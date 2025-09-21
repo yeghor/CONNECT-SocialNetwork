@@ -1,9 +1,10 @@
 import React from "react";
+import "../index.css"
 
 const App = () => {
     return (
         <div>
-            <p>Hello World!</p>
+            <p className="text-3xl font-bold underline">Hello World!</p>
         </div>
     )
 }
