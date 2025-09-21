@@ -76,7 +76,7 @@ async def get_my_chats(
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
         return await chat.get_chat_batch(user=user, exclude=exclude, chat_type="chat")
 
-@chat.get("/chat/not-approved")
+@chat.get("/chat/not-approved/{page}")
 @endpoint_exception_handler
 async def get_not_approved_chats(
     exclude: bool = Depends(query_exclude_required),

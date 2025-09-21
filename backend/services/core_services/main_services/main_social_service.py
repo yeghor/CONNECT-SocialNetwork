@@ -1,9 +1,3 @@
-from tkinter import image_names
-from turtle import pos
-from django import views
-from fastapi import HTTPException
-from streamlit import image
-
 from services.core_services import MainServiceBase
 from services.postgres_service.models import *
 from post_popularity_rate_task.popularity_rate import POST_ACTIONS
