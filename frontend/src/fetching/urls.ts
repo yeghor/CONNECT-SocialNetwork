@@ -22,6 +22,7 @@ export const myProfileURL = `${BASEURL}${usersConstructor}${myProfileConstructor
 
 //Social
 
+// Page specified required
 export const postsFeedURL = (page: number | string) => {
     return `${BASEURL}${postsConstructor}/feed/${page}`;
 }
@@ -41,5 +42,3 @@ export const searchUsersURL = (page: number | string) => {
 export const postCommentsURL = (postId: string, page: number | string) => {
     return `${BASEURL}${postsConstructor}/${postId}/${commentsConstructor}/${page}`;
 }
-
-
