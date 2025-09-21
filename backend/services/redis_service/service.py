@@ -239,7 +239,7 @@ class RedisService:
     # ==============
     # Chat
     # ==============
-
+    
     @redis_error_handler
     async def save_chat_token(self, chat_token, user_id: str) -> None:
         await self.__client.setex(
