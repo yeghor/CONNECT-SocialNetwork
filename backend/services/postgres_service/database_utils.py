@@ -2,41 +2,15 @@ from .models import Base
 from .database import get_engine, get_sessionlocal
 
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from functools import wraps
 from sqlalchemy.exc import SQLAlchemyError, MultipleResultsFound
-from fastapi import HTTPException
-
-from sqlalchemy import select, or_
-from typing import List, Type, TypeVar
-from uuid import UUID
-
+from typing import TypeVar
 from exceptions.custom_exceptions import PostgresError, MultipleDataFound
-
-from dotenv import load_dotenv
 from os import getenv
-import random
 
 MAX_FOLLOWED_POSTS_TO_SHOW = int(getenv("MAX_FOLLOWED_POSTS_TO_SHOW"))
 
 ModelT = TypeVar("Models", bound=Base)
-
-# def validate_ids_type_to_UUID(func):
-#     @wraps(func)
-#     async def wrapper(ids: List[UUID | str],  *args, **kwargs):
-#         if not ids: 
-#             return []
-#         ids_validated = []
-#         for id in ids:
-#             if isinstance(id, str):
-#                 id = UUID(id)
-#             elif isinstance(id, UUID):
-#                 pass
-#             else:
-#                 raise ValueError(f"Invalid id type: {type(id)}")
-#             ids_validated.append(id)
-#         return await func(ids_validated, *args, **kwargs)
-#     return wrapper
 
 async def get_session_depends():
     """
