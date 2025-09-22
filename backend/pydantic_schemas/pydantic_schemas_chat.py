@@ -52,7 +52,7 @@ class ChatTokenResponse(BaseModel):
 class CreateChatBodyBase(BaseModel):
     message: str
 
-class CreateDialoqueRoomBody(CreateChatBodyBase):
+class CreateDialogueRoomBody(CreateChatBodyBase):
     other_participant_id: str
 
 class CreateGroupRoomBody(CreateChatBodyBase):

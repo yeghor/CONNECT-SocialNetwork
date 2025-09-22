@@ -40,10 +40,10 @@ async def get_batch_of_chat_messages(
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
         return await chat.get_messages_batch(room_id=chat_id, user=user, page=page)
 
-@chat.post("/chat/dialoque")
+@chat.post("/chat/dialogue")
 @endpoint_exception_handler
-async def create_dialoque_chat(
-    data: CreateDialoqueRoomBody = Body(...),  
+async def create_dialogue_chat(
+    data: CreateDialogueRoomBody = Body(...),  
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:

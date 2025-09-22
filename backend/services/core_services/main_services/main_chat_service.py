@@ -2,7 +2,7 @@ from services.core_services import MainServiceBase
 from services.postgres_service.models import *
 from exceptions.custom_exceptions import *
 from exceptions.exceptions_handler import web_exceptions_raiser
-from pydantic_schemas.pydantic_schemas_chat import Chat, MessageSchema, MessageSchemaShort, ExpectedWSData, ChatJWTPayload, CreateDialoqueRoomBody, ChatTokenResponse, CreateGroupRoomBody, MessageSchemaActionIncluded, MessageSchemaShortActionIncluded
+from pydantic_schemas.pydantic_schemas_chat import Chat, MessageSchema, MessageSchemaShort, ExpectedWSData, ChatJWTPayload, CreateDialogueRoomBody, ChatTokenResponse, CreateGroupRoomBody, MessageSchemaActionIncluded, MessageSchemaShortActionIncluded
 from pydantic_schemas.pydantic_schemas_social import UserShortSchema
 from post_popularity_rate_task.popularity_rate import scheduler
 from uuid import uuid4
@@ -169,7 +169,7 @@ class MainChatService(MainServiceBase):
         return MessageSchemaShortActionIncluded(action="change", message_id=message.message_id, text=message_data.message)
 
     @web_exceptions_raiser
-    async def create_dialogue_chat(self, data: CreateDialoqueRoomBody, user: User) -> None:
+    async def create_dialogue_chat(self, data: CreateDialogueRoomBody, user: User) -> None:
         other_user = await self._PostgresService.get_user_by_id(data.other_participant_id)
 
         if other_user.user_id == user.user_id:
