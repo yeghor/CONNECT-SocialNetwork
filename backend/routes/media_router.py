@@ -52,7 +52,7 @@ async def upload_post_picture(
         await media.upload_post_image(post_id=post_id, user=user, image_contents=file_contents, specified_mime=file_.content_type)
 
 # No need to request user_id - getting it from JWT  
-@media_router.post("/media/users/")
+@media_router.post("/media/users")
 # @endpoint_exception_handler
 async def upload_user_avatar(
     file: UploadFile = File(...),

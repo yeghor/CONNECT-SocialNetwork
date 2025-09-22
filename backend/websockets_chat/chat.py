@@ -84,7 +84,7 @@ async def get_not_approved_chats(
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
         return await chat.get_chat_batch(user=user, page=page, chat_type="not-approved")
 
-@chat.post("/chat/{chat_id}")
+@chat.post("/chat/approve/{chat_id}")
 @endpoint_exception_handler
 async def approve_chat(
     chat_id: str,

@@ -43,7 +43,7 @@ async def get_feed(
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
         return await social.get_feed(user=user, page=page)
 
-@social.get("/posts/following")
+@social.get("/posts/following/{page}")
 @endpoint_exception_handler
 async def get_followed_posts(
     page: int = Depends(page_validator),
@@ -54,8 +54,8 @@ async def get_followed_posts(
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
         return await social.get_followed_posts(user=user, page=page)
 
-@social.get("/search/posts")
-# @endpoint_exception_handler
+@social.get("/search/posts/{page}")
+@endpoint_exception_handler
 async def search_posts(
     page: int = Depends(page_validator),
     prompt: str = Depends(query_prompt_required),
@@ -67,7 +67,7 @@ async def search_posts(
         return await social.search_posts(prompt=prompt, user=user, page=page)
 
 @social.get("/search/users/{page}")
-# @endpoint_exception_handler
+@endpoint_exception_handler
 async def search_users(
     prompt: str = Depends(query_prompt_required),
     page: str = Depends(page_validator),
