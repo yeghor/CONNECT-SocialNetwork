@@ -43,14 +43,14 @@ interface CreateGroupInterface extends CreateChatInterface {
 }
 
 
-const getHeaders = (JWT: string): HeaderType => {
+export const requestHeaders = (JWT: string): HeaderType => {
     return {
         "Content-Type": "application/json",
         "token": JWT
     };
 }
 
-const makePostBody = (title: string, text: string, parent_post_id: string | undefined): MakePostInterface => {
+export const makePostBody = (title: string, text: string, parent_post_id: string | undefined): MakePostInterface => {
     return {
         title,
         text,
@@ -58,21 +58,21 @@ const makePostBody = (title: string, text: string, parent_post_id: string | unde
     };
 }
 
-const changePostBody = (title: string, text: string): ChangePostInterface => {
+export const changePostBody = (title: string, text: string): ChangePostInterface => {
     return {
         title,
         text
     };
 }
 
-const loginBody = (username: string, password: string): LoginInterface => {
+export const loginBody = (username: string, password: string): LoginInterface => {
     return {
         username,
         password
     };
 }
 
-const registerBody = (username: string, password: string, email: string): RegisterInterface => {
+export const registerBody = (username: string, password: string, email: string): RegisterInterface => {
     return {
         username,
         password,
@@ -80,27 +80,27 @@ const registerBody = (username: string, password: string, email: string): Regist
     };
 }
 
-const changePasswordBody = (oldPassword: string, newPassword: string): ChangePasswordInterface => {
+export const changePasswordBody = (oldPassword: string, newPassword: string): ChangePasswordInterface => {
     return {
         old_password: oldPassword,
         new_password: newPassword
     };
 }
 
-const changeUsernameBody = (newUsername: string): ChangeUsernameInterface => {
+export const changeUsernameBody = (newUsername: string): ChangeUsernameInterface => {
     return {
         new_username: newUsername
     };
 }
 
-const createDialogueBody = (message: string, otherParticipantId: string): CreateDialogueInterface => {
+export const createDialogueBody = (message: string, otherParticipantId: string): CreateDialogueInterface => {
     return {
         message,
         other_participant_id: otherParticipantId
     };
 }
 
-const createGroupBody = (message: string, otherParticipantsIds: string[]): CreateGroupInterface => {
+export const createGroupBody = (message: string, otherParticipantsIds: string[]): CreateGroupInterface => {
     return {
         message,
         other_participants_ids: otherParticipantsIds
