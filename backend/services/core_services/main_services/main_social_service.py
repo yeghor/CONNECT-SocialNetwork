@@ -181,6 +181,9 @@ class MainServiceSocial(MainServiceBase):
                 title=post.title,
                 published=post.published,
                 is_reply=post.is_reply,
+                likes=post.likes_count,
+                views=post.views_count,
+                replies=post.replies_count,
                 owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
                 parent_post=post.parent_post
@@ -200,6 +203,9 @@ class MainServiceSocial(MainServiceBase):
                 published=post.published,
                 is_reply=post.is_reply,
                 owner=post.owner,
+                likes=post.likes_count,
+                views=post.views_count,
+                replies=post.replies_count,
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
                 parent_post=post.parent_post
             ) for post in posts
@@ -220,6 +226,9 @@ class MainServiceSocial(MainServiceBase):
                 title=post.title,
                 published=post.published,
                 is_reply=post.is_reply,
+                likes=post.likes_count,
+                views=post.views_count,
+                replies=post.replies_count,          
                 owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
                 parent_post=post.parent_post
@@ -234,7 +243,8 @@ class MainServiceSocial(MainServiceBase):
     @web_exceptions_raiser  
     async def make_post(self, data: MakePostDataSchema, user: User) -> None:
         if data.parent_post_id:
-            if not await self._PostgresService.get_entry_by_id(id_=data.parent_post_id, ModelType=Post):
+            parent_post = await self._PostgresService.get_entry_by_id(id_=data.parent_post_id, ModelType=Post)
+            if not parent_post:
                 raise InvalidAction(detail=f"SocialService: User: {user.user_id} tried to reply to post: {data.parent_post_id} that does not exists.", client_safe_detail="Post that you are replying does not exist.")
 
         post = Post(
@@ -245,6 +255,8 @@ class MainServiceSocial(MainServiceBase):
             text=data.text,
             is_reply=bool(data.parent_post_id)
         )
+
+        parent_post.replies_count += 1
 
         await self._PostgresService.insert_models_and_flush(post)
         await self._PostgresService.refresh_model(post)
@@ -268,6 +280,9 @@ class MainServiceSocial(MainServiceBase):
 
         self.check_post_user_id(post=post, user=user)
 
+        if post.parent_post:
+            post.parent_post.replies_count -= 1
+
         await self._PostgresService.delete_post_by_id(id_=post.post_id)
         await self._ImageStorage.delete_post_images(base_name=post.post_id)
         await self._ChromaService.delete_by_ids(ids=[post.post_id])
@@ -278,8 +293,10 @@ class MainServiceSocial(MainServiceBase):
         post = await self._PostgresService.get_entry_by_id(id_=post_id, ModelType=Post)
         if like:
             await self._construct_and_flush_action(action_type=ActionType.like,post=post, user=user)
+            post.likes_count += 1
         else:
             await self.remove_action(user=user, post=post, action_type=ActionType.like)
+            post.likes_count -= 1
 
     @web_exceptions_raiser
     async def change_post(self, post_data: PostDataSchemaID, user: User, post_id: str) -> PostSchema:
@@ -328,8 +345,8 @@ class MainServiceSocial(MainServiceBase):
         return UserSchema(
             user_id=other_user.user_id,
             username=other_user.username,
-            followers=[UserShortSchema.model_validate(follower, from_attributes=True) for follower in other_user.followers],
-            followed=[UserShortSchema.model_validate(followed, from_attributes=True) for followed in other_user.followed],
+            followers=len(other_user.followers),
+            followed=len(other_user.followed),
             avatar_url=avatar_token
         )
     
@@ -344,10 +361,13 @@ class MainServiceSocial(MainServiceBase):
                 published=post.published,
                 is_reply=post.is_reply,
                 owner=post.owner,
+                likes=post.likes_count,
+                views=post.views_count,
+                replies=post.replies_count,
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
                 parent_post=post.parent_post
             ) for post in posts
-            ]
+        ]
     
     @web_exceptions_raiser
     async def get_my_profile(self, user: User) -> UserSchema:
@@ -361,8 +381,8 @@ class MainServiceSocial(MainServiceBase):
         return UserSchema(
             user_id=user.user_id,
             username=user.username,
-            followers=user.followers,
-            followed=user.followed,
+            followers=len(user.followers),
+            followed=len(user.followed),
             posts=user.posts,
             avatar_url=avatar_token
         )
@@ -378,11 +398,9 @@ class MainServiceSocial(MainServiceBase):
         else: parent_post = None
 
         await self._construct_and_flush_action(action_type=ActionType.view, post=post, user=user)
+        post.views_count += 1
 
         await self._PostgresService.refresh_model(model_obj=post)
-
-        post_likes = await self._PostgresService.get_actions(user_id=user.user_id, post_id=post.post_id, action_type=ActionType.like)
-        post_views = await self._PostgresService.get_actions(user_id=user.user_id, post_id=post.post_id, action_type=ActionType.view)
 
         filenames = [filename.image_name for filename in post.images]
         images_temp_urls = await self._ImageStorage.get_post_image_urls(image_names=filenames)
@@ -393,8 +411,9 @@ class MainServiceSocial(MainServiceBase):
             text=post.text,
             published=post.published,
             owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
-            likes=len(post_likes),
-            views=len(post_views),
+            likes=post.likes_count,
+            views=post.views_count,
+            replies=post.replies_count,
             parent_post=parent_post,
             last_updated=post.last_updated,
             pictures_urls=images_temp_urls,

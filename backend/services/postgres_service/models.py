@@ -91,6 +91,11 @@ class Post(Base):
     published: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     last_updated: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    likes_count: Mapped[int] = mapped_column(default=0)
+    views_count: Mapped[int] = mapped_column(default=0)
+    replies_count: Mapped[int] = mapped_column(default=0)
+
+
     images: Mapped[List["PostImage"]] = relationship(
         "PostImage",
         lazy="selectin"
@@ -109,7 +114,6 @@ class Post(Base):
         back_populates="post",
         lazy="selectin"
     )
-
 
     # Self referable one-2-many relationship https://docs.sqlalchemy.org/en/20/orm/self_referential.html
     parent_post: Mapped["Post"] = relationship(

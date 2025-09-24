@@ -213,7 +213,7 @@ class PostgresService:
         return result.scalars().all()
 
     @postgres_exception_handler(action="Get actions on post by specified type")
-    async def get_post_action_by_type(self, post_id: str, action_type: ActionType) -> List[User]:
+    async def get_post_action_by_type(self, post_id: str, action_type: ActionType) -> List[PostActions]:
         result = await self.__session.execute(
             select(PostActions)
             .where(and_(PostActions.post_id == post_id, PostActions.action == action_type))

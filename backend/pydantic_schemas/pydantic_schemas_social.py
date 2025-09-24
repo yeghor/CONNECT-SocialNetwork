@@ -46,6 +46,10 @@ class PostBaseShort(PostIDValidate):
 class PostBase(PostBaseShort):
     owner: UserShortSchema | None
 
+    likes: int = 0
+    views: int = 0
+    replies: int = 0
+
     pictures_urls: List[str]
 
 class PostLiteSchema(PostBase):
@@ -54,9 +58,6 @@ class PostLiteSchema(PostBase):
 # TODO: Separate urls field to diferent models
 class PostSchema(PostBase):
     text: str
-
-    likes: int = 0
-    views: int = 0
 
     last_updated: datetime
 
@@ -76,11 +77,11 @@ class UserShortSchemaAvatarURL(UserShortSchema):
 
 class UserLiteSchema(UserShortSchema):
     """Pass to the followers field List[User]!"""
-    followers: List[UserShortSchema]
+    followers: int
 
 
 class UserSchema(UserLiteSchema):
-    followed: List[UserShortSchema]
+    followed: int
     avatar_url: str | None
 
 # =================
