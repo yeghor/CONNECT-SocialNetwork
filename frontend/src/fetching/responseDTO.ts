@@ -55,12 +55,18 @@ interface ShortPostDTO {
     pictures_urls: string[]
 };
 
-interface PostDTO extends ShortPostDTO{
-    parent_post?: PostDTO;
+interface FeedPostDTO extends ShortPostDTO{
+    parent_post?: FeedPostDTO;
 };
 
+interface LoadPostResponseDTOInterface extends FeedPostDTO{
+    text: string,
+    last_updated: string
+}
+
+type LoadPostResponseDTO = LoadPostResponseDTOInterface[];
 type ShortPostsDTO = ShortPostDTO[];
-type PostsResponseDTO = PostDTO[];
+type FeedPostsResponseDTO = FeedPostDTO[];
 
 interface PostOwner {
     userId: string,
@@ -79,14 +85,58 @@ interface ShortPostReponse {
     picturesURLs: string[]
 };
 
-interface PostResponse extends ShortPostReponse{
+interface FeedPostResponse extends ShortPostReponse{
     parentPost?: ShortPostReponse
 };
 
-type PostCommentsResponse = ShortPostReponse[];
-type PostsResponse = PostResponse[];
+interface LoadPostResponseInterface extends FeedPostResponse {
+    text: string,
+    lastUpdated: string
+}
 
-export const postResponseMapper = (data: PostsResponseDTO): PostsResponse => {
+type LoadPostResponse = LoadPostResponseInterface[];
+type PostCommentsResponse = ShortPostReponse[];
+type FeedPostsResponse = FeedPostResponse[];
+
+// KISS THIS MOTHERFUCKER
+export const loadPostRexponseMapped = (data: LoadPostResponseDTO): LoadPostResponse => {
+    const mapped = data.map(postDTO => ({
+        postId: postDTO.post_id,
+        title: postDTO.title,
+        published: postDTO.published,
+        isReply: postDTO.is_reply,
+        owner: {
+            userId: postDTO.owner.user_id,
+            username: postDTO.owner.username,
+        },
+        likes: postDTO.likes,
+        views: postDTO.views,
+        replies: postDTO.replies,
+        text: postDTO.text,
+        lastUpdated: postDTO.last_updated,
+        picturesURLs: postDTO.pictures_urls,
+        parentPost: postDTO.parent_post
+            ? {
+                postId: postDTO.parent_post.post_id,
+                title: postDTO.parent_post.title,
+                published: postDTO.parent_post.published,
+                isReply: postDTO.parent_post.is_reply,
+                owner: {
+                    userId: postDTO.parent_post.owner.user_id,
+                    username: postDTO.parent_post.owner.username,
+                },
+                likes: postDTO.parent_post.likes,
+                views: postDTO.parent_post.views,
+                replies: postDTO.parent_post.replies,
+                picturesURLs: postDTO.parent_post.pictures_urls,
+            }
+            : undefined,
+        }));    
+
+    return mapped
+}
+
+export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsResponse => {
     const mapped = data.map(postDTO => ({
     postId: postDTO.post_id,
     title: postDTO.title,
@@ -110,9 +160,9 @@ export const postResponseMapper = (data: PostsResponseDTO): PostsResponse => {
                 userId: postDTO.parent_post.owner.user_id,
                 username: postDTO.parent_post.owner.username,
             },
-            likes: postDTO.likes,
-            views: postDTO.views,
-            replies: postDTO.replies,
+            likes: postDTO.parent_post.likes,
+            views: postDTO.parent_post.views,
+            replies: postDTO.parent_post.replies,
             picturesURLs: postDTO.parent_post.pictures_urls,
         }
         : undefined,
@@ -194,4 +244,4 @@ export const userProfileMapper = (data: UseProfilerDTO): UserProfile => {
     };
 }
 
-//
+// Chat
