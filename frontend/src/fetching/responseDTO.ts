@@ -1,44 +1,52 @@
+const OwnerMapper = (data: OwnerDTO): OwnerResponse => {
+    return {
+        userId: data.user_id,
+        username: data.username
+    };
+}
+
+
 // Login/Register/Refresh
 
-interface AccesTokenDTO {
-    acces_token: string,
-    expires_at_acces: string,
+interface AccessTokenDTO {
+    access_token: string,
+    expires_at_access: string,
 };
 
-interface AuthResponseDTO extends AccesTokenDTO {
+interface AuthResponseDTO extends AccessTokenDTO {
     refresh_token: string,
     expires_at_refresh: string
 };
 
 export interface AccesTokenResponse {
     accessToken: string,
-    expiresAtAccessToken: string
+    expiresAtAccessToken: Date
 };
 
 export interface AuthTokensResponse extends AccesTokenResponse {
     refreshToken: string,
-    expiresAtRefreshToken: string
+    expiresAtRefreshToken: Date
 };
 
 export const authTokensResponseMapper = (data: AuthResponseDTO): AuthTokensResponse => {
     return {
-        accessToken: data.acces_token,
-        expiresAtAccessToken: data.expires_at_acces,
+        accessToken: data.access_token,
+        expiresAtAccessToken: new Date(data.expires_at_access),
         refreshToken: data.refresh_token,
-        expiresAtRefreshToken: data.expires_at_refresh
+        expiresAtRefreshToken: new Date(data.expires_at_refresh)
     };
 }
 
-export const accesTokenResponseMapper = (data: AccesTokenDTO): AccesTokenResponse => {
+export const accesTokenResponseMapper = (data: AccessTokenDTO): AccesTokenResponse => {
     return {
-        accessToken: data.acces_token,
-        expiresAtAccessToken: data.expires_at_acces
+        accessToken: data.access_token,
+        expiresAtAccessToken: new Date(data.expires_at_access)
     };
 }
 
 // Posts
 
-interface PostOwnerDTO {
+interface OwnerDTO {
     user_id: string;
     username: string;
 };
@@ -48,7 +56,7 @@ interface ShortPostDTO {
     title: string;
     published: string;
     is_reply: boolean;
-    owner: PostOwnerDTO;
+    owner: OwnerDTO;
     likes: number,
     views: number,
     replies: number,
@@ -68,7 +76,7 @@ type LoadPostResponseDTO = LoadPostResponseDTOInterface[];
 type ShortPostsDTO = ShortPostDTO[];
 type FeedPostsResponseDTO = FeedPostDTO[];
 
-interface PostOwner {
+interface OwnerResponse {
     userId: string,
     username: string
 };
@@ -76,9 +84,9 @@ interface PostOwner {
 interface ShortPostReponse {
     postId: string;
     title: string;
-    published: string;
+    published: Date;
     isReply: boolean;
-    owner: PostOwner;
+    owner: OwnerResponse;
     likes: number,
     views: number,
     replies: number,
@@ -91,8 +99,8 @@ interface FeedPostResponse extends ShortPostReponse{
 
 interface LoadPostResponseInterface extends FeedPostResponse {
     text: string,
-    lastUpdated: string
-}
+    lastUpdated: Date
+};
 
 type LoadPostResponse = LoadPostResponseInterface[];
 type PostCommentsResponse = ShortPostReponse[];
@@ -103,28 +111,22 @@ export const loadPostRexponseMapped = (data: LoadPostResponseDTO): LoadPostRespo
     const mapped = data.map(postDTO => ({
         postId: postDTO.post_id,
         title: postDTO.title,
-        published: postDTO.published,
+        published: new Date(postDTO.published),
         isReply: postDTO.is_reply,
-        owner: {
-            userId: postDTO.owner.user_id,
-            username: postDTO.owner.username,
-        },
+        owner: OwnerMapper(postDTO.owner),
         likes: postDTO.likes,
         views: postDTO.views,
         replies: postDTO.replies,
         text: postDTO.text,
-        lastUpdated: postDTO.last_updated,
+        lastUpdated: new Date(postDTO.last_updated),
         picturesURLs: postDTO.pictures_urls,
         parentPost: postDTO.parent_post
             ? {
                 postId: postDTO.parent_post.post_id,
                 title: postDTO.parent_post.title,
-                published: postDTO.parent_post.published,
+                published: new Date(postDTO.parent_post.published),
                 isReply: postDTO.parent_post.is_reply,
-                owner: {
-                    userId: postDTO.parent_post.owner.user_id,
-                    username: postDTO.parent_post.owner.username,
-                },
+                owner: OwnerMapper(postDTO.parent_post.owner),
                 likes: postDTO.parent_post.likes,
                 views: postDTO.parent_post.views,
                 replies: postDTO.parent_post.replies,
@@ -140,12 +142,9 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
     const mapped = data.map(postDTO => ({
     postId: postDTO.post_id,
     title: postDTO.title,
-    published: postDTO.published,
+    published: new Date(postDTO.published),
     isReply: postDTO.is_reply,
-    owner: {
-        userId: postDTO.owner.user_id,
-        username: postDTO.owner.username,
-    },
+    owner: OwnerMapper(postDTO.owner),
     likes: postDTO.likes,
     views: postDTO.views,
     replies: postDTO.replies,
@@ -154,12 +153,9 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
         ? {
             postId: postDTO.parent_post.post_id,
             title: postDTO.parent_post.title,
-            published: postDTO.parent_post.published,
+            published: new Date(postDTO.parent_post.published),
             isReply: postDTO.parent_post.is_reply,
-            owner: {
-                userId: postDTO.parent_post.owner.user_id,
-                username: postDTO.parent_post.owner.username,
-            },
+            owner: OwnerMapper(postDTO.parent_post.owner),
             likes: postDTO.parent_post.likes,
             views: postDTO.parent_post.views,
             replies: postDTO.parent_post.replies,
@@ -178,15 +174,12 @@ export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsRes
         {
             postId: commentDTO.post_id,
             title: commentDTO.title,
-            published: commentDTO.published,
+            published: new Date(commentDTO.published),
             isReply: commentDTO.is_reply,
             likes: commentDTO.likes,
             views: commentDTO.views,
             replies: commentDTO.replies,
-            owner: {
-                userId: commentDTO.owner.user_id,
-                username: commentDTO.owner.username
-            },
+            owner: OwnerMapper(commentDTO.owner),
             picturesURLs: commentDTO.pictures_urls
         }
     ));
@@ -205,7 +198,7 @@ interface ShortUserDTO {
 
 export type ShortUsersDTOResponse = ShortUserDTO[];
 
-export interface UseProfilerDTO extends ShortUserDTO {
+export interface UserProfileDTO extends ShortUserDTO {
   followed: number,
   avatar_url: string
 };
@@ -245,3 +238,73 @@ export const userProfileMapper = (data: UseProfilerDTO): UserProfile => {
 }
 
 // Chat
+
+export interface ChatDTO {
+    chat_id: string,
+    participants: number
+};
+
+type ChatsDTO = ChatDTO[];
+
+interface ChatResponse {
+    chatId: string,
+    participants: number
+};
+
+type ChatsResponse = ChatResponse[];
+
+const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
+    const mapped = data.map((chatDTO) => (
+        {
+            chatId: chatDTO.chat_id,
+            participants: chatDTO.participants
+        }
+    ));
+    return mapped;
+}
+
+export interface MessageDTO {
+    message_id: string,
+    text: string,
+    sent: string,
+    owner: OwnerDTO
+};
+
+export type MessagesDTO = MessageDTO[];
+
+export interface MessageResponse {
+    messageId: string,
+    text: string,
+    sent: Date,
+    owner: OwnerResponse
+};
+
+export type MessagesResponse = MessageResponse[];
+
+export const messageResponseMapper = (data: MessagesDTO): MessagesResponse => {
+    return data.map((messageDTO) => ({
+        messageId: messageDTO.message_id,
+        text: messageDTO.text,
+        sent: new Date(messageDTO.sent),
+        owner: OwnerMapper(messageDTO.owner)
+    }));
+};
+
+// Chat access
+
+export interface ChatConnectDTO {
+    token: string,
+    participants_avatar_urls: string[]
+};
+
+export interface ChatConnectResponse {
+    token: string,
+    participantsAvatarURLs: string[]
+};
+
+export const chatConnectMapper = (data: ChatConnectDTO): ChatConnectResponse => {
+    return {
+        token: data.token,
+        participantsAvatarURLs: data.participants_avatar_urls
+    };
+}
