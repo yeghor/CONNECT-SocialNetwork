@@ -227,7 +227,7 @@ export const userShortProfilesMapper = (data: ShortUsersDTOResponse): ShortUserP
     return mapped;
 }
 
-export const userProfileMapper = (data: UseProfilerDTO): UserProfile => {
+export const userProfileMapper = (data: UserProfileDTO): UserProfile => {
     return {
         userId: data.user_id,
         username: data.username,
