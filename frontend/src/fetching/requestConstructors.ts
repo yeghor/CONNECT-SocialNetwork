@@ -1,7 +1,24 @@
-type HeaderType = {
-    "Content-Type": string,
-    "token": string
+interface BaseHeaderType {
+    [key: string]: string
 };
+
+interface TokenHeaderType extends BaseHeaderType {
+    [key: string]: string
+};
+
+export const requestHeaders = (): BaseHeaderType => {
+    return {
+        "Content-Type": "application/json",
+    };
+}
+
+export const requestTokenHeaders = (JWT: string): TokenHeaderType => {
+    return {
+        "Content-Type": "application/json",
+        "token": JWT
+    };
+}
+
 
 interface LoginInterface {
     password: string
@@ -40,14 +57,6 @@ interface CreateDialogueInterface extends CreateChatInterface {
 
 interface CreateGroupInterface extends CreateChatInterface {
     other_participants_ids: string[]
-}
-
-
-export const requestHeaders = (JWT: string): HeaderType => {
-    return {
-        "Content-Type": "application/json",
-        "token": JWT
-    };
 }
 
 export const makePostBody = (title: string, text: string, parent_post_id: string | undefined): MakePostInterface => {

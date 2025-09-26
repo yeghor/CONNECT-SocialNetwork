@@ -1,10 +1,22 @@
+// Fatal response
+export interface BadResponse {
+    detail: string,
+    statusCode: number
+};
+
+export const badResponseMapper = (detail: string, statusCode: number): BadResponse => {
+    return {
+        detail,
+        statusCode
+    }
+}
+
 const OwnerMapper = (data: OwnerDTO): OwnerResponse => {
     return {
         userId: data.user_id,
         username: data.username
     };
 }
-
 
 // Login/Register/Refresh
 
@@ -13,7 +25,7 @@ interface AccessTokenDTO {
     expires_at_access: string,
 };
 
-interface AuthResponseDTO extends AccessTokenDTO {
+export interface AuthResponseDTO extends AccessTokenDTO {
     refresh_token: string,
     expires_at_refresh: string
 };
