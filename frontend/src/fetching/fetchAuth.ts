@@ -5,24 +5,25 @@ import {
     refreshTokenURL,
     changePasswordURL,
     changeUsernameURL,
-} from "./urls";
+} from "./urls.ts";
 
 import { 
     requestTokenHeaders,
     requestHeaders,
     loginBody,
     registerBody, 
-} from "./requestConstructors"
+} from "./requestConstructors.ts"
 
 import {
-    badResponseMapper,
-    BadResponse,
+    BadResponseDTO,
+    isBadResponse,
     AuthResponseDTO,
     AuthTokensResponse,
     authTokensResponseMapper,
-} from "./responseDTO"
+} from "./responseDTO.ts"
 
-export const fetchLogin = async (username: string, password: string): Promise<AuthTokensResponse|BadResponse> => {
+export const fetchLogin = async (username: string, password: string): Promise<(AuthTokensResponse & {success: true})|(BadResponseDTO & {success: false})> => {
+    console.log(loginURL)
     const response = await fetch(loginURL,
         {
             method: "POST",
@@ -31,13 +32,14 @@ export const fetchLogin = async (username: string, password: string): Promise<Au
         }
     );
     // Do something wit type crossing
-    const responseDTO: AuthResponseDTO & BadResponse = await response.json();
-    if (response.ok) {
-        return authTokensResponseMapper(responseDTO);
+    const responseDTO: AuthResponseDTO | BadResponseDTO = await response.json();
+    if (isBadResponse(responseDTO)) {
+        return responseDTO;
     } else {
-        return badResponseMapper(responseDTO.detail, responseDTO.statusCode);
+        return authTokensResponseMapper(responseDTO);
     }
 }
+
 
 export const fetchRegister = async (username: string, email: string, password: string): Promise<void> => {
     await fetch(loginURL,

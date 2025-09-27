@@ -1,4 +1,4 @@
-export const BASEURL = "http://0.0.0.0:8000"
+export const BASEURL = "http://localhost:8000"
 
 // Constructors
 const usersConstructor = "/users";

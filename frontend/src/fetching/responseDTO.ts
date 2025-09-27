@@ -1,20 +1,32 @@
-// Fatal response
-export interface BadResponse {
-    detail: string,
-    statusCode: number
+interface SuccessfullField {
+    success: true
 };
 
-export const badResponseMapper = (detail: string, statusCode: number): BadResponse => {
+interface NotSuccesfullField {
+    success: false
+};
+
+export interface BadResponseDTO extends NotSuccesfullField {
+    detail: string
+};
+
+export interface BadResponse extends BadResponseDTO, NotSuccesfullField {};
+
+export const isBadResponse = (data: any): data is BadResponseDTO => {
+    return "detail" in data;
+}
+
+export const badResponseMapper = (data: BadResponseDTO): BadResponse => {
     return {
-        detail,
-        statusCode
-    }
+        detail: data.detail,
+        success: false
+    };
 }
 
 const OwnerMapper = (data: OwnerDTO): OwnerResponse => {
     return {
         userId: data.user_id,
-        username: data.username
+        username: data.username,
     };
 }
 
@@ -30,7 +42,7 @@ export interface AuthResponseDTO extends AccessTokenDTO {
     expires_at_refresh: string
 };
 
-export interface AccesTokenResponse {
+export interface AccesTokenResponse extends SuccessfullField {
     accessToken: string,
     expiresAtAccessToken: Date
 };
@@ -45,14 +57,16 @@ export const authTokensResponseMapper = (data: AuthResponseDTO): AuthTokensRespo
         accessToken: data.access_token,
         expiresAtAccessToken: new Date(data.expires_at_access),
         refreshToken: data.refresh_token,
-        expiresAtRefreshToken: new Date(data.expires_at_refresh)
+        expiresAtRefreshToken: new Date(data.expires_at_refresh),
+        success: true
     };
 }
 
 export const accesTokenResponseMapper = (data: AccessTokenDTO): AccesTokenResponse => {
     return {
         accessToken: data.access_token,
-        expiresAtAccessToken: new Date(data.expires_at_access)
+        expiresAtAccessToken: new Date(data.expires_at_access),
+        success: true
     };
 }
 
@@ -105,7 +119,7 @@ interface ShortPostReponse {
     picturesURLs: string[]
 };
 
-interface FeedPostResponse extends ShortPostReponse{
+interface FeedPostResponse extends ShortPostReponse {
     parentPost?: ShortPostReponse
 };
 
@@ -114,40 +128,51 @@ interface LoadPostResponseInterface extends FeedPostResponse {
     lastUpdated: Date
 };
 
-type LoadPostResponse = LoadPostResponseInterface[];
-type PostCommentsResponse = ShortPostReponse[];
-type FeedPostsResponse = FeedPostResponse[];
+interface LoadPostResponse extends SuccessfullField {
+    data: LoadPostResponseInterface[]
+};
+interface PostCommentsResponse extends SuccessfullField {
+    data: ShortPostReponse[]
+};
+interface FeedPostsResponse extends SuccessfullField {
+    data: FeedPostResponse[]
+};
 
 // KISS THIS MOTHERFUCKER
 export const loadPostRexponseMapped = (data: LoadPostResponseDTO): LoadPostResponse => {
-    const mapped = data.map(postDTO => ({
-        postId: postDTO.post_id,
-        title: postDTO.title,
-        published: new Date(postDTO.published),
-        isReply: postDTO.is_reply,
-        owner: OwnerMapper(postDTO.owner),
-        likes: postDTO.likes,
-        views: postDTO.views,
-        replies: postDTO.replies,
-        text: postDTO.text,
-        lastUpdated: new Date(postDTO.last_updated),
-        picturesURLs: postDTO.pictures_urls,
-        parentPost: postDTO.parent_post
-            ? {
-                postId: postDTO.parent_post.post_id,
-                title: postDTO.parent_post.title,
-                published: new Date(postDTO.parent_post.published),
-                isReply: postDTO.parent_post.is_reply,
-                owner: OwnerMapper(postDTO.parent_post.owner),
-                likes: postDTO.parent_post.likes,
-                views: postDTO.parent_post.views,
-                replies: postDTO.parent_post.replies,
-                picturesURLs: postDTO.parent_post.pictures_urls,
-            }
-            : undefined,
-        }));    
+    const mapped = data.map(postDTO => (
+        {
+            postId: postDTO.post_id,
+            title: postDTO.title,
+            published: new Date(postDTO.published),
+            isReply: postDTO.is_reply,
+            owner: OwnerMapper(postDTO.owner),
+            likes: postDTO.likes,
+            views: postDTO.views,
+            replies: postDTO.replies,
+            text: postDTO.text,
+            lastUpdated: new Date(postDTO.last_updated),
+            picturesURLs: postDTO.pictures_urls,
+            parentPost: postDTO.parent_post
+                ? {
+                    postId: postDTO.parent_post.post_id,
+                    title: postDTO.parent_post.title,
+                    published: new Date(postDTO.parent_post.published),
+                    isReply: postDTO.parent_post.is_reply,
+                    owner: OwnerMapper(postDTO.parent_post.owner),
+                    likes: postDTO.parent_post.likes,
+                    views: postDTO.parent_post.views,
+                    replies: postDTO.parent_post.replies,
+                    picturesURLs: postDTO.parent_post.pictures_urls,
+                }
+                : undefined,
+        }
+    ));    
 
-    return mapped
+    return {
+        data: mapped,
+        success: true
+    }
 }
 
 export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsResponse => {
@@ -176,7 +201,10 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
         : undefined,
     }));    
 
-    return mapped
+    return {
+        data: mapped,
+        success: true
+    }
 }
 
 // Comments
@@ -196,7 +224,10 @@ export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsRes
         }
     ));
 
-    return mapped;
+    return {
+        data: mapped,
+        success: true
+    }
 }
 
 
@@ -221,11 +252,13 @@ interface ShortUserProfile {
     followers: number
 };
 
-export type ShortUserProfilesResponse = ShortUserProfile[];
+export interface ShortUserProfilesResponse extends SuccessfullField{
+    data: ShortUserProfile[],
+};
 
-interface UserProfile extends ShortUserProfile {
+interface UserProfileResponse extends ShortUserProfile, SuccessfullField {
     followed: number,
-    avatarURL: string
+    avatarURL: string,
 };
 
 export const userShortProfilesMapper = (data: ShortUsersDTOResponse): ShortUserProfilesResponse => {
@@ -236,21 +269,24 @@ export const userShortProfilesMapper = (data: ShortUsersDTOResponse): ShortUserP
             followers: shortUserDTO.followers
         })
     )
-    return mapped;
+    return {
+        data: mapped,
+        success: true
+    };
 }
 
-export const userProfileMapper = (data: UserProfileDTO): UserProfile => {
+export const userProfileMapper = (data: UserProfileDTO): UserProfileResponse => {
     return {
         userId: data.user_id,
         username: data.username,
         followers: data.followers,
         followed: data.followed,
-        avatarURL: data.avatar_url
+        avatarURL: data.avatar_url,
+        success: true
     };
 }
 
 // Chat
-
 export interface ChatDTO {
     chat_id: string,
     participants: number
@@ -263,7 +299,9 @@ interface ChatResponse {
     participants: number
 };
 
-type ChatsResponse = ChatResponse[];
+export interface ChatsResponse extends SuccessfullField{
+    data: ChatResponse[],
+};
 
 const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
     const mapped = data.map((chatDTO) => (
@@ -272,7 +310,10 @@ const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
             participants: chatDTO.participants
         }
     ));
-    return mapped;
+    return {
+        data: mapped,
+        success: true
+    };
 }
 
 export interface MessageDTO {
@@ -282,7 +323,7 @@ export interface MessageDTO {
     owner: OwnerDTO
 };
 
-export type MessagesDTO = MessageDTO[];
+export type MessagesDTO = MessageDTO[]
 
 export interface MessageResponse {
     messageId: string,
@@ -291,25 +332,32 @@ export interface MessageResponse {
     owner: OwnerResponse
 };
 
-export type MessagesResponse = MessageResponse[];
+export interface MessagesResponse extends SuccessfullField {
+    data: MessageResponse[]
+};
 
 export const messageResponseMapper = (data: MessagesDTO): MessagesResponse => {
-    return data.map((messageDTO) => ({
+    const mapped = data.map((messageDTO) => ({
         messageId: messageDTO.message_id,
         text: messageDTO.text,
         sent: new Date(messageDTO.sent),
         owner: OwnerMapper(messageDTO.owner)
     }));
+
+    return {
+        data: mapped,
+        success: true
+    };
+    
 };
 
 // Chat access
-
 export interface ChatConnectDTO {
     token: string,
     participants_avatar_urls: string[]
 };
 
-export interface ChatConnectResponse {
+export interface ChatConnectResponse extends SuccessfullField {
     token: string,
     participantsAvatarURLs: string[]
 };
@@ -317,6 +365,7 @@ export interface ChatConnectResponse {
 export const chatConnectMapper = (data: ChatConnectDTO): ChatConnectResponse => {
     return {
         token: data.token,
-        participantsAvatarURLs: data.participants_avatar_urls
+        participantsAvatarURLs: data.participants_avatar_urls,
+        success: true
     };
 }

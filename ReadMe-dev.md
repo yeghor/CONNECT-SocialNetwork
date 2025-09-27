@@ -60,3 +60,8 @@ When action on message needs to be validated, like deleting or changing - firsty
 For groups, ChatRoom model `approved` field must always be setted on `True`. To create group - user and it's participants must be friends. (following each other)
 
 `created` ChatRoom model field change manualy on chat approval.
+
+
+## Frontend-Backend 
+
+Backend must **never** provide successful response with `detail` field. It will break frontend DTO!
