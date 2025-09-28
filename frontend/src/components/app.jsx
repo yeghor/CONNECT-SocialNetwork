@@ -6,13 +6,14 @@ const App = () => {
 
     useEffect(() => {
         const fetcher = async () => {
-            const response = await fetchLogin("JavaScriptEnjoyer", "password1A")
+            // const response = await fetchLogin("JavaScriptEnjoyer", "password1A")
 
-            if(response.success) {
-                console.log(response.accessToken);
-            } else {
-                console.log(response.detail);
-            }
+            // // if(response.success) {
+            // //     console.log("Succes!")
+            // //     console.log(response.accessToken);
+            // // } else {
+            // //     console.log(response.detail);
+            // // }
         }
         fetcher();
     })

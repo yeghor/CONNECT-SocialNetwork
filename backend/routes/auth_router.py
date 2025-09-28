@@ -65,7 +65,7 @@ async def change_password(
     credentials: OldNewPassword = Body(...),
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
-) -> UserSchema:
+) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, MainServiceType=MainServiceAuth) as auth:
         await auth.change_password(user=user, credentials=credentials)
@@ -76,7 +76,7 @@ async def change_username(
     credentials: NewUsername = Body(...),
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
-) -> UserSchema:
+) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, MainServiceType=MainServiceAuth) as auth:
         await auth.change_username(user=user, credentials=credentials)

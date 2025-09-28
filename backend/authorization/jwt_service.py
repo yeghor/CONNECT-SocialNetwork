@@ -66,7 +66,7 @@ class JWTService:
 
         if token_type == "acces":
             expires_at = await redis.save_acces_jwt(jwt_token=encoded_jwt, user_id=user_id)
-            return AccesTokenSchema.model_validate({"acces_token": encoded_jwt, "expires_at_acces": expires_at})
+            return AccesTokenSchema.model_validate({"access_token": encoded_jwt, "expires_at_access": expires_at})
         elif token_type == "refresh":
             expires_at = await redis.save_refresh_jwt(jwt_token=encoded_jwt, user_id=user_id)
             return RefreshTokenSchema.model_validate({"refresh_token": encoded_jwt, "expires_at_refresh": expires_at})
@@ -84,8 +84,8 @@ class JWTService:
 
         return RefreshAccesTokens.model_validate(
             {
-                "acces_token": acces_token.acces_token,
-                "expires_at_acces": acces_token.expires_at_acces,
+                "access_token": acces_token.access_token,
+                "expires_at_access": acces_token.expires_at_access,
                 "refresh_token": refresh_token.refresh_token,
                 "expires_at_refresh": refresh_token.expires_at_refresh
             }

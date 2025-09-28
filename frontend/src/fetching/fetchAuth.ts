@@ -15,38 +15,54 @@ import {
 } from "./requestConstructors.ts"
 
 import {
-    BadResponseDTO,
+    BadResponse,
     isBadResponse,
     AuthResponseDTO,
     AuthTokensResponse,
     authTokensResponseMapper,
+    AccesTokenResponse,
+    AccessTokenDTO,
+    accesTokenResponseMapper,
 } from "./responseDTO.ts"
 
-export const fetchLogin = async (username: string, password: string): Promise<(AuthTokensResponse & {success: true})|(BadResponseDTO & {success: false})> => {
-    console.log(loginURL)
-    const response = await fetch(loginURL,
-        {
-            method: "POST",
-            headers: requestHeaders(),
-            body: JSON.stringify(loginBody(username, password))
-        }
-    );
-    // Do something wit type crossing
-    const responseDTO: AuthResponseDTO | BadResponseDTO = await response.json();
-    if (isBadResponse(responseDTO)) {
+type APIResponse<R> = Promise<R & {success: true} | BadResponse & {success: false}>
+
+const fetchHelper = async <ResponseType>(requestURL: string, requestInit: RequestInit, DTOMapper: CallableFunction): Promise<ResponseType | BadResponse> => {
+    const response = await fetch(requestURL, requestInit);
+    const responseDTO = await response.json();
+
+    if(isBadResponse(responseDTO)) {
         return responseDTO;
     } else {
-        return authTokensResponseMapper(responseDTO);
+        return DTOMapper(responseDTO);
     }
 }
 
+export const fetchLogin = async (username: string, password: string): APIResponse<AuthTokensResponse> => {
+    const requestInit = {
+        method: "POST",
+        headers: requestHeaders(),
+        body: JSON.stringify(loginBody(username, password))
+    };
 
-export const fetchRegister = async (username: string, email: string, password: string): Promise<void> => {
-    await fetch(loginURL,
-        {
-            method: "POST",
-            headers: requestHeaders(),
-            body: JSON.stringify(registerBody(username=username, email=email, password=password))
-        }
-    );
+    return await fetchHelper<AuthTokensResponse>(loginURL, requestInit, authTokensResponseMapper);
+}
+
+export const fetchRegister = async (username: string, email: string, password: string): APIResponse<AuthTokensResponse> => {
+    const requestInit = {
+        method: "POST",
+        headers: requestHeaders(),
+        body: JSON.stringify(registerBody(username, email, password))
+    };
+
+    return await fetchHelper<AuthTokensResponse>(registerURL, requestInit, authTokensResponseMapper);
+}
+
+export const fetchRefresh = async (refreshJWT: string): APIResponse<AccesTokenResponse> => {
+    const requestInit = {
+        method: "POST",
+        headers: requestTokenHeaders(refreshJWT),
+    };
+
+    return await fetchHelper<AccesTokenResponse>(refreshTokenURL, requestInit, authTokensResponseMapper);
 }

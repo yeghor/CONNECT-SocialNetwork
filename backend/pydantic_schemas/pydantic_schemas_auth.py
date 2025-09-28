@@ -85,7 +85,7 @@ class NewUsername(BaseModel):
 
 class RefreshAccesTokensProvided(BaseModel):
     refresh_token: str
-    acces_token: str
+    access_token: str
 
 class RefreshTokenSchema(BaseModel):
     refresh_token: str
@@ -104,10 +104,10 @@ class RefreshTokenSchema(BaseModel):
         return value
 
 class AccesTokenSchema(BaseModel):
-    acces_token: str
-    expires_at_acces: str
+    access_token: str
+    expires_at_access: str
 
-    @field_validator("expires_at_acces", mode="before")
+    @field_validator("expires_at_access", mode="before")
     @classmethod
     def normalize_datetime(cls, value: Any) -> str:
         if isinstance(value, int):

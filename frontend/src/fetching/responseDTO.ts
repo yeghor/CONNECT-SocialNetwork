@@ -6,7 +6,7 @@ interface NotSuccesfullField {
     success: false
 };
 
-export interface BadResponseDTO extends NotSuccesfullField {
+interface BadResponseDTO extends NotSuccesfullField {
     detail: string
 };
 
@@ -32,7 +32,7 @@ const OwnerMapper = (data: OwnerDTO): OwnerResponse => {
 
 // Login/Register/Refresh
 
-interface AccessTokenDTO {
+export interface AccessTokenDTO {
     access_token: string,
     expires_at_access: string,
 };

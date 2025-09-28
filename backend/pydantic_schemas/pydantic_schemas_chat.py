@@ -33,7 +33,7 @@ class MessageSchemaShort(BaseModel):
 class MessageSchema(MessageSchemaShort):
     "Use in main http endpoints"
     text: str
-    sent: datetime = Field(default=datetime.utcnow)
+    sent: datetime
     owner: UserShortSchema
 
 class MessageSchemaActionIncluded(MessageSchema, ActionIncluded):
