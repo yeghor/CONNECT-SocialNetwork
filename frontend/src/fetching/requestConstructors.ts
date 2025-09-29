@@ -35,7 +35,7 @@ interface ChangePostInterface {
 };
 
 interface MakePostInterface extends ChangePostInterface {
-    parent_post_id?: string
+    parent_post_id: string | null
 };
 
 interface ChangePasswordInterface {
@@ -59,11 +59,11 @@ interface CreateGroupInterface extends CreateChatInterface {
     other_participants_ids: string[]
 }
 
-export const makePostBody = (title: string, text: string, parent_post_id: string | undefined): MakePostInterface => {
+export const makePostBody = (title: string, text: string, parentPostId: string | null): MakePostInterface => {
     return {
         title,
         text,
-        parent_post_id
+        parent_post_id: parentPostId
     };
 }
 

@@ -43,12 +43,12 @@ export const followedPostsFeedURL = (page: number | string) => {
     return `${BASEURL}${postsConstructor}/following/${page}`;
 }
 
-export const searchPostsURL = (page: number | string) => {
-    return `${BASEURL}${searchConstructor}${postsConstructor}/${page}`;
+export const searchPostsURL = (prompt: string, page: number | string) => {
+    return `${BASEURL}${searchConstructor}${postsConstructor}/${page}?prompt=${prompt}`;
 }
 
-export const searchUsersURL = (page: number | string) => {
-    return `${BASEURL}${searchConstructor}${usersConstructor}/${page}`;
+export const searchUsersURL = (prompt: string, page: number | string) => {
+    return `${BASEURL}${searchConstructor}${usersConstructor}/${page}?prompt=${prompt}`;
 }
 
 export const postCommentsURL = (postId: string, page: number | string) => {

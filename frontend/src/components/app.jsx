@@ -1,19 +1,19 @@
 import React, { useEffect } from "react";
 import "../index.css"
-import { fetchLogin } from "../fetching/fetchAuth.ts"
+import { fetchLogin, fetchChangePassword } from "../fetching/fetchAuth.ts"
 
 const App = () => {
 
     useEffect(() => {
         const fetcher = async () => {
-            // const response = await fetchLogin("JavaScriptEnjoyer", "password1A")
+            const response = await fetchChangePassword("JavaScriptEnjoyer", "password1A")
 
-            // // if(response.success) {
-            // //     console.log("Succes!")
-            // //     console.log(response.accessToken);
-            // // } else {
-            // //     console.log(response.detail);
-            // // }
+            if(response.success) {
+                console.log("Succes!")
+                console.log(response.accessToken);
+            } else {
+                console.log(response.detail);
+            }
         }
         fetcher();
     })
