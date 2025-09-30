@@ -17,22 +17,17 @@ import {
     requestHeaders,
     loginBody,
     registerBody,
+    logoutBody,
     changePasswordBody, 
     changeUsernameBody
 } from "./requestConstructors.ts"
 
 import {
     SuccessfullResponse,
-    succesfullResponseCreator,
-    BadResponse,
-    isBadResponse,
-    AuthResponseDTO,
+    successfullResponseMapper,
     AuthTokensResponse,
     authTokensResponseMapper,
-    AccesTokenResponse,
-    AccessTokenDTO,
-    accesTokenResponseMapper,
-    badResponseMapper,
+    AccessTokenResponse,
 } from "./responseDTOs.ts"
 
 
@@ -56,13 +51,13 @@ export const fetchRegister = async (username: string, email: string, password: s
     return await fetchHelper<AuthTokensResponse>(registerURL, requestInit, authTokensResponseMapper);
 }
 
-export const fetchRefresh = async (refreshJWT: string): APIResponse<AccesTokenResponse> => {
+export const fetchRefresh = async (refreshJWT: string): APIResponse<AccessTokenResponse> => {
     const requestInit: RequestInit  = {
         method: "POST",
         headers: requestTokenHeaders(refreshJWT),
     };
 
-    return await fetchHelper<AccesTokenResponse>(refreshTokenURL, requestInit, authTokensResponseMapper);
+    return await fetchHelper<AccessTokenResponse>(refreshTokenURL, requestInit, authTokensResponseMapper);
 }
 
 export const fetchChangePassword = async (accessJWT: string, oldPassword: string, newPassword: string): APIResponse<SuccessfullResponse> => {
@@ -72,7 +67,7 @@ export const fetchChangePassword = async (accessJWT: string, oldPassword: string
         body: JSON.stringify(changePasswordBody(oldPassword, newPassword))
     };
 
-    return await fetchHelper<SuccessfullResponse>(changePasswordURL, requestInit, succesfullResponseCreator);
+    return await fetchHelper<SuccessfullResponse>(changePasswordURL, requestInit, successfullResponseMapper);
 }
 
 export const fetchChangeUsername = async (accessJWT: string, newUsername: string): APIResponse<SuccessfullResponse> => {
@@ -82,5 +77,15 @@ export const fetchChangeUsername = async (accessJWT: string, newUsername: string
         body: JSON.stringify(changeUsernameBody(newUsername))
     };
 
-    return await fetchHelper<SuccessfullResponse>(changeUsernameURL, requestInit, succesfullResponseCreator);
+    return await fetchHelper<SuccessfullResponse>(changeUsernameURL, requestInit, successfullResponseMapper);
+}
+
+export const fetchLogout = async (accessJWT: string, rerfreshJWT: string): APIResponse<SuccessfullResponse> => {
+    const requestInit: RequestInit = {
+        method: "POST",
+        headers: requestHeaders(),
+        body: JSON.stringify(logoutBody(accessJWT, rerfreshJWT))
+    }
+
+    return await fetchHelper(logoutURL, requestInit, successfullResponseMapper);
 }

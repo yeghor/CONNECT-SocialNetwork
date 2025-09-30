@@ -29,6 +29,11 @@ interface RegisterInterface extends LoginInterface {
     email: string
 };
 
+interface LogoutInterface {
+    access_token: string,
+    refresg_token: string
+};
+
 interface ChangePostInterface {
     title: string
     text: string
@@ -53,11 +58,11 @@ interface CreateChatInterface {
 
 interface CreateDialogueInterface extends CreateChatInterface {
     other_participant_id: string
-}
+};
 
 interface CreateGroupInterface extends CreateChatInterface {
     other_participants_ids: string[]
-}
+};
 
 export const makePostBody = (title: string, text: string, parentPostId: string | null): MakePostInterface => {
     return {
@@ -78,6 +83,13 @@ export const loginBody = (username: string, password: string): LoginInterface =>
     return {
         username,
         password
+    };
+}
+
+export const logoutBody = (accessToken: string, refreshToken: string): LogoutInterface => {
+    return {
+        access_token: accessToken,
+        refresg_token: refreshToken
     };
 }
 

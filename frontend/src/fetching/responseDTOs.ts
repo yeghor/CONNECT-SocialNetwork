@@ -1,7 +1,7 @@
 export interface SuccessfullResponse {
     success: true
 };
-export const succesfullResponseCreator = (): SuccessfullResponse => {
+export const successfullResponseMapper = (): SuccessfullResponse => {
     return {
         success: true
     };
@@ -50,12 +50,12 @@ export interface AuthResponseDTO extends AccessTokenDTO {
     expires_at_refresh: string
 };
 
-export interface AccesTokenResponse extends SuccessfullResponse {
+export interface AccessTokenResponse extends SuccessfullResponse {
     accessToken: string,
     expiresAtAccessToken: Date
 };
 
-export interface AuthTokensResponse extends AccesTokenResponse {
+export interface AuthTokensResponse extends AccessTokenResponse {
     refreshToken: string,
     expiresAtRefreshToken: Date
 };
@@ -70,7 +70,7 @@ export const authTokensResponseMapper = (data: AuthResponseDTO): AuthTokensRespo
     };
 }
 
-export const accesTokenResponseMapper = (data: AccessTokenDTO): AccesTokenResponse => {
+export const accesTokenResponseMapper = (data: AccessTokenDTO): AccessTokenResponse => {
     return {
         accessToken: data.access_token,
         expiresAtAccessToken: new Date(data.expires_at_access),

@@ -24,15 +24,12 @@ import {
     requestTokenHeaders,
     makePostBody,
     changePostBody,
-    changePasswordBody,
 } from "./requestConstructors.ts";
 
 import {
     // Base
     SuccessfullResponse,
-    succesfullResponseCreator as succesfullResponseMapper,
-    BadResponse,
-    badResponseMapper,
+    successfullResponseMapper,
 
     // Posts
     LoadPostResponse,
@@ -46,7 +43,7 @@ import {
     ShortUserProfilesResponse,
     UserProfileResponse,
     userShortProfilesMapper,
-    userProfileMapper
+    userProfileMapper as userProfileResponseMapper
 } from "./responseDTOs.ts";
 
 // Get Posts
@@ -96,6 +93,16 @@ export const fetchSearchPosts = async (accessJWT: string, prompt: string, page: 
     return await fetchHelper<PostsResponse>(searchPostsURL(prompt, page), requestInit, postsResponseMapper);
 }
 
+export const fetchUsersPosts = async (accessJWT: string, userId: string, page: number): APIResponse<PostsResponse> => {
+    const requestInit: RequestInit = {
+        method: "GET",
+        headers: requestTokenHeaders(accessJWT),
+    };
+
+    return await fetchHelper<PostsResponse>(UserPostsURL(userId, page), requestInit, postsResponseMapper);
+}
+
+
 // Actions with posts
 
 export const fetchMakePost = async (accessJWT: string, title: string, text: string, parent_post_id: string | null = null): APIResponse<SuccessfullResponse> => {
@@ -105,7 +112,7 @@ export const fetchMakePost = async (accessJWT: string, title: string, text: stri
         body:    JSON.stringify(makePostBody(title, text, parent_post_id))
     };
 
-    return await fetchHelper<SuccessfullResponse>(basePostURL, requestInit, succesfullResponseMapper);
+    return await fetchHelper<SuccessfullResponse>(basePostURL, requestInit, successfullResponseMapper);
 }
 
 export const fetchChangePost = async (accessJWT: string, postId: string, title: string, text: string): APIResponse<SuccessfullResponse> => {
@@ -115,7 +122,7 @@ export const fetchChangePost = async (accessJWT: string, postId: string, title: 
         body: JSON.stringify(changePostBody(title, text))
     };
 
-    return await fetchHelper<SuccessfullResponse>(specificPostURL(postId), requestInit, succesfullResponseMapper);
+    return await fetchHelper<SuccessfullResponse>(specificPostURL(postId), requestInit, successfullResponseMapper);
 }
 
 export const fetchDeletePost = async (accessJWT: string, postId: string): APIResponse<SuccessfullResponse> => {
@@ -124,7 +131,7 @@ export const fetchDeletePost = async (accessJWT: string, postId: string): APIRes
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<SuccessfullResponse>(specificPostURL(postId), requestInit, succesfullResponseMapper);
+    return await fetchHelper<SuccessfullResponse>(specificPostURL(postId), requestInit, successfullResponseMapper);
 }
 
 export const fetchLikePost = async (accessJWT: string, postId: string): APIResponse<SuccessfullResponse> => {
@@ -133,7 +140,7 @@ export const fetchLikePost = async (accessJWT: string, postId: string): APIRespo
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<SuccessfullResponse>(postActionURL(postId), requestINIT, succesfullResponseMapper);
+    return await fetchHelper<SuccessfullResponse>(postActionURL(postId), requestINIT, successfullResponseMapper);
 }
 
 export const fetchUnlikePost = async (accessJWT: string, postId: string): APIResponse<SuccessfullResponse> => {
@@ -142,7 +149,7 @@ export const fetchUnlikePost = async (accessJWT: string, postId: string): APIRes
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<SuccessfullResponse>(postActionURL(postId), requestInit, succesfullResponseMapper);
+    return await fetchHelper<SuccessfullResponse>(postActionURL(postId), requestInit, successfullResponseMapper);
 }
 
 // User Interactions
@@ -162,5 +169,32 @@ export const fetchSpecificUser = async (accessJWT: string, userId: string): APIR
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<UserProfileResponse>(specificUserURL(userId), requestInit, userProfileMapper);
+    return await fetchHelper<UserProfileResponse>(specificUserURL(userId), requestInit, userProfileResponseMapper);
+}
+
+export const fetchMyProfile = async (accessJWT: string): APIResponse<UserProfileResponse> => {
+    const requestInit: RequestInit = {
+        method: "GET",
+        headers: requestTokenHeaders(accessJWT)
+    };
+
+    return await fetchHelper<UserProfileResponse>(myProfileURL, requestInit, userProfileResponseMapper);
+}
+
+export const fetchFollow = async (accessJWT: string, userId: string): APIResponse<SuccessfullResponse> => {
+    const requestInit: RequestInit = {
+        method: "POST",
+        headers: requestTokenHeaders(accessJWT)
+    };
+
+    return await fetchHelper<SuccessfullResponse>(followURL(userId), requestInit, userProfileResponseMapper);
+}
+
+export const fetchUnfollow = async (accessJWT: string, userId: string): APIResponse<SuccessfullResponse> => {
+    const requestInit: RequestInit = {
+        method: "DELETE",
+        headers: requestTokenHeaders(accessJWT)
+    };
+
+    return await fetchHelper<SuccessfullResponse>(followURL(userId), requestInit, userProfileResponseMapper);
 }
