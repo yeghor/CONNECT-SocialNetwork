@@ -1,3 +1,5 @@
+import { Message } from "postcss";
+
 export interface SuccessfullResponse {
     success: true
 };
@@ -216,7 +218,6 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
 }
 
 // Comments
-
 export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsResponse => {
     const mapped = data.map((commentDTO) => (
         {
@@ -240,7 +241,6 @@ export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsRes
 
 
 // User profiles
-
 interface ShortUserDTO {
     user_id: string,
     username: string,
@@ -333,7 +333,7 @@ export interface MessageDTO {
 
 export type MessagesDTO = MessageDTO[]
 
-export interface MessageResponse {
+export interface MessageInterface {
     messageId: string,
     text: string,
     sent: Date,
@@ -341,10 +341,15 @@ export interface MessageResponse {
 };
 
 export interface MessagesResponse extends SuccessfullResponse {
-    data: MessageResponse[]
+    data: MessageInterface[]
 };
 
-export const messageResponseMapper = (data: MessagesDTO): MessagesResponse => {
+export interface MessageResponse extends SuccessfullResponse {
+    data: MessageInterface
+};
+
+// DRY THIS
+export const messagesResponseMapper = (data: MessagesDTO): MessagesResponse => {
     const mapped = data.map((messageDTO) => ({
         messageId: messageDTO.message_id,
         text: messageDTO.text,
@@ -358,6 +363,18 @@ export const messageResponseMapper = (data: MessagesDTO): MessagesResponse => {
     };
     
 };
+
+export const singleMessageResponseMapper = (data: MessageDTO): MessageResponse => {
+    return {
+        data: {
+            messageId: data.message_id,
+            text: data.text,
+            sent: new Date(data.sent),
+            owner: OwnerMapper(data.owner),  
+        },
+        success: true
+    };
+}   
 
 // Chat access
 export interface ChatConnectDTO {

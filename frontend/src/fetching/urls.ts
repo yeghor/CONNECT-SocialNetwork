@@ -1,4 +1,10 @@
-export const BASEURL = "http://localhost:8000"
+const MAINHTTPPROTOCOL = "http://"
+const WSPROTOCOL = "ws://"
+const HOST = "localhost:8000"
+
+const BASEURL = `${MAINHTTPPROTOCOL}${HOST}`
+
+export const WebSocketURL = `${WSPROTOCOL}${HOST}`
 
 // Constructors
 const usersConstructor = "/users";
@@ -81,19 +87,11 @@ export const followURL = (userId: string) => {
 
 // Media
 
-export const userTokenImageURL = (token: string) => {
-    return `${BASEURL}${mediaConstructor}${usersConstructor}/${token}`;
-}
-
-export const postTokenImageURL = (token: string) => {
-    return `${BASEURL}${mediaConstructor}${postsConstructor}/${token}`;
-}
-
-export const specificPostImageURL = (postId: string) => {
+export const uploadPostImageURL = (postId: string) => {
     return `${BASEURL}${mediaConstructor}${postsConstructor}/${postId}`;
 }
 
-export const userImageURL = `${BASEURL}${mediaConstructor}${usersConstructor}`;
+export const uploadUserImageURL = `${BASEURL}${mediaConstructor}${usersConstructor}`;
 
 
 // Chat

@@ -2,9 +2,10 @@ interface BaseHeaderType {
     [key: string]: string
 };
 
-interface TokenHeaderType extends BaseHeaderType {
-    [key: string]: string
-};
+type TokenHeaderType = BaseHeaderType & {
+    [key: string]: string;
+};;
+
 
 export const requestHeaders = (): BaseHeaderType => {
     return {
@@ -15,6 +16,14 @@ export const requestHeaders = (): BaseHeaderType => {
 export const requestTokenHeaders = (JWT: string): TokenHeaderType => {
     return {
         "Content-Type": "application/json",
+        "token": JWT
+    };
+}
+
+// For files
+export const requestTokenMultipartHeaders = (JWT: string): TokenHeaderType => {
+    return {
+        "Content-Type": "multipart/form-data",
         "token": JWT
     };
 }
