@@ -69,7 +69,7 @@ interface CreateDialogueInterface extends CreateChatInterface {
     other_participant_id: string
 };
 
-interface CreateGroupInterface extends CreateChatInterface {
+interface CreateGroupInterface {
     other_participants_ids: string[]
 };
 
@@ -130,9 +130,8 @@ export const createDialogueBody = (message: string, otherParticipantId: string):
     };
 }
 
-export const createGroupBody = (message: string, otherParticipantsIds: string[]): CreateGroupInterface => {
+export const createGroupBody = (otherParticipantsIds: string[]): CreateGroupInterface => {
     return {
-        message,
         other_participants_ids: otherParticipantsIds
     };
 }

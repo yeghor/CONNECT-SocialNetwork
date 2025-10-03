@@ -73,10 +73,6 @@ export const ChatsURL = (page: string | number) => {
     return `${BASEURL}${chatConstructor}/${page}`;
 }
 
-export const NotApprovedChatsURL = (page: string | number) => {
-    return `${BASEURL}${chatConstructor}/not-approved/${page}`;
-}
-
 export const specificUserURL = (userId: string) => {
     return `${BASEURL}${usersConstructor}/${userId}`;
 }

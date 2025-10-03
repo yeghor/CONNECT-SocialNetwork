@@ -61,6 +61,10 @@ For groups, ChatRoom model `approved` field must always be setted on `True`. To 
 
 `created` ChatRoom model field change manualy on chat approval.
 
+### Chat pagination
+
+Add note about pagination normalization... 
+
 
 ## Frontend-Backend 
 

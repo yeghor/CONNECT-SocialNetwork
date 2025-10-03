@@ -14,7 +14,6 @@ from os import getenv
 ActionType = Literal["send", "change", "delete"]
 
 load_dotenv()
-
 MESSAGE_MAX_LEN = int(getenv("MESSAGE_MAX_LEN", "5000"))
 
 class Chat(BaseModel):
@@ -55,7 +54,7 @@ class CreateChatBodyBase(BaseModel):
 class CreateDialogueRoomBody(CreateChatBodyBase):
     other_participant_id: str
 
-class CreateGroupRoomBody(CreateChatBodyBase):
+class CreateGroupRoomBody(BaseModel):
     other_participants_ids: List[str]
 
 class ExpectedWSData(BaseModel):
