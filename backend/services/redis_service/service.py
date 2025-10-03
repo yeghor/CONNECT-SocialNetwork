@@ -118,7 +118,7 @@ class RedisService:
         return self._get_expiry(REFRESH_JWT_EXPIRY_SECONDS)
 
     @redis_error_handler
-    async def refresh_acces_token(self, old_token, new_token: str, user_id: str) -> str:
+    async def refresh_access_token(self, old_token, new_token: str, user_id: str) -> str:
         await self.delete_jwt(jwt_token=old_token, token_type="acces")
         await self.__client.setex(
             name=f"{self.__jwt_acces_prefix}{new_token}",

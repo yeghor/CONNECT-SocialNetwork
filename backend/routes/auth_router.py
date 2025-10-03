@@ -7,8 +7,8 @@ from authorization.authorization_utils import authorize_request_depends
 from pydantic_schemas.pydantic_schemas_auth import (
     LoginSchema,
     RegisterSchema,
-    RefreshAccesTokens,
-    AccesTokenSchema,
+    RefreshAccessTokens,
+    AccessTokenSchema,
     RefreshAccesTokensProvided,
     OldNewPassword,
     NewUsername
@@ -24,7 +24,7 @@ auth = APIRouter()
 async def login(
     credentials: LoginSchema = Body(...),
     session: AsyncSession = Depends(get_session_depends)
-    ) -> RefreshAccesTokens:
+    ) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
         response = await auth.login(credentials=credentials)
         return response
@@ -34,7 +34,7 @@ async def login(
 async def register(
     credentials: RegisterSchema = Body(...),
     session: AsyncSession = Depends(get_session_depends)
-    ) -> RefreshAccesTokens:
+    ) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
         response = await auth.register(credentials=credentials)
         return response
@@ -54,7 +54,7 @@ async def logout(
 async def refresh_token(
     token = Header(..., examples="Bearer (refresh_token)"),
     session: AsyncSession = Depends(get_session_depends)
-) -> AccesTokenSchema:
+) -> AccessTokenSchema:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
         response = await auth.refresh_token(refresh_token=token)
         return response

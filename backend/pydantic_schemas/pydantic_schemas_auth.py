@@ -103,7 +103,7 @@ class RefreshTokenSchema(BaseModel):
             value = value.strftime(DATE_FORMAT)
         return value
 
-class AccesTokenSchema(BaseModel):
+class AccessTokenSchema(BaseModel):
     access_token: str
     expires_at_access: str
 
@@ -117,5 +117,5 @@ class AccesTokenSchema(BaseModel):
         return value
 
 
-class RefreshAccesTokens(RefreshTokenSchema, AccesTokenSchema):
+class RefreshAccessTokens(RefreshTokenSchema, AccessTokenSchema):
     pass

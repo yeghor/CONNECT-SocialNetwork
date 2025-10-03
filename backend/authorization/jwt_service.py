@@ -6,8 +6,8 @@ from services.redis_service import RedisService
 from typing import Literal
 from pydantic_schemas.pydantic_schemas_auth import (PayloadJWT,
     RefreshTokenSchema,
-    AccesTokenSchema,
-    RefreshAccesTokens
+    AccessTokenSchema,
+    RefreshAccessTokens
 )
 import jwt.exceptions as jwt_exceptions
 from functools import wraps
@@ -60,13 +60,13 @@ class JWTService:
 
     # Doesn't require error handle
     @classmethod
-    async def generate_save_token(cls, user_id: str, redis: RedisService, token_type: str) -> RefreshTokenSchema | AccesTokenSchema:
+    async def generate_save_token(cls, user_id: str, redis: RedisService, token_type: str) -> RefreshTokenSchema | AccessTokenSchema:
         """Choose token type you want to generate - acces/refresh"""
         encoded_jwt = cls.generate_token(user_id)
 
         if token_type == "acces":
             expires_at = await redis.save_acces_jwt(jwt_token=encoded_jwt, user_id=user_id)
-            return AccesTokenSchema.model_validate({"access_token": encoded_jwt, "expires_at_access": expires_at})
+            return AccessTokenSchema.model_validate({"access_token": encoded_jwt, "expires_at_access": expires_at})
         elif token_type == "refresh":
             expires_at = await redis.save_refresh_jwt(jwt_token=encoded_jwt, user_id=user_id)
             return RefreshTokenSchema.model_validate({"refresh_token": encoded_jwt, "expires_at_refresh": expires_at})
@@ -76,13 +76,13 @@ class JWTService:
 
     @classmethod
     @jwt_error_handler
-    async def generate_save_refresh_acces_token(cls, user_id: str, redis: RedisService) -> RefreshAccesTokens:
+    async def generate_save_refresh_access_token(cls, user_id: str, redis: RedisService) -> RefreshAccessTokens:
 
         acces_token = await cls.generate_save_token(user_id=user_id, redis=redis, token_type="acces")
         refresh_token = await cls.generate_save_token(user_id=user_id, redis=redis, token_type="refresh")
 
 
-        return RefreshAccesTokens.model_validate(
+        return RefreshAccessTokens.model_validate(
             {
                 "access_token": acces_token.access_token,
                 "expires_at_access": acces_token.expires_at_access,
