@@ -21,8 +21,6 @@ import os
 from exceptions.exceptions_handler import web_exceptions_raiser
 from exceptions.custom_exceptions import *
 
-POST_IMAGE_MAX_SIZE_MB = int(os.getenv("POST_IMAGE_MAX_SIZE_MB", "25"))
-
 class MainServiceAuth(MainServiceBase):
     @web_exceptions_raiser
     async def authorize_request(self, token: str, return_user: bool = True) -> User | None:
@@ -124,7 +122,7 @@ class MainServiceAuth(MainServiceBase):
         if user.username == credentials.new_username:
             raise InvalidResourceProvided(detail=f"AuthService: User: {user.user_id} tried to change username to identical to his old one.", client_safe_detail="New username can't the same as old one")
 
-        await self._PostgresService.change_field_and_flush(model=User, username=new_username)
+        await self._PostgresService.change_field_and_flush(model=user, username=new_username)
 
     @web_exceptions_raiser
     async def delete_user(self, password: str, user: User) -> None:
