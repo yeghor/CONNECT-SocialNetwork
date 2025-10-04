@@ -103,6 +103,7 @@ const websocketMessageHelper = (ws: WebSocket, action: chatAction, message?: str
             console.warn("WebSocket connection establishing");
         } else if (err instanceof WebsocketConnectionError) {
             console.error("WebSockets connection is not established");
+        }
     }
 }
 
@@ -119,7 +120,11 @@ export const deleteMessage = (ws: WebSocket, messageId: string): void => {
 }
 
 
-// API Calls
+export const fetchDisapproveChat = async (accessJWT: string, chatId: string): APIResponse<SuccessfullResponse> => {
+    // TOOD
+    return successfullResponseMapper()
+}
+
 export const fetchApproveChat = async (accessJWT: string, chatId: string): APIResponse<SuccessfullResponse> => {
     const requestInit: RequestInit = {
         method: "POST",
