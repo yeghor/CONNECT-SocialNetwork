@@ -33,14 +33,18 @@ import {
     successfullResponseMapper,
 } from "./responseDTOs.ts"
 
-export const checkWSConnEstablished = (ws: WebSocket): boolean => {
+/**
+ * 
+ * @param {WebSocket} ws - takes webosocket object
+ * @returns {void} Returns null if connections established. Else - raise exceptions `WebsocketNotReady` or `WebsocketConnectionError`
+ */
+export const checkWSConnEstablished = (ws: WebSocket): void => {
     if (ws.readyState == 1) {
-        return false;
+        return;
     } else if (ws.readyState == 3 || ws.readyState == 2) {
-        return false;
+        throw new WebsocketConnectionError("WebSocket not connected");
     } else {
-        console.warn("Connection establishing...");
-        return false;
+        throw new WebsocketNotReady("WebSocket connection establishing...");
     }
 }
 
@@ -48,10 +52,21 @@ export const checkWSConnEstablished = (ws: WebSocket): boolean => {
 type chatAction = "send" | "change" | "delete";
 const wsClosedErrorMessage = "WebSocket connection is closed"
 
+class WebsocketNotReady extends Error {
+    constructor (msg: string){
+        super(msg)
+    }
+};
+
+class WebsocketConnectionError extends Error {
+    constructor (msg: string){
+        super(msg)
+    }
+};
+
 
 interface ExpectedWSData {
     action: chatAction,
-
     message: string | null,
     messageId: string | null
 };
@@ -68,31 +83,39 @@ export const connectWSChat = (): WebSocket => {
     return new WebSocket(WebSocketURL);
 }
 
-export const sendMessage = (ws: WebSocket, message: string): void => {
-    if (checkWSConnEstablished(ws)) {
-        const wsData = wsDataMapper("send", message);
-        ws.send(wsData)
-    } else {
-        throw new Error(wsClosedErrorMessage);
+const websocketMessageHelper = (ws: WebSocket, action: chatAction, message?: string, messageId?: string): void => {
+    try {
+        let wsData: string;
+
+        switch (action) {
+            case "send":
+                wsData = wsDataMapper(action, message);
+            case "change":
+                wsData = wsDataMapper(action, messageId);
+            case "delete":
+                wsData = wsDataMapper(action, messageId);
+        }
+
+        ws.send(wsData);
+
+    } catch (err) {
+        if (err instanceof WebsocketNotReady) {
+            console.warn("WebSocket connection establishing");
+        } else if (err instanceof WebsocketConnectionError) {
+            console.error("WebSockets connection is not established");
     }
 }
 
-export const changeMessage = (ws: WebSocket, messageId: string): void => {
-    if (checkWSConnEstablished(ws)) {
-        const wsData = wsDataMapper("change", messageId);
-        ws.send(wsData);
-    } else {
-        throw new Error(wsClosedErrorMessage);
-    }
+export const sendMessage = (ws: WebSocket, message: string): void => {
+    websocketMessageHelper(ws, "send", message);
+}
+
+export const changeMessage = (ws: WebSocket, message: string, messageId: string): void => {
+    websocketMessageHelper(ws, "change", message, messageId);
 }
 
 export const deleteMessage = (ws: WebSocket, messageId: string): void => {
-    if (checkWSConnEstablished(ws)) {
-        const wsData = wsDataMapper("delete", messageId);
-        ws.send(wsData)
-    } else {
-        throw new Error(wsClosedErrorMessage);
-    }
+    websocketMessageHelper(ws, "delete", undefined, messageId);
 }
 
 
