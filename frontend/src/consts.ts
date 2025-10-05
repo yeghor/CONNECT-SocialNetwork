@@ -1,0 +1,1 @@
+export const TOKENCOOKIEEXPIRYHOURS: number = 2
