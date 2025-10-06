@@ -40,7 +40,7 @@ interface RegisterInterface extends LoginInterface {
 
 interface LogoutInterface {
     access_token: string,
-    refresg_token: string
+    refresh_token: string
 };
 
 interface ChangePostInterface {
@@ -98,7 +98,7 @@ export const loginBody = (username: string, password: string): LoginInterface =>
 export const logoutBody = (accessToken: string, refreshToken: string): LogoutInterface => {
     return {
         access_token: accessToken,
-        refresg_token: refreshToken
+        refresh_token: refreshToken
     };
 }
 

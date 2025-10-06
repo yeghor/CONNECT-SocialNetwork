@@ -25,10 +25,10 @@ export const isBadResponse = (data: any): data is BadResponseDTO => {
     return "detail" in data;
 }
 
-export const badResponseMapper = (data: BadResponseDTO, statucCode: number): BadResponse => {
+export const badResponseMapper = (data: BadResponseDTO, statusCode: number): BadResponse => {
     return {
         detail: data.detail,
-        statusCode: statucCode,
+        statusCode: statusCode,
         success: false
     };
 }

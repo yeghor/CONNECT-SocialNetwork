@@ -98,7 +98,7 @@ const websocketMessageHelper = (ws: WebSocket, action: chatAction, message?: str
                 wsData = wsDataMapper(action, messageId);
                 break;
             default:
-                throw new Error(`Uknown chat action: ${action}`);
+                throw new Error(`Unknown chat action: ${action}`);
         }
 
         ws.send(wsData);
