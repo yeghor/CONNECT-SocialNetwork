@@ -1,8 +1,9 @@
 import React from "react";
+import { ReactNode } from "react";
 
-
-const footer = () => {
-
+const footerBae = (): ReactNode => {
+    return (
+        <div></div>
+    );
 }
-
-export default footer
+export default footerBae;

@@ -90,10 +90,15 @@ const websocketMessageHelper = (ws: WebSocket, action: chatAction, message?: str
         switch (action) {
             case "send":
                 wsData = wsDataMapper(action, message);
+                break;
             case "change":
-                wsData = wsDataMapper(action, messageId);
+                wsData = wsDataMapper(action, message, messageId);
+                break;
             case "delete":
                 wsData = wsDataMapper(action, messageId);
+                break;
+            default:
+                throw new Error(`Uknown chat action: ${action}`);
         }
 
         ws.send(wsData);
