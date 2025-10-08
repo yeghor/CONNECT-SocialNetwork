@@ -1,9 +1,11 @@
 import { TOKENCOOKIEEXPIRYHOURS } from "../../consts.ts"
 import Cookies from 'universal-cookie';
+import { refreshTokenURL } from "../../fetching/urls.ts";
 
 const cookies = new Cookies();
 
-
+const ACCESSTOKENCONST = "access-token";
+const REFRESHTOKENCONST = "refresh-token";
 
 export const setUpdateCookie = (key: string, value: string): void => {
     const now = new Date();
@@ -17,7 +19,7 @@ export const removeCookie = (key: string): void => {
     cookies.remove(key);
 }
 
-export const getCookie = (key: string): any | null => {
-    return cookies.get(key);
+export const getCookies = (): string[] => {
+    return [cookies.get(ACCESSTOKENCONST), cookies.get(REFRESHTOKENCONST)];
 }
 

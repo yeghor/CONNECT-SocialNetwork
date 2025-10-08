@@ -1,5 +1,3 @@
-import { Message } from "postcss";
-
 export interface SuccessfullResponse {
     success: true
 };
@@ -129,7 +127,7 @@ interface ShortPostReponse {
     picturesURLs: string[]
 };
 
-interface FeedPostResponse extends ShortPostReponse {
+export interface FeedPostResponse extends ShortPostReponse {
     parentPost?: ShortPostReponse
 };
 
