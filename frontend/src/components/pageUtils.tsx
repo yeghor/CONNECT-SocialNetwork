@@ -1,8 +1,8 @@
 import React, { ReactNode} from "react";
 import "../index.css"
 
-import NavigationBar from "./base/navBar";
-import FooterBar from "./base/footer";
+import NavigationBar from "./base/navBar.tsx";
+import FooterBar from "./base/footer.tsx";
 
 interface ComponentProps {
     children: ReactNode

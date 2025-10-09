@@ -4,10 +4,12 @@ import BaseComponentsWrapper from "./components/pageUtils.tsx";
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import SocialPage from "./components/social/socialPage.tsx"
-import ChatPage from "./components/social/chatPage.jsx"
+import ChatPage from "./components/social/chatPage.tsx"
 import MyProfilePage from './components/social/myProfilePage.tsx';
 import ProfilePage from './components/social/profilePage.tsx';
 import PostPage from './components/social/postPage.tsx';
+import LoginForm from './components/auth/loginForm.tsx';
+
 
 const container = document.getElementById('root')
 
@@ -41,6 +43,11 @@ if(container) {
                     <Route path='/post/:postId' element={
                         <BaseComponentsWrapper>
                             <PostPage />
+                        </BaseComponentsWrapper>
+                    } />
+                    <Route path='/login' element={
+                        <BaseComponentsWrapper>
+                            <LoginForm />
                         </BaseComponentsWrapper>
                     } />
                 </Routes>

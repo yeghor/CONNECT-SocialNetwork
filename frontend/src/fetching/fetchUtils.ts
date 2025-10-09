@@ -2,7 +2,7 @@ import {
     BadResponse,
     isBadResponse,
     badResponseMapper
-} from "./responseDTOs"
+} from "./responseDTOs.ts"
 
 // & Types Intersection
 // If object type {succes: fasle} intersepts with BadResponse *(which has that exactly field)* - function return type will be BadResponse

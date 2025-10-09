@@ -81,10 +81,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 origins = [
-    "http://localhost",
     "http://localhost:3000",
-    "http://0.0.0.0",
-    # React frontend app
+    "http://127.0.0.1:3000",
     "http://0.0.0.0:3000"
 ]
 
@@ -109,4 +107,4 @@ except FileExistsError:
 
 # for debug
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="localhost", port=8000)
