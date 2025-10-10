@@ -1,7 +1,8 @@
 from authorization import jwt_service
+from authorization import password_utils
+from authorization import authorization_utils
 from services.core_services import MainServiceBase
 from services.postgres_service import Post, User
-from authorization import password_utils
 from pydantic_schemas.pydantic_schemas_auth import (
     RegisterSchema,
     RefreshTokenSchema,
@@ -49,9 +50,11 @@ class MainServiceAuth(MainServiceBase):
         
         return token
 
-    # TODO: Invalid password is passing.
     @web_exceptions_raiser
     async def register(self, credentials: RegisterSchema) -> RefreshAccessTokens:
+        authorization_utils.validate_email(credentials.email)
+        authorization_utils.validate_password(credentials.password)
+
         if await self._PostgresService.get_user_by_username_or_email(username=credentials.username, email=credentials.email):
             raise Collision(detail=f"AuthService: User tried to register with credentials: {credentials.username}, {credentials.email} that already exist.", client_safe_detail="Registered user with these credentials already exist")
 

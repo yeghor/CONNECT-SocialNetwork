@@ -34,11 +34,13 @@ async def authorize_chat_token(token: str) -> None:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
         return await auth.authorize_chat_token(token=token)
 
-@endpoint_exception_handler
 def validate_password(password: str) -> None:
-    """Raises HTTPexception if password not secure enough"""
+    """Raises ValidationErrorExc if password not secure enough"""
 
-    valid_flag = True
-
-    if not re.match(r"/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])/;", password):
-        raise ValidationErrorExc(detail=f"Password validation failed", client_safe_detail=f"Password length is out of range. Must be from {PASSWORD_MIN_L} to {PASSWORD_MAX_L} chars.")
+    if not re.match(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])", password):
+        raise ValidationErrorExc(detail="validate_password: Password validation failed", client_safe_detail="Password is not secure enough.")
+    
+def validate_email(email: str) -> None:
+    print(email)
+    if not re.match(r"^(?!\.)(?!.*\.\.)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+"r"@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$", email):
+        raise ValidationErrorExc(detail="validate_email: Email validation failed", client_safe_detail="Invalid Email!")
