@@ -18,11 +18,9 @@ export const validateFromString = (formString: string, stringType: stringType): 
             }
             break;
         case "password":
-            return true;
             if (passwordRegexp.test(formString)) {
                 return true;
             }
-            break;
         }
     return false;
 }

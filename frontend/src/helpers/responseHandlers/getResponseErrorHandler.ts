@@ -1,11 +1,11 @@
 import { BadResponse, SuccessfullResponse } from "../../fetching/responseDTOs.ts"
-import { RedirectFunction } from "react-router-dom"
+import { NavigateFunction } from "react-router-dom"
 
-export const validateResponse = (response: BadResponse | SuccessfullResponse, setErrorMessage?: Function, redirect?: RedirectFunction): boolean => {
+export const validateResponse = (response: BadResponse | SuccessfullResponse, setErrorMessage?: Function, redirect?: NavigateFunction): boolean => {
     if (response.success) {
         return true;
     } else {
-        if (response.statusCode == 500) { 
+        if (response.statusCode === 500) { 
             if (redirect) {
                 redirect("");
                 return false;                

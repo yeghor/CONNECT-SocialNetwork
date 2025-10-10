@@ -102,11 +102,11 @@ export const logoutBody = (accessToken: string, refreshToken: string): LogoutInt
     };
 }
 
-export const registerBody = (username: string, password: string, email: string): RegisterInterface => {
+export const registerBody = (username: string, email: string, password: string): RegisterInterface => {
     return {
-        username,
-        password,
-        email
+        username: username,
+        email: email,
+        password: password
     };
 }
 

@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { redirect } from "react-router";
+import { redirect, useNavigate } from "react-router";
 
 import {
-    appHomeURI, 
-    UsernameMinLength, UsernameMaxLength,
+    appHomeURI, internalServerErrorURI,
     AccessTokenCookieKey, RefreshTokenCookieKey,
     passwordNotSecureEnoughMessage, invalidEmailMessage, invalidUsernameMessage
 } from "../../consts.ts"
 
-import { fetchLogin } from "../../fetching/fetchAuth.ts"
+import { fetchLogin, fetchRegister } from "../../fetching/fetchAuth.ts"
 import { validateResponse } from "../../helpers/responseHandlers/getResponseErrorHandler.ts"
 
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
@@ -16,6 +15,8 @@ import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
 import { validateFromString } from "../../helpers/validatorts.ts"
 
 const RegisterForm = () => {
+    const navigate = useNavigate();
+
     const [ errorMessage, setErrorMessage ] = useState("");
     const [ username, setUsername ] = useState("");
     const [ email, setEmail ] = useState("");
@@ -33,20 +34,26 @@ const RegisterForm = () => {
             return;
 
         } else if(!validateFromString(password, "password")) {
+            console.log("password is not secure enough: ", password);
             setErrorMessage(passwordNotSecureEnoughMessage);
             return;
         }
 
-        const response = await fetchLogin(username, password);
-
-        if(!validateResponse(response, setErrorMessage, redirect)) {
-            return;
-        }
-        
-        if(response.success) {
-            setUpdateCookie(AccessTokenCookieKey, response.accessToken);
-            setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
-            redirect(appHomeURI);
+        try {
+            const response = await fetchRegister(username, email, password);
+            if(!validateResponse(response, setErrorMessage, navigate)) {
+                return;
+            }
+            
+            if(response.success) {
+                setUpdateCookie(AccessTokenCookieKey, response.accessToken);
+                setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
+                redirect(appHomeURI);
+                return;
+            }
+        } catch(err) {
+            console.error(err);
+            navigate(internalServerErrorURI);
             return;
         }
     }
@@ -71,7 +78,7 @@ const RegisterForm = () => {
                             </div>
                             <div>
                                 <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
-                                <input onChange={(event) => setEmail(event.target.value)} type="email" name="email" id="email" placeholder="example@gmail.com" className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required={true} />
+                                <input onChange={(event) => setEmail(event.target.value)} type="text" name="email" id="email" placeholder="example@gmail.com" className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required={true} />
                             </div>
                             <div>
                                 <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>

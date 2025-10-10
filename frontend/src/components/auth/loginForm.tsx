@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { redirect } from "react-router";
+import React, { useState } from "react";
+import { redirect, useNavigate } from "react-router";
 
 import {
     appHomeURI,
-    invalidUsernameMessage, invalidEmailMessage, passwordNotSecureEnoughMessage,
-    UsernameMinLength, UsernameMaxLength,
-    AccessTokenCookieKey, RefreshTokenCookieKey
+    AccessTokenCookieKey, RefreshTokenCookieKey,
+    internalServerErrorURI
 } from "../../consts.ts"
 
 import { fetchLogin } from "../../fetching/fetchAuth.ts"
 
 import { validateResponse } from "../../helpers/responseHandlers/getResponseErrorHandler.ts"
-import { validateFromString } from "../../helpers/validatorts.ts"
 
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
 
 const LoginForm = () => {
+    const navigate = useNavigate();
+
     const [ errorMessage, setErrorMessage ] = useState("");
     const [ username, setUsername ] = useState("");
     const [ password, setPassword ] = useState("");
@@ -23,25 +23,22 @@ const LoginForm = () => {
     const formHandler = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        if(!validateFromString(username, "username")) {
-            setErrorMessage(invalidUsernameMessage);
-            return;
-    
-        } else if(!validateFromString(password, "password")) {
-            setErrorMessage(passwordNotSecureEnoughMessage);
-            return;
-        }
+        try {
+            const response = await fetchLogin(username, password);
 
-        const response = await fetchLogin(username, password);
-
-        if(!validateResponse(response, setErrorMessage, redirect)) {
-            return;
-        }
-        
-        if(response.success) {
-            setUpdateCookie(AccessTokenCookieKey, response.accessToken);
-            setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
-            redirect(appHomeURI);
+            if(!validateResponse(response, setErrorMessage, navigate)) {
+                return;
+            }
+            
+            if(response.success) {
+                setUpdateCookie(AccessTokenCookieKey, response.accessToken);
+                setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
+                redirect(appHomeURI);
+                return;
+            }
+        } catch (err) {
+            console.error(err);
+            navigate(internalServerErrorURI);
             return;
         }
     }

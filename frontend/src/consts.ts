@@ -11,6 +11,7 @@ export const emailRegexp = /^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/;
 export const passwordRegexp = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])/;
 
 
+export const internalServerErrorURI = "/internal-server-error"
 export const appHomeURI = "/";
 export const appLoginURI = "/login";
 export const appRegisterURI = "/register";
@@ -18,4 +19,4 @@ export const appRegisterURI = "/register";
 
 export const passwordNotSecureEnoughMessage = "Come on, you can do better! Make your password better, longer, stronger, and maybe throw in a ’!’ for flair.";
 export const invalidEmailMessage = "That doesn’t look like a valid email. Make sure it includes ’@’ and a domain name.";
-export const invalidUsernameMessage = `Keep it simple! Use ${UsernameMinLength}–${UsernameMaxLength} characters: letters, numbers, or . _ - ! * ' no spaces or fancy symbols.`;
+export const invalidUsernameMessage = `Keep your username simple! Use ${UsernameMinLength}–${UsernameMaxLength} characters: letters, numbers, or . _ - ! * ' no spaces or fancy symbols.`;

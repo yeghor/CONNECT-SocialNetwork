@@ -9,7 +9,7 @@ import MyProfilePage from './components/social/myProfilePage.tsx';
 import ProfilePage from './components/social/profilePage.tsx';
 import PostPage from './components/social/postPage.tsx';
 import LoginForm from './components/auth/loginForm.tsx';
-
+import RegisterForm from "./components/auth/registerForm.tsx"
 
 const container = document.getElementById('root')
 
@@ -48,6 +48,11 @@ if(container) {
                     <Route path='/login' element={
                         <BaseComponentsWrapper>
                             <LoginForm />
+                        </BaseComponentsWrapper>
+                    } />
+                    <Route path='/register' element={
+                        <BaseComponentsWrapper>
+                            <RegisterForm />
                         </BaseComponentsWrapper>
                     } />
                 </Routes>
