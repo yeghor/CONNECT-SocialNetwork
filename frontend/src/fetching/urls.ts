@@ -1,6 +1,6 @@
 const MAINHTTPPROTOCOL = "http://"
 const WSPROTOCOL = "ws://"
-const HOST = "localhost:8000"
+const HOST = "127.0.0.1:8000"
 
 const BASEURL = `${MAINHTTPPROTOCOL}${HOST}`
 
