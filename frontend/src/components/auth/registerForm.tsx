@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { redirect, useNavigate } from "react-router";
+import { redirect } from "react-router";
 
 import {
     appHomeURI, internalServerErrorURI,
     AccessTokenCookieKey, RefreshTokenCookieKey,
     passwordNotSecureEnoughMessage, invalidEmailMessage, invalidUsernameMessage
-} from "../../consts.ts"
+} from "../../consts"
 
-import { fetchLogin, fetchRegister } from "../../fetching/fetchAuth.ts"
-import { validateResponse } from "../../helpers/responseHandlers/getResponseErrorHandler.ts"
+import { fetchLogin, fetchRegister } from "../../fetching/fetchAuth"
+import { validateResponse } from "../../helpers/responseHandlers/getResponseErrorHandler"
 
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
 
@@ -22,7 +22,7 @@ const RegisterForm = () => {
     const [ email, setEmail ] = useState("");
     const [ password, setPassword ] = useState("");
 
-    const formHandler = async (event: React.FormEvent) => {
+    const formHandler = async (event: React.FormEvent): Promise<void> => {
         event.preventDefault();
 
         if(!validateFromString(username, "username")) {
@@ -44,7 +44,7 @@ const RegisterForm = () => {
             if(!validateResponse(response, setErrorMessage, navigate)) {
                 return;
             }
-            
+
             if(response.success) {
                 setUpdateCookie(AccessTokenCookieKey, response.accessToken);
                 setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
