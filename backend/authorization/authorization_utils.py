@@ -5,6 +5,7 @@ from fastapi import Header, HTTPException
 from dotenv import load_dotenv
 from os import getenv
 from typing import Callable
+import re
 
 from exceptions.custom_exceptions import *
 from exceptions.exceptions_handler import endpoint_exception_handler
@@ -39,11 +40,5 @@ def validate_password(password: str) -> None:
 
     valid_flag = True
 
-    valid_flag = any(char.isdigit() for char in password)
-    valid_flag = any(char.isupper() for char in password)
-
-    if not valid_flag:
-        raise ValidationErrorExc(detail=f"Password validation failed", client_safe_detail=f"Password is too weak. At least one number and upper letter")
-    
-    if not PASSWORD_MIN_L <= len(password) <= PASSWORD_MAX_L:
+    if not re.match(r"/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])/;", password):
         raise ValidationErrorExc(detail=f"Password validation failed", client_safe_detail=f"Password length is out of range. Must be from {PASSWORD_MIN_L} to {PASSWORD_MAX_L} chars.")
