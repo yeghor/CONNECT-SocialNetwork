@@ -6,8 +6,8 @@ import {
  } from "./urls.ts"
 
 import {
-    SuccessfullResponse,
-    successfullResponseMapper,
+    SuccessfulResponse,
+    successfulResponseMapper,
 
 } from "./responseDTOs.ts"
 
@@ -15,7 +15,7 @@ import {
     requestTokenMultipartHeaders
 } from "./requestConstructors.ts"
 
-export const fetchUploadAvatar = async (accessJWT: string, imageData: Blob): APIResponse<SuccessfullResponse> => {
+export const fetchUploadAvatar = async (accessJWT: string, imageData: Blob): APIResponse<SuccessfulResponse> => {
     const formData = new FormData();
     formData.append("file_", imageData);
 
@@ -25,10 +25,10 @@ export const fetchUploadAvatar = async (accessJWT: string, imageData: Blob): API
         body: formData
     };
 
-    return await fetchHelper<SuccessfullResponse>(uploadUserImageURL, requestInit, successfullResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(uploadUserImageURL, requestInit, successfulResponseMapper);
 }
 
-export const fetchUploadPostPictures = async (accessJWT: string, postId: string, imageData: Blob): APIResponse<SuccessfullResponse> => {
+export const fetchUploadPostPictures = async (accessJWT: string, postId: string, imageData: Blob): APIResponse<SuccessfulResponse> => {
     const formData = new FormData();
     formData.append("file_", imageData);
 
@@ -38,6 +38,6 @@ export const fetchUploadPostPictures = async (accessJWT: string, postId: string,
         body: formData
     };
 
-    return await fetchHelper<SuccessfullResponse>(uploadPostImageURL(postId), requestInit, successfullResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(uploadPostImageURL(postId), requestInit, successfulResponseMapper);
 }
 

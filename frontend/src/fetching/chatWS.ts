@@ -29,8 +29,8 @@ import {
     MessageResponse,
     MessagesResponse,
     singleMessageResponseMapper,
-    SuccessfullResponse,
-    successfullResponseMapper,
+    SuccessfulResponse,
+    successfulResponseMapper,
 } from "./responseDTOs.ts"
 
 /**
@@ -125,18 +125,18 @@ export const deleteMessage = (ws: WebSocket, messageId: string): void => {
 }
 
 
-export const fetchDisapproveChat = async (accessJWT: string, chatId: string): APIResponse<SuccessfullResponse> => {
+export const fetchDisapproveChat = async (accessJWT: string, chatId: string): APIResponse<SuccessfulResponse> => {
     // TOOD
-    return successfullResponseMapper()
+    return successfulResponseMapper()
 }
 
-export const fetchApproveChat = async (accessJWT: string, chatId: string): APIResponse<SuccessfullResponse> => {
+export const fetchApproveChat = async (accessJWT: string, chatId: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<SuccessfullResponse>(approveChatURL(chatId), requestInit, successfullResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(approveChatURL(chatId), requestInit, successfulResponseMapper);
 }
 
 export const fetchNotApprovedChats = async (accessJWT: string, page: number): APIResponse<ChatsResponse> => {
@@ -145,7 +145,7 @@ export const fetchNotApprovedChats = async (accessJWT: string, page: number): AP
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<ChatsResponse>(notApprovedChatsURL(page), requestInit, successfullResponseMapper);
+    return await fetchHelper<ChatsResponse>(notApprovedChatsURL(page), requestInit, successfulResponseMapper);
 }
 
 export const fetchAllChats = async (accessJWT: string, page: number): APIResponse<ChatsResponse> => {
@@ -154,17 +154,17 @@ export const fetchAllChats = async (accessJWT: string, page: number): APIRespons
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<ChatsResponse>(ChatsURL(page), requestInit, successfullResponseMapper);
+    return await fetchHelper<ChatsResponse>(ChatsURL(page), requestInit, successfulResponseMapper);
 }
 
-export const fetchCreateDialogueChat = async (accessJWT: string, participantId: string, message: string): APIResponse<SuccessfullResponse> => {
+export const fetchCreateDialogueChat = async (accessJWT: string, participantId: string, message: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestTokenHeaders(accessJWT),
         body: JSON.stringify(createDialogueBody(message, participantId))
     };
 
-    return await fetchHelper(dialoqueChatURL, requestInit, successfullResponseMapper);
+    return await fetchHelper(dialoqueChatURL, requestInit, successfulResponseMapper);
 }
 
 export const fetchCreateGroupChat = async (accessJWT: string, participantsIds: string[]) => {
@@ -174,5 +174,5 @@ export const fetchCreateGroupChat = async (accessJWT: string, participantsIds: s
         body: JSON.stringify(createGroupBody(participantsIds))
     };
 
-    return await fetchHelper(dialoqueChatURL, requestInit, successfullResponseMapper);
+    return await fetchHelper(dialoqueChatURL, requestInit, successfulResponseMapper);
 }

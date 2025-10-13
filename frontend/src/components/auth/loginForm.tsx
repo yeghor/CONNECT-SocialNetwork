@@ -9,7 +9,7 @@ import {
 
 import { fetchLogin } from "../../fetching/fetchAuth.ts"
 
-import { validateResponse } from "../../helpers/responseHandlers/getResponseErrorHandler.ts"
+import { validateResponse } from "../../helpers/responseHandlers/getResponseHandlers.ts"
 
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
 

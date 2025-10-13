@@ -49,9 +49,9 @@ const SocialPage = () => {
 
     return (
         <div>
-            <LoginForm />
+
         </div>
-    )
+    );
 }
 
 export default SocialPage;

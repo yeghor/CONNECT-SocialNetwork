@@ -28,8 +28,8 @@ import {
 
 import {
     // Base
-    SuccessfullResponse,
-    successfullResponseMapper,
+    SuccessfulResponse,
+    successfulResponseMapper,
 
     // Posts
     LoadPostResponse,
@@ -105,51 +105,51 @@ export const fetchUsersPosts = async (accessJWT: string, userId: string, page: n
 
 // Actions with posts
 
-export const fetchMakePost = async (accessJWT: string, title: string, text: string, parent_post_id: string | null = null): APIResponse<SuccessfullResponse> => {
+export const fetchMakePost = async (accessJWT: string, title: string, text: string, parent_post_id: string | null = null): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestTokenHeaders(accessJWT),
         body:    JSON.stringify(makePostBody(title, text, parent_post_id))
     };
 
-    return await fetchHelper<SuccessfullResponse>(basePostURL, requestInit, successfullResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(basePostURL, requestInit, successfulResponseMapper);
 }
 
-export const fetchChangePost = async (accessJWT: string, postId: string, title: string, text: string): APIResponse<SuccessfullResponse> => {
+export const fetchChangePost = async (accessJWT: string, postId: string, title: string, text: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "PATCH",
         headers: requestTokenHeaders(accessJWT),
         body: JSON.stringify(changePostBody(title, text))
     };
 
-    return await fetchHelper<SuccessfullResponse>(specificPostURL(postId), requestInit, successfullResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(specificPostURL(postId), requestInit, successfulResponseMapper);
 }
 
-export const fetchDeletePost = async (accessJWT: string, postId: string): APIResponse<SuccessfullResponse> => {
+export const fetchDeletePost = async (accessJWT: string, postId: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "DELETE",
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<SuccessfullResponse>(specificPostURL(postId), requestInit, successfullResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(specificPostURL(postId), requestInit, successfulResponseMapper);
 }
 
-export const fetchLikePost = async (accessJWT: string, postId: string): APIResponse<SuccessfullResponse> => {
+export const fetchLikePost = async (accessJWT: string, postId: string): APIResponse<SuccessfulResponse> => {
     const requestINIT: RequestInit = {
         method: "POST",
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<SuccessfullResponse>(postActionURL(postId), requestINIT, successfullResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(postActionURL(postId), requestINIT, successfulResponseMapper);
 }
 
-export const fetchUnlikePost = async (accessJWT: string, postId: string): APIResponse<SuccessfullResponse> => {
+export const fetchUnlikePost = async (accessJWT: string, postId: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "DELETE",
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<SuccessfullResponse>(postActionURL(postId), requestInit, successfullResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(postActionURL(postId), requestInit, successfulResponseMapper);
 }
 
 // User Interactions
@@ -181,20 +181,20 @@ export const fetchMyProfile = async (accessJWT: string): APIResponse<UserProfile
     return await fetchHelper<UserProfileResponse>(myProfileURL, requestInit, userProfileResponseMapper);
 }
 
-export const fetchFollow = async (accessJWT: string, userId: string): APIResponse<SuccessfullResponse> => {
+export const fetchFollow = async (accessJWT: string, userId: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<SuccessfullResponse>(followURL(userId), requestInit, userProfileResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(followURL(userId), requestInit, userProfileResponseMapper);
 }
 
-export const fetchUnfollow = async (accessJWT: string, userId: string): APIResponse<SuccessfullResponse> => {
+export const fetchUnfollow = async (accessJWT: string, userId: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "DELETE",
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<SuccessfullResponse>(followURL(userId), requestInit, userProfileResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(followURL(userId), requestInit, userProfileResponseMapper);
 }

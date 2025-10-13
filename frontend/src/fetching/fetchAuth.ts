@@ -23,8 +23,8 @@ import {
 } from "./requestConstructors.ts"
 
 import {
-    SuccessfullResponse,
-    successfullResponseMapper,
+    SuccessfulResponse,
+    successfulResponseMapper,
     AuthTokensResponse,
     authTokensResponseMapper,
     AccessTokenResponse,
@@ -57,35 +57,35 @@ export const fetchRefresh = async (refreshJWT: string): APIResponse<AccessTokenR
         headers: requestTokenHeaders(refreshJWT),
     };
 
-    return await fetchHelper<AccessTokenResponse>(refreshTokenURL, requestInit, authTokensResponseMapper);
+    return await fetchHelper<AuthTokensResponse>(refreshTokenURL, requestInit, authTokensResponseMapper);
 }
 
-export const fetchChangePassword = async (accessJWT: string, oldPassword: string, newPassword: string): APIResponse<SuccessfullResponse> => {
+export const fetchChangePassword = async (accessJWT: string, oldPassword: string, newPassword: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "PATCH",
         headers: requestTokenHeaders(accessJWT),
         body: JSON.stringify(changePasswordBody(oldPassword, newPassword))
     };
 
-    return await fetchHelper<SuccessfullResponse>(changePasswordURL, requestInit, successfullResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(changePasswordURL, requestInit, successfulResponseMapper);
 }
 
-export const fetchChangeUsername = async (accessJWT: string, newUsername: string): APIResponse<SuccessfullResponse> => {
+export const fetchChangeUsername = async (accessJWT: string, newUsername: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit  = {
         method: "PATCH",
         headers: requestTokenHeaders(accessJWT),
         body: JSON.stringify(changeUsernameBody(newUsername))
     };
 
-    return await fetchHelper<SuccessfullResponse>(changeUsernameURL, requestInit, successfullResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(changeUsernameURL, requestInit, successfulResponseMapper);
 }
 
-export const fetchLogout = async (accessJWT: string, rerfreshJWT: string): APIResponse<SuccessfullResponse> => {
+export const fetchLogout = async (accessJWT: string, rerfreshJWT: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestHeaders(),
         body: JSON.stringify(logoutBody(accessJWT, rerfreshJWT))
     }
 
-    return await fetchHelper(logoutURL, requestInit, successfullResponseMapper);
+    return await fetchHelper(logoutURL, requestInit, successfulResponseMapper);
 }

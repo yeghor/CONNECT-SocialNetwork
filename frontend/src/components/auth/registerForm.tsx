@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { redirect } from "react-router";
+import React, { useState } from "react";
+import { useNavigate } from "react-router";
 
 import {
     appHomeURI, internalServerErrorURI,
@@ -7,12 +7,12 @@ import {
     passwordNotSecureEnoughMessage, invalidEmailMessage, invalidUsernameMessage
 } from "../../consts"
 
-import { fetchLogin, fetchRegister } from "../../fetching/fetchAuth"
-import { validateResponse } from "../../helpers/responseHandlers/getResponseErrorHandler"
+import { fetchRegister } from "../../fetching/fetchAuth"
+import { validateResponse } from "../../helpers/responseHandlers/getResponseHandlers.ts"
 
-import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
+import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler"
 
-import { validateFromString } from "../../helpers/validatorts.ts"
+import { validateFromString } from "../../helpers/validatorts"
 
 const RegisterForm = () => {
     const navigate = useNavigate();
@@ -48,7 +48,7 @@ const RegisterForm = () => {
             if(response.success) {
                 setUpdateCookie(AccessTokenCookieKey, response.accessToken);
                 setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
-                redirect(appHomeURI);
+                navigate(appHomeURI);
                 return;
             }
         } catch(err) {

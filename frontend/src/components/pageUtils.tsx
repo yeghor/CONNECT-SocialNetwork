@@ -6,7 +6,7 @@ import FooterBar from "./base/footer.tsx";
 
 interface ComponentProps {
     children: ReactNode
-};  
+}
 
 const BaseComponentsWrapper = (props: ComponentProps) => {
     
