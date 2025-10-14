@@ -2,14 +2,16 @@ import React from "react";
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
+import  { appHomeURI } from "../../consts.ts";
+
 const NavigationBar = (): ReactNode => {
     return (
         <div>
-            <nav className="bg-white border-gray-200 dark:bg-gray-900">
+            <nav>
                 <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-                    <a href="https://flowbite.com/" className="flex items-center space-x-3 rtl:space-x-reverse">
-                        <img src="/connect-logo-full.png" className="h-10 w-auto" alt="Connect Logo" />
-                    </a>
+                    <Link to={appHomeURI} className="flex items-center space-x-3 rtl:space-x-reverse">
+                        <img src="/connect-logo-full.png" className="h-15 w-auto" alt="Connect Logo" />
+                    </Link>
                     <div className="flex md:order-2">
                         <button type="button" data-collapse-toggle="navbar-search" aria-controls="navbar-search"
                                 aria-expanded="false"
@@ -45,19 +47,19 @@ const NavigationBar = (): ReactNode => {
                             <input type="text" id="search-navbar"
                                    className="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-zinc-700 focus:text-zinc-700 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring- dark:focus:border-zinc-700"/>
                         </div>
-                        <ul className="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+                        <ul className="flex flex-col p-4 md:p-0 mt-4 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0">
                             <li>
-                                <Link to="/" className="block py-2 px-3 text-gray-900 font-mono rounded-sm md:bg-transparent md:hover:text-zinc-700 md:p-0 md:dark:hover:text-zinc-700 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700" aria-current="page">
+                                <Link to="/" className="block py-2 px-3" aria-current="page">
                                     <img src="/feed-title.png" alt="Feed" className="h-10 w-auto"></img>
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/chat" className="block py-2 px-3 text-gray-900 font-mono rounded-sm md:bg-transparent md:hover:text-zinc-700 md:p-0 md:dark:hover:text-zinc-700 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700" aria-current="page">
+                                <Link to="/chat" className="block py-2 px-3" aria-current="page">
                                     <img src="/chat-title.png" alt="Chat" className="h-10 w-auto"></img>
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/my-profile" className="block py-2 px-3 text-gray-900 font-mono rounded-sm md:bg-transparent md:hover:text-zinc-700 md:p-0 md:dark:hover:text-zinc-700 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700" aria-current="page">
+                                <Link to="/my-profile" className="block py-2 px-3" aria-current="page">
                                     <img src="/me-title.png" alt="Me" className="h-10 w-auto"></img>
                                 </Link>
                             </li>
