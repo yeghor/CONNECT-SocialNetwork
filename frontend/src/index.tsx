@@ -1,8 +1,10 @@
 import React, {StrictMode} from 'react';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReactDOM from 'react-dom/client';
-import BaseComponentsWrapper from "./components/pageUtils.tsx";
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import "./index.css"
+
+import BaseComponentsWrapper from "./components/pageUtils.tsx";
 
 import SocialPage from "./components/social/socialPage.tsx"
 import ChatPage from "./components/social/chatPage.tsx"
@@ -16,45 +18,49 @@ import Footer from "./components/base/footer.tsx";
 
 const container = document.getElementById('root')
 
+const queryClient = new QueryClient();
+
 if(container) {
     const root = ReactDOM.createRoot(container);
 
     root.render(
         <StrictMode>
-            <BrowserRouter>
-                <div
-                    className="min-h-screen w-full bg-cover bg-center bg-no-repeat flex flex-col"
-                    style={{
-                        backgroundImage: "url('/background.png')"
-                    }}
-                >
-                    <NavigationBar />
-                        <Routes>
-                            <Route path='/' element={
-                                <SocialPage />
-                            }/>
-                            <Route path='/chat' element={
-                                <ChatPage />
-                            }/>
-                            <Route path='/my-profile' element={
-                                <MyProfilePage />
-                            } />
-                            <Route path='/profile/:userId' element={
-                                <ProfilePage />
-                            } />
-                            <Route path='/post/:postId' element={
-                                <PostPage />
-                            } />
-                            <Route path='/login' element={
-                                <LoginForm />
-                            } />
-                            <Route path='/register' element={
-                                <RegisterForm />
-                            } />
-                        </Routes>
-                    <Footer />
-                </div>
-            </BrowserRouter>
+            <QueryClientProvider client={queryClient}>
+                <BrowserRouter>
+                    <div
+                        className="min-h-screen w-full bg-cover bg-center bg-no-repeat flex flex-col"
+                        style={{
+                            backgroundImage: "url('/background.png')"
+                        }}
+                    >
+                        <NavigationBar />
+                            <Routes>
+                                <Route path='/' element={
+                                    <SocialPage />
+                                }/>
+                                <Route path='/chat' element={
+                                    <ChatPage />
+                                }/>
+                                <Route path='/my-profile' element={
+                                    <MyProfilePage />
+                                } />
+                                <Route path='/profile/:userId' element={
+                                    <ProfilePage />
+                                } />
+                                <Route path='/post/:postId' element={
+                                    <PostPage />
+                                } />
+                                <Route path='/login' element={
+                                    <LoginForm />
+                                } />
+                                <Route path='/register' element={
+                                    <RegisterForm />
+                                } />
+                            </Routes>
+                        <Footer />
+                    </div>
+                </BrowserRouter>
+            </QueryClientProvider>
         </StrictMode>
     );
 

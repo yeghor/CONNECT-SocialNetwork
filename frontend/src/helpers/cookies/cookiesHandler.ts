@@ -32,7 +32,7 @@ export const removeCookie = (key: string): void => {
 type AccessKey = string;
 type RefreshKey = string;
 
-interface CookieTokenObject {
+export interface CookieTokenObject {
     access: AccessKey | undefined,
     refresh: RefreshKey | undefined
 }
