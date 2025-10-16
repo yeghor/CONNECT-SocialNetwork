@@ -244,6 +244,7 @@ class MainServiceSocial(MainServiceBase):
     async def make_post(self, data: MakePostDataSchema, user: User) -> None:
         if data.parent_post_id:
             parent_post = await self._PostgresService.get_entry_by_id(id_=data.parent_post_id, ModelType=Post)
+            parent_post.replies_count += 1
             if not parent_post:
                 raise InvalidAction(detail=f"SocialService: User: {user.user_id} tried to reply to post: {data.parent_post_id} that does not exists.", client_safe_detail="Post that you are replying does not exist.")
 
@@ -255,8 +256,6 @@ class MainServiceSocial(MainServiceBase):
             text=data.text,
             is_reply=bool(data.parent_post_id)
         )
-
-        parent_post.replies_count += 1
 
         await self._PostgresService.insert_models_and_flush(post)
         await self._PostgresService.refresh_model(post)
