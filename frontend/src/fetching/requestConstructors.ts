@@ -16,7 +16,7 @@ export const requestHeaders = (): BaseHeaderType => {
 export const requestTokenHeaders = (JWT: string): TokenHeaderType => {
     return {
         "Content-Type": "application/json",
-        "token": JWT
+        "token": `Bearer ${JWT}`
     };
 }
 
