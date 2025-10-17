@@ -1,28 +1,27 @@
 import React, {useEffect, useRef, useState} from "react";
-import { queryClient } from "../../index.tsx";
+import { queryClient } from "../../../index.tsx";
 
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import PostComponent from "./post/post.tsx";
+import PostComponent from "./post.tsx";
 
-import { fetchFeedPosts, fetchFollowedPosts } from "../../fetching/fetchSocial.ts";
+import { fetchFeedPosts, fetchFollowedPosts } from "../../../fetching/fetchSocial.ts";
 
 
 import {
     getCookiesOrRedirect,
     CookieTokenObject
-} from "../../helpers/cookies/cookiesHandler.ts";
+} from "../../../helpers/cookies/cookiesHandler.ts";
 
 
-import {FeedPostResponse, FeedPostsResponse} from "../../fetching/responseDTOs.ts";
+import {FeedPostResponse, FeedPostsResponse} from "../../../fetching/responseDTOs.ts";
 import { useNavigate } from "react-router";
-import {retryUnauthorizedResponse, validateResponse} from "../../helpers/responseHandlers/getResponseHandlers.ts";
+import {retryUnauthorizedResponse, validateResponse} from "../../../helpers/responseHandlers/getResponseHandlers.ts";
 import {NavigateFunction} from "react-router-dom";
-import {internalServerErrorURI, unauthorizedRedirectURI} from "../../consts.ts";
-import {APIResponseResolved} from "../../fetching/fetchUtils.ts";
+import {internalServerErrorURI, unauthorizedRedirectURI} from "../../../consts.ts";
+import {APIResponseResolved} from "../../../fetching/fetchUtils.ts";
 
-// TODO: Add 401 retry
 const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolean, navigate: NavigateFunction) => {
     if(tokens.access) {
         console.log("Fetching post...");
@@ -39,6 +38,11 @@ const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolea
         if(!validateResponse(fetchedPosts)) {
             navigate(internalServerErrorURI);
             return fetchedPosts;
+        }
+
+        if(tokens.refresh && tokens.refresh) {
+            const fetchFunc = feed ? fetchFeedPosts : fetchFollowedPosts;
+            return await retryUnauthorizedResponse<FeedPostsResponse>(fetchFunc, tokens.refresh, navigate, undefined, tokens.access, page);
         }
 
         return fetchedPosts;
@@ -68,7 +72,7 @@ function createPostsInfiniteQueryOptions(tokens: CookieTokenObject, feed: boolea
 }
 
 // Base Home page with posts
-const SocialPage = () => {
+const PostsFlow = () => {
     const navigate = useNavigate();
 
     const tokens = getCookiesOrRedirect(navigate);
@@ -134,4 +138,4 @@ const SocialPage = () => {
     );
 }
 
-export default SocialPage;
+export default PostsFlow;

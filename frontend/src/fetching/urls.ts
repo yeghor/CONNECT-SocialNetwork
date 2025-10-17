@@ -21,7 +21,7 @@ export const loginURL = `${BASEURL}/login`;
 export const registerURL = `${BASEURL}/register`;
 export const logoutURL = `${BASEURL}/logout`;
 
-export const refreshTokenURL = "/refresh";
+export const refreshTokenURL = `${BASEURL}/refresh`;
 
 export const changeUsernameURL = `${BASEURL}${usersConstructor}${myProfileConstructor}/username`;
 export const changePasswordURL = `${BASEURL}${usersConstructor}${myProfileConstructor}/password`;

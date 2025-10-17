@@ -70,7 +70,7 @@ If 401 again - redirecting to unauthorized URI *(login or register)* and returni
 
 Do **NOT** provide old accessJWT in fetchArgs. And make sure that args are in correct order.
 */
-export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, refreshToken: string, setErrorMessage: CallableFunction, navigate: NavigateFunction, ...fetchArgs: any[]): Promise<APIResponse<R> | null> => {
+export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, refreshToken: string, navigate: NavigateFunction, setErrorMessage?: CallableFunction, ...fetchArgs: any[]): Promise<APIResponse<R> | null> => {
     const refreshResponse = await refreshSetTokens(navigate, refreshToken);
     if(refreshResponse) {
         return null;

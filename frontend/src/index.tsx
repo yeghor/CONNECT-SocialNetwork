@@ -4,9 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import "./index.css"
 
-import BaseComponentsWrapper from "./components/pageUtils.tsx";
-
-import SocialPage from "./components/social/socialPage.tsx"
+import SocialHomePage from "./components/social/socialHomePage.tsx";
 import ChatPage from "./components/social/chatPage.tsx"
 import MyProfilePage from './components/social/myProfilePage.tsx';
 import ProfilePage from './components/social/profilePage.tsx';
@@ -31,12 +29,11 @@ if(container) {
                         className="min-h-screen w-full bg-cover bg-center bg-no-repeat flex flex-col"
                         style={{
                             backgroundImage: "url('/background.png')"
-                        }}
-                    >
+                        }}>
                         <NavigationBar />
                             <Routes>
                                 <Route path='/' element={
-                                    <SocialPage />
+                                    <SocialHomePage />
                                 }/>
                                 <Route path='/chat' element={
                                     <ChatPage />
