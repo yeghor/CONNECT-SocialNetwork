@@ -6,7 +6,7 @@ import {RowComponentProps} from "react-window";
 const PostComponent = (props: { postData: FeedPostResponse | undefined }) => {
     return (
         <div>
-            <p>{props.postData ? props.postData.title : null}</p>
+            <p className="text-white">{props.postData ? props.postData.title : null}</p>
         </div>
     );
 }

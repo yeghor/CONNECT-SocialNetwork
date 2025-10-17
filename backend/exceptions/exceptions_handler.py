@@ -51,9 +51,10 @@ def web_exceptions_raiser(func):
     async def wrapper(*args, **kwargs):
         try:
             return await func(*args, **kwargs)
-        
-        except (InvalidAction, InvalidFileMimeType, LimitReached, InvalidResourceProvided, ValidationErrorExc, ValidationError) as e:
-            if isinstance(e, ValidationError):
+
+        # TODO: Remove ValueError crutch
+        except (InvalidAction, InvalidFileMimeType, LimitReached, InvalidResourceProvided, ValidationErrorExc, ValidationError, ValueError) as e:
+            if isinstance(e, ValidationError) or isinstance(e, ValueError):
                 raise BadRequestExc(client_safe_detail="Invalid request data received", dev_log_detail=str(e), exc_type=e)
             
             raise BadRequestExc(client_safe_detail=e.client_safe_detail, dev_log_detail=str(e), exc_type=e) from e

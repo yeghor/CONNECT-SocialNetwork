@@ -38,7 +38,7 @@ class MainServiceAuth(MainServiceBase):
             if not user:
                 raise Unauthorized(detail=f"AuthService: User tried to authorize request by token: {token}, but specified user id does not exist.", client_safe_detail="Invalid or expired token")
             return user
-        
+
         return None
 
     @web_exceptions_raiser
