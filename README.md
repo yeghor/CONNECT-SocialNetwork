@@ -14,7 +14,6 @@ It is a prototype of a social network similar to Twitter _(now X)_.
 **Features:**
 - **Architecture** built on SOLID principles, also it is fully asynchronous and easy to _develop_/_expand_.
 - **Images** support user avatars and post pictures. Storage can be chosen in `.env` file (**AWS S3** via **AioBotocore**, **Local Storage**)
-
 - **Authorization** handled with password hashing and two JWT tokens:
   - **Refresh** token - long termed. Used to refresh access token.
   - **Access** token - short termed.
@@ -31,7 +30,7 @@ This project has a `docker-compose.yml` file, so it allows you to start the appl
 
 Also the project has basic **CI** _(Implemented with GitHub actions)_ that runs tests on every **push**.
 
-**Next step**: Implement fronted, chat via websockets, notifications
+**Currently working on**: Implementing frontend, scroll virtualization, auth email confirmation, backend optimization
 
 # Usage
 
