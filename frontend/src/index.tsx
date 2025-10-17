@@ -18,7 +18,7 @@ import Footer from "./components/base/footer.tsx";
 
 const container = document.getElementById('root')
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 if(container) {
     const root = ReactDOM.createRoot(container);
