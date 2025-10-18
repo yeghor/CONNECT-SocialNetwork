@@ -17,7 +17,11 @@ import {
 
 import {FeedPostResponse, FeedPostsResponse} from "../../../fetching/responseDTOs.ts";
 import { useNavigate } from "react-router";
-import {retryUnauthorizedResponse, validateResponse} from "../../../helpers/responseHandlers/getResponseHandlers.ts";
+import {
+    checkUnauthorizedResponse,
+    retryUnauthorizedResponse,
+    validateResponse
+} from "../../../helpers/responseHandlers/getResponseHandlers.ts";
 import {NavigateFunction} from "react-router-dom";
 import {internalServerErrorURI, unauthorizedRedirectURI} from "../../../consts.ts";
 import {APIResponseResolved} from "../../../fetching/fetchUtils.ts";
@@ -40,7 +44,7 @@ const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolea
             return fetchedPosts;
         }
 
-        if(tokens.refresh && tokens.refresh) {
+        if(tokens.refresh && tokens.refresh && checkUnauthorizedResponse(fetchedPosts)) {
             const fetchFunc = feed ? fetchFeedPosts : fetchFollowedPosts;
             return await retryUnauthorizedResponse<FeedPostsResponse>(fetchFunc, tokens.refresh, navigate, undefined, tokens.access, page);
         }
