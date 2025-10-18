@@ -87,7 +87,11 @@ const PostsFlow = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const virtualizer = useVirtualizer({
         count: posts?.length ?? 0,
-        estimateSize: () => 200,
+        estimateSize: (index) => {
+            const post = posts[index];
+            if(!post) return 200;
+            return post.picturesURLs.length > 0 ? 600 : 200
+        },
         getScrollElement: () => scrollRef.current
     });
     const virtualItems = virtualizer.getVirtualItems();
@@ -116,8 +120,8 @@ const PostsFlow = () => {
 
     return (
         <div>
-            <div onClick={toggleFeed}>Toogle feed</div>
-            <div ref={scrollRef} className="h-[80vh] overflow-auto relative">
+            <div onClick={toggleFeed} className="text-center text-white">Toggle feed</div>
+            <div ref={scrollRef} className="h-[80vh] overflow-auto relative max-w-lg mx-auto border-gray-300 py-2   ">
                 <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
                     {
                         virtualItems.map((vItem) => {
@@ -127,11 +131,10 @@ const PostsFlow = () => {
                                      style={
                                          {
                                              transform: `translateY(${vItem.start}px)`,
-                                             height: `${vItem.size}px`
+                                             height: `${vItem.size}px`,
                                          }
                                      }>
                                     <PostComponent postData={post}/>
-                                    <p className="text-white">{vItem.index}</p>
                                 </div>
                             )
                         })

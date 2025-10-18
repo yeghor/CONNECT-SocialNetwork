@@ -16,6 +16,9 @@ export const appHomeURI = "/";
 export const appLoginURI = "/login";
 export const appRegisterURI = "/register";
 export const unauthorizedRedirectURI = appLoginURI;
+export const specificPostURI = (postId: string): string => {
+    return `/post/${postId}`;
+};
 
 export const passwordNotSecureEnoughMessage = "Come on, you can do better! Make your password better, longer, stronger, and maybe throw in a ’!’ for flair.";
 export const invalidEmailMessage = "That doesn’t look like a valid email. Make sure it includes ’@’ and a domain name.";

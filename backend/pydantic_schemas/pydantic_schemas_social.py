@@ -72,7 +72,7 @@ class UserShortSchema(UserIDValidate):
 class UserShortSchemaAvatarURL(UserShortSchema):
     avatar_url: str | None
     
-    # Boolean variable to identify which messsages do user own
+    # Boolean variable to identify which messages do user own
     me: bool
 
 class UserLiteSchema(UserShortSchema):

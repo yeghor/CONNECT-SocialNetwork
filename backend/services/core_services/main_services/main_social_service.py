@@ -187,7 +187,17 @@ class MainServiceSocial(MainServiceBase):
                 replies=post.replies_count,
                 owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
-                parent_post=post.parent_post
+                parent_post=PostBase(
+                    post_id=post.parent_post.post_id,
+                    title=post.parent_post.title,
+                    published=post.parent_post.published,
+                    is_reply=post.parent_post.is_reply ,
+                    owner=UserShortSchema.model_validate(post.parent_post.owner, from_attributes=True),
+                    lieks=post.parent_post.likes_count,
+                    views=post.parent_post.views_count,
+                    replies=post.parent_post.replies_count,
+                    pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images])
+                ) if post.parent_post else None
             ) for post in posts
             ]
 

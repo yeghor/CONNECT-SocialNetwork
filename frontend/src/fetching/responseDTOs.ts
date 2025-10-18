@@ -101,7 +101,7 @@ type LoadPostResponseDTO = LoadPostResponseDTOInterface[];
 type ShortPostsDTO = ShortPostDTO[];
 type FeedPostsResponseDTO = FeedPostDTO[];
 
-interface OwnerResponse {
+export interface OwnerResponse {
     userId: string,
     username: string
 }
