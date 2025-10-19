@@ -87,7 +87,7 @@ const RegisterForm = () => {
                             </div>
                             <button
                                 type="submit"
-                                className="w-full bg-white/10 hover:bg-white/20 focus:ring-4 focus:outline-none focus:ring-zinc-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-zinc-600 dark:hover:bg-zinc-700 dark:focus:ring-zinc-800">
+                                className="w-full bg-white/10 hover:bg-white/20 focus:ring-4 focus:outline-none focus:ring-zinc-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                                 <p className="text-white">Sign up</p>
                             </button>
                             <p className="text-sm font-light text-gray-200 dark:text-gray-400">

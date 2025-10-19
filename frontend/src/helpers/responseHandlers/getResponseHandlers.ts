@@ -2,7 +2,7 @@ import {AccessTokenResponse, BadResponse, SuccessfulResponse} from "../../fetchi
 import {
     AccessTokenCookieKey,
     unauthorizedRedirectURI,
-    internalServerErrorURI
+    internalServerErrorURI, RefreshTokenCookieKey
 } from "../../consts.ts";
 import {getCookies, getCookiesOrRedirect, setUpdateCookie} from "../cookies/cookiesHandler.ts";
 import  { fetchRefresh } from "../../fetching/fetchAuth.ts";
@@ -10,10 +10,10 @@ import { NavigateFunction } from "react-router-dom"
 import {APIResponse} from "../../fetching/fetchUtils.ts";
 
 /*
-This functions does NOT validate 401 code
+This functions does NOT validate 401 code. Code 401 - returns true
 */
 export const validateResponse = (response: BadResponse | SuccessfulResponse, setErrorMessage?: CallableFunction, navigate?: NavigateFunction): boolean => {
-    if (response.success) {
+    if (response.success || response.statusCode === 401) {
         return true;
     } else {
         if (response.statusCode === 500) { 
@@ -30,30 +30,14 @@ export const validateResponse = (response: BadResponse | SuccessfulResponse, set
     }
 }
 
-const refreshTokens = async (navigate: NavigateFunction, refreshToken: string): Promise<AccessTokenResponse | void> => {
+const refreshTokens = async (navigate: NavigateFunction, refreshToken: string): APIResponse<AccessTokenResponse> => {
      const response = await fetchRefresh(refreshToken);
 
-     if(validateResponse(response, undefined,  navigate)) {
-         if (response.success) {
-             return response;
-         }
-     }
+     validateResponse(response, undefined, navigate);
+
+     return response;
 }
 
-/*
-If redirecting - return true, else - false
-*/
-const refreshSetTokens = async (navigate: NavigateFunction, refreshToken: string): Promise<boolean> => {
-    const refreshedTokens = await refreshTokens(navigate, refreshToken);
-
-    if(!refreshedTokens) {
-        navigate(unauthorizedRedirectURI);
-        return true;
-    }
-
-    setUpdateCookie(AccessTokenCookieKey, refreshedTokens.accessToken);
-    return false;
-}
 
 export const checkUnauthorizedResponse = (response: BadResponse | SuccessfulResponse): boolean => {
     if (!response.success) {
@@ -70,17 +54,23 @@ If 401 again - redirecting to unauthorized URI *(login or register)* and returni
 
 Do **NOT** provide old accessJWT in fetchArgs. And make sure that args are in correct order.
 */
-export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, refreshToken: string, navigate: NavigateFunction, setErrorMessage?: CallableFunction, ...fetchArgs: any[]): Promise<APIResponse<R>> => {
-    const tokens = getCookies();
+export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, refreshToken: string, navigate: NavigateFunction, setErrorMessage?: CallableFunction, ...fetchArgs: any[]): Promise<APIResponse<R> | undefined> => {
+    const tokens = await refreshTokens(navigate, refreshToken);
 
-    const retryResponse: BadResponse | SuccessfulResponse = await fetchFunc(tokens.access, ...fetchArgs)
+    if(tokens.success) {
+        setUpdateCookie(AccessTokenCookieKey, tokens.accessToken);
 
-    // Extra !retryResponse.success check to tell ts that response type is BadRepones. And it has statusCode field
-    if(!validateResponse(retryResponse, setErrorMessage,  navigate) && !retryResponse.success) {
-        if (checkUnauthorizedResponse(retryResponse)) {
-            navigate(unauthorizedRedirectURI);
+        const retryResponse: BadResponse | SuccessfulResponse = await fetchFunc(tokens.accessToken, ...fetchArgs);
+
+        // Extra !retryResponse.success check to tell ts that response type is BadRepones. And it has statusCode field
+        if(!validateResponse(retryResponse, setErrorMessage,  navigate) && !retryResponse.success) {
+            if (checkUnauthorizedResponse(retryResponse)) {
+                navigate(unauthorizedRedirectURI);
+            }
         }
-    }
 
-    return retryResponse;
+        return retryResponse;
+    } else {
+        validateResponse(tokens, undefined, navigate);
+    }
 }

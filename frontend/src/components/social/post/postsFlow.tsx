@@ -34,7 +34,7 @@ const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolea
         let fetchedPosts: APIResponseResolved<FeedPostsResponse>;
 
         if (feed) {
-            fetchedPosts = await fetchFeedPosts(tokens.access, page);
+            fetchedPosts = await fetchFeedPosts("sometoken", page);
         } else {
             fetchedPosts = await fetchFollowedPosts(tokens.access, page);
         }
