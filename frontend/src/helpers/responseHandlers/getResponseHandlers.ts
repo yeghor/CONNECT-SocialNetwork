@@ -52,7 +52,7 @@ export const checkUnauthorizedResponse = (response: BadResponse | SuccessfulResp
 /*
 If 401 again - redirecting to unauthorized URI *(login or register)* and returning null.
 
-Do **NOT** provide old accessJWT in fetchArgs. And make sure that args are in correct order.
+Do **NOT** provide old accessJWT in fetchArgs. And make sure that args are in correct order. Do NOT pass auth token manually as e fetchFunc arg!
 */
 export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, refreshToken: string, navigate: NavigateFunction, setErrorMessage?: CallableFunction, ...fetchArgs: any[]): Promise<APIResponse<R> | undefined> => {
     const tokens = await refreshTokens(navigate, refreshToken);

@@ -49,7 +49,7 @@ async def logout(
         response = await auth.logout(tokens=tokens)
         return response
 
-@auth.get("/refresh")
+@auth.post("/refresh")
 @endpoint_exception_handler
 async def refresh_token(
     token = Header(..., examples="Bearer (refresh_token)"),

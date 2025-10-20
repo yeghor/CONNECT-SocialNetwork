@@ -74,7 +74,7 @@ async def lifespan(app: FastAPI):
         scheduler.start()
     except Exception as e:
         scheduler.shutdown()
-        raise e("Scheduler initializtion failed")
+        raise Exception("Scheduler initialization failed")
     yield
 
 

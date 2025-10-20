@@ -16,7 +16,6 @@ const PostComponent = (props: { postData: FeedPostResponse | undefined }) => {
                         <span className="font-bold">Reply to:</span> {props.postData.parentPost.title}
                     </div>
                 </Link>
-
             )}
 
             {images.length > 0 && (

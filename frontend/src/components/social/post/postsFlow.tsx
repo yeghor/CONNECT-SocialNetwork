@@ -34,7 +34,7 @@ const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolea
         let fetchedPosts: APIResponseResolved<FeedPostsResponse>;
 
         if (feed) {
-            fetchedPosts = await fetchFeedPosts("sometoken", page);
+            fetchedPosts = await fetchFeedPosts(tokens.access, page);
         } else {
             fetchedPosts = await fetchFollowedPosts(tokens.access, page);
         }
@@ -46,7 +46,7 @@ const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolea
 
         if(tokens.refresh && tokens.refresh && checkUnauthorizedResponse(fetchedPosts)) {
             const fetchFunc = feed ? fetchFeedPosts : fetchFollowedPosts;
-            return await retryUnauthorizedResponse<FeedPostsResponse>(fetchFunc, tokens.refresh, navigate, undefined, tokens.access, page);
+            return await retryUnauthorizedResponse<FeedPostsResponse>(fetchFunc, tokens.refresh, navigate, undefined, page);
         }
 
         return fetchedPosts;

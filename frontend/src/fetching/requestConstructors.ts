@@ -1,10 +1,10 @@
 interface BaseHeaderType {
     [key: string]: string
-};
+}
 
 type TokenHeaderType = BaseHeaderType & {
     [key: string]: string;
-};;
+}
 
 
 export const requestHeaders = (): BaseHeaderType => {
