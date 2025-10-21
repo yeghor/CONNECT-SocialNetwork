@@ -1,5 +1,6 @@
 import re
 from fastapi import APIRouter, Depends, Body, Query, HTTPException
+from limits.util import Dependency
 from posthog import page
 from services.postgres_service.database_utils import *
 from services.postgres_service.models import User
@@ -13,7 +14,8 @@ from pydantic_schemas.pydantic_schemas_social import (
     PostSchema,
     MakePostDataSchema,
     PostDataSchemaBase,
-    UserSchema
+    UserSchema,
+    RecentActivitySchema
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import inspect
@@ -25,6 +27,8 @@ from os import getenv
 from exceptions.exceptions_handler import endpoint_exception_handler
 
 from .query_utils import page_validator, query_prompt_required
+from ..authorization import authorize_request_depends
+from ..services.postgres_service import get_session_depends, merge_model
 
 social = APIRouter()
 
@@ -211,3 +215,13 @@ async def get_users_posts(
 ) -> List[PostLiteSchema]:
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
         return await social.get_user_posts(user_id, page)
+
+@social.get("/recent-activity")
+@endpoint_exception_handler
+async def get_recent_activity(
+        user_: User = Depends(authorize_request_depends),
+        session: AsyncSession = Depends(get_session_depends)
+    ) -> List[RecentActivitySchema]:
+    user = await merge_model(user_, User)
+    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+        return await social.get_recent_activity(user)

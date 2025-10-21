@@ -1,3 +1,7 @@
+import asyncio
+
+from pydantic.mypy import from_attributes_callback
+from pyexpat.errors import messages
 from services.core_services import MainServiceBase
 from services.postgres_service.models import *
 from post_popularity_rate_task.popularity_rate import POST_ACTIONS
@@ -5,7 +9,7 @@ from mix_posts_consts import *
 
 from dotenv import load_dotenv
 from os import getenv
-from typing import List, TypeVar, Type, Literal, Iterable, NamedTuple, Union
+from typing import List, TypeVar, Type, Literal, Iterable, NamedTuple, Union, Awaitable, Dict, Coroutine, Any
 from pydantic_schemas.pydantic_schemas_social import (
     PostBaseShort,
     PostSchema,
@@ -15,11 +19,13 @@ from pydantic_schemas.pydantic_schemas_social import (
     UserLiteSchema,
     UserSchema,
     UserShortSchema,
-    PostBase
+    PostBase,
+    RecentActivitySchema
 )
 
 from exceptions.exceptions_handler import web_exceptions_raiser
 from exceptions.custom_exceptions import *
+from watchfiles import awatch
 
 
 class NotImplementedError(Exception):
@@ -33,6 +39,8 @@ REPLY_COST_DEVALUATION = float(getenv("REPLY_COST_DEVALUATION")) # TODO: Devalua
 FEED_MAX_POSTS_LOAD = int(getenv("FEED_MAX_POSTS_LOAD"))
 MINIMUM_USER_HISTORY_LENGTH = int(getenv("MINIMUM_USER_HISTORY_LENGTH"))
 
+RECENT_ACTIVITY_ENTRIES = int(getenv("RECENT_ACTIVITY_ENTRIES"))
+
 SHUFFLE_BY_RATE = float(getenv("SHUFFLE_BY_RATE", "0.7"))
 SHUFFLE_BY_TIMESTAMP = float(getenv("SHUFFLE_BY_TIMESTAMP", "0.3"))
 
@@ -43,7 +51,10 @@ BASE_PAGINATION = int(getenv("BASE_PAGINATION"))
 DIVIDE_BASE_PAG_BY = int(getenv("DIVIDE_BASE_PAG_BY"))
 SMALL_PAGINATION = int(getenv("SMALL_PAGINATION"))
 
-T = TypeVar("T", bound=Base)
+M = TypeVar("M", bound=Base)
+
+CoroutineFunc = TypeVar("CoroutineFunc")
+ListData = TypeVar("ContainsType")
 
 class IdsPostTuple(NamedTuple):
     ids: List[str]
@@ -125,7 +136,7 @@ class MainServiceSocial(MainServiceBase):
         await self._ChromaService.add_posts_data(posts=posts)
 
     @web_exceptions_raiser
-    async def _get_all_from_specific_model(self, ModelType: Type[T]) -> List[T]:
+    async def _get_all_from_specific_model(self, ModelType: Type[M]) -> List[M]:
         return await self._PostgresService.get_all_from_model(ModelType=ModelType)
 
     @web_exceptions_raiser
@@ -448,3 +459,48 @@ class MainServiceSocial(MainServiceBase):
             owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
             parent_post=PostBase.model_validate(post.parent_post, from_attributes=True) if post.parent_post else None
         ) for post in user_posts]
+
+    async def _get_recent_action_message(self, action: PostAction) -> Dict | None:
+        """
+        Returns dict that compatible to Pydantic **RecentActivitySchema** model
+        """
+
+        match action.action.value:
+            case "like":
+                return {
+                    "avatar_url": await self._ImageStorage.get_user_avatar_url(action.owner.username),
+                    "message": f"{action.owner.username} liked your post",
+                    "date": action.date
+                }
+            case "reply":
+                return  {
+                    "avatar_url": await self._ImageStorage.get_user_avatar_url(action.owner.username),
+                    "message": f"{action.owner.username} left a reply to your post: {action.post.title}",
+                    "date": action.date
+                }
+
+    async def _get_recent_followed_post_message(self, followed_post: Post) -> Dict | None:
+        """
+        Returns dict that compatible to Pydantic RecentActivitySchema model
+        """
+
+        return {
+            "avatar_url": await self._ImageStorage.get_user_avatar_url(followed_post.owner.username),
+            "message": f"{followed_post.owner.username} made a new post.",
+            "date": followed_post.published
+        }
+
+    # End
+
+    @web_exceptions_raiser
+    async def get_recent_activity(self, user: User) -> List[RecentActivitySchema]:
+        followed_posts = await self._PostgresService.get_fresh_followed_posts(user)
+        actions = await self._PostgresService.get_fresh_actions_for_user(user)
+
+        followed_coroutines = [self._get_recent_followed_post_message(post) for post in followed_posts]
+        action_coroutines = [self._get_recent_action_message(action) for action in actions]
+
+        activity = await asyncio.gather(*followed_coroutines, *action_coroutines)
+        activity = filter(lambda i: bool(i), activity)
+
+        return sorted(activity, key=lambda message: message.get("date"), reverse=True)[:RECENT_ACTIVITY_ENTRIES]

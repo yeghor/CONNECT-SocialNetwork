@@ -165,7 +165,7 @@ class ActionType(enum.Enum):
     view = "view"
     like = "like"
     reply = "reply"
-    repost = "repost"
+    # repost = "repost"
 
 
 class PostActions(Base):

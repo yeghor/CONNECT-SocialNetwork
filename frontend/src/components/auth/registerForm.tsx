@@ -49,7 +49,7 @@ const RegisterForm = () => {
             if(response.success) {
                 setUpdateCookie(AccessTokenCookieKey, response.accessToken);
                 setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
-                navigate(-1);
+                navigate(appHomeURI);
                 return;
             }
         } catch(err) {

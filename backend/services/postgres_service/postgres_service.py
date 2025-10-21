@@ -291,7 +291,7 @@ class PostgresService:
         return result.scalars().all()
     
     @postgres_exception_handler(action="Get n user chat rooms excluding exclude_ids list")
-    async def get_n_user_chats(self, user: User, n, page: int, pagination_normalization: int, chat_type: Literal["chat", "not-approved"]) -> List[ChatRoom]:
+    async def get_n_user_chats(self, user: User, n: int, page: int, pagination_normalization: int, chat_type: Literal["chat", "not-approved"]) -> List[ChatRoom]:
         if chat_type == "chat":
             where_stmt = ChatRoom.approved.is_(True)
         elif chat_type == "not-approved":
@@ -315,3 +315,25 @@ class PostgresService:
         )
 
         return result.scalar()
+
+    @postgres_exception_handler(action="Get most fresh followed posts")
+    async def get_fresh_followed_posts(self, user: User, n: int) -> List[Post]:
+        result = await  self.__session.execute(
+            select(Post)
+            .where(Post.owner.in_((user.followed)))
+            .order_by(Post.published.desc())
+            .limit(n)
+        )
+
+        return result.scalars().all()
+
+    @postgres_exception_handler(action="Get most fresh action for a user")
+    async def get_fresh_actions_for_user(self, user: User, n: int) -> List[PostActions]:
+        result = await  self.__session.execute(
+            select(PostActions)
+            .where(PostActions.post.in_(user.posts))
+            .order_by(PostActions.date.desc())
+            .limit(n)
+        )
+
+        return result.scalars().all()

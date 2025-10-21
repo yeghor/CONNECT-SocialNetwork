@@ -55,7 +55,6 @@ class PostBase(PostBaseShort):
 class PostLiteSchema(PostBase):
     parent_post: PostBase | None
 
-# TODO: Separate urls field to diferent models
 class PostSchema(PostBase):
     text: str
 
@@ -63,6 +62,10 @@ class PostSchema(PostBase):
 
     parent_post: PostBase | None
 
+class RecentActivitySchema(BaseModel):
+    avatar_url: str
+    message: str
+    date: datetime
 
 # =====================
 

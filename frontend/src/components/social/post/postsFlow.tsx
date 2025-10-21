@@ -90,7 +90,7 @@ const PostsFlow = () => {
         estimateSize: (index) => {
             const post = posts[index];
             if(!post) return 200;
-            return post.picturesURLs.length > 0 ? 600 : 200
+            return (post.picturesURLs.length > 0 ? 600 : 200) + 32
         },
         getScrollElement: () => scrollRef.current
     });
@@ -119,15 +119,33 @@ const PostsFlow = () => {
     }
 
     return (
-        <div>
-            <div onClick={toggleFeed} className="text-center text-white">Toggle feed</div>
-            <div ref={scrollRef} className="h-[80vh] overflow-auto relative max-w-lg mx-auto border-gray-300 py-2   ">
+        <div className="m-16">
+            <div className="max-w-lg mx-auto">
+                <div className="flex justify-center gap-2 mb-4 text-white text-medium" onClick={toggleFeed}>
+                    <button
+                        className={`px-4 py-2 rounded-lg ${
+                            !feed ? "bg-white/30" : "bg-white/50"
+                        }`}
+                    >
+                        Feed
+                    </button>
+                    <button
+                        className={`px-4 py-2 rounded-lg ${
+                            feed ? "bg-white/30" : "bg-white/50"
+                        }`}
+                    >
+                        Followed
+                    </button>
+                </div>
+            </div>
+            
+            <div ref={scrollRef} className="h-[80vh] overflow-auto relative max-w-lg mx-auto border-gray-300">
                 <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
                     {
                         virtualItems.map((vItem) => {
                             const post = posts[vItem.index];
                             return (
-                                <div key={vItem.key} className="absolute top-0 left-0 w-full" data-index={vItem.index}
+                                <div key={vItem.key} className="absolute top left-0 w-full" data-index={vItem.index}
                                      style={
                                          {
                                              transform: `translateY(${vItem.start}px)`,
