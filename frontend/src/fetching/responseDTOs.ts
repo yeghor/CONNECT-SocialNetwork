@@ -92,12 +92,11 @@ interface FeedPostDTO extends ShortPostDTO{
     parent_post?: FeedPostDTO;
 }
 
-interface LoadPostResponseDTOInterface extends FeedPostDTO{
+interface LoadPostResponseDTO extends FeedPostDTO{
     text: string,
     last_updated: string
 }
 
-type LoadPostResponseDTO = LoadPostResponseDTOInterface[];
 type ShortPostsDTO = ShortPostDTO[];
 type FeedPostsResponseDTO = FeedPostDTO[];
 
@@ -122,13 +121,13 @@ export interface FeedPostResponse extends ShortPostResponse {
     parentPost?: ShortPostResponse
 }
 
-interface LoadPostResponseInterface extends FeedPostResponse {
+export interface LoadPostResponseInterface extends FeedPostResponse {
     text: string,
     lastUpdated: Date
 }
 
 export interface LoadPostResponse extends SuccessfulResponse {
-    data: LoadPostResponseInterface[]
+    data: LoadPostResponseInterface
 }
 export interface PostCommentsResponse extends SuccessfulResponse {
     data: ShortPostResponse[]
@@ -138,8 +137,8 @@ export interface FeedPostsResponse extends SuccessfulResponse {
 }
 
 // KISS THIS MOTHERFUCKER
-export const loadPostResponseMapper = (data: LoadPostResponseDTO): LoadPostResponse => {
-    const mapped = data.map(postDTO => (
+export const loadPostResponseMapper = (postDTO: LoadPostResponseDTO): LoadPostResponse => {
+    const mapped =
         {
             postId: postDTO.post_id,
             title: postDTO.title,
@@ -166,7 +165,6 @@ export const loadPostResponseMapper = (data: LoadPostResponseDTO): LoadPostRespo
                 }
                 : undefined,
         }
-    ));    
 
     return {
         data: mapped,

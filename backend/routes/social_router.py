@@ -1,7 +1,5 @@
 import re
 from fastapi import APIRouter, Depends, Body, Query, HTTPException
-from limits.util import Dependency
-from posthog import page
 from services.postgres_service.database_utils import *
 from services.postgres_service.models import User
 from services.core_services import MainServiceContextManager
@@ -18,7 +16,6 @@ from pydantic_schemas.pydantic_schemas_social import (
     RecentActivitySchema
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import inspect
 
 from typing import Annotated, List
 from dotenv import load_dotenv
@@ -27,8 +24,8 @@ from os import getenv
 from exceptions.exceptions_handler import endpoint_exception_handler
 
 from .query_utils import page_validator, query_prompt_required
-from ..authorization import authorize_request_depends
-from ..services.postgres_service import get_session_depends, merge_model
+from authorization import authorize_request_depends
+from services.postgres_service import get_session_depends, merge_model
 
 social = APIRouter()
 

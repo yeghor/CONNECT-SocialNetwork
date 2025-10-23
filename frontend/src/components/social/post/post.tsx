@@ -5,7 +5,7 @@ import {Link} from "react-router-dom";
 
 import { specificPostURI } from "../../../consts.ts";
 
-const PostComponent = (props: { postData: FeedPostResponse | undefined }) => {
+const ShortPostComponent = (props: { postData: FeedPostResponse }) => {
     const images = props.postData?.picturesURLs || [];
 
     return (
@@ -47,23 +47,25 @@ const PostComponent = (props: { postData: FeedPostResponse | undefined }) => {
             )}
 
             <div className="p-4 flex flex-col gap-2">
-                <h5 className="text-2xl font-bold text-white text-ce">{props.postData?.title}</h5>
+                <h5 className="text-2xl font-bold text-white text-ce">
+                    <Link to={`${specificPostURI(props.postData.postId)}`}>{props.postData.title}</Link>
+                </h5>
 
-                {props.postData?.owner && (
+                {props.postData.owner && (
                     <div className="text-gray-300">
                         <OwnerComponent ownerData={props.postData.owner} />
                     </div>
                 )}
 
                 <div className="flex items-center gap-4 text-sm text-gray-300 mt-2">
-                    <span>Likes: {props.postData?.likes || 0}</span>
-                    <span>Views: {props.postData?.views || 0}</span>
+                    <span>Likes: {props.postData.likes || 0}</span>
+                    <span>Views: {props.postData.views || 0}</span>
                 </div>
             </div>
         </div>
     );
 };
 
-export default PostComponent;
+export default ShortPostComponent;
 
 

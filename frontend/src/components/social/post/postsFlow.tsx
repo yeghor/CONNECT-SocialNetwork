@@ -4,7 +4,7 @@ import { queryClient } from "../../../index.tsx";
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import PostComponent from "./post.tsx";
+import ShortPostComponent from "./post.tsx";
 
 import { fetchFeedPosts, fetchFollowedPosts } from "../../../fetching/fetchSocial.ts";
 
@@ -152,7 +152,7 @@ const PostsFlow = () => {
                                              height: `${vItem.size}px`,
                                          }
                                      }>
-                                    <PostComponent postData={post}/>
+                                    <ShortPostComponent postData={post}/>
                                 </div>
                             )
                         })
