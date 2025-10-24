@@ -50,10 +50,10 @@ class PostBase(PostBaseShort):
     views: int = 0
     replies: int = 0
 
-    pictures_urls: List[str]
 
 class PostLiteSchema(PostBase):
     parent_post: PostBase | None
+    pictures_urls: List[str]
 
 class PostSchema(PostBase):
     text: str
@@ -61,6 +61,7 @@ class PostSchema(PostBase):
     last_updated: datetime
 
     parent_post: PostBase | None
+    pictures_urls: List[str]
 
 class RecentActivitySchema(BaseModel):
     avatar_url: str

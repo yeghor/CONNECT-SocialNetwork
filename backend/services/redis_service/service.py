@@ -82,6 +82,9 @@ class RedisService:
 
         self._viewed_post_prefix = "viewed-posts:"
 
+        self.__post_view_timeout_prefix_1 = "post-view-user-"
+        self.__post_view_timeout_prefix_2 = "post:"
+
 
         # Chat
         self.__chat_token_prefix = "chat-jwt-token:"

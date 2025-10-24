@@ -1,7 +1,5 @@
 import asyncio
 
-from pydantic.mypy import from_attributes_callback
-from pyexpat.errors import messages
 from services.core_services import MainServiceBase
 from services.postgres_service.models import *
 from post_popularity_rate_task.popularity_rate import POST_ACTIONS
@@ -26,10 +24,6 @@ from pydantic_schemas.pydantic_schemas_social import (
 from exceptions.exceptions_handler import web_exceptions_raiser
 from exceptions.custom_exceptions import *
 from watchfiles import awatch
-
-
-class NotImplementedError(Exception):
-    pass
 
 load_dotenv()
 
@@ -204,7 +198,7 @@ class MainServiceSocial(MainServiceBase):
                     published=post.parent_post.published,
                     is_reply=post.parent_post.is_reply ,
                     owner=UserShortSchema.model_validate(post.parent_post.owner, from_attributes=True),
-                    lieks=post.parent_post.likes_count,
+                    likes=post.parent_post.likes_count,
                     views=post.parent_post.views_count,
                     replies=post.parent_post.replies_count,
                     pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images])
@@ -415,16 +409,13 @@ class MainServiceSocial(MainServiceBase):
         if not post:
             raise ResourceNotFound(detail=f"SocialService: User: {user.user_id} tried to load post: {post_id} that does not exist.", client_safe_detail="This post does not exist.")
 
-        if post.parent_post: parent_post = PostBase.model_validate(post.parent_post, from_attributes=True)
-        else: parent_post = None
-
         await self._construct_and_flush_action(action_type=ActionType.view, post=post, user=user)
         post.views_count += 1
 
         await self._PostgresService.refresh_model(model_obj=post)
 
         filenames = [filename.image_name for filename in post.images]
-        images_temp_urls = await self._ImageStorage.get_post_image_urls(image_names=filenames)
+        images_temp_urls = await self._ImageStorage.get_post_image_urls(images_names=filenames)
 
         return PostSchema(
             post_id=post.post_id,
@@ -435,7 +426,16 @@ class MainServiceSocial(MainServiceBase):
             likes=post.likes_count,
             views=post.views_count,
             replies=post.replies_count,
-            parent_post=parent_post,
+            parent_post=PostBase(
+                post_id=post.parent_post.post_id,
+                title=post.parent_post.title,
+                published=post.parent_post.published,
+                is_reply=post.parent_post.is_reply,
+                owner=UserShortSchema.model_validate(post.parent_post.owner, from_attributes=True),
+                likes=post.parent_post.likes_count,
+                views=post.parent_post.views_count,
+                replies=post.parent_post.replies_count
+            ),
             last_updated=post.last_updated,
             pictures_urls=images_temp_urls,
             is_reply=post.is_reply
@@ -460,7 +460,7 @@ class MainServiceSocial(MainServiceBase):
             parent_post=PostBase.model_validate(post.parent_post, from_attributes=True) if post.parent_post else None
         ) for post in user_posts]
 
-    async def _get_recent_action_message(self, action: PostAction) -> Dict | None:
+    async def _get_recent_action_message(self, action: PostActions) -> Dict | None:
         """
         Returns dict that compatible to Pydantic **RecentActivitySchema** model
         """
