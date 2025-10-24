@@ -435,7 +435,7 @@ class MainServiceSocial(MainServiceBase):
                 likes=post.parent_post.likes_count,
                 views=post.parent_post.views_count,
                 replies=post.parent_post.replies_count
-            ),
+            ) if post.parent_post else None,
             last_updated=post.last_updated,
             pictures_urls=images_temp_urls,
             is_reply=post.is_reply
