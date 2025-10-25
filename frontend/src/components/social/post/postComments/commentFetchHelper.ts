@@ -9,7 +9,7 @@ import {
 } from "../../../../helpers/responseHandlers/getResponseHandlers.ts";
 import {internalServerErrorURI} from "../../../../consts.ts";
 
-const commentsFetched = async (tokens: CookieTokenObject, postId: string, page: number, navigate: NavigateFunction): PostCommentsResponse | undefined => {
+const commentsFetched = async (tokens: CookieTokenObject, postId: string, page: number, navigate: NavigateFunction) => {
     if(!(tokens.access && tokens.refresh && postId)) {  return; }
 
     try {

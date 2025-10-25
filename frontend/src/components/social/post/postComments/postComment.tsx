@@ -22,10 +22,13 @@ const PostComment = (props: CommentProps) => {
     const [ page, setPage ] = useState<number>(0);
 
     useEffect(() => {
-        const response = commentFetchHelper(tokens, props.originalCommentData.postId, page, navigate);
-        if(response) {
-            setPostComments(response)
+        const fetchWrapper = async () => {
+            const response = await commentFetchHelper(tokens, props.originalCommentData.postId, page, navigate);
+            if(response) {
+                setPostComments(response);
+            }
         }
+        fetchWrapper();
     }, [loadMoreTrigger, setLoadMoreTrigger, page, setPage]);
 
     const loadMoreClick = (): void => {
