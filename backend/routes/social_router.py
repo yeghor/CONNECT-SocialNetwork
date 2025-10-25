@@ -108,7 +108,7 @@ async def load_comments(
     page: int = Depends(page_validator),
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
-) -> List[PostBase]:
+) -> List[PostLiteSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
         return await social.load_replies(post_id=post_id, user_id=user.user_id, page=page)

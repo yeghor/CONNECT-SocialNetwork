@@ -105,7 +105,7 @@ export interface OwnerResponse {
     username: string
 }
 
-interface ShortPostResponse {
+export interface ShortPostInterface {
     postId: string;
     title: string;
     published: Date;
@@ -117,8 +117,8 @@ interface ShortPostResponse {
     picturesURLs: string[]
 }
 
-export interface FeedPostResponse extends ShortPostResponse {
-    parentPost?: ShortPostResponse
+export interface FeedPostResponse extends ShortPostInterface {
+    parentPost?: ShortPostInterface
 }
 
 export interface LoadPostResponseInterface extends FeedPostResponse {
@@ -130,7 +130,7 @@ export interface LoadPostResponse extends SuccessfulResponse {
     data: LoadPostResponseInterface
 }
 export interface PostCommentsResponse extends SuccessfulResponse {
-    data: ShortPostResponse[]
+    data: ShortPostInterface[]
 }
 export interface FeedPostsResponse extends SuccessfulResponse {
     data: FeedPostResponse[]

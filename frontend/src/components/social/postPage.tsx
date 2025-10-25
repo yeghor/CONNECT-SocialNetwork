@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
-import {LoadPostResponseInterface} from "../../fetching/responseDTOs.ts";
+import {LoadPostResponse, LoadPostResponseInterface} from "../../fetching/responseDTOs.ts";
 import {fetchLoadPost} from "../../fetching/fetchSocial.ts";
 import {
     checkUnauthorizedResponse,
@@ -10,6 +10,7 @@ import {
 } from "../../helpers/responseHandlers/getResponseHandlers.ts";
 import {internalServerErrorURI} from "../../consts.ts";
 
+import CommentsFlow from "./post/postComments/topCommentsFlow.tsx";
 
 const PostPage = () => {
     const navigate = useNavigate();
@@ -21,30 +22,32 @@ const PostPage = () => {
 
     const postFetcher = async (): Promise<void> => {
         // If statement to prevent TS errors. Cause if no tokens - getCookiesOrRedirect will redirect user to auth page
-        if(tokens.access && tokens.refresh && postId) {
-                try {
-                const response = await fetchLoadPost(tokens.access, postId);
+        if(!(tokens.access && tokens.refresh && postId)) { return; }
 
-                if(!validateResponse(response, undefined, navigate)) {
+        try {
+            let response = await fetchLoadPost(tokens.access, postId);
+
+            if (!validateResponse(response, undefined, navigate)) {
+                return;
+            }
+
+            if (checkUnauthorizedResponse(response)) {
+                const retried = await retryUnauthorizedResponse<LoadPostResponse>(fetchLoadPost, tokens.refresh, navigate, undefined, postId);
+                if (!retried) {
                     return;
                 }
-
-                if(checkUnauthorizedResponse(response)) {
-                    const retriedResponse = await retryUnauthorizedResponse(fetchLoadPost, tokens.refresh, navigate, undefined, postId);
-                    if(!retriedResponse) {
-                        return;
-                    }
-                }
-
-                if(response.success) {
-                    setPostData(response.data);
-                }
+                response = retried;
             }
-        catch (err) {
+
+            if (response.success) {
+                setPostData(response.data);
+            }
+
+        } catch (err) {
             console.error(err);
             navigate(internalServerErrorURI);
-        }}
-    }
+        }
+    };
 
     useEffect(() => {
         postFetcher();
@@ -68,12 +71,15 @@ const PostPage = () => {
                                 <li>
                                     <img src={imageURL} alt="Post picture"></img>
                                 </li>
-
                             )
                         ))}
                     </ul>
                 </div>
             </div>
+            <div className="flex items-center justify-start px-72 py-8 mb-6">
+                <CommentsFlow originalPostId={postData?.postId}/>
+            </div>
+
         </div>
     );
 }

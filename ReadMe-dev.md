@@ -27,8 +27,7 @@ If this error: The AWS Access Key Id you provided does not exist in our records.
 Update your AWS CLI
 
 ## Tests
-Tests can be only in `backend` directory, due to import issues. 
-Sonn will be fixed
+Coming soon
 
 ## Debug mode
 
@@ -42,6 +41,7 @@ The `DEBUG` variable in the `.env` file controls how the application handles exc
 Exception handlers decorators rules:
 1. Use exception handler decorators only in functions that don't raise any exceptions that the decorator not handling. 
 2. Use exception handler decorators only if functions that being called outside the class. (It handles, but follow thi rule)
+3. Make sure that exceptions decorator supports async functions! 
 
 Caution! The Pydantic **ValidationError** can be occured in two cases:
 - ISE, code 500. When code interactions with pydantic schema is invalid
@@ -69,3 +69,9 @@ Add note about pagination normalization...
 ## Frontend-Backend 
 
 Backend must **never** provide successful response with `detail` field. It will break frontend DTO!
+
+# Issues 
+
+Pydantic schemas designed poorly. The application often returns unused or extra data. Which is not critical, but influences project support.
+
+This is the most problematic part of the application.
