@@ -1,6 +1,6 @@
 import { CookieTokenObject } from "../../../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
-import { PostCommentsResponse } from "../../../../fetching/responseDTOs.ts";
+import {PostCommentsResponse, ShortPostInterface} from "../../../../fetching/responseDTOs.ts";
 import { fetchLoadPost, fetchPostComments } from "../../../../fetching/fetchSocial.ts";
 import {
     checkUnauthorizedResponse,
@@ -8,6 +8,10 @@ import {
     validateResponse
 } from "../../../../helpers/responseHandlers/getResponseHandlers.ts";
 import {internalServerErrorURI} from "../../../../consts.ts";
+
+export interface CommentProps {
+    originalPostData: ShortPostInterface
+}
 
 const commentsFetched = async (tokens: CookieTokenObject, postId: string, page: number, navigate: NavigateFunction) => {
     if(!(tokens.access && tokens.refresh && postId)) {  return; }

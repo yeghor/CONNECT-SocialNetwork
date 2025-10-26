@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 
-import commentFetchHelper from "./commentFetchHelper.ts";
+import commentFetchHelper, { CommentProps } from "./commentFetchHelper.ts";
 import { PostCommentsResponse, ShortPostInterface } from "../../../../fetching/responseDTOs.ts";
 import {useNavigate} from "react-router";
 import {getCookiesOrRedirect} from "../../../../helpers/cookies/cookiesHandler.ts";
 
-interface CommentProps {
-    originalCommentData: ShortPostInterface
-}
+const PostComments = (props: CommentProps) => {
+    if(!props.originalPostData) {
+        return null;
+    }
 
-const PostComment = (props: CommentProps) => {
     const navigate = useNavigate();
 
     const tokens = getCookiesOrRedirect(navigate);
@@ -23,7 +23,7 @@ const PostComment = (props: CommentProps) => {
 
     useEffect(() => {
         const fetchWrapper = async () => {
-            const response = await commentFetchHelper(tokens, props.originalCommentData.postId, page, navigate);
+            const response = await commentFetchHelper(tokens, props.originalPostData.postId, page, navigate);
             if(response) {
                 setPostComments(response);
             }
@@ -41,4 +41,4 @@ const PostComment = (props: CommentProps) => {
     );
 };
 
-export default PostComment;
+export default PostComments;
