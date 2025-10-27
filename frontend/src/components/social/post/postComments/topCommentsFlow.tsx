@@ -1,12 +1,12 @@
 import React, {useState, useEffect, useRef} from "react";
 
-import PostComment from "./onePostComment.tsx";
+import PostComments from "./postComments.tsx";
 
-import {LoadPostResponse, PostCommentsResponse, ShortPostInterface} from "../../../../fetching/responseDTOs.ts";
+import { PostCommentsResponse } from "../../../../fetching/responseDTOs.ts";
 import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler.ts"
 import commentFetchHelper, { CommentProps } from "./commentFetchHelper.ts";
-import {useNavigate} from "react-router";
-import {useVirtualizer} from "@tanstack/react-virtual";
+import { useNavigate } from "react-router";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 
 const CommentsFlow = (props: CommentProps) => {
@@ -26,7 +26,9 @@ const CommentsFlow = (props: CommentProps) => {
     const virtualizer = useVirtualizer({
         count:  postComments?.data?.length ?? 0,
         estimateSize: () => 200,
-        getScrollElement: () => scrollRef.current
+        getScrollElement: () => scrollRef.current,
+        // Should re calculate virtual scroll elements positions when changing element
+        measureElement: (element) => element.getBoundingClientRect().height
     });
 
     useEffect(() => {
@@ -56,12 +58,12 @@ const CommentsFlow = (props: CommentProps) => {
                             <div
                                 key={vItem.key}
                                 style={{
-                                        transform: `translateY${vItem.start}px`,
+                                        transform: `translateY(${vItem.start}px)`,
                                         height: `${vItem.size}px`
                                     }}
                                 className="absolute top-0 left-0 w-full"
                             >
-                                <PostComment commentData={commentData} />
+                                <PostComments originalPostData={commentData} />
                             </div>
                         )
                     })

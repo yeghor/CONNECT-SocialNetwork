@@ -1,11 +1,25 @@
 import React, { useState } from "react";
+import {ShortPostInterface} from "../../../../fetching/responseDTOs.ts";
 
-const PostComment = () => {
+interface PostCommentProps {
+    commentData: ShortPostInterface
+}
+
+const PostComment = (props: PostCommentProps) => {
+    if(!props.commentData) { return null; }
+
     return(
-        <div>
-
+        <div className="bg-white/30 rounded-lg w-full h-full">
+            <div className="py-4 px-2">
+                <p className="text-black text-bold">{props.commentData.title}</p>
+                <div>
+                    <span>{props.commentData.owner.username}:</span>
+                    <span>{props.commentData.published.toISOString().split("T")[0]}</span>
+                    <span className="mx-2">{`${props.commentData.published.getHours()}:${props.commentData.published.getMinutes()}`}</span>
+                </div>
+            </div>
         </div>
-    )
+    );
 };
 
 export default PostComment;
