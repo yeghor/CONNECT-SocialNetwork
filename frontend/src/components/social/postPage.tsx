@@ -90,7 +90,7 @@ const PostPage = () => {
                 }
             </div>
             <div className="flex items-center justify-start px-72 py-8 mb-6">
-                <CommentsFlow originalPostId={postData?.postId}/>
+                <CommentsFlow originalPostData={postData}/>
             </div>
 
         </div>
