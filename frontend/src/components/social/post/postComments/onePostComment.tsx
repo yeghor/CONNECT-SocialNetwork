@@ -9,7 +9,7 @@ const PostComment = (props: PostCommentProps) => {
     if(!props.commentData) { return null; }
 
     return(
-        <div className="bg-white/30 rounded-lg w-full h-full">
+        <div className="bg-white/30 rounded-lg w-full h-full" key={props.commentData.postId}>
             <div className="py-4 px-2">
                 <p className="text-black text-bold">{props.commentData.title}</p>
                 <div>

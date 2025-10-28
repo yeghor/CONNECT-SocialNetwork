@@ -33,12 +33,7 @@ const PostComments = (props: CommentProps) => {
             }
             const response = await commentFetchHelper(tokens, props.originalPostData.postId, page, navigate);
             if(response) {
-                if(postComments.length === 0) {
-                    setPostComments((prevState) => [...prevState, ...response.data]);
-                } else {
-                    setPostComments(response.data);
-                }
-
+                setPostComments((prevState) => [...prevState, ...response.data]);
                 setLastResponseLen(response.data.length);
             }
         }
