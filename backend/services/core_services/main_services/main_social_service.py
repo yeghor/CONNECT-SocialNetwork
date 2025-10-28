@@ -441,23 +441,22 @@ class MainServiceSocial(MainServiceBase):
             is_reply=post.is_reply
         )
 
-    async def _create_post_lite_schema_via_gather(self, post: Post) -> PostLiteSchema:
+    async def _create_post_lite_schema_via_gather(self, post: Post) -> PostBase:
         images_coroutines = [self._ImageStorage.get_post_image_urls(images_names=image.image_name) for image in post.images]
 
-        images_urls = await  asyncio.gather(*images_coroutines)
+        images_urls = (await asyncio.gather(*images_coroutines))[0]
 
-        return PostLiteSchema(
+        return PostBase(
             post_id=post.post_id,
             title=post.title,
             published=post.published,
             is_reply=post.is_reply,
             pictures_urls=images_urls,
             owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
-            parent_post=PostBase.model_validate(post.parent_post, from_attributes=True) if post.parent_post else None
         )
 
     @web_exceptions_raiser
-    async def load_replies(self, post_id: str, page: int) -> List[PostLiteSchema]:
+    async def load_replies(self, post_id: str, page: int) -> List[PostBase]:
         replies = await self._PostgresService.get_post_replies(post_id=post_id, page=page, n=SMALL_PAGINATION)
 
         replies_coroutines = [self._create_post_lite_schema_via_gather(reply) for reply in replies]

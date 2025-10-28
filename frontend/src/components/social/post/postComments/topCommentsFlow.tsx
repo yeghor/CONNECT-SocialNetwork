@@ -1,21 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 import PostComments from "./postComments.tsx";
 
-import { FeedPostResponse, PostCommentsResponse, ShortPostInterface } from "../../../../fetching/responseDTOs.ts";
+import { ShortPostInterface } from "../../../../fetching/responseDTOs.ts";
 import { CookieTokenObject, getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler.ts"
 import commentFetchHelper, { CommentProps } from "./commentFetchHelper.ts";
 import { useNavigate } from "react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
 import { NavigateFunction } from "react-router-dom";
-
-const fetchWrapper = async (tokens: CookieTokenObject, postId: string, page: number, navigate: NavigateFunction): Promise<ShortPostInterface[] | undefined> => {
-    const response = await commentFetchHelper(tokens, postId, page, navigate);
-    if(response?.success) {
-        return response.data;
-    }
-}
 
 const createCommentsInfiniteQueryOptions = (tokens: CookieTokenObject, postId: string, navigate: NavigateFunction) => {
     return infiniteQueryOptions({
@@ -34,10 +27,6 @@ const createCommentsInfiniteQueryOptions = (tokens: CookieTokenObject, postId: s
 
 
 const CommentsFlow = (props: CommentProps) => {
-    if(!props.originalPostData) {
-        return null;
-    }
-
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
@@ -63,6 +52,8 @@ const CommentsFlow = (props: CommentProps) => {
             fetchNextPage();
         }
     }, [virtualItems, hasNextPage, isFetchingNextPage]);
+
+    console.log(postComments);
 
     return (
         <div ref={scrollRef} className="h-screen overflow-y-auto flex flex-col gap-4">

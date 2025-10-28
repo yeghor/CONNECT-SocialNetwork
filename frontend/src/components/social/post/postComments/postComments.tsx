@@ -8,10 +8,6 @@ import {useNavigate} from "react-router";
 import {getCookiesOrRedirect} from "../../../../helpers/cookies/cookiesHandler.ts";
 
 const PostComments = (props: CommentProps) => {
-    if(!props.originalPostData) {
-        return null;
-    }
-
     const pageRendered = useRef(false);
 
     const navigate = useNavigate();

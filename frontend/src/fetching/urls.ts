@@ -58,7 +58,7 @@ export const searchUsersURL = (prompt: string, page: number | string) => {
 }
 
 export const postCommentsURL = (postId: string, page: number | string) => {
-    return `${BASEURL}${postsConstructor}/${postId}/${commentsConstructor}/${page}`;
+    return `${BASEURL}${postsConstructor}/${postId}${commentsConstructor}/${page}`;
 }
 
 export const UserPostsURL = (userId: string, page: number | string) => {

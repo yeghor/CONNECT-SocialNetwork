@@ -245,6 +245,7 @@ class PostgresService:
             select(Post, likes_subq)
             .where(Post.parent_post_id == post_id)
             .order_by(Post.published.desc(), Post.popularity_rate.desc(), likes_subq.desc())
+            .options(selectinload(Post.parent_post))
             .offset(page*n)
             .limit(n)
         )

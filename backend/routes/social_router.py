@@ -101,17 +101,16 @@ async def load_post(
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
         return await social.load_post(user=user, post_id=post_id)
 
-@social.get("/posts/{post_id}/comments")
+@social.get("/posts/{post_id}/comments/{page}")
 @endpoint_exception_handler
 async def load_comments(
     post_id: str,
     page: int = Depends(page_validator),
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
-) -> List[PostLiteSchema]:
-    user = await merge_model(postgres_session=session, model_obj=user_)
+    ) -> List[PostBase]:
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
-        return await social.load_replies(post_id=post_id, user_id=user.user_id, page=page)
+        return await social.load_replies(post_id=post_id, page=page)
 
 @social.patch("/posts/{post_id}")
 @endpoint_exception_handler
