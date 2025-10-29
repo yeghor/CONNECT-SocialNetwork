@@ -119,7 +119,7 @@ const PostsFlow = () => {
     }
 
     return (
-        <div className="m-16">
+        <div className="">
             <div className="max-w-lg mx-auto">
                 <div className="flex justify-center gap-2 mb-4 text-white text-medium" onClick={toggleFeed}>
                     <button
@@ -139,7 +139,7 @@ const PostsFlow = () => {
                 </div>
             </div>
             
-            <div ref={scrollRef} className="h-[80vh] overflow-auto relative max-w-lg mx-auto border-gray-300">
+            <div ref={scrollRef} className="h-[80vh] overflow-auto relative w-full mx-auto border-gray-300">
                 <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
                     {
                         virtualItems.map((vItem) => {
