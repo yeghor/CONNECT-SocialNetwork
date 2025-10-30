@@ -5,7 +5,7 @@ from services.postgres_service.models import ActionType
 from pydantic import BaseModel, field_validator, Field, ValidationInfo, model_validator
 from uuid import UUID
 from datetime import datetime
-from typing import List, Any, Annotated
+from typing import List, Any, Annotated, Literal
 from dotenv import load_dotenv
 from os import getenv
 
@@ -65,6 +65,7 @@ class PostSchema(PostBase):
 
 class RecentActivitySchema(BaseModel):
     avatar_url: str
+    type: Literal["post", "like", "reply"]
     message: str
     date: datetime
 

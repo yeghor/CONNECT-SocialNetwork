@@ -18,6 +18,7 @@ import {
     followURL,
     specificUserURL,
     UserPostsURL,
+    recentActivityURL
 } from "./urls.ts";
 
 import {
@@ -38,6 +39,7 @@ import {
     postCommentsResponseMapper,
     FeedPostsResponse as PostsResponse,
     feedPostResponseMapper as postsResponseMapper,
+    RecentActivityResponse, recentActivityMapper,
  
     // Users
     ShortUserProfilesResponse,
@@ -197,4 +199,13 @@ export const fetchUnfollow = async (accessJWT: string, userId: string): APIRespo
     };
 
     return await fetchHelper<SuccessfulResponse>(followURL(userId), requestInit, userProfileResponseMapper);
+}
+
+export const fetchRecentActivity = async (accessJWT: string): APIResponse<RecentActivityResponse> => {
+    const requestInit: RequestInit = {
+        method: "GET",
+        headers: requestTokenHeaders(accessJWT)
+    }
+
+    return await fetchHelper<RecentActivityResponse>(recentActivityURL, requestInit, recentActivityMapper);
 }

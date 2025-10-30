@@ -24,7 +24,7 @@ class ActionIncluded(BaseModel):
     action: Literal["send", "change", "delete"] = "send"
 
 class MessageSchemaShort(BaseModel):
-    # Default value "send" for enabling model_validate with Message Postgre model
+    # Default value "send" for enabling model_validate with Message Postgres model
     
     message_id: str
     text: str | None = Field(default=None)

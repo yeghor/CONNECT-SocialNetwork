@@ -28,6 +28,8 @@ export const changePasswordURL = `${BASEURL}${usersConstructor}${myProfileConstr
 
 export const myProfileURL = `${BASEURL}${usersConstructor}${myProfileConstructor}`;
 
+export const recentActivityURL = `${BASEURL}/recent-activity`;
+
 //Social
 
 export const basePostURL = `${BASEURL}${postsConstructor}`;

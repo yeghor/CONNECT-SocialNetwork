@@ -1,3 +1,6 @@
+import RecentActivity from "../components/social/post/recentActivity.tsx";
+import {data} from "react-router";
+
 export interface SuccessfulResponse {
     success: true
 }
@@ -279,6 +282,48 @@ export const userProfileMapper = (data: UserProfileDTO): UserProfileResponse => 
         avatarURL: data.avatar_url,
         success: true
     };
+}
+
+export type RecentActivityType = "post" | "like" | "reply"
+
+interface RecentActivityBase {
+    type: RecentActivityType,
+    message: string,
+    postId: string
+    date: Date
+}
+
+interface RecentActivityBaseDTO extends RecentActivityBase {
+    avatar_url: string | undefined
+}
+
+type RecentActivityDTO = RecentActivityBaseDTO[];
+
+export interface RecentActivity extends RecentActivityBase {
+    avatarURL: string
+}
+
+export type RecentActivityArray = RecentActivity[];
+
+export interface RecentActivityResponse extends SuccessfulResponse {
+    data: RecentActivity[];
+}
+
+export const recentActivityMapper = (data: RecentActivityDTO): RecentActivityResponse => {
+    const mapped = data.map((DTO) => {
+        return {
+            type: DTO.type,
+            message: DTO.message,
+            date: new Date(DTO.date),
+            postId: DTO.postId,
+            avatarURL: DTO.avatar_url
+        };
+    })
+
+    return {
+        data: mapped,
+        success: true
+    }
 }
 
 // Chat

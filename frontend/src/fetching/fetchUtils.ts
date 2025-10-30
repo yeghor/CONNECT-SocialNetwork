@@ -1,7 +1,7 @@
 import {
     BadResponse,
     isBadResponse,
-    badResponseMapper
+    badResponseMapper, UserProfileResponse
 } from "./responseDTOs.ts"
 
 // & Types Intersection
@@ -19,3 +19,7 @@ export const fetchHelper = async <ResponseType>(requestURL: string, requestInit:
         return DTOMapper(responseDTO);
     }
 }
+
+export const safeAPICall = async () => {
+
+};
