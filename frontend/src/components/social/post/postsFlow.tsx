@@ -87,12 +87,10 @@ const PostsFlow = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const virtualizer = useVirtualizer({
         count: posts?.length ?? 0,
-        estimateSize: (index) => {
-            const post = posts[index];
-            if(!post) return 200;
-            return (post.picturesURLs.length > 0 ? 600 : 200) + 32
-        },
-        getScrollElement: () => scrollRef.current
+        estimateSize: (index) => 300,
+        getScrollElement: () => scrollRef.current,
+        measureElement: (el) => el?.getBoundingClientRect().height,
+        overscan: 5
     });
     const virtualItems = virtualizer.getVirtualItems();
 
@@ -119,7 +117,7 @@ const PostsFlow = () => {
     }
 
     return (
-        <div className="m-16">
+        <div>
             <div className="max-w-lg mx-auto">
                 <div className="flex justify-center gap-2 mb-4 text-white text-medium" onClick={toggleFeed}>
                     <button
@@ -139,7 +137,7 @@ const PostsFlow = () => {
                 </div>
             </div>
             
-            <div ref={scrollRef} className="h-[80vh] overflow-auto relative max-w-lg mx-auto border-gray-300">
+            <div ref={scrollRef} className="h-[80vh] overflow-auto relative w-full mx-auto border-gray-300">
                 <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
                     {
                         virtualItems.map((vItem) => {
