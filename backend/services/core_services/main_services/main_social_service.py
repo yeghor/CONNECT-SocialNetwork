@@ -444,7 +444,12 @@ class MainServiceSocial(MainServiceBase):
     async def _create_post_lite_schema_via_gather(self, post: Post) -> PostBase:
         images_coroutines = [self._ImageStorage.get_post_image_urls(images_names=image.image_name) for image in post.images]
 
-        images_urls = (await asyncio.gather(*images_coroutines))[0]
+        images_urls = (await asyncio.gather(*images_coroutines))
+
+        if not images_urls:
+            images_urls = []
+        else:
+            images_urls = images_urls[0]
 
         return PostBase(
             post_id=post.post_id,

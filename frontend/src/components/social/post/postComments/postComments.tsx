@@ -23,7 +23,9 @@ const PostComments = (props: CommentProps) => {
 
     useEffect(() => {
         const fetchWrapper = async () => {
+            console.log("Fetching post comments");
             if(!pageRendered.current) {
+                console.log("Guarded");
                 pageRendered.current = true;
                 return;
             }

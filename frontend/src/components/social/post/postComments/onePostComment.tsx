@@ -6,12 +6,11 @@ interface PostCommentProps {
 }
 
 const PostComment = (props: PostCommentProps) => {
-    if(!props.commentData) { return null; }
-
+    console.log("Rendering PostComment");
     return(
-        <div className="bg-white/30 rounded-lg w-full h-full" key={props.commentData.postId}>
-            <div className="py-4 px-2">
-                <p className="text-black text-bold">{props.commentData.title}</p>
+        <div className="rounded-lg w-full h-full bg-white/30" key={props.commentData.postId}>
+            <div className="py-4 px-2 text-white">
+                <p className="text-bold">{props.commentData.title}</p>
                 <div>
                     <span>{props.commentData.owner.username}:</span>
                     <span>{props.commentData.published.toISOString().split("T")[0]}</span>

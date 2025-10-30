@@ -60,7 +60,7 @@ const PostPage = () => {
     }
 
     return (
-        <div className="w-full sm:w-[900px] mx-auto p-6 bg-white/30 backdrop-blur rounded-2xl shadow-sm m-12">
+        <div className="w-full sm:w-[900px] mx-auto p-6 bg-white/10  backdrop-blur rounded-2xl shadow-sm m-12">
         <div className="flex items-center gap-3 mb-4">
                 <div
                     className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-sm font-medium text-gray-700">Author

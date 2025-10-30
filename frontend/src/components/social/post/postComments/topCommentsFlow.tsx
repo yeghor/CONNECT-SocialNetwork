@@ -40,7 +40,13 @@ const CommentsFlow = (props: CommentProps) => {
         estimateSize: () => 200,
         getScrollElement: () => scrollRef.current,
         // Should re calculate virtual scroll elements positions when changing element
-        measureElement: (element) => element.getBoundingClientRect().height
+        measureElement: (element) => {
+            const estimateSize = element.getBoundingClientRect().height
+            if(estimateSize === 0) {
+                return 200
+            }
+            return estimateSize;
+        }
     });
 
     const virtualItems = virtualizer.getVirtualItems();
@@ -56,7 +62,7 @@ const CommentsFlow = (props: CommentProps) => {
     console.log(postComments);
 
     return (
-        <div ref={scrollRef} className="h-screen overflow-y-auto flex flex-col gap-4">
+        <div ref={scrollRef} className="h-screen overflow-y-auto">
             <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
                 {
                     virtualItems.map((vItem) => {
@@ -68,7 +74,7 @@ const CommentsFlow = (props: CommentProps) => {
                                 key={vItem.key}
                                 style={{
                                         transform: `translateY(${vItem.start}px)`,
-                                        height: `${vItem.size}px`
+                                        height: `${vItem.size}px`,
                                     }}
                                 className="absolute top-0 left-0 w-full"
                             >
