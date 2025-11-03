@@ -45,8 +45,7 @@ const PostComments = (props: CommentProps) => {
 
     return(
         <div>
-            <PostComment commentData={props.originalPostData} />
-            <div>
+            <div className="pl-2">
                 {
                     postComments && postComments.map((commentData) => {
                         return (
@@ -54,7 +53,7 @@ const PostComments = (props: CommentProps) => {
                         );
                     })
                 }
-                { lastResponseLen !== 0 &&  <button onClick={() => loadMoreClick()} className="text-blue-700 hover:underline">Load More</button>}
+                { lastResponseLen !== 0 &&  <button onClick={() => loadMoreClick()} className="text-blue-500 hover:underline">Load More</button>}
             </div>
         </div>
     );

@@ -1,15 +1,18 @@
-import React from "react";
+import React, {useRef, useEffect} from "react";
+
 import { FeedPostResponse } from "../../../fetching/responseDTOs.ts";
 import OwnerComponent from "./owner.tsx";
 import {Link} from "react-router-dom";
 
 import { specificPostURI } from "../../../consts.ts";
 
-const ShortPostComponent = (props: { postData: FeedPostResponse }) => {
+const ShortPostComponent = (props: { postData: FeedPostResponse}) => {
+    const ref = useRef(null);
     const images = props.postData?.picturesURLs || [];
 
+
     return (
-        <div className="bg-white/10 border border-white/30 rounded-lg shadow-sm overflow-hidden flex flex-col m-8">
+        <div ref={ref} className="bg-white/10 border border-white/30 rounded-lg shadow-sm overflow-hidden flex flex-col m-8">
             {props.postData?.isReply && props.postData?.parentPost && (
                 <Link to={specificPostURI(props.postData.parentPost.postId)}>
                     <div className="bg-white/10 text-white text-sm p-2 rounded m-2">
@@ -18,33 +21,37 @@ const ShortPostComponent = (props: { postData: FeedPostResponse }) => {
                 </Link>
             )}
 
-            {images.length > 0 && (
-                <div className="grid gap-1 p-2">
-                    <img
-                        src={images[0]}
-                        alt=""
-                        className="w-full h-48 object-cover rounded"
-                    />
-                    {images.length > 1 && (
-                        <div className="grid grid-cols-2 gap-1 mt-1">
-                            {images[1] && (
-                                <img
-                                    src={images[1]}
-                                    alt=""
-                                    className="w-full h-24 object-cover rounded"
-                                />
-                            )}
-                            {images[2] && (
-                                <img
-                                    src={images[2]}
-                                    alt=""
-                                    className="w-full h-24 object-cover rounded"
-                                />
-                            )}
-                        </div>
-                    )}
-                </div>
-            )}
+            {
+                images.length > 0 ? (
+                    <div className="grid gap-1 p-2">
+                        <img
+                            src={images[0]}
+                            alt=""
+                            className="w-full h-48 object-cover rounded"
+                        />
+                        {images.length > 1 && (
+                            <div className="grid grid-cols-2 gap-1 mt-1">
+                                {images[1] && (
+                                    <img
+                                        src={images[1]}
+                                        alt=""
+                                        className="w-full h-24 object-cover rounded"
+                                    />
+                                )}
+                                {images[2] && (
+                                    <img
+                                        src={images[2]}
+                                        alt=""
+                                        className="w-full h-24 object-cover rounded"
+                                    />
+                                )}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="h-72"></div>
+                )
+            }
 
             <div className="p-4 flex flex-col gap-2">
                 <h5 className="text-2xl font-bold text-white text-ce">

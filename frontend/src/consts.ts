@@ -2,6 +2,7 @@ export const TokenCookieExpiryHours: number = 2;
 export const AccessTokenCookieKey = "access-token";
 export const RefreshTokenCookieKey = "refresh-token";
 
+export const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export const UsernameMinLength = 3;
 export const UsernameMaxLength = 32;

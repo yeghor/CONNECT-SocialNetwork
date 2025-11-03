@@ -1,6 +1,3 @@
-import RecentActivity from "../components/social/post/recentActivity.tsx";
-import {data} from "react-router";
-
 export interface SuccessfulResponse {
     success: true
 }
@@ -300,13 +297,13 @@ interface RecentActivityBaseDTO extends RecentActivityBase {
 type RecentActivityDTO = RecentActivityBaseDTO[];
 
 export interface RecentActivity extends RecentActivityBase {
-    avatarURL: string
+    avatarURL: string | undefined
 }
 
 export type RecentActivityArray = RecentActivity[];
 
 export interface RecentActivityResponse extends SuccessfulResponse {
-    data: RecentActivity[];
+    data: RecentActivityArray;
 }
 
 export const recentActivityMapper = (data: RecentActivityDTO): RecentActivityResponse => {

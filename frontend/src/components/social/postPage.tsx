@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
+import PostComments from "./post/postComments/postComments.tsx"
+
 import { getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
 import { LoadPostResponseInterface, LoadPostResponse } from "../../fetching/responseDTOs.ts";
 import { fetchLoadPost } from "../../fetching/fetchSocial.ts";
@@ -129,6 +132,7 @@ const PostPage = () => {
             </div>
             <div className="w-full sm:w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
                 <div className="font-bold text-2xl text-white">Comments:</div>
+                <PostComments originalPostData={postData} />
             </div>
         </div>
     );

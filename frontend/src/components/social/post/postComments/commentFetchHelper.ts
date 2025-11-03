@@ -13,7 +13,7 @@ export interface CommentProps {
     originalPostData: ShortPostInterface
 }
 
-const commentsFetched = async (tokens: CookieTokenObject, postId: string, page: number, navigate: NavigateFunction) => {
+const commentsFetcher = async (tokens: CookieTokenObject, postId: string, page: number, navigate: NavigateFunction) => {
     if(!(tokens.access && tokens.refresh && postId)) {  return; }
 
     try {
@@ -41,4 +41,4 @@ const commentsFetched = async (tokens: CookieTokenObject, postId: string, page: 
     }
 };
 
-export default commentsFetched;
+export default commentsFetcher;

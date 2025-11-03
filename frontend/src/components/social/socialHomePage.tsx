@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import RecentActivity from "./post/recentActivity.tsx";
+import RecentActivityComponent from "./post/recentActivityComponent.tsx";
 import PostsFlow from "./post/postsFlow.tsx";
 
 
@@ -48,7 +48,7 @@ const SocialHomePage = () => {
                 <PostsFlow />
             </div>
             <div>
-                <RecentActivity />
+                <RecentActivityComponent />
             </div>
 
         </div>

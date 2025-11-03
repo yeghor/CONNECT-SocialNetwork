@@ -16,6 +16,19 @@ const PostComment = (props: PostCommentProps) => {
                     <span>{props.commentData.published.toISOString().split("T")[0]}</span>
                     <span className="mx-2">{`${props.commentData.published.getHours()}:${props.commentData.published.getMinutes()}`}</span>
                 </div>
+                <div>
+                    <ul>
+                        {
+                            props.commentData.picturesURLs?.map((url: string, index: number) => {
+                                return (
+                                    <li key={index}>
+                                        <img src={url} alt="Comment Image" className="h-30 w-30 rounded-lg" />
+                                    </li>
+                                );
+                            })
+                        }
+                    </ul>
+                </div>
             </div>
         </div>
     );

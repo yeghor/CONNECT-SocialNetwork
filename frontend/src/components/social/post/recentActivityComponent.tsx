@@ -16,7 +16,7 @@ import {internalServerErrorURI, specificPostURI} from "../../../consts.ts";
 import {getCookiesOrRedirect} from "../../../helpers/cookies/cookiesHandler.ts";
 import {useNavigate} from "react-router";
 
-const RecentActivity = () => {
+const RecentActivityComponent = () => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
@@ -78,4 +78,4 @@ const RecentActivity = () => {
     );
 };
 
-export default RecentActivity;
+export default RecentActivityComponent;

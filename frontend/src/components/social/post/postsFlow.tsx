@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {ReactElement, ReactNode, useEffect, useRef, useState} from "react";
 import { queryClient } from "../../../index.tsx";
 
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
@@ -87,17 +87,15 @@ const PostsFlow = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const virtualizer = useVirtualizer({
         count: posts?.length ?? 0,
-        estimateSize: (index) => 300,
+        estimateSize: (index) => 550,
         getScrollElement: () => scrollRef.current,
-        measureElement: (el) => el?.getBoundingClientRect().height,
-        overscan: 5
     });
     const virtualItems = virtualizer.getVirtualItems();
 
 
     const infiniteQuerying = async () => {
         const flatMapPosts = data?.pages.flatMap((page) => {if(page && page.success) { return page.data; }}).filter((post) => post !== undefined) ?? []
-        setPosts(flatMapPosts);
+        setPosts(flatMapPosts)
 
         const lastItem = virtualItems[virtualItems.length - 1];
         if (!hasNextPage || isFetchingNextPage || !lastItem) return;
@@ -136,21 +134,21 @@ const PostsFlow = () => {
                     </button>
                 </div>
             </div>
-            
+
             <div ref={scrollRef} className="h-[80vh] overflow-auto relative w-full mx-auto border-gray-300">
                 <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
                     {
                         virtualItems.map((vItem) => {
-                            const post = posts[vItem.index];
+                            const postData = posts[vItem.index];
                             return (
-                                <div key={vItem.key} className="absolute top left-0 w-full" data-index={vItem.index}
+                                <div key={vItem.key} className="absolute top-0 left-0 w-full" data-index={vItem.index}
                                      style={
                                          {
                                              transform: `translateY(${vItem.start}px)`,
                                              height: `${vItem.size}px`,
                                          }
                                      }>
-                                    <ShortPostComponent postData={post}/>
+                                    <ShortPostComponent postData={postData}/>
                                 </div>
                             )
                         })
