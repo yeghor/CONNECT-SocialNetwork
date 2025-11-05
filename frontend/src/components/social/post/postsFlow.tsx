@@ -1,4 +1,4 @@
-import React, {ReactElement, ReactNode, useEffect, useRef, useState} from "react";
+import React, {FunctionComponent, ReactElement, ReactNode, useEffect, useRef, useState} from "react";
 import { queryClient } from "../../../index.tsx";
 
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
@@ -25,10 +25,44 @@ import {
 import {NavigateFunction} from "react-router-dom";
 import {internalServerErrorURI, unauthorizedRedirectURI} from "../../../consts.ts";
 import {APIResponseResolved} from "../../../fetching/fetchUtils.ts";
+import Post from "./post.tsx";
 
-const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolean, navigate: NavigateFunction) => {
+interface PostsFlowFetcherInterface {
+    component: React.JSX.Element;
+    // Depends on image existence
+    estimatedSize: number;
+}
+
+type PostsFlowComponents = PostsFlowFetcherInterface[];
+
+const createPostFlowResponse = (data: FeedPostResponse[]): PostsFlowComponents => {
+    return data.map((post) => {
+        let componentSize: number = 200;
+
+        switch (true) {
+            case (post.picturesURLs.length <= 0):
+                componentSize = 200;
+                break;
+            case (post.picturesURLs.length === 1):
+                componentSize = 350;
+                break;
+            case (post.picturesURLs.length >= 2):
+                componentSize = 450;
+        }
+
+        const component = (
+            <Post postData={post} />
+        );
+
+        return {
+            component: component,
+            estimatedSize: componentSize,
+        };
+    })
+}
+
+const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolean, navigate: NavigateFunction): Promise<PostsFlowComponents | undefined> => {
     if(tokens.access) {
-        console.log("Fetching post...");
         console.log(tokens.access);
 
         let fetchedPosts: APIResponseResolved<FeedPostsResponse>;
@@ -41,15 +75,21 @@ const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolea
 
         if(!validateResponse(fetchedPosts)) {
             navigate(internalServerErrorURI);
-            return fetchedPosts;
+            return undefined;
         }
 
         if(tokens.refresh && tokens.refresh && checkUnauthorizedResponse(fetchedPosts)) {
             const fetchFunc = feed ? fetchFeedPosts : fetchFollowedPosts;
-            return await retryUnauthorizedResponse<FeedPostsResponse>(fetchFunc, tokens.refresh, navigate, undefined, page);
+            const retried = await retryUnauthorizedResponse<FeedPostsResponse>(fetchFunc, tokens.refresh, navigate, undefined, page);
+            if(retried && retried.success) {
+                return createPostFlowResponse(retried.data);
+            } else { return undefined; }
+        }
+        if(fetchedPosts.success) {
+            return createPostFlowResponse(fetchedPosts.data);
         }
 
-        return fetchedPosts;
+        return undefined;
     }
 }
 
@@ -63,8 +103,8 @@ function createPostsInfiniteQueryOptions(tokens: CookieTokenObject, feed: boolea
         queryFn: ({ pageParam = 0 }) => postFetcher(tokens, pageParam, feed, navigate),
         initialPageParam: 0,
         getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
-            if (lastPage && lastPage.success) {
-                if (!lastPage || lastPage.data.length === 0) {
+            if (lastPage) {
+                if (!lastPage || lastPage.length === 0) {
                     return undefined;
                 }
                 return lastPageParam + 1;
@@ -83,18 +123,21 @@ const PostsFlow = () => {
     const [ feed, setFeed ] = useState(true);
 
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createPostsInfiniteQueryOptions(tokens, feed, navigate));
-    const [ posts, setPosts ] = useState<FeedPostResponse[]>([]);
+    const [ posts, setPosts ] = useState<PostsFlowComponents>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
     const virtualizer = useVirtualizer({
         count: posts?.length ?? 0,
-        estimateSize: (index) => 550,
+        estimateSize: (index) => {
+            const post = posts[index];
+            return post.estimatedSize + 16;
+        },
         getScrollElement: () => scrollRef.current,
     });
     const virtualItems = virtualizer.getVirtualItems();
 
 
     const infiniteQuerying = async () => {
-        const flatMapPosts = data?.pages.flatMap((page) => {if(page && page.success) { return page.data; }}).filter((post) => post !== undefined) ?? []
+        const flatMapPosts = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((post) => post !== undefined) ?? []
         setPosts(flatMapPosts)
 
         const lastItem = virtualItems[virtualItems.length - 1];
@@ -148,7 +191,7 @@ const PostsFlow = () => {
                                              height: `${vItem.size}px`,
                                          }
                                      }>
-                                    <ShortPostComponent postData={postData}/>
+                                    {postData.component}
                                 </div>
                             )
                         })
