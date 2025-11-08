@@ -25,7 +25,7 @@ import {
 import {NavigateFunction} from "react-router-dom";
 import {internalServerErrorURI, unauthorizedRedirectURI} from "../../../consts.ts";
 import {APIResponseResolved} from "../../../fetching/fetchUtils.ts";
-import Post from "./post.tsx";
+import FlowPost from "./flowPost.tsx";
 
 interface PostsFlowFetcherInterface {
     component: React.JSX.Element;
@@ -41,17 +41,22 @@ const createPostFlowResponse = (data: FeedPostResponse[]): PostsFlowComponents =
 
         switch (true) {
             case (post.picturesURLs.length <= 0):
-                componentSize = 250;
+                componentSize = 150;
                 break;
             case (post.picturesURLs.length === 1):
-                componentSize = 600;
+                componentSize = 300;
                 break;
             case (post.picturesURLs.length >= 2):
-                componentSize = 700;
+                componentSize = 450;
         }
+
+        if (post.isReply) {
+            componentSize += 75
+        }
+
         console.log(componentSize);
         const component = (
-            <Post postData={post} />
+            <FlowPost postData={post}/>
         );
 
         return {
@@ -131,6 +136,7 @@ const PostsFlow = () => {
             const post = posts[index];
             return post.estimatedSize;
         },
+        overscan: 5,
         getScrollElement: () => scrollRef.current,
     });
     const virtualItems = virtualizer.getVirtualItems();
@@ -178,24 +184,24 @@ const PostsFlow = () => {
                 </div>
             </div>
 
-            <div ref={scrollRef} className="h-[80vh] overflow-auto relative w-full mx-auto">
-                <div
-                    className="relative"
-                    style={{ height: virtualizer.getTotalSize() }}
-                >
-                    {virtualizer.getVirtualItems().map((vItem) => {
-                        const postData = posts[vItem.index];
-                        return (
-                            <div
-                                key={vItem.key}
-                                ref={(el) => virtualizer.measureElement(el)}
-                                className="absolute top-0 left-0 w-full"
-                                style={{ transform: `translateY(${vItem.start}px)` }}
-                            >
-                                {postData.component}
-                            </div>
-                        );
-                    })}
+            <div ref={scrollRef} className="h-[80vh] overflow-auto relative w-1/3 mx-auto border-gray-300">
+                <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
+                    {
+                        virtualItems.map((vItem) => {
+                            const postData = posts[vItem.index];
+                            return (
+                                <div key={vItem.key} className="absolute top-0 left-0 w-full" data-index={vItem.index}
+                                     style={
+                                         {
+                                             transform: `translateY(${vItem.start}px)`,
+                                             height: `${vItem.size}px`,
+                                         }
+                                     }>
+                                    {postData.component}
+                                </div>
+                            )
+                        })
+                    }
                 </div>
             </div>
         </div>
