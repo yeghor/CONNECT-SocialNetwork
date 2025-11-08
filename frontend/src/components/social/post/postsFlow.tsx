@@ -26,6 +26,7 @@ import {NavigateFunction} from "react-router-dom";
 import {internalServerErrorURI, unauthorizedRedirectURI} from "../../../consts.ts";
 import {APIResponseResolved} from "../../../fetching/fetchUtils.ts";
 import Post from "./post.tsx";
+import FlowPost from "./flowPost.tsx";
 
 interface PostsFlowFetcherInterface {
     component: React.JSX.Element;
@@ -41,7 +42,7 @@ const createPostFlowResponse = (data: FeedPostResponse[]): PostsFlowComponents =
 
         switch (true) {
             case (post.picturesURLs.length <= 0):
-                componentSize = 200;
+                componentSize = 250;
                 break;
             case (post.picturesURLs.length === 1):
                 componentSize = 350;
@@ -50,8 +51,13 @@ const createPostFlowResponse = (data: FeedPostResponse[]): PostsFlowComponents =
                 componentSize = 450;
         }
 
+        if (post.isReply) {
+            componentSize += 75
+        }
+
+        console.log(componentSize);
         const component = (
-            <Post postData={post} />
+            <FlowPost postData={post} estimateSize={componentSize} />
         );
 
         return {
@@ -129,8 +135,9 @@ const PostsFlow = () => {
         count: posts?.length ?? 0,
         estimateSize: (index) => {
             const post = posts[index];
-            return post.estimatedSize + 16;
+            return post.estimatedSize;
         },
+        overscan: 5,
         getScrollElement: () => scrollRef.current,
     });
     const virtualItems = virtualizer.getVirtualItems();
