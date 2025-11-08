@@ -9,7 +9,7 @@ const FlowPost = (props: { postData: FeedPostResponse | undefined }) => {
     const images = props.postData?.picturesURLs || [];
 
     return (
-        <div className="bg-white/10 border border-white/30 rounded-lg shadow-sm overflow-hidden flex flex-col m-8">
+        <div className="bg-white/10 border border-white/30 rounded-lg shadow-sm overflow-hidden flex flex-col">
             {props.postData?.isReply && props.postData?.parentPost && (
                 <Link to={specificPostURI(props.postData.parentPost.postId)}>
                     <div className="bg-white/10 text-white text-sm p-2 rounded m-2">
