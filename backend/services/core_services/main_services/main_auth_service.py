@@ -107,7 +107,7 @@ class MainServiceAuth(MainServiceBase):
         old_access_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="acces")
         new_access_token = await self._JWT.generate_save_token(user_id=user_id, redis=self._RedisService, token_type="acces")
 
-        await self._RedisService.refresh_access_token(old_token=old_access_token, new_token=new_access_token.access_token, user_id=user_id)
+        await self._RedisService.refresh_access_token(old_token=old_access_token, new_token=new_access_token.access_tokendd, user_id=user_id)
         return new_access_token
     
     @web_exceptions_raiser
