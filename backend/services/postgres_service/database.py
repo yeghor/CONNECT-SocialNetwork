@@ -25,7 +25,6 @@ async def create_engine(mode: str = "prod", echo=False) -> AsyncEngine:
     for i in range(RETRIES):
         try:
             DATABASE_URL = define_database_url(mode)
-            print(DATABASE_URL)
             engine = create_async_engine(
                 url=DATABASE_URL,
                 echo=echo

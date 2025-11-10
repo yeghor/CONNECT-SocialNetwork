@@ -67,9 +67,10 @@ class MainServiceSocial(MainServiceBase):
     @staticmethod
     def combine_lists(*lists: Iterable) -> List:
         to_return = []
+        
         for lst in lists:
             to_return.extend(lst)
-        print(to_return)
+
         return to_return
 
     @staticmethod
@@ -174,8 +175,6 @@ class MainServiceSocial(MainServiceBase):
 
 
         all_ids = self.combine_lists(related_ids, followed_ids, unrelevant_ids)
-
-        print(len(all_ids))
 
         posts = await self._PostgresService.get_entries_by_ids(ids=all_ids, ModelType=Post)
         posts = self._shuffle_posts(posts=posts)

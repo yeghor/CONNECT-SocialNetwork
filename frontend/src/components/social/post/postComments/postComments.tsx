@@ -6,8 +6,14 @@ import commentFetchHelper, { CommentProps } from "./commentFetchHelper.ts";
 import { PostCommentsResponse, ShortPostInterface } from "../../../../fetching/responseDTOs.ts";
 import {useNavigate} from "react-router";
 import {getCookiesOrRedirect} from "../../../../helpers/cookies/cookiesHandler.ts";
+import {useParams} from "react-router-dom";
 
 const PostComments = (props: CommentProps) => {
+    const { postId } = useParams();
+    if (postId) {
+        props.originalPostData.postId = postId
+    }
+
     const pageRendered = useRef(false);
 
     const navigate = useNavigate();
@@ -24,19 +30,19 @@ const PostComments = (props: CommentProps) => {
     useEffect(() => {
         const fetchWrapper = async () => {
             console.log("Fetching post comments");
-            if(!pageRendered.current) {
+            if (!pageRendered.current) {
                 console.log("Guarded");
                 pageRendered.current = true;
                 return;
             }
             const response = await commentFetchHelper(tokens, props.originalPostData.postId, page, navigate);
-            if(response) {
+            if( response) {
                 setPostComments((prevState) => [...prevState, ...response.data]);
                 setLastResponseLen(response.data.length);
             }
         }
         fetchWrapper();
-    }, [loadMoreTrigger, page]);
+    }, [loadMoreTrigger, postId]);
 
     const loadMoreClick = (): void => {
         setLoadMoreTrigger(!loadMoreTrigger);

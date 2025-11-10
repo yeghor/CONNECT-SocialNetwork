@@ -7,7 +7,7 @@ const MakePost = () => {
     };
     
     return(
-        <div className="w-full sm:w-[900px] mx-auto p-4 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12 text-white">
+        <div className="w-full mx-auto p-4 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12 text-white">
             <div className="mb-6 space-y-3">
                 <div className="text-xl font-semibold">Make a Post</div>
 
@@ -29,7 +29,7 @@ const MakePost = () => {
                         multiple
                         className="text-sm text-white/60 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-white/10 file:text-white file:hover:bg-white/20 file:cursor-pointer"
                     />
-                    <span className="text-sm text-white/50">Up to 3 images</span>
+                    <p className="text-sm text-white/50">Up to 3 images</p>
                 </div>
 
                 <button

@@ -167,7 +167,7 @@ const PostsFlow = () => {
                         <div className="flex justify-center gap-2 mb-4 text-white text-medium">
                             <button
                                 className={`px-4 py-2 rounded-3xl ${
-                                    !feed ? "bg-white/10" : "bg-white/30"
+                                    !feed ? "bg-white/10" : "bg-white/30 font-bold"
                                 }`}
                                 onClick={() => {
                                     if(!feed) {
@@ -175,11 +175,11 @@ const PostsFlow = () => {
                                     }
                                 }}
                             >
-                                Feed
+                                For You
                             </button>
                             <button
                                 className={`px-4 py-2 rounded-3xl ${
-                                    feed ? "bg-white/10" : "bg-white/30"
+                                    feed ? "bg-white/10" : "bg-white/30 font-bold"
                                 }`}
                                 onClick={() => {
                                     if(feed) {

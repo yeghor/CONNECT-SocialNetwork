@@ -33,12 +33,15 @@ const PostPage = () => {
 
             if(response.success) {
                 setPostData(response.data);
+                if (response.data.isLiked) {
+                    toggleLikes(true);
+                }
             }
     }
 
     useEffect(() => {
         postFetcher();
-    }, [])
+    }, [postId])
 
     const sendComment = async () => {
 
@@ -46,22 +49,17 @@ const PostPage = () => {
 
     const likeAction = async () => {
         if(postData) {
+            toggleLikes((prevState) => !prevState);
             if(postData.isLiked) {
-                const response = await safeAPICall<SuccessfulResponse>(tokens, fetchUnlikePost, navigate, undefined, postId);
-                if (response.success) {
-                    postData.likes -= 1;
-                    postData.isLiked = false;
-                }
-
+                postData.likes -= 1;
+                postData.isLiked = false;
+                 await safeAPICall<SuccessfulResponse>(tokens, fetchUnlikePost, navigate, undefined, postId);
             } else {
-                const response = await safeAPICall<SuccessfulResponse>(tokens, fetchLikePost, navigate, undefined, postId);
-                if (response.success) {
-                    postData.likes += 1;
-                    postData.isLiked = true;
-                }
+                postData.likes += 1;
+                postData.isLiked = true;
+                await safeAPICall<SuccessfulResponse>(tokens, fetchLikePost, navigate, undefined, postId);
             }
         }
-        toggleLikes((prevState) => !prevState);
     }
 
     if(!postData) {
@@ -100,7 +98,7 @@ const PostPage = () => {
                 </div>
                 <div className="flex justify-start items-center gap-3">
                     <button onClick={() => likeAction()}>
-                        <img src={postData.isLiked ? "/thumbs-up-filled.png" : "/thumbs-up.png"} alt="like-icon" className="h-8 mt-4" />
+                        <img src={liked ? "/thumbs-up-filled.png" : "/thumbs-up.png"} alt="like-icon" className="h-8 mt-4" />
                     </button>
                     <div className="mt-4 text-white flex gap-3">
                         <span>Likes: {postData.likes}</span> <span>Views: {postData.views}</span>
