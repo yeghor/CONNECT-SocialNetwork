@@ -4,8 +4,6 @@ import { queryClient } from "../../../index.tsx";
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import ShortPostComponent from "./post.tsx";
-
 import { fetchFeedPosts, fetchFollowedPosts } from "../../../fetching/fetchSocial.ts";
 
 
@@ -22,10 +20,12 @@ import {
     retryUnauthorizedResponse,
     validateResponse
 } from "../../../helpers/responseHandlers/getResponseHandlers.ts";
+
 import {NavigateFunction} from "react-router-dom";
 import {internalServerErrorURI, unauthorizedRedirectURI} from "../../../consts.ts";
 import {APIResponseResolved} from "../../../fetching/fetchUtils.ts";
 import FlowPost from "./flowPost.tsx";
+
 
 interface PostsFlowFetcherInterface {
     component: React.JSX.Element;
@@ -165,24 +165,37 @@ const PostsFlow = () => {
 
     return (
         <div>
-            <div className="max-w-lg mx-auto">
-                <div className="flex justify-center gap-2 mb-4 text-white text-medium" onClick={toggleFeed}>
-                    <button
-                        className={`px-4 py-2 rounded-lg ${
-                            !feed ? "bg-white/30" : "bg-white/50"
-                        }`}
-                    >
-                        Feed
-                    </button>
-                    <button
-                        className={`px-4 py-2 rounded-lg ${
-                            feed ? "bg-white/30" : "bg-white/50"
-                        }`}
-                    >
-                        Followed
-                    </button>
+            <div className="w-1/3 mx-auto">
+                <div className="flex justify-start">
+                    <div className="flex justify-center gap-2 mb-4 text-white text-medium">
+                        <button
+                            className={`px-4 py-2 rounded-3xl ${
+                                !feed ? "bg-white/10" : "bg-white/30"
+                            }`}
+                            onClick={() => {
+                                if(!feed) {
+                                    toggleFeed();
+                                }
+                            }}
+                        >
+                            Feed
+                        </button>
+                        <button
+                            className={`px-4 py-2 rounded-3xl ${
+                                feed ? "bg-white/10" : "bg-white/30"
+                            }`}
+                            onClick={() => {
+                                if(feed) {
+                                    toggleFeed();
+                                }
+                            }}
+                        >
+                            Followed
+                        </button>
+                    </div>
                 </div>
             </div>
+
 
             <div ref={scrollRef} className="h-[80vh] overflow-auto relative w-1/3 mx-auto border-gray-300">
                 <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>

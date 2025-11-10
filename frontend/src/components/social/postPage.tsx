@@ -21,6 +21,7 @@ const PostPage = () => {
     const tokens = getCookiesOrRedirect(navigate);
 
     const [ newComment, setNewComment ] = useState("");
+    const [ liked, toggleLikes ] = useState(false);
 
     const [ postData, setPostData ] = useState<LoadPostResponseInterface | undefined>(undefined);
 
@@ -61,6 +62,10 @@ const PostPage = () => {
 
     }
 
+    const likePost = async () => {
+
+    }
+
     if(!postData) {
         return null;
     }
@@ -96,10 +101,18 @@ const PostPage = () => {
                         })
                     }
                 </div>
+                <div className="flex justify-start items-center gap-3">
+                    <button onClick={() => likePost()}>
+                        <img src="/thumbs-up.png" alt="like-icon" className="h-8 mt-4" />
+                    </button>
+                    <div className="mt-4 text-white flex gap-3">
+                        <span>Likes: {postData.likes}</span> <span>Views: {postData.views}</span>
+                    </div>
+                </div>
             </div>
             <div className="w-full sm:w-[900px] mx-auto p-4 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12 text-white">
                 <div className="mb-6 space-y-3">
-                    <div className="text-xl font-semibold">Create a comment</div>
+                    <div className="text-xl font-semibold">Make a Reply</div>
 
                     <input
                         type="text"
@@ -126,7 +139,7 @@ const PostPage = () => {
                         className="w-full py-2 mt-2 bg-white/20 hover:bg-white/30 text-white rounded-lg backdrop-blur-sm transition border border-white/20"
                         onClick={() => sendComment()}
                     >
-                        Post Comment
+                        Reply
                     </button>
                 </div>
             </div>

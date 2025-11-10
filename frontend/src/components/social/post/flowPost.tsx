@@ -8,6 +8,11 @@ import { specificPostURI } from "../../../consts.ts";
 const FlowPost = (props: { postData: FeedPostResponse | undefined }) => {
     const images = props.postData?.picturesURLs || [];
 
+    // Guard for TS
+    if(!props.postData) {
+        return null;
+    }
+
     return (
         <div className="bg-white/10 border border-white/30 rounded-lg shadow-sm overflow-hidden flex flex-col">
             {props.postData?.isReply && props.postData?.parentPost && (
@@ -17,49 +22,50 @@ const FlowPost = (props: { postData: FeedPostResponse | undefined }) => {
                     </div>
                 </Link>
             )}
-
-            {images.length > 0 && (
-                <div className="grid gap-1 p-2">
-                    <img
-                        src={images[0]}
-                        alt=""
-                        className="w-full h-48 object-cover rounded"
-                    />
-                    {images.length > 1 && (
-                        <div className="grid grid-cols-2 gap-1 mt-1">
-                            {images[1] && (
-                                <img
-                                    src={images[1]}
-                                    alt=""
-                                    className="w-full h-24 object-cover rounded"
-                                />
-                            )}
-                            {images[2] && (
-                                <img
-                                    src={images[2]}
-                                    alt=""
-                                    className="w-full h-24 object-cover rounded"
-                                />
-                            )}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            <div className="p-4 flex flex-col gap-2">
-                <h5 className="text-2xl font-bold text-white text-ce">{props.postData?.title}</h5>
-
-                {props.postData?.owner && (
-                    <div className="text-gray-300">
-                        <OwnerComponent ownerData={props.postData.owner} />
+            <Link to={specificPostURI(props.postData.postId)}>
+                {images.length > 0 && (
+                    <div className="grid gap-1 p-2">
+                        <img
+                            src={images[0]}
+                            alt=""
+                            className="w-full h-48 object-cover rounded"
+                        />
+                        {images.length > 1 && (
+                            <div className="grid grid-cols-2 gap-1 mt-1">
+                                {images[1] && (
+                                    <img
+                                        src={images[1]}
+                                        alt=""
+                                        className="w-full h-24 object-cover rounded"
+                                    />
+                                )}
+                                {images[2] && (
+                                    <img
+                                        src={images[2]}
+                                        alt=""
+                                        className="w-full h-24 object-cover rounded"
+                                    />
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 
-                <div className="flex items-center gap-4 text-sm text-gray-300 mt-2">
-                    <span>Likes: {props.postData?.likes || 0}</span>
-                    <span>Views: {props.postData?.views || 0}</span>
+                <div className="p-4 flex flex-col gap-2">
+                    <h5 className="text-2xl font-bold text-white text-ce">{props.postData?.title}</h5>
+
+                    {props.postData?.owner && (
+                        <div className="text-gray-300">
+                            <OwnerComponent ownerData={props.postData.owner} />
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-4 text-sm text-gray-300 mt-2">
+                        <span>Likes: {props.postData?.likes || 0}</span>
+                        <span>Views: {props.postData?.views || 0}</span>
+                    </div>
                 </div>
-            </div>
+            </Link>
         </div>
     );
 };
