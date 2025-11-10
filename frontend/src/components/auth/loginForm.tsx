@@ -10,7 +10,7 @@ import {
 
 import { fetchLogin } from "../../fetching/fetchAuth.ts"
 
-import { validateResponse } from "../../helpers/responseHandlers/getResponseHandlers.ts"
+import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers.ts"
 
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
 import {Link} from "react-router-dom";
@@ -28,7 +28,7 @@ const LoginForm = () => {
         try {
             const response = await fetchLogin(username, password);
 
-            if(!validateResponse(response, setErrorMessage, navigate)) {
+            if(!validateGETResponse(response, setErrorMessage, navigate)) {
                 return;
             }
             

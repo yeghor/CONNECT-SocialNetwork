@@ -8,7 +8,7 @@ import {
 } from "../../consts"
 
 import { fetchRegister } from "../../fetching/fetchAuth"
-import { validateResponse } from "../../helpers/responseHandlers/getResponseHandlers.ts"
+import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers.ts"
 
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler"
 
@@ -42,7 +42,7 @@ const RegisterForm = () => {
 
         try {
             const response = await fetchRegister(username, email, password);
-            if(!validateResponse(response, setErrorMessage, navigate)) {
+            if(!validateGETResponse(response, setErrorMessage, navigate)) {
                 return;
             }
 

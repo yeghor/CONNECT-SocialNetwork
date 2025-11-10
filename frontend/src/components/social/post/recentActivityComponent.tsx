@@ -7,11 +7,8 @@ import {
     RecentActivityArray,
     RecentActivityResponse, RecentActivityType
 } from "../../../fetching/responseDTOs.ts";
-import {
-    checkUnauthorizedResponse,
-    retryUnauthorizedResponse,
-    validateResponse
-} from "../../../helpers/responseHandlers/getResponseHandlers.ts";
+import {validateGETResponse} from "../../../helpers/responseHandlers/getResponseHandlers.ts";
+import { checkUnauthorizedResponse, retryUnauthorizedResponse } from "../../../fetching/fetchUtils.ts";
 import {internalServerErrorURI, specificPostURI} from "../../../consts.ts";
 import {getCookiesOrRedirect} from "../../../helpers/cookies/cookiesHandler.ts";
 import {useNavigate} from "react-router";
@@ -30,7 +27,7 @@ const RecentActivityComponent = () => {
             try {
                 let response = await fetchRecentActivity(tokens.access);
 
-                if (!validateResponse(response, undefined, navigate)) {
+                if (!validateGETResponse(response, undefined, navigate)) {
                     return;
                 }
 
@@ -66,7 +63,7 @@ const RecentActivityComponent = () => {
             <ul>
                 {recentActivity?.map((rc, index) => {
                     return(
-                        <li key={index}>
+                        <li key={index} className="p-4">
                             <img src={rc.avatarURL} alt="Avatar" className="h-10 w-10 rounded-lg"></img>
                             <span className="text-white font-bold">{rc.message}</span>
                             <span className="mx-2 text-grey-700">{calculateElapsedTime(rc.date)}</span>

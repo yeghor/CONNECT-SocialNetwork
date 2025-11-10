@@ -75,7 +75,7 @@ class ClientSafeServiceError(ServiceLayerBaseBound):
         super().__init__(detail)
 
 
-# 404 # PROVIDE DEFIRENT CLIENT SAFE INFO WHERE IT'S NECESSARY
+# 404 # PROVIDE DIFFERENT CLIENT SAFE INFO WHERE IT'S NECESSARY
 class ResourceNotFound(ClientSafeServiceError):
     """Raise in case provided ID does not exist or similar"""
 
@@ -84,13 +84,13 @@ class ResourceNotFound(ClientSafeServiceError):
 class Unauthorized(ClientSafeServiceError):
     """Authorization failed? Raise this."""
     
-class UnauthorizedInWebocket(ClientSafeServiceError):
+class UnauthorizedInWebsocket(ClientSafeServiceError):
     """Raise in websocket and don't re raise HttpException to this."""
 
 
 # 400 PROVIDE SPECIFIED USER ACTION IN DEV DETAIL (FIRST ARG) AND REGULAR CLIENT ERROR IN `client_safe_detail`
 class InvalidAction(ClientSafeServiceError):
-    """Raise in case when action can't be done. For examaple - follow user that you already following to. Or follow self"""
+    """Raise in case when action can't be done. For example - follow user that you're already following to. Or follow self"""
 
 class InvalidFileMimeType(ClientSafeServiceError):
     """Raise when provided file mime type invalid"""

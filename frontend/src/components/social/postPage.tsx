@@ -4,15 +4,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import PostComments from "./post/postComments/postComments.tsx"
 
 import { getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
-import { LoadPostResponseInterface, LoadPostResponse } from "../../fetching/responseDTOs.ts";
-import { fetchLoadPost } from "../../fetching/fetchSocial.ts";
-import {
-    checkUnauthorizedResponse,
-    retryUnauthorizedResponse,
-    validateResponse
-} from "../../helpers/responseHandlers/getResponseHandlers.ts";
-import { internalServerErrorURI } from "../../consts.ts";
+import {LoadPostResponseInterface, LoadPostResponse, SuccessfulResponse} from "../../fetching/responseDTOs.ts";
+import {fetchLikePost, fetchLoadPost, fetchUnlikePost} from "../../fetching/fetchSocial.ts";
 
+import { safeAPICall } from "../../fetching/fetchUtils.ts";
 
 const PostPage = () => {
     const navigate = useNavigate();
@@ -20,7 +15,6 @@ const PostPage = () => {
 
     const tokens = getCookiesOrRedirect(navigate);
 
-    const [ newComment, setNewComment ] = useState("");
     const [ liked, toggleLikes ] = useState(false);
 
     const [ postData, setPostData ] = useState<LoadPostResponseInterface | undefined>(undefined);
@@ -29,30 +23,18 @@ const PostPage = () => {
         // If statement to prevent TS errors. Cause if no tokens - getCookiesOrRedirect will redirect user to auth page
         if(!(tokens.access && tokens.refresh && postId)) { return; }
 
-        try {
-            let response = await fetchLoadPost(tokens.access, postId);
+            const response = await safeAPICall<LoadPostResponse>(
+                tokens,
+                fetchLoadPost,
+                navigate,
+                undefined,
+                postId
+            );
 
-            if (!validateResponse(response, undefined, navigate)) {
-                return;
-            }
-
-            if (checkUnauthorizedResponse(response)) {
-                const retried = await retryUnauthorizedResponse<LoadPostResponse>(fetchLoadPost, tokens.refresh, navigate, undefined, postId);
-                if (!retried) {
-                    return;
-                }
-                response = retried;
-            }
-
-            if (response.success) {
+            if(response.success) {
                 setPostData(response.data);
             }
-
-        } catch (err) {
-            console.error(err);
-            navigate(internalServerErrorURI);
-        }
-    };
+    }
 
     useEffect(() => {
         postFetcher();
@@ -62,8 +44,24 @@ const PostPage = () => {
 
     }
 
-    const likePost = async () => {
+    const likeAction = async () => {
+        if(postData) {
+            if(postData.isLiked) {
+                const response = await safeAPICall<SuccessfulResponse>(tokens, fetchUnlikePost, navigate, undefined, postId);
+                if (response.success) {
+                    postData.likes -= 1;
+                    postData.isLiked = false;
+                }
 
+            } else {
+                const response = await safeAPICall<SuccessfulResponse>(tokens, fetchLikePost, navigate, undefined, postId);
+                if (response.success) {
+                    postData.likes += 1;
+                    postData.isLiked = true;
+                }
+            }
+        }
+        toggleLikes((prevState) => !prevState);
     }
 
     if(!postData) {
@@ -92,7 +90,6 @@ const PostPage = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     { postData.picturesURLs.map((url: string, index: number) => {
-                        console.log(url);
                         return (
                             <div className="relative block aspect-square cursor-pointer" key={index}>
                                 <img className="w-full h-full object-cover rounded-lg" src={url} alt="Post image"/>
@@ -102,8 +99,8 @@ const PostPage = () => {
                     }
                 </div>
                 <div className="flex justify-start items-center gap-3">
-                    <button onClick={() => likePost()}>
-                        <img src="/thumbs-up.png" alt="like-icon" className="h-8 mt-4" />
+                    <button onClick={() => likeAction()}>
+                        <img src={postData.isLiked ? "/thumbs-up-filled.png" : "/thumbs-up.png"} alt="like-icon" className="h-8 mt-4" />
                     </button>
                     <div className="mt-4 text-white flex gap-3">
                         <span>Likes: {postData.likes}</span> <span>Views: {postData.views}</span>

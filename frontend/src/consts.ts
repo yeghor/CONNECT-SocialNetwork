@@ -24,3 +24,5 @@ export const specificPostURI = (postId: string): string => {
 export const passwordNotSecureEnoughMessage = "Come on, you can do better! Make your password better, longer, stronger, and maybe throw in a ’!’ for flair.";
 export const invalidEmailMessage = "That doesn’t look like a valid email. Make sure it includes ’@’ and a domain name.";
 export const invalidUsernameMessage = `Keep your username simple! Use ${UsernameMinLength}–${UsernameMaxLength} characters: letters, numbers, or . _ - ! * ' no spaces or fancy symbols.`;
+export const manualUnauthorizedMessage = "Unauthorized. Try to login fort.";
+export const internalServerErrorDefaultMessage = "It's not you. It's us. Please try again later.";

@@ -5,7 +5,7 @@ export const successfulResponseMapper = (): SuccessfulResponse => {
     return {
         success: true
     };
-}
+};
 
 interface NotSuccessfulResponse {
     success: false
@@ -21,7 +21,7 @@ export interface BadResponse extends BadResponseDTO, NotSuccessfulResponse {
 
 export const isBadResponse = (data: any): data is BadResponseDTO => {
     return "detail" in data;
-}
+};
 
 export const badResponseMapper = (data: BadResponseDTO, statusCode: number): BadResponse => {
     return {
@@ -29,14 +29,22 @@ export const badResponseMapper = (data: BadResponseDTO, statusCode: number): Bad
         statusCode: statusCode,
         success: false
     };
-}
+};
+
+export const createBadResponseManually = (detail: string, statusCode: number): BadResponse => {
+    return {
+        detail: detail,
+        statusCode: statusCode,
+        success: false
+    };
+};
 
 const OwnerMapper = (data: OwnerDTO): OwnerResponse => {
     return {
         userId: data.user_id,
         username: data.username,
     };
-}
+};
 
 // Login/Register/Refresh
 
@@ -68,7 +76,7 @@ export const authTokensResponseMapper = (data: AuthResponseDTO): AuthTokensRespo
         expiresAtRefreshToken: new Date(data.expires_at_refresh),
         success: true
     };
-}
+};
 // Posts
 
 interface OwnerDTO {
@@ -84,6 +92,7 @@ interface ShortPostDTO {
     owner: OwnerDTO;
     likes: number,
     views: number,
+    is_liked: boolean,
     replies: number,
     pictures_urls: string[]
 }
@@ -113,6 +122,7 @@ export interface ShortPostInterface {
     owner: OwnerResponse;
     likes: number,
     views: number,
+    isLiked: boolean,
     replies: number,
     picturesURLs: string[]
 }
@@ -147,6 +157,7 @@ export const loadPostResponseMapper = (postDTO: LoadPostResponseDTO): LoadPostRe
             owner: OwnerMapper(postDTO.owner),
             likes: postDTO.likes,
             views: postDTO.views,
+            isLiked: postDTO.is_liked,
             replies: postDTO.replies,
             text: postDTO.text,
             lastUpdated: new Date(postDTO.last_updated),
@@ -160,17 +171,18 @@ export const loadPostResponseMapper = (postDTO: LoadPostResponseDTO): LoadPostRe
                     owner: OwnerMapper(postDTO.parent_post.owner),
                     likes: postDTO.parent_post.likes,
                     views: postDTO.parent_post.views,
+                    isLiked: postDTO.parent_post.is_liked,
                     replies: postDTO.parent_post.replies,
                     picturesURLs: postDTO.parent_post.pictures_urls,
                 }
                 : undefined,
-        }
+        };
 
     return {
         data: mapped,
         success: true
-    }
-}
+    };
+};
 
 export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsResponse => {
     const mapped = data.map(postDTO => ({
@@ -181,6 +193,7 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
     owner: OwnerMapper(postDTO.owner),
     likes: postDTO.likes,
     views: postDTO.views,
+    isLiked: postDTO.is_liked,
     replies: postDTO.replies,
     picturesURLs: postDTO.pictures_urls,
     parentPost: postDTO.parent_post
@@ -192,6 +205,7 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
             owner: OwnerMapper(postDTO.parent_post.owner),
             likes: postDTO.parent_post.likes,
             views: postDTO.parent_post.views,
+            isLiked: postDTO.parent_post.is_liked,
             replies: postDTO.parent_post.replies,
             picturesURLs: postDTO.parent_post.pictures_urls,
         }
@@ -201,8 +215,8 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
     return {
         data: mapped,
         success: true
-    }
-}
+    };
+};
 
 // Comments
 export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsResponse => {
@@ -214,6 +228,7 @@ export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsRes
             isReply: commentDTO.is_reply,
             likes: commentDTO.likes,
             views: commentDTO.views,
+            isLiked: commentDTO.is_liked,
             replies: commentDTO.replies,
             owner: OwnerMapper(commentDTO.owner),
             picturesURLs: commentDTO.pictures_urls
@@ -223,8 +238,8 @@ export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsRes
     return {
         data: mapped,
         success: true
-    }
-}
+    };
+};
 
 
 // User profiles
@@ -263,12 +278,12 @@ export const userShortProfilesMapper = (data: ShortUsersDTOResponse): ShortUserP
             username: shortUserDTO.username,
             followers: shortUserDTO.followers
         })
-    )
+    );
     return {
         data: mapped,
         success: true
     };
-}
+};
 
 export const userProfileMapper = (data: UserProfileDTO): UserProfileResponse => {
     return {
@@ -279,7 +294,7 @@ export const userProfileMapper = (data: UserProfileDTO): UserProfileResponse => 
         avatarURL: data.avatar_url,
         success: true
     };
-}
+};
 
 export type RecentActivityType = "post" | "like" | "reply"
 
@@ -315,13 +330,13 @@ export const recentActivityMapper = (data: RecentActivityDTO): RecentActivityRes
             postId: DTO.postId,
             avatarURL: DTO.avatar_url
         };
-    })
+    });
 
     return {
         data: mapped,
         success: true
-    }
-}
+    };
+};
 
 // Chat
 export interface ChatDTO {
@@ -351,7 +366,7 @@ export const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
         data: mapped,
         success: true
     };
-}
+};
 
 export interface MessageDTO {
     message_id: string,
@@ -403,7 +418,7 @@ export const singleMessageResponseMapper = (data: MessageDTO): MessageResponse =
         },
         success: true
     };
-}   
+};
 
 // Chat access
 export interface ChatConnectDTO {
@@ -422,4 +437,4 @@ export const chatConnectMapper = (data: ChatConnectDTO): ChatConnectResponse => 
         participantsAvatarURLs: data.participants_avatar_urls,
         success: true
     };
-}
+};

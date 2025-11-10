@@ -57,6 +57,7 @@ class PostLiteSchema(PostBase):
 
 class PostSchema(PostBase):
     text: str
+    is_liked: bool
 
     last_updated: datetime
 

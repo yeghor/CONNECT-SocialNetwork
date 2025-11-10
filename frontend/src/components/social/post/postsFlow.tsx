@@ -15,12 +15,8 @@ import {
 
 import {FeedPostResponse, FeedPostsResponse} from "../../../fetching/responseDTOs.ts";
 import { useNavigate } from "react-router";
-import {
-    checkUnauthorizedResponse,
-    retryUnauthorizedResponse,
-    validateResponse
-} from "../../../helpers/responseHandlers/getResponseHandlers.ts";
-
+import {validateGETResponse} from "../../../helpers/responseHandlers/getResponseHandlers.ts";
+import { checkUnauthorizedResponse, retryUnauthorizedResponse } from "../../../fetching/fetchUtils.ts";
 import {NavigateFunction} from "react-router-dom";
 import {internalServerErrorURI, unauthorizedRedirectURI} from "../../../consts.ts";
 import {APIResponseResolved} from "../../../fetching/fetchUtils.ts";
@@ -41,7 +37,7 @@ const createPostFlowResponse = (data: FeedPostResponse[]): PostsFlowComponents =
 
         switch (true) {
             case (post.picturesURLs.length <= 0):
-                componentSize = 150;
+                componentSize = 256;
                 break;
             case (post.picturesURLs.length === 1):
                 componentSize = 300;
@@ -78,7 +74,7 @@ const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolea
             fetchedPosts = await fetchFollowedPosts(tokens.access, page);
         }
 
-        if(!validateResponse(fetchedPosts)) {
+        if(!validateGETResponse(fetchedPosts)) {
             navigate(internalServerErrorURI);
             return undefined;
         }
@@ -165,56 +161,58 @@ const PostsFlow = () => {
 
     return (
         <div>
-            <div className="w-1/3 mx-auto">
-                <div className="flex justify-start">
-                    <div className="flex justify-center gap-2 mb-4 text-white text-medium">
-                        <button
-                            className={`px-4 py-2 rounded-3xl ${
-                                !feed ? "bg-white/10" : "bg-white/30"
-                            }`}
-                            onClick={() => {
-                                if(!feed) {
-                                    toggleFeed();
-                                }
-                            }}
-                        >
-                            Feed
-                        </button>
-                        <button
-                            className={`px-4 py-2 rounded-3xl ${
-                                feed ? "bg-white/10" : "bg-white/30"
-                            }`}
-                            onClick={() => {
-                                if(feed) {
-                                    toggleFeed();
-                                }
-                            }}
-                        >
-                            Followed
-                        </button>
+            <div>
+                <div className="w-1/3">
+                    <div className="flex justify-start">
+                        <div className="flex justify-center gap-2 mb-4 text-white text-medium">
+                            <button
+                                className={`px-4 py-2 rounded-3xl ${
+                                    !feed ? "bg-white/10" : "bg-white/30"
+                                }`}
+                                onClick={() => {
+                                    if(!feed) {
+                                        toggleFeed();
+                                    }
+                                }}
+                            >
+                                Feed
+                            </button>
+                            <button
+                                className={`px-4 py-2 rounded-3xl ${
+                                    feed ? "bg-white/10" : "bg-white/30"
+                                }`}
+                                onClick={() => {
+                                    if(feed) {
+                                        toggleFeed();
+                                    }
+                                }}
+                            >
+                                Followed
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
 
-            <div ref={scrollRef} className="h-[80vh] overflow-auto relative w-1/3 mx-auto border-gray-300">
-                <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
-                    {
-                        virtualItems.map((vItem) => {
-                            const postData = posts[vItem.index];
-                            return (
-                                <div key={vItem.key} className="absolute top-0 left-0 w-full" data-index={vItem.index}
-                                     style={
-                                         {
-                                             transform: `translateY(${vItem.start}px)`,
-                                             height: `${vItem.size}px`,
-                                         }
-                                     }>
-                                    {postData.component}
-                                </div>
-                            )
-                        })
-                    }
+                <div ref={scrollRef} className="h-[80vh] overflow-auto relative mx-auto border-gray-300">
+                    <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
+                        {
+                            virtualItems.map((vItem) => {
+                                const postData = posts[vItem.index];
+                                return (
+                                    <div key={vItem.key} className="absolute top-0 left-0 w-full" data-index={vItem.index}
+                                         style={
+                                             {
+                                                 transform: `translateY(${vItem.start}px)`,
+                                                 height: `${vItem.size}px`,
+                                             }
+                                         }>
+                                        {postData.component}
+                                    </div>
+                                )
+                            })
+                        }
+                    </div>
                 </div>
             </div>
         </div>

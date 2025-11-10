@@ -23,7 +23,6 @@ from pydantic_schemas.pydantic_schemas_social import (
 
 from exceptions.exceptions_handler import web_exceptions_raiser
 from exceptions.custom_exceptions import *
-from watchfiles import awatch
 
 load_dotenv()
 
@@ -279,11 +278,17 @@ class MainServiceSocial(MainServiceBase):
 
     @web_exceptions_raiser
     async def remove_action(self, user: User, post: Post, action_type: ActionType) -> None:
+        if action_type.value == "reply":
+            raise InvalidAction()
+
         potential_action = await self._PostgresService.get_actions(user_id=user.user_id, post_id=post.post_id, action_type=action_type)
         if not potential_action:
-            raise InvalidAction(detail=f"SocialService: User: {user.user_id} tried to reply to post: {post.post_id} that does not exists.")
-        
-        await self._PostgresService.delete_models_and_flush(potential_action)
+            raise InvalidAction(detail=f"SocialService: User: {user.user_id} tried to remove post action: {post.post_id} that does not exists.")
+
+        if len(potential_action) > 1:
+            raise WrongDataFound(detail=f"SocialService: User: {user.user_id} tried to remove post action, but multiple instances of action", client_safe_detail="Something wrong happened on our side, please, contact us.")
+
+        await self._PostgresService.delete_models_and_flush(potential_action[0])
         self.change_post_rate(post=post, action_type=action_type, add=False)
     
     @web_exceptions_raiser
@@ -414,6 +419,8 @@ class MainServiceSocial(MainServiceBase):
 
         await self._PostgresService.refresh_model(model_obj=post)
 
+        liked = await self._PostgresService.get_actions(user.user_id, post_id=post_id, action_type=ActionType.like)
+
         filenames = [filename.image_name for filename in post.images]
         images_temp_urls = await self._ImageStorage.get_post_image_urls(images_names=filenames)
 
@@ -424,6 +431,7 @@ class MainServiceSocial(MainServiceBase):
             published=post.published,
             owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
             likes=post.likes_count,
+            is_liked=True if liked else False,
             views=post.views_count,
             replies=post.replies_count,
             parent_post=PostBase(

@@ -34,7 +34,7 @@ export const recentActivityURL = `${BASEURL}/recent-activity`;
 
 export const basePostURL = `${BASEURL}${postsConstructor}`;
 
-export const postActionURL = (postId: string) => {
+export const likePostActionURL = (postId: string) => {
     return `${BASEURL}${postsConstructor}/${postId}/like`;
 }
 

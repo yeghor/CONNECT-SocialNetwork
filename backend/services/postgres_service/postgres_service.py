@@ -51,7 +51,7 @@ class PostgresService:
     async def flush(self) -> None:
         await self.__session.flush()
 
-    @postgres_exception_handler(action="Delete model sesion")
+    @postgres_exception_handler(action="Delete model session")
     async def delete_models_and_flush(self, *models: Base) -> None:
         for model in models:
             await self.__session.delete(model)

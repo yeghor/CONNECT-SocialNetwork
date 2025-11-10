@@ -14,7 +14,7 @@ import {
     // Load post / change post / delete post
     specificPostURL,
     postCommentsURL,
-    postActionURL,
+    likePostActionURL,
     followURL,
     specificUserURL,
     UserPostsURL,
@@ -142,7 +142,7 @@ export const fetchLikePost = async (accessJWT: string, postId: string): APIRespo
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<SuccessfulResponse>(postActionURL(postId), requestINIT, successfulResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(likePostActionURL(postId), requestINIT, successfulResponseMapper);
 }
 
 export const fetchUnlikePost = async (accessJWT: string, postId: string): APIResponse<SuccessfulResponse> => {
@@ -151,7 +151,7 @@ export const fetchUnlikePost = async (accessJWT: string, postId: string): APIRes
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<SuccessfulResponse>(postActionURL(postId), requestInit, successfulResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(likePostActionURL(postId), requestInit, successfulResponseMapper);
 }
 
 // User Interactions
