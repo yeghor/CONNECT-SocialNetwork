@@ -7,7 +7,9 @@ import { PostCommentsResponse, ShortPostInterface } from "../../../../fetching/r
 import {useNavigate} from "react-router";
 import {getCookiesOrRedirect} from "../../../../helpers/cookies/cookiesHandler.ts";
 import {useParams} from "react-router-dom";
+import {fetchPostComments} from "../../../../fetching/fetchSocial.ts";
 
+/* Use this component only in /post/UUID route */
 const PostComments = (props: CommentProps) => {
     const { postId } = useParams();
     if (postId) {
@@ -29,24 +31,22 @@ const PostComments = (props: CommentProps) => {
 
     useEffect(() => {
         const fetchWrapper = async () => {
-            console.log("Fetching post comments");
-            if (!pageRendered.current) {
-                console.log("Guarded");
+            if (!pageRendered.current) {;
                 pageRendered.current = true;
                 return;
             }
-            const response = await commentFetchHelper(tokens, props.originalPostData.postId, page, navigate);
+            const response = await commentFetchHelper(tokens, postId, page, navigate);
             if( response) {
                 setPostComments((prevState) => [...prevState, ...response.data]);
                 setLastResponseLen(response.data.length);
             }
         }
         fetchWrapper();
-    }, [loadMoreTrigger, postId]);
+    }, [loadMoreTrigger]);
 
     const loadMoreClick = (): void => {
-        setLoadMoreTrigger(!loadMoreTrigger);
         setPage((prevState) => prevState + 1);
+        setLoadMoreTrigger(!loadMoreTrigger);
     }
 
     return(

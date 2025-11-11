@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 
 import PostComments from "./post/postComments/postComments.tsx"
 
@@ -11,6 +11,7 @@ import { safeAPICall } from "../../fetching/fetchUtils.ts";
 
 const PostPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { postId } = useParams();
 
     const tokens = getCookiesOrRedirect(navigate);
@@ -40,6 +41,7 @@ const PostPage = () => {
     }
 
     useEffect(() => {
+        setPostData(undefined);
         postFetcher();
     }, [postId])
 
@@ -67,7 +69,7 @@ const PostPage = () => {
     }
 
     return (
-        <div>
+        <div key={location.pathname + location.search}>
             <div className="w-full sm:w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
             <div className="flex items-center gap-3 mb-4">
                     <div
