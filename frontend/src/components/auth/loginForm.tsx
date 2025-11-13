@@ -38,6 +38,9 @@ const LoginForm = () => {
                 navigate(appHomeURI);
                 return;
             }
+
+            setErrorMessage(response.detail)
+
         } catch (err) {
             console.error(err);
             navigate(internalServerErrorURI);

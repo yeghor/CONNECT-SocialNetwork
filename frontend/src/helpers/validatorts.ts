@@ -1,6 +1,7 @@
 import {
     usernameRegexp, emailRegexp, passwordRegexp,
     UsernameMinLength, UsernameMaxLength,
+    imageMaxSizeMB, allowedImageExtensions,
 } from "../consts.ts"
 
 type stringType = "username" | "email" | "password";
@@ -23,4 +24,9 @@ export const validateFromString = (formString: string, stringType: stringType): 
             }
         }
     return false;
+}
+
+export const imageValidator = (file: File): boolean => {
+    const fileSizeMB = file.size / 1024 / 1024;
+    return true;
 }

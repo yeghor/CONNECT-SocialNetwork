@@ -37,20 +37,19 @@ const createPostFlowResponse = (data: FeedPostResponse[]): PostsFlowComponents =
 
         switch (true) {
             case (post.picturesURLs.length <= 0):
-                componentSize = 256;
+                componentSize = 200;
                 break;
             case (post.picturesURLs.length === 1):
-                componentSize = 300;
+                componentSize = 350;
                 break;
             case (post.picturesURLs.length >= 2):
-                componentSize = 450;
+                componentSize = 500;
         }
 
         if (post.isReply) {
-            componentSize += 75
+            componentSize += 50
         }
 
-        console.log(componentSize);
         const component = (
             <FlowPost postData={post}/>
         );
@@ -132,7 +131,8 @@ const PostsFlow = () => {
             const post = posts[index];
             return post.estimatedSize;
         },
-        overscan: 5,
+        measureElement: (element) => { console.log(element?.getBoundingClientRect().height); return element?.getBoundingClientRect().height },
+        overscan: 16,
         getScrollElement: () => scrollRef.current,
     });
     const virtualItems = virtualizer.getVirtualItems();
