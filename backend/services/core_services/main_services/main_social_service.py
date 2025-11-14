@@ -92,22 +92,22 @@ class MainServiceSocial(MainServiceBase):
         if return_posts_too: return (ids, posts)
         else: return ids
         
-    async def _construct_and_flush_action(self, action_type: ActionType, user: User, post: Post = None) -> None:
-        """Protected method. Do NOT call this method outside the class"""
+    async def _construct_and_flush_action(self, action_type: ActionType, user: User, post: Post = None) -> bool:
+        """Returns `True` if action registered, otherwise `False`"""
         actions = await self._PostgresService.get_actions(user_id=user.user_id, post_id=post.post_id, action_type=action_type)
         cost = POST_ACTIONS[action_type.value]
 
         if actions:
             if action_type == ActionType.view:
                 if not await self._RedisService.check_view_timeout(id_=post.post_id, user_id=user.user_id):
-                    return
+                    return False
             elif action_type == ActionType.reply:
                 if len(actions) < MAX_REPLIES_THAT_GIVE_POPULARITY_RATE:
                     cost = POST_ACTIONS[action_type.value]
                     for _ in range(len(actions)): cost *= REPLY_COST_DEVALUATION
                 else: cost = 0
             else:
-                raise InvalidAction(detail=f"SocialService: User: {user.user_id} tried to give already giveт action: {action_type.value} to post: {post.post_id} that does not exists.", client_safe_detail="This action is already given to this post.")
+                raise InvalidAction(detail=f"SocialService: User: {user.user_id} tried to give already given action: {action_type.value} to post: {post.post_id} that does not exists.", client_safe_detail="This action is already given to this post.")
 
         if action_type == ActionType.view:
             await self._RedisService.add_view(user_id=user.user_id, id_=post.post_id)
@@ -120,7 +120,10 @@ class MainServiceSocial(MainServiceBase):
             post_id=post.post_id,
             action=action_type,
         )
+
         await self._PostgresService.insert_models_and_flush(action)
+
+        return True
 
     @web_exceptions_raiser
     async def sync_postgres_chroma_DEV_METHOD(self) -> None:
@@ -149,10 +152,8 @@ class MainServiceSocial(MainServiceBase):
         liked_history = await self._PostgresService.get_user_actions(user_id=user.user_id, action_type=ActionType.like, n_most_fresh=LIKED_POSTS_TO_TAKE_INTO_RELATED, return_posts=True)
         history_posts_relation = views_history + liked_history
 
-
-
         # History related mix
-        if len(views_history) > MINIMUM_USER_HISTORY_LENGTH:
+        if len(views_history) > MINIMUM_USER_HISTORY_LENGTH and len(liked_history) > MINIMUM_USER_HISTORY_LENGTH:
             related_ids = await self._ChromaService.get_n_related_posts_ids(user=user, page=page, post_relation=history_posts_relation, pagination=EACH_SOURCE_PAGINATION)
 
             # Following mix
@@ -167,17 +168,20 @@ class MainServiceSocial(MainServiceBase):
 
             # Following mix
             followed_ids =  await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="followed")
+
+
             if not followed_ids:
-                followed_ids = await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page+1, n=EACH_SOURCE_PAGINATION, id_type="fresh")
-                unrelevant_ids = await self._get_ids_by_query_type(exclude_ids=followed_ids + related_ids, user=user, page=page+2, n=EACH_SOURCE_PAGINATION, id_type="fresh")
+                followed_ids = await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
+                unrelevant_ids = await self._get_ids_by_query_type(exclude_ids=followed_ids + related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
             else:
-                unrelevant_ids = await self._get_ids_by_query_type(exclude_ids=followed_ids + related_ids, user=user, page=page+1, n=EACH_SOURCE_PAGINATION, id_type="fresh")
+                unrelevant_ids = await self._get_ids_by_query_type(exclude_ids=followed_ids + related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
 
 
         all_ids = self.combine_lists(related_ids, followed_ids, unrelevant_ids)
 
         posts = await self._PostgresService.get_entries_by_ids(ids=all_ids, ModelType=Post)
-        posts = self._shuffle_posts(posts=posts)
+        posts = set(self._shuffle_posts(posts=posts))
+
 
         return [
             PostLiteSchema(
@@ -413,10 +417,9 @@ class MainServiceSocial(MainServiceBase):
         if not post:
             raise ResourceNotFound(detail=f"SocialService: User: {user.user_id} tried to load post: {post_id} that does not exist.", client_safe_detail="This post does not exist.")
 
-        await self._construct_and_flush_action(action_type=ActionType.view, post=post, user=user)
-        post.views_count += 1
+        registered_view = await self._construct_and_flush_action(action_type=ActionType.view, post=post, user=user)
 
-        await self._PostgresService.refresh_model(model_obj=post)
+        if registered_view: post.views_count += 1
 
         liked = await self._PostgresService.get_actions(user.user_id, post_id=post_id, action_type=ActionType.like)
 

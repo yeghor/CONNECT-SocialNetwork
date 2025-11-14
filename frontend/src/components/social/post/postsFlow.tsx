@@ -27,6 +27,7 @@ interface PostsFlowFetcherInterface {
     component: React.JSX.Element;
     // Depends on image existence
     estimatedSize: number;
+    postId: string
 }
 
 type PostsFlowComponents = PostsFlowFetcherInterface[];
@@ -57,6 +58,7 @@ const createPostFlowResponse = (data: FeedPostResponse[]): PostsFlowComponents =
         return {
             component: component,
             estimatedSize: componentSize,
+            postId: post.postId,
         };
     })
 }
@@ -111,7 +113,8 @@ function createPostsInfiniteQueryOptions(tokens: CookieTokenObject, feed: boolea
             } else {
                 return undefined;
             }
-        }
+        },
+        refetchOnWindowFocus: false,
     });
 }
 
@@ -140,6 +143,7 @@ const PostsFlow = () => {
 
     const infiniteQuerying = async () => {
         const flatMapPosts = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((post) => post !== undefined) ?? []
+        console.log(flatMapPosts.length)
         setPosts(flatMapPosts)
 
         const lastItem = virtualItems[virtualItems.length - 1];
@@ -200,7 +204,7 @@ const PostsFlow = () => {
                             virtualItems.map((vItem) => {
                                 const postData = posts[vItem.index];
                                 return (
-                                    <div key={vItem.key} className="absolute top-0 left-0 w-full" data-index={vItem.index}
+                                    <div key={postData.postId + vItem.index} className="absolute top-0 left-0 w-full" data-index={vItem.index}
                                          style={
                                              {
                                                  transform: `translateY(${vItem.start}px)`,

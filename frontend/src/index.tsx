@@ -22,7 +22,7 @@ if(container) {
     const root = ReactDOM.createRoot(container);
 
     root.render(
-        <StrictMode>
+        // <StrictMode>
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
                     <div
@@ -58,7 +58,7 @@ if(container) {
                     </div>
                 </BrowserRouter>
             </QueryClientProvider>
-        </StrictMode>
+        // </StrictMode>
     );
 
 } else {

@@ -143,7 +143,7 @@ class Post(Base):
         return text
 
     def __repr__(self):
-        return f"Post name: {self.title} | Rate: {self.popularity_rate}"
+        return f"Post name: {self.title} | Rate: {self.popularity_rate} | Post id: {self.post_id}"
 
 class PostImage(Base):
     __tablename__ = "postimages"

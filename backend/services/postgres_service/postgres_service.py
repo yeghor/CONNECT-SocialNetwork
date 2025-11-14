@@ -177,7 +177,7 @@ class PostgresService:
             .where(and_(Post.owner_id.in_(followed_ids), Post.post_id.not_in(exclude_ids)))
             .order_by(Post.popularity_rate.desc(), Post.published.desc())
             .offset(page*n)
-            .limit((page*n) + n)
+            .limit(n)
         )
         return result.scalars().all()
 

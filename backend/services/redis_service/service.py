@@ -97,6 +97,8 @@ class RedisService:
         self.__post_image_acces_prefix = "post-image-acces:"
         self.__user_image_acces_prefix = "user-image-acces:"
 
+        #
+
 
     # ===============
     # JWT tokens logic
