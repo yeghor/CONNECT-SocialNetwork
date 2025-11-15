@@ -6,6 +6,7 @@ from post_popularity_rate_task.popularity_rate import POST_ACTIONS
 from mix_posts_consts import *
 
 from dotenv import load_dotenv
+from datetime import datetime
 from os import getenv
 from typing import List, TypeVar, Type, Literal, Iterable, NamedTuple, Union, Awaitable, Dict, Coroutine, Any
 from pydantic_schemas.pydantic_schemas_social import (
@@ -75,7 +76,16 @@ class MainServiceSocial(MainServiceBase):
 
     @staticmethod
     def _shuffle_posts(posts: List[Post]) -> List[Post]:
-        return sorted(posts, key=lambda post: (post.popularity_rate * SHUFFLE_BY_RATE, int(post.published.timestamp()) * SHUFFLE_BY_TIMESTAMP), reverse=True)
+        now = datetime.now().timestamp()
+        return sorted(
+            posts,
+            key=lambda post: (
+                post.popularity_rate * SHUFFLE_BY_RATE,
+                # minus is required, because we want to show more young posts
+                -(now - post.published.timestamp() * SHUFFLE_BY_TIMESTAMP)
+            ),
+            reverse=True
+        )
 
     @staticmethod
     def check_post_user_id(post: Post, user: User) -> None:
@@ -180,8 +190,9 @@ class MainServiceSocial(MainServiceBase):
         all_ids = self.combine_lists(related_ids, followed_ids, unrelevant_ids)
 
         posts = await self._PostgresService.get_entries_by_ids(ids=all_ids, ModelType=Post)
+        print(posts)
         posts = set(self._shuffle_posts(posts=posts))
-
+        print(posts)
 
         return [
             PostLiteSchema(

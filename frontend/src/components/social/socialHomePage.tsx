@@ -10,13 +10,13 @@ const SocialHomePage = () => {
     // Trending hashtags ???
     return(
         <div className="flex gap-8 m-16">
-            <div className="w-1/4">
+            <div className="w-1/3">
                 <MakePost />
             </div>
             <div className="w-1/3 mx-auto">
                 <PostsFlow />
             </div>
-            <div className="w-1/4">
+            <div className="w-1/3">
                 <RecentActivityComponent />
             </div>
         </div>

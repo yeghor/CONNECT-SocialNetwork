@@ -2,17 +2,28 @@ import React, {ChangeEvent, useState} from "react";
 
 import { fetchUploadPostPictures } from "../../../fetching/fetchMedia.ts";
 import { allowedImageExtensions, maxPostImagesUpload, fileIsTooBigMessage } from "../../../consts.ts";
+import {safeAPICall} from "../../../fetching/fetchUtils.ts";
+import {LoadPostResponse, SuccessfulResponse} from "../../../fetching/responseDTOs.ts";
+import {getCookiesOrRedirect} from "../../../helpers/cookies/cookiesHandler.ts";
+import {useNavigate} from "react-router";
 
 
 const MakePost = () => {
+    const navigate = useNavigate();
+    const tokens = getCookiesOrRedirect(navigate);
+
     const [ title, setTitle ] = useState("");
     const [ text, setText ] = useState("");
     const [ images, setImages ] = useState<File[]>([]);
     const [ errorMessage, setErrorMessage ] = useState("");
 
 
-    const createPost = () => {
-        
+    const createPost = async () => {
+        const postId = "temp post id"
+        for (let i = 0; i < images.length; i++) {
+            await safeAPICall<SuccessfulResponse>(tokens, fetchUploadPostPictures, navigate, setErrorMessage, postId, images[i]);
+        }
+
     };
 
     const uploadImageLocal = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -23,7 +34,8 @@ const MakePost = () => {
     };
 
     const removeImageLocal = (index: number): void => {
-
+        const newImages = images.filter((i, ImageIndex) => index !== ImageIndex);
+        setImages(newImages);
     }
 
     return(
@@ -57,8 +69,8 @@ const MakePost = () => {
                 {images && (
                     images.map((image, i) => (
                         <div key={i} className="flex justify-between items-center mb-2">
-                            <p><span>{image.name}.{image.type}</span><span>{(image.size / 1048576).toFixed(2)} MB</span></p>
-                            <button className="p-1 rounded text-red-300 border border-red-300" onClick={() => removeImageLocal(i)}>Remove</button>
+                            <p><span>{image.name}</span><span className="ml-2">{(image.size / 1048576).toFixed(2)} MB</span></p>
+                            <button className="p-1 rounded text-red-300 border border-red-300 hover:bg-red-300/30" onClick={() => removeImageLocal(i)}>Remove</button>
                         </div>
                     ))
                 )}

@@ -28,7 +28,7 @@ export const fetchUploadAvatar = async (accessJWT: string, imageData: Blob): API
     return await fetchHelper<SuccessfulResponse>(uploadUserImageURL, requestInit, successfulResponseMapper);
 }
 
-export const fetchUploadPostPictures = async (accessJWT: string, postId: string, imageData: Blob): APIResponse<SuccessfulResponse> => {
+export const fetchUploadPostPictures = async (accessJWT: string, postId: string, imageData: File): APIResponse<SuccessfulResponse> => {
     const formData = new FormData();
     formData.append("file_", imageData);
 

@@ -20,13 +20,15 @@ import { validateGETResponse } from "../helpers/responseHandlers/getResponseHand
 export type APIResponse<R> = Promise<R & {success: true} | BadResponse & {success: false}>
 export type APIResponseResolved<R> = R & {success: true} | BadResponse & {success: false}
 
-export const fetchHelper = async <ResponseType>(requestURL: string, requestInit: RequestInit, DTOMapper: CallableFunction): Promise<ResponseType | BadResponse | SuccessfulResponse> => {
+export const fetchHelper = async <ResponseType>(requestURL: string, requestInit: RequestInit, DTOMapper: CallableFunction): Promise<ResponseType | BadResponse> => {
     const response = await fetch(requestURL, requestInit);
     const responseDTO = await response.json();
 
     if(!responseDTO) {
         console.log("no response dto")
         if(response.status === 200) {
+            // The code is safe
+            // @ts-ignore
             return successfulResponseMapper();
         } else {
             return createBadResponseManually(response.statusText, response.status);

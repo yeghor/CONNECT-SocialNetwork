@@ -143,7 +143,6 @@ const PostsFlow = () => {
 
     const infiniteQuerying = async () => {
         const flatMapPosts = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((post) => post !== undefined) ?? []
-        console.log(flatMapPosts.length)
         setPosts(flatMapPosts)
 
         const lastItem = virtualItems[virtualItems.length - 1];
