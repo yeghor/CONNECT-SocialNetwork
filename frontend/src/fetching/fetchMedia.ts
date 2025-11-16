@@ -30,8 +30,8 @@ export const fetchUploadAvatar = async (accessJWT: string, imageData: Blob): API
 
 export const fetchUploadPostPictures = async (accessJWT: string, postId: string, imageData: File): APIResponse<SuccessfulResponse> => {
     const formData = new FormData();
+    console.log(accessJWT)
     formData.append("file_", imageData);
-
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestTokenMultipartHeaders(accessJWT),

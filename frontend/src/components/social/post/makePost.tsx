@@ -1,14 +1,18 @@
 import React, {ChangeEvent, useState} from "react";
 
 import { fetchUploadPostPictures } from "../../../fetching/fetchMedia.ts";
-import { allowedImageExtensions, maxPostImagesUpload, fileIsTooBigMessage } from "../../../consts.ts";
+import {allowedImageExtensions, maxPostImagesUpload, fileIsTooBigMessage, specificPostURI} from "../../../consts.ts";
 import {safeAPICall} from "../../../fetching/fetchUtils.ts";
-import {LoadPostResponse, SuccessfulResponse} from "../../../fetching/responseDTOs.ts";
+import {LoadPostResponse, PostBaseResponse, SuccessfulResponse} from "../../../fetching/responseDTOs.ts";
 import {getCookiesOrRedirect} from "../../../helpers/cookies/cookiesHandler.ts";
 import {useNavigate} from "react-router";
+import {fetchMakePost} from "../../../fetching/fetchSocial.ts";
 
+type MakePostProps = {
+    postType:  "post" | "reply"
+};
 
-const MakePost = () => {
+const MakePost = (props: MakePostProps) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
@@ -19,11 +23,21 @@ const MakePost = () => {
 
 
     const createPost = async () => {
-        const postId = "temp post id"
-        for (let i = 0; i < images.length; i++) {
-            await safeAPICall<SuccessfulResponse>(tokens, fetchUploadPostPictures, navigate, setErrorMessage, postId, images[i]);
+        if (!tokens.access || !tokens.refresh) {
+            return;
         }
 
+        const createdPost = await safeAPICall<PostBaseResponse>(tokens, fetchMakePost, navigate, setErrorMessage, title, text, null);
+
+        if (!createdPost.success) {
+            return;
+        }
+
+        for (let i = 0; i < images.length; i++) {
+            console.log(await safeAPICall<SuccessfulResponse>(tokens, fetchUploadPostPictures, navigate, setErrorMessage, createdPost.data.postId, images[i]));
+        }
+
+        navigate(specificPostURI(createdPost.data.postId));
     };
 
     const uploadImageLocal = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -39,7 +53,7 @@ const MakePost = () => {
     }
 
     return(
-        <div className="w-full mx-auto p-4 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12 text-white">
+        <div className="w-full mx-auto p-4 bg-white/10 backdrop-blur rounded-2xl shadow-sm text-white">
             <div className="mb-6 space-y-3">
                 <div className="text-xl font-semibold">Make a Post</div>
 
@@ -76,7 +90,7 @@ const MakePost = () => {
                 )}
                 <p className="text-sm text-white/50">Up to 3 images</p>
 
-                {errorMessage && (<p className="py-2 rounded text-red-300 border border-red-300">{errorMessage}</p>)}
+                {errorMessage && (<p className="p-2 rounded text-red-300 border border-red-300">{errorMessage}</p>)}
 
                 <button
                     className="w-full py-2 mt-2 bg-white/20 hover:bg-white/30 text-white rounded-lg backdrop-blur-sm transition border border-white/20"

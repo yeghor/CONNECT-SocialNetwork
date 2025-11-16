@@ -77,18 +77,27 @@ export const authTokensResponseMapper = (data: AuthResponseDTO): AuthTokensRespo
         success: true
     };
 };
-// Posts
 
 interface OwnerDTO {
     user_id: string;
     username: string;
 }
 
-interface ShortPostDTO {
+export interface OwnerResponse {
+    userId: string;
+    username: string;
+}
+
+// Posts
+
+interface PostBaseDTO {
     post_id: string;
     title: string;
-    published: string;
+    published: Date;
     is_reply: boolean;
+}
+
+interface ShortPostDTO extends PostBaseDTO {
     owner: OwnerDTO;
     likes: number,
     views: number,
@@ -109,16 +118,15 @@ interface LoadPostResponseDTO extends FeedPostDTO{
 type ShortPostsDTO = ShortPostDTO[];
 type FeedPostsResponseDTO = FeedPostDTO[];
 
-export interface OwnerResponse {
-    userId: string,
-    username: string
-}
 
-export interface ShortPostInterface {
+interface PostBase {
     postId: string;
     title: string;
     published: Date;
     isReply: boolean;
+}
+
+export interface ShortPostInterface extends PostBase {
     owner: OwnerResponse;
     likes: number,
     views: number,
@@ -145,6 +153,22 @@ export interface PostCommentsResponse extends SuccessfulResponse {
 export interface FeedPostsResponse extends SuccessfulResponse {
     data: FeedPostResponse[]
 }
+
+export interface PostBaseResponse extends SuccessfulResponse {
+    data: PostBase
+}
+
+export const postBaseMapper = (postBaseDTO: PostBaseDTO): PostBaseResponse => {
+    return {
+        data: {
+            postId: postBaseDTO.post_id,
+            title: postBaseDTO.title,
+            published: new Date(postBaseDTO.published),
+            isReply: postBaseDTO.is_reply
+        },
+        success: true
+    };
+};
 
 // KISS THIS MOTHERFUCKER
 export const loadPostResponseMapper = (postDTO: LoadPostResponseDTO): LoadPostResponse => {

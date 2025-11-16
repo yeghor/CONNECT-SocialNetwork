@@ -102,7 +102,6 @@ export const safeAPICall = async <ResponseType>(
     ...funcArgs: any[]
 ): Promise<ResponseType | BadResponse> => {
     if(!(tokens.access && tokens.refresh)) {
-        console.log("no tokens")
         return createBadResponseManually(manualUnauthorizedMessage, 401);
     }
 

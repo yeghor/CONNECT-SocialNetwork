@@ -13,7 +13,8 @@ from pydantic_schemas.pydantic_schemas_social import (
     MakePostDataSchema,
     PostDataSchemaBase,
     UserSchema,
-    RecentActivitySchema
+    RecentActivitySchema,
+    PostBaseShort
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -85,10 +86,10 @@ async def make_post(
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends),
     post_data: MakePostDataSchema = Body(...)
-    ) -> None:
+    ) -> PostBaseShort:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
-        await social.make_post(data=post_data, user=user)
+        return await social.make_post(data=post_data, user=user)
 
 @social.get("/posts/{post_id}")
 @endpoint_exception_handler

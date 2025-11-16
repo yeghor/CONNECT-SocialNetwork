@@ -270,7 +270,7 @@ class MainServiceSocial(MainServiceBase):
         return [UserLiteSchema.model_validate(user, from_attributes=True) for user in users if user.user_id != request_user.user_id]
 
     @web_exceptions_raiser  
-    async def make_post(self, data: MakePostDataSchema, user: User) -> None:
+    async def make_post(self, data: MakePostDataSchema, user: User) -> PostBaseShort:
         if data.parent_post_id:
             parent_post = await self._PostgresService.get_entry_by_id(id_=data.parent_post_id, ModelType=Post)
             parent_post.replies_count += 1
@@ -289,6 +289,8 @@ class MainServiceSocial(MainServiceBase):
         await self._PostgresService.insert_models_and_flush(post)
         await self._PostgresService.refresh_model(post)
         await self._ChromaService.add_posts_data(posts=[post])
+
+        return PostBaseShort.model_validate(post, from_attributes=True)
 
     @web_exceptions_raiser
     async def remove_action(self, user: User, post: Post, action_type: ActionType) -> None:

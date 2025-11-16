@@ -40,12 +40,12 @@ import {
     FeedPostsResponse as PostsResponse,
     feedPostResponseMapper as postsResponseMapper,
     RecentActivityResponse, recentActivityMapper,
- 
+
     // Users
     ShortUserProfilesResponse,
     UserProfileResponse,
     userShortProfilesMapper,
-    userProfileMapper as userProfileResponseMapper
+    userProfileMapper as userProfileResponseMapper, PostBaseResponse, postBaseMapper
 } from "./responseDTOs.ts";
 
 // Get Posts
@@ -107,14 +107,14 @@ export const fetchUsersPosts = async (accessJWT: string, userId: string, page: n
 
 // Actions with posts
 
-export const fetchMakePost = async (accessJWT: string, title: string, text: string, parent_post_id: string | null = null): APIResponse<SuccessfulResponse> => {
+export const fetchMakePost = async (accessJWT: string, title: string, text: string, parent_post_id: string | null = null): APIResponse<PostBaseResponse> => {
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestTokenHeaders(accessJWT),
-        body:    JSON.stringify(makePostBody(title, text, parent_post_id))
+        body: JSON.stringify(makePostBody(title, text, parent_post_id))
     };
 
-    return await fetchHelper<SuccessfulResponse>(basePostURL, requestInit, successfulResponseMapper);
+    return await fetchHelper<PostBaseResponse>(basePostURL, requestInit, postBaseMapper);
 }
 
 export const fetchChangePost = async (accessJWT: string, postId: string, title: string, text: string): APIResponse<SuccessfulResponse> => {
