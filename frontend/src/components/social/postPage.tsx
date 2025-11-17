@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
+import {Link, useLocation, useNavigate, useParams} from "react-router-dom";
 
 import PostComments from "./post/postComments/postComments.tsx"
 
@@ -9,6 +9,7 @@ import {fetchLikePost, fetchLoadPost, fetchUnlikePost} from "../../fetching/fetc
 
 import { safeAPICall } from "../../fetching/fetchUtils.ts";
 import MakePost from "./post/makePost.tsx";
+import {specificPostURI} from "../../consts.ts";
 
 const PostPage = () => {
     const navigate = useNavigate();
@@ -72,8 +73,14 @@ const PostPage = () => {
 
     return (
         <div key={location.pathname + location.search}>
+            { postData.parentPost ?
+            <Link to={specificPostURI(postData.parentPost.postId)}>
+                <div className="w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
+                    <p className="text-white"><span className="font-bold">Reply to:</span> {postData.parentPost?.title}</p>
+                </div>
+            </Link> : null }
             <div className="w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
-            <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-3 mb-4">
                     <div
                         className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-sm font-medium text-gray-700">Author
                     </div>

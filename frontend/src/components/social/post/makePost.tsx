@@ -7,6 +7,7 @@ import {LoadPostResponse, PostBaseResponse, SuccessfulResponse} from "../../../f
 import {getCookiesOrRedirect} from "../../../helpers/cookies/cookiesHandler.ts";
 import {useNavigate} from "react-router";
 import {fetchMakePost} from "../../../fetching/fetchSocial.ts";
+import {validateMakePost} from "../../../helpers/validatorts.ts";
 
 type MakePostProps = {
     postType:  "post" | "reply"
@@ -31,7 +32,14 @@ const MakePost = (props: MakePostProps) => {
         if (!tokens.access || !tokens.refresh) {
             return;
         }
-        console.log(props.parentPostId)
+
+        const potentialValidationMessage = validateMakePost({ title: title, text: text });
+
+        if (potentialValidationMessage) {
+            setErrorMessage(potentialValidationMessage);
+            return;
+        }
+
         const createdPost = await safeAPICall<PostBaseResponse>(tokens, fetchMakePost, navigate, setErrorMessage, title, text, props.parentPostId);
 
         if (!createdPost.success) {

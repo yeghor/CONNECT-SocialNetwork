@@ -85,7 +85,6 @@ class Post(Base):
 
     is_reply: Mapped[bool] = mapped_column(default=False)
 
-    # Add constraits!!!
     title: Mapped[str] = mapped_column()
     text: Mapped[str]
     published: Mapped[datetime] = mapped_column(default=datetime.utcnow)
@@ -138,7 +137,7 @@ class Post(Base):
 
     @validates("text")
     def validate_text(self, key, text: str):
-        if not int(getenv("POST_TEXT_MIN_L")) <= len(text) <= int(getenv("POST_TEXT_MAX_L")):
+        if not len(text) <= int(getenv("POST_TEXT_MAX_L")):
             raise ValueError("Post text length is out of range")
         return text
 

@@ -12,9 +12,14 @@ export const emailRegexp = /^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/;
 export const passwordRegexp = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]){8,}/;
 
 export const maxPostImagesUpload = 3;
-export const imageMaxSizeMB = 25;
+export const imageMaxSizeMB = 5;
 // Mime types
 export const allowedImageExtensions = ["image/jpeg", "image/png", "image/webp"];
+
+export const postTitleMinLength = 3;
+export const postTitleMaxLength = 256;
+export const postTextMaxLength = 4000;
+
 
 export const internalServerErrorURI = "/internal-server-error"
 export const appHomeURI = "/";
@@ -31,3 +36,6 @@ export const invalidUsernameMessage = `Keep your username simple! Use ${Username
 export const manualUnauthorizedMessage = "Unauthorized. Try to login fort.";
 export const internalServerErrorDefaultMessage = "It's not you. It's us. Please try again later.";
 export const fileIsTooBigMessage = "Whoa there! That file is too big. Try something smaller.";
+export const postTitleIsTooSmallMessage = "Title’s too tiny. Give it at least a bit of substance.";
+export const postTitleIsTooLargeMessage = "Easy there, Shakespeare. That title is way too long.";
+export const postTextIsTooLargeMessage = "Your post is overflowing. Trim it down a little.";
