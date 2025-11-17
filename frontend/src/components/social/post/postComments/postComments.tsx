@@ -16,36 +16,34 @@ const PostComments = (props: CommentProps) => {
         props.originalPostData.postId = postId
     }
 
-    const pageRendered = useRef(false);
-
     const navigate = useNavigate();
 
     const tokens = getCookiesOrRedirect(navigate);
 
-    // Show button 'load more' only if lastResponseLen !== 0
-    const [ lastResponseLen, setLastResponseLen ] = useState<number>(0);
     const [ postComments, setPostComments ] = useState<ShortPostInterface[]>([]);
 
     const [ loadMoreTrigger, setLoadMoreTrigger ] = useState<boolean>(false);
     const [ page, setPage ] = useState<number>(0);
 
+    const [hasMore, setHasMore] = useState<boolean>(props.originalPostData.replies > 0);
+
     useEffect(() => {
         const fetchWrapper = async () => {
-            if (!pageRendered.current) {;
-                pageRendered.current = true;
-                return;
+            const response = await commentFetchHelper(tokens, props.originalPostData.postId, page, navigate);
+            if (response) {
+                setPostComments((prev) => {
+                    const updatedComments = [...prev, ...response.data];
+                    // React updates states asynchronously, so we need to update hasMore state inside setPostComments to update it before render
+                    setHasMore(updatedComments.length < props.originalPostData.replies);
+                    return updatedComments;
+                });
+                setPage((prev) => prev + 1);
             }
-            const response = await commentFetchHelper(tokens, postId, page, navigate);
-            if( response) {
-                setPostComments((prevState) => [...prevState, ...response.data]);
-                setLastResponseLen(response.data.length);
-            }
-        }
+        };
         fetchWrapper();
     }, [loadMoreTrigger]);
 
     const loadMoreClick = (): void => {
-        setPage((prevState) => prevState + 1);
         setLoadMoreTrigger(!loadMoreTrigger);
     }
 
@@ -59,7 +57,7 @@ const PostComments = (props: CommentProps) => {
                         );
                     })
                 }
-                { lastResponseLen !== 0 &&  <button onClick={() => loadMoreClick()} className="text-blue-500 hover:underline">Load More</button>}
+                { hasMore &&  <button onClick={() => loadMoreClick()} className="text-blue-500 hover:underline">Load More</button>}
             </div>
         </div>
     );

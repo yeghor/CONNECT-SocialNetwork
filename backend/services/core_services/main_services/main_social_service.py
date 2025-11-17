@@ -190,9 +190,7 @@ class MainServiceSocial(MainServiceBase):
         all_ids = self.combine_lists(related_ids, followed_ids, unrelevant_ids)
 
         posts = await self._PostgresService.get_entries_by_ids(ids=all_ids, ModelType=Post)
-        print(posts)
         posts = set(self._shuffle_posts(posts=posts))
-        print(posts)
 
         return [
             PostLiteSchema(

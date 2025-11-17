@@ -38,7 +38,7 @@ const createPostFlowResponse = (data: FeedPostResponse[]): PostsFlowComponents =
 
         switch (true) {
             case (post.picturesURLs.length <= 0):
-                componentSize = 200;
+                componentSize = 250;
                 break;
             case (post.picturesURLs.length === 1):
                 componentSize = 350;
@@ -48,7 +48,7 @@ const createPostFlowResponse = (data: FeedPostResponse[]): PostsFlowComponents =
         }
 
         if (post.isReply) {
-            componentSize += 50
+            componentSize += 100
         }
 
         const component = (

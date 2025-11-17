@@ -121,7 +121,7 @@ class PostgresService:
             result = await self.__session.execute(
                 select(Post)
                 .where(Post.post_id == id_)
-                .options(selectinload(Post.replies))
+                .options(selectinload(Post.replies), selectinload(Post.parent_post))
             )
         else:
             raise TypeError("Unsupported model type!")

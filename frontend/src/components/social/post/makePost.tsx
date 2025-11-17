@@ -10,9 +10,14 @@ import {fetchMakePost} from "../../../fetching/fetchSocial.ts";
 
 type MakePostProps = {
     postType:  "post" | "reply"
+    parentPostId: string | null;
 };
 
 const MakePost = (props: MakePostProps) => {
+    if (props.postType === "post" && props.parentPostId || props.postType === "reply" && !props.parentPostId) {
+        throw new Error("Invalid postType provided");
+    }
+
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
@@ -26,8 +31,8 @@ const MakePost = (props: MakePostProps) => {
         if (!tokens.access || !tokens.refresh) {
             return;
         }
-
-        const createdPost = await safeAPICall<PostBaseResponse>(tokens, fetchMakePost, navigate, setErrorMessage, title, text, null);
+        console.log(props.parentPostId)
+        const createdPost = await safeAPICall<PostBaseResponse>(tokens, fetchMakePost, navigate, setErrorMessage, title, text, props.parentPostId);
 
         if (!createdPost.success) {
             return;
@@ -53,9 +58,9 @@ const MakePost = (props: MakePostProps) => {
     }
 
     return(
-        <div className="w-full mx-auto p-4 bg-white/10 backdrop-blur rounded-2xl shadow-sm text-white">
+        <div className={`${props.postType === "post" ? "w-full" : "w-[900px]"} mx-auto p-4 bg-white/10 backdrop-blur rounded-2xl shadow-sm text-white`}>
             <div className="mb-6 space-y-3">
-                <div className="text-xl font-semibold">Make a Post</div>
+                <div className="text-xl font-semibold">{props.postType == "post" ? "Make a Post" : "Make a Reply"}</div>
 
                 <input
                     type="text"
@@ -96,7 +101,7 @@ const MakePost = (props: MakePostProps) => {
                     className="w-full py-2 mt-2 bg-white/20 hover:bg-white/30 text-white rounded-lg backdrop-blur-sm transition border border-white/20"
                     onClick={() => createPost()}
                 >
-                    Post
+                    {props.postType === "post" ? "Post" : "Reply"}
                 </button>
             </div>
         </div>

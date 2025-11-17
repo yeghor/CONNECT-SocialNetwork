@@ -8,6 +8,7 @@ import {LoadPostResponseInterface, LoadPostResponse, SuccessfulResponse} from ".
 import {fetchLikePost, fetchLoadPost, fetchUnlikePost} from "../../fetching/fetchSocial.ts";
 
 import { safeAPICall } from "../../fetching/fetchUtils.ts";
+import MakePost from "./post/makePost.tsx";
 
 const PostPage = () => {
     const navigate = useNavigate();
@@ -41,6 +42,7 @@ const PostPage = () => {
     }
 
     useEffect(() => {
+        toggleLikes(false);
         setPostData(undefined);
         postFetcher();
     }, [postId])
@@ -70,7 +72,7 @@ const PostPage = () => {
 
     return (
         <div key={location.pathname + location.search}>
-            <div className="w-full sm:w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
+            <div className="w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
             <div className="flex items-center gap-3 mb-4">
                     <div
                         className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-sm font-medium text-gray-700">Author
@@ -107,41 +109,11 @@ const PostPage = () => {
                     </div>
                 </div>
             </div>
-            <div className="w-full sm:w-[900px] mx-auto p-4 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12 text-white">
-                <div className="mb-6 space-y-3">
-                    <div className="text-xl font-semibold">Make a Reply</div>
 
-                    <input
-                        type="text"
-                        placeholder="Title..."
-                        className="w-full bg-white/5 text-white placeholder-white/60 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white/20 transition"
-                    />
+            <MakePost postType={"reply"} parentPostId={postData.postId} />
 
-                    <textarea
-                        placeholder="Write your comment..."
-                        className="w-full bg-white/5 text-white placeholder-white/60 rounded-lg px-4 py-2 min-h-[100px] resize-none focus:outline-none focus:ring-2 focus:ring-white/20 transition"
-                    ></textarea>
-
-                    <div className="flex items-center justify-between">
-                        <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="text-sm text-white/60 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-white/10 file:text-white file:hover:bg-white/20 file:cursor-pointer"
-                        />
-                        <span className="text-sm text-white/50">Up to 3 images</span>
-                    </div>
-
-                    <button
-                        className="w-full py-2 mt-2 bg-white/20 hover:bg-white/30 text-white rounded-lg backdrop-blur-sm transition border border-white/20"
-                        onClick={() => sendComment()}
-                    >
-                        Reply
-                    </button>
-                </div>
-            </div>
-            <div className="w-full sm:w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
-                <div className="font-bold text-2xl text-white">Comments:</div>
+            <div className="w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
+                <div className="font-bold text-xl text-white">Comments {postData.replies}:</div>
                 <PostComments originalPostData={postData} />
             </div>
         </div>
