@@ -11,7 +11,7 @@ const SocialHomePage = () => {
     return(
         <div className="flex gap-8 m-16">
             <div className="w-1/3">
-                <MakePost postType="post" />
+                <MakePost postType="post" parentPostId={null} />
             </div>
             <div className="w-1/3 mx-auto">
                 <PostsFlow />

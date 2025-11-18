@@ -165,12 +165,12 @@ const PostsFlow = () => {
     return (
         <div>
             <div>
-                <div className="">
+                <div className="flex items-center justify-center">
                     <div className="flex justify-start">
-                        <div className="flex justify-center gap-2 mb-4 text-white">
+                        <div className="flex justify-center gap-2 m-6 text-white">
                             <button
                                 className={`px-4 py-2 rounded-3xl ${
-                                    !feed ? "bg-white/10 hover:bg-white/30 transition-all" : "bg-white/30"
+                                    !feed ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30"
                                 }`}
                                 onClick={() => {
                                     if(!feed) {
@@ -182,7 +182,7 @@ const PostsFlow = () => {
                             </button>
                             <button
                                 className={`px-4 py-2 rounded-3xl ${
-                                    feed ? "bg-white/10 hover:bg-white/30 transition-all" : "bg-white/30"
+                                    feed ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30"
                                 }`}
                                 onClick={() => {
                                     if(feed) {

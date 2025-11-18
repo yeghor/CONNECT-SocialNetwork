@@ -60,14 +60,15 @@ const RecentActivityComponent = () => {
 
     return (
         <div>
+            <p className="text-xl text-white font-bold text-left m-6">Recent Activity:</p>
             <ul>
                 {recentActivity?.map((rc, index) => {
                     return(
-                        <li key={index} className="p-4">
-                            <img src={rc.avatarURL} alt="Avatar" className="h-10 w-10 rounded-lg"></img>
-                            <span className="text-white font-bold">{rc.message}</span>
-                            <span className="mx-2 text-grey-700">{calculateElapsedTime(rc.date)}</span>
-                        </li>
+                            <li key={index} className="p-4">
+                                <img src={rc.avatarURL} alt="Avatar" className="h-10 w-10 rounded-lg"></img>
+                                <span className="text-white font-bold">{rc.message}</span>
+                                <span className="mx-2 text-grey-700">{calculateElapsedTime(rc.date)}</span>
+                            </li>
                     )
                 }) ?? null}
             </ul>

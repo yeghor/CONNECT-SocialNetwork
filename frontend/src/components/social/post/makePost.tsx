@@ -66,8 +66,8 @@ const MakePost = (props: MakePostProps) => {
     }
 
     return(
-        <div className={`${props.postType === "post" ? "w-full" : "w-[900px]"} mx-auto p-4 bg-white/10 backdrop-blur rounded-2xl shadow-sm text-white`}>
-            <div className="mb-6 space-y-3">
+        <div className={`${props.postType === "post" ? "w-full" : "w-[900px] bg-white/10"} mx-auto p-4 bg-white/005 backdrop-blur rounded-2xl shadow-sm text-white flex justify-center`}>
+            <div className="mb-6 space-y-3 w-full">
                 <div className="text-xl font-semibold">{props.postType == "post" ? "Make a Post" : "Make a Reply"}</div>
 
                 <input
@@ -106,7 +106,7 @@ const MakePost = (props: MakePostProps) => {
                 {errorMessage && (<p className="p-2 rounded text-red-300 border border-red-300">{errorMessage}</p>)}
 
                 <button
-                    className="w-full py-2 mt-2 bg-white/20 hover:bg-white/30 text-white rounded-lg backdrop-blur-sm transition border border-white/20"
+                    className="w-full py-2 mt-2 bg-white/10 hover:bg-white/20 hover:scale-105 text-white rounded-lg backdrop-blur-sm transition border border-white/20"
                     onClick={() => createPost()}
                 >
                     {props.postType === "post" ? "Post" : "Reply"}
