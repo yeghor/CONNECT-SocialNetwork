@@ -443,7 +443,7 @@ class MainServiceSocial(MainServiceBase):
             title=post.title,
             text=post.text,
             published=post.published,
-            owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
+            owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
             likes=post.likes_count,
             is_liked=True if liked else False,
             views=post.views_count,
@@ -453,7 +453,7 @@ class MainServiceSocial(MainServiceBase):
                 title=post.parent_post.title,
                 published=post.parent_post.published,
                 is_reply=post.parent_post.is_reply,
-                owner=UserShortSchema.model_validate(post.parent_post.owner, from_attributes=True),
+                owner=UserShortSchemaAvatarURL(user_id=post.parent_post.owner_id, username=post.parent_post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.parent_post.owner_id)),
                 likes=post.parent_post.likes_count,
                 views=post.parent_post.views_count,
                 replies=post.parent_post.replies_count
@@ -479,7 +479,7 @@ class MainServiceSocial(MainServiceBase):
             published=post.published,
             is_reply=post.is_reply,
             pictures_urls=images_urls,
-            owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
+            owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
         )
 
     @web_exceptions_raiser
@@ -501,7 +501,7 @@ class MainServiceSocial(MainServiceBase):
             published=post.published,
             is_reply=post.is_reply,
             pictures_urls=[await self._ImageStorage.get_post_image_urls(images_names=image.image_name) for image in post.images],
-            owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
+            owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
             parent_post=PostBase.model_validate(post.parent_post, from_attributes=True) if post.parent_post else None
         ) for post in user_posts]
 

@@ -211,7 +211,6 @@ const PostsFlow = () => {
                                         <div className="hover:-translate-y-0.5 hover:border-white hover:border-3 transition-all">
                                             {postData.component}
                                         </div>
-
                                     </div>
                                 )
                             })

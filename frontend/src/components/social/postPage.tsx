@@ -10,6 +10,7 @@ import {fetchLikePost, fetchLoadPost, fetchUnlikePost} from "../../fetching/fetc
 import { safeAPICall } from "../../fetching/fetchUtils.ts";
 import MakePost from "./post/makePost.tsx";
 import {maxRequestsQueueLength, specificPostURI, tooMuchActivityMessage} from "../../consts.ts";
+import OwnerComponent from "./post/owner.tsx";
 
 const PostPage = () => {
     const navigate = useNavigate();
@@ -115,16 +116,7 @@ const PostPage = () => {
             </Link> : null }
             <div className="w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
                 <div className="flex items-center gap-3 mb-4">
-                    <div
-                        className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-sm font-medium text-gray-700">Author
-                    </div>
-                    <div>
-                        <div className="font-semibold text-white">{postData.owner.username}</div>
-                        <div className="text-xs text-gray-200">
-                            <span>{postData.published.toISOString().split("T")[0]}</span>
-                            <span className="mx-2">{`${postData.published.getHours()}:${postData.published.getMinutes()}`}</span>
-                        </div>
-                    </div>
+                    <OwnerComponent ownerData={postData.owner} postPublished={postData.published} avatarHeight={10} />
                 </div>
 
                 <div className="text-white leading-relaxed mb-4 font-bold">{postData.title}</div>
