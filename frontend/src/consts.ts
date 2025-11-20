@@ -20,6 +20,7 @@ export const postTitleMinLength = 3;
 export const postTitleMaxLength = 256;
 export const postTextMaxLength = 4000;
 
+export const maxRequestsQueueLength = 30;
 
 export const internalServerErrorURI = "/internal-server-error"
 export const appHomeURI = "/";
@@ -39,3 +40,4 @@ export const fileIsTooBigMessage = "Whoa there! That file is too big. Try someth
 export const postTitleIsTooSmallMessage = "Title’s too tiny. Give it at least a bit of substance.";
 export const postTitleIsTooLargeMessage = "Easy there, Shakespeare. That title is way too long.";
 export const postTextIsTooLargeMessage = "Your post is overflowing. Trim it down a little.";
+export const tooMuchActivityMessage = "Whoa! You’re smashing that button way too fast. Chill for a sec so we don’t confuse the server.";

@@ -9,7 +9,7 @@ import {fetchLikePost, fetchLoadPost, fetchUnlikePost} from "../../fetching/fetc
 
 import { safeAPICall } from "../../fetching/fetchUtils.ts";
 import MakePost from "./post/makePost.tsx";
-import {specificPostURI} from "../../consts.ts";
+import {maxRequestsQueueLength, specificPostURI, tooMuchActivityMessage} from "../../consts.ts";
 
 const PostPage = () => {
     const navigate = useNavigate();
@@ -19,7 +19,9 @@ const PostPage = () => {
     const tokens = getCookiesOrRedirect(navigate);
 
     const [ liked, toggleLikes ] = useState(false);
-    const [ delayed, toggleDelayed ] = useState(false);
+
+    // Store () => fetchLike/UnlinePost(...args)
+    const [ likeRequestQueue, setLikeRequestQueue ] = useState<CallableFunction[]>([]);
 
     const [ postData, setPostData ] = useState<LoadPostResponseInterface | undefined>(undefined);
 
@@ -43,32 +45,61 @@ const PostPage = () => {
             }
     }
 
+    const likeAction = () => {
+        if (postData) {
+            if (liked) {
+                postData.likes += 1;
+                postData.isLiked = true;
+                setLikeRequestQueue((prevState) => [...prevState, () => likeActionResolve(true)])
+            } else {
+                postData.likes -= 1;
+                postData.isLiked = false;
+                setLikeRequestQueue((prevState) => [...prevState, () => likeActionResolve(true)])
+            }
+            toggleLikes((prevState) => !prevState);
+        }
+    }
+
+    const likeActionResolve = async (like: boolean) => {
+        if (postData) {
+            if (like) {
+                await safeAPICall<SuccessfulResponse>(tokens, fetchLikePost, navigate, undefined, postId);
+            } else {
+                await safeAPICall<SuccessfulResponse>(tokens, fetchUnlikePost, navigate, undefined, postId);
+            }
+        }
+    }
+
+    const resolveLikesQueue = async () => {
+        if (resolveLikesQueue.length > maxRequestsQueueLength) {
+            setLikeRequestQueue([]);
+            window.alert(tooMuchActivityMessage);
+            return;
+        }
+        console.log("Resolving");
+        console.log(likeRequestQueue)
+
+        const toResolve = likeRequestQueue[0];
+
+        if (toResolve) {
+            await toResolve();
+            setLikeRequestQueue((prevState) => prevState.slice(1));
+        }
+
+        console.log(likeRequestQueue);
+
+        setTimeout(resolveLikesQueue, 2000);
+    }
+
+    const likeTimeout = setTimeout(resolveLikesQueue, 200);
+
     useEffect(() => {
         toggleLikes(false);
         setPostData(undefined);
         postFetcher();
+
+        return () => { clearTimeout(likeTimeout); }
     }, [postId])
-
-    const sendComment = async () => {
-
-    }
-
-    const likeAction = async () => {
-        if(postData ) {
-            toggleDelayed(true);
-            toggleLikes((prevState) => !prevState);
-            if(postData.isLiked) {
-                postData.likes -= 1;
-                postData.isLiked = false;
-                 await safeAPICall<SuccessfulResponse>(tokens, fetchUnlikePost, navigate, undefined, postId);
-            } else {
-                postData.likes += 1;
-                postData.isLiked = true;
-                await safeAPICall<SuccessfulResponse>(tokens, fetchLikePost, navigate, undefined, postId);
-            }
-            setTimeout(() => toggleDelayed(false), 200);
-        }
-    }
 
     if(!postData) {
         return null;
@@ -111,9 +142,7 @@ const PostPage = () => {
                     }
                 </div>
                 <div className="flex justify-start items-center gap-3">
-                    <button onClick={() => {
-                        if (!delayed) { likeAction() }
-                    }}>
+                    <button onClick={()=> likeAction()}>
                         <img src={liked ? "/thumbs-up-filled.png" : "/thumbs-up.png"} alt="like-icon" className="h-8 mt-4 hover:scale-110 transition-all" />
                     </button>
                     <div className="mt-4 text-white flex gap-3">
