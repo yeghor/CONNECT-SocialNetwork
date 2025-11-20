@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-import {Link, useLocation, useNavigate, useParams} from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import PostComments from "./post/postComments/postComments.tsx"
 
 import { getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
-import {LoadPostResponseInterface, LoadPostResponse, SuccessfulResponse} from "../../fetching/responseDTOs.ts";
-import {fetchLikePost, fetchLoadPost, fetchUnlikePost} from "../../fetching/fetchSocial.ts";
+import { LoadPostResponseInterface, LoadPostResponse, SuccessfulResponse } from "../../fetching/responseDTOs.ts";
+import { fetchLikePost, fetchLoadPost, fetchUnlikePost } from "../../fetching/fetchSocial.ts";
 
 import { safeAPICall } from "../../fetching/fetchUtils.ts";
 import MakePost from "./post/makePost.tsx";
-import {maxRequestsQueueLength, specificPostURI, tooMuchActivityMessage} from "../../consts.ts";
+import { maxRequestsQueueLength, specificPostURI, tooMuchActivityMessage } from "../../consts.ts";
 import OwnerComponent from "./post/owner.tsx";
 
 const PostPage = () => {
@@ -20,9 +20,7 @@ const PostPage = () => {
     const tokens = getCookiesOrRedirect(navigate);
 
     const [ liked, toggleLikes ] = useState(false);
-
-    // Store () => fetchLike/UnlinePost(...args)
-    const [ likeRequestQueue, setLikeRequestQueue ] = useState<CallableFunction[]>([]);
+    const [ likeDelay, setLikeDelay ] = useState(false);
 
     const [ postData, setPostData ] = useState<LoadPostResponseInterface | undefined>(undefined);
 
@@ -46,60 +44,28 @@ const PostPage = () => {
             }
     }
 
-    const likeAction = () => {
-        if (postData) {
+    const likeAction = async () => {
+        if (postData && !likeDelay) {
+            setLikeDelay(true);
             if (liked) {
-                postData.likes += 1;
-                postData.isLiked = true;
-                setLikeRequestQueue((prevState) => [...prevState, () => likeActionResolve(true)])
-            } else {
                 postData.likes -= 1;
                 postData.isLiked = false;
-                setLikeRequestQueue((prevState) => [...prevState, () => likeActionResolve(true)])
-            }
-            toggleLikes((prevState) => !prevState);
-        }
-    }
-
-    const likeActionResolve = async (like: boolean) => {
-        if (postData) {
-            if (like) {
-                await safeAPICall<SuccessfulResponse>(tokens, fetchLikePost, navigate, undefined, postId);
-            } else {
+                toggleLikes(postData.isLiked);
                 await safeAPICall<SuccessfulResponse>(tokens, fetchUnlikePost, navigate, undefined, postId);
+            } else {
+                postData.likes += 1;
+                postData.isLiked = true;
+                toggleLikes(postData.isLiked);
+                await safeAPICall<SuccessfulResponse>(tokens, fetchLikePost, navigate, undefined, postId);
             }
+            setTimeout(() => setLikeDelay(false), 200);
         }
     }
-
-    const resolveLikesQueue = async () => {
-        if (resolveLikesQueue.length > maxRequestsQueueLength) {
-            setLikeRequestQueue([]);
-            window.alert(tooMuchActivityMessage);
-            return;
-        }
-        console.log("Resolving");
-        console.log(likeRequestQueue)
-
-        const toResolve = likeRequestQueue[0];
-
-        if (toResolve) {
-            await toResolve();
-            setLikeRequestQueue((prevState) => prevState.slice(1));
-        }
-
-        console.log(likeRequestQueue);
-
-        setTimeout(resolveLikesQueue, 2000);
-    }
-
-    const likeTimeout = setTimeout(resolveLikesQueue, 200);
 
     useEffect(() => {
         toggleLikes(false);
         setPostData(undefined);
         postFetcher();
-
-        return () => { clearTimeout(likeTimeout); }
     }, [postId])
 
     if(!postData) {
@@ -134,7 +100,7 @@ const PostPage = () => {
                     }
                 </div>
                 <div className="flex justify-start items-center gap-3">
-                    <button onClick={()=> likeAction()}>
+                    <button onClick={()=> { if(!likeDelay) { likeAction() } }}>
                         <img src={liked ? "/thumbs-up-filled.png" : "/thumbs-up.png"} alt="like-icon" className="h-8 mt-4 hover:scale-110 transition-all" />
                     </button>
                     <div className="mt-4 text-white flex gap-3">
@@ -153,4 +119,4 @@ const PostPage = () => {
     );
 }
 
-export default PostPage
+export default PostPage;
