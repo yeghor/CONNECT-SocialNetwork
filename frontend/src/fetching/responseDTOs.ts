@@ -43,6 +43,7 @@ const OwnerMapper = (data: OwnerDTO): OwnerResponse => {
     return {
         userId: data.user_id,
         username: data.username,
+        avatarURL: data.avatar_url
     };
 };
 
@@ -50,7 +51,7 @@ const OwnerMapper = (data: OwnerDTO): OwnerResponse => {
 
 export interface AccessTokenDTO {
     access_token: string,
-    expires_at_access: string,
+    expires_at_access: string
 }
 
 export interface AuthResponseDTO extends AccessTokenDTO {
@@ -81,11 +82,13 @@ export const authTokensResponseMapper = (data: AuthResponseDTO): AuthTokensRespo
 interface OwnerDTO {
     user_id: string;
     username: string;
+    avatar_url: string | null;
 }
 
 export interface OwnerResponse {
     userId: string;
     username: string;
+    avatarURL: string | null;
 }
 
 // Posts

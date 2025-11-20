@@ -44,7 +44,7 @@ class PostBaseShort(PostIDValidate):
     is_reply: bool
 
 class PostBase(PostBaseShort):
-    owner: UserShortSchema | None
+    owner: UserShortSchemaAvatarURL | None
 
     likes: int = 0
     views: int = 0
@@ -77,8 +77,9 @@ class UserShortSchema(UserIDValidate):
 
 class UserShortSchemaAvatarURL(UserShortSchema):
     avatar_url: str | None
-    
-    # Boolean variable to identify which messages do user own
+
+class ChatUserShortSchemaAvatarURL(UserShortSchemaAvatarURL):
+    # Boolean state to identify which messages do user own
     me: bool
 
 class UserLiteSchema(UserShortSchema):

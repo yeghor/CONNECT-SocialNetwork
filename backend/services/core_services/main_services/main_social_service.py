@@ -18,6 +18,7 @@ from pydantic_schemas.pydantic_schemas_social import (
     UserLiteSchema,
     UserSchema,
     UserShortSchema,
+    UserShortSchemaAvatarURL,
     PostBase,
     RecentActivitySchema
 )
@@ -201,14 +202,14 @@ class MainServiceSocial(MainServiceBase):
                 likes=post.likes_count,
                 views=post.views_count,
                 replies=post.replies_count,
-                owner=UserShortSchema.model_validate(post.owner, from_attributes=True),
+                owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
                 parent_post=PostBase(
                     post_id=post.parent_post.post_id,
                     title=post.parent_post.title,
                     published=post.parent_post.published,
                     is_reply=post.parent_post.is_reply ,
-                    owner=UserShortSchema.model_validate(post.parent_post.owner, from_attributes=True),
+                    owner=UserShortSchemaAvatarURL(user_id=post.parent_post.owner_id, username=post.parent_post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.parent_post.owner_id)),
                     likes=post.parent_post.likes_count,
                     views=post.parent_post.views_count,
                     replies=post.parent_post.replies_count,
