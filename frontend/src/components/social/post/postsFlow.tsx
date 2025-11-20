@@ -13,13 +13,13 @@ import {
 } from "../../../helpers/cookies/cookiesHandler.ts";
 
 
-import {FeedPostResponse, FeedPostsResponse} from "../../../fetching/responseDTOs.ts";
+import { FeedPostResponse, FeedPostsResponse } from "../../../fetching/responseDTOs.ts";
 import { useNavigate } from "react-router";
-import {validateGETResponse} from "../../../helpers/responseHandlers/getResponseHandlers.ts";
+import { validateGETResponse } from "../../../helpers/responseHandlers/getResponseHandlers.ts";
 import { checkUnauthorizedResponse, retryUnauthorizedResponse } from "../../../fetching/fetchUtils.ts";
-import {NavigateFunction} from "react-router-dom";
-import {internalServerErrorURI, unauthorizedRedirectURI} from "../../../consts.ts";
-import {APIResponseResolved} from "../../../fetching/fetchUtils.ts";
+import { NavigateFunction } from "react-router-dom";
+import { internalServerErrorURI, unauthorizedRedirectURI } from "../../../consts.ts";
+import { APIResponseResolved } from "../../../fetching/fetchUtils.ts";
 import FlowPost from "./flowPost.tsx";
 
 

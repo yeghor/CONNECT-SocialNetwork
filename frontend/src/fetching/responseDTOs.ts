@@ -283,7 +283,7 @@ export interface UserProfileDTO extends ShortUserDTO {
   avatar_url: string
 }
 
-interface ShortUserProfile {
+export interface ShortUserProfile {
     userId: string,
     username: string,
     followers: number
