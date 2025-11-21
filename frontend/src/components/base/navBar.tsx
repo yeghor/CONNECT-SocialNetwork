@@ -9,7 +9,7 @@ const NavigationBar = (): ReactNode => {
     return (
         <div>
             <nav>
-                <div className="max-w-screen-xl flex items-center justify-between mx-auto p-4">
+                <div className="max-w flex items-center justify-between mx-auto p-4">
                     <Link to={appHomeURI} className="flex items-center space-x-3 rtl:space-x-reverse">
                         <img
                             src="/connect-logo-full.png"
