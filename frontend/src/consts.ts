@@ -30,6 +30,9 @@ export const unauthorizedRedirectURI = appLoginURI;
 export const specificPostURI = (postId: string) => {
     return `/post/${postId}`;
 };
+export const searchURI = (query: string): string => {
+    return `/search?query=${query}`;
+};
 
 export const passwordNotSecureEnoughMessage = "Come on, you can do better! Make your password better, longer, stronger, and maybe throw in a ’!’ for flair.";
 export const invalidEmailMessage = "That doesn’t look like a valid email. Make sure it includes ’@’ and a domain name.";

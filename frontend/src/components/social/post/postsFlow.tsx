@@ -1,10 +1,9 @@
-import React, {FunctionComponent, ReactElement, ReactNode, useEffect, useRef, useState} from "react";
-import { queryClient } from "../../../index.tsx";
+import React, { useEffect, useRef, useState } from "react";
 
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import { fetchFeedPosts, fetchFollowedPosts } from "../../../fetching/fetchSocial.ts";
+import { safeAPICall } from "../../../fetching/fetchUtils.ts";
 
 
 import {
@@ -12,86 +11,47 @@ import {
     CookieTokenObject
 } from "../../../helpers/cookies/cookiesHandler.ts";
 
-
-import { FeedPostResponse, FeedPostsResponse } from "../../../fetching/responseDTOs.ts";
+import { FeedPost, FeedPostsResponse } from "../../../fetching/responseDTOs.ts";
 import { useNavigate } from "react-router";
-import { validateGETResponse } from "../../../helpers/responseHandlers/getResponseHandlers.ts";
-import { checkUnauthorizedResponse, retryUnauthorizedResponse } from "../../../fetching/fetchUtils.ts";
 import { NavigateFunction } from "react-router-dom";
-import { internalServerErrorURI, unauthorizedRedirectURI } from "../../../consts.ts";
-import { APIResponseResolved } from "../../../fetching/fetchUtils.ts";
 import FlowPost from "./flowPost.tsx";
-
+import { fetchFeedPosts, fetchFollowPosts } from "../../../fetching/fetchSocial.ts";
+import { unauthorizedRedirectURI } from "../../../consts.ts"
+import estimatePostSize from "../../../helpers/postSizeEstimator.ts";
 
 interface PostsFlowFetcherInterface {
-    component: React.JSX.Element;
     // Depends on image existence
     estimatedSize: number;
-    postId: string
+    postId: string;
+    postData: FeedPost;
 }
 
 type PostsFlowComponents = PostsFlowFetcherInterface[];
 
-const createPostFlowResponse = (data: FeedPostResponse[]): PostsFlowComponents => {
+const createPostFlowResponse = (data: FeedPost[]): PostsFlowComponents => {
     return data.map((post) => {
-        let componentSize: number = 200;
-
-        switch (true) {
-            case (post.picturesURLs.length <= 0):
-                componentSize = 250;
-                break;
-            case (post.picturesURLs.length === 1):
-                componentSize = 350;
-                break;
-            case (post.picturesURLs.length >= 2):
-                componentSize = 500;
-        }
-
-        if (post.isReply) {
-            componentSize += 100
-        }
-
-        const component = (
-            <FlowPost postData={post}/>
-        );
+        let estimatedSize: number = estimatePostSize(post.picturesURLs.length, post.isReply);
 
         return {
-            component: component,
-            estimatedSize: componentSize,
+            estimatedSize: estimatedSize,
             postId: post.postId,
+            postData: post
         };
     })
 }
 
 const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolean, navigate: NavigateFunction): Promise<PostsFlowComponents | undefined> => {
     if(tokens.access) {
-        console.log(tokens.access);
+        const fetchFunction = feed ? fetchFeedPosts : fetchFollowPosts;
 
-        let fetchedPosts: APIResponseResolved<FeedPostsResponse>;
+        const fetchedPosts = await safeAPICall<FeedPostsResponse>(tokens, fetchFunction, navigate, undefined, page)
 
-        if (feed) {
-            fetchedPosts = await fetchFeedPosts(tokens.access, page);
-        } else {
-            fetchedPosts = await fetchFollowedPosts(tokens.access, page);
-        }
-
-        if(!validateGETResponse(fetchedPosts)) {
-            navigate(internalServerErrorURI);
+        if (!fetchedPosts.success) {
+            // safeApiCall will redirect
             return undefined;
         }
 
-        if(tokens.refresh && tokens.refresh && checkUnauthorizedResponse(fetchedPosts)) {
-            const fetchFunc = feed ? fetchFeedPosts : fetchFollowedPosts;
-            const retried = await retryUnauthorizedResponse<FeedPostsResponse>(fetchFunc, tokens.refresh, navigate, undefined, page);
-            if(retried && retried.success) {
-                return createPostFlowResponse(retried.data);
-            } else { return undefined; }
-        }
-        if(fetchedPosts.success) {
-            return createPostFlowResponse(fetchedPosts.data);
-        }
-
-        return undefined;
+        return createPostFlowResponse(fetchedPosts.data);
     }
 }
 
@@ -128,6 +88,7 @@ const PostsFlow = () => {
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createPostsInfiniteQueryOptions(tokens, feed, navigate));
     const [ posts, setPosts ] = useState<PostsFlowComponents>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
+
     const virtualizer = useVirtualizer({
         count: posts?.length ?? 0,
         estimateSize: (index) => {
@@ -138,6 +99,7 @@ const PostsFlow = () => {
         overscan: 16,
         getScrollElement: () => scrollRef.current,
     });
+
     const virtualItems = virtualizer.getVirtualItems();
 
 
@@ -149,10 +111,6 @@ const PostsFlow = () => {
         if (!hasNextPage || isFetchingNextPage || !lastItem) return;
         if (lastItem.index >= posts.length - 1) await fetchNextPage();
     }
-
-    useEffect(() => {
-        queryClient.clear();
-    }, [feed, setFeed]);
 
     useEffect(() => {
         infiniteQuerying();
@@ -199,9 +157,9 @@ const PostsFlow = () => {
                     <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
                         {
                             virtualItems.map((vItem) => {
-                                const postData = posts[vItem.index];
+                                const post = posts[vItem.index];
                                 return (
-                                    <div key={postData.postId + vItem.index} className="absolute top-0 left-0 w-full" data-index={vItem.index}
+                                    <div key={post.postId + vItem.index} className="absolute top-0 left-0 w-full" data-index={vItem.index}
                                          style={
                                              {
                                                  transform: `translateY(${vItem.start}px)`,
@@ -209,7 +167,7 @@ const PostsFlow = () => {
                                              }
                                          }>
                                         <div className="hover:-translate-y-0.5 hover:border-white hover:border-3 transition-all">
-                                            {postData.component}
+                                            <FlowPost postData={post.postData} />
                                         </div>
                                     </div>
                                 )

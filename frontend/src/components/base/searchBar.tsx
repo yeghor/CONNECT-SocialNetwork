@@ -1,17 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import { fetchSearchPosts, fetchSearchUsers } from "../../fetching/fetchSocial"
-import { safeAPICall } from "../../fetching/fetchUtils"
-import { FeedPostsResponse } from "../../fetching/responseDTOs"
-import SearchPage from "../social/searchPage.tsx";
+import { searchURI } from "../../consts.ts";
 
 const SearchBar = () => {
     const navigate = useNavigate();
 
-    const [ prompt, setPrompt ] = useState("");
+    const [ query, setQuery ] = useState("");
 
     const search = () => {
-        console.log("Search activated");
+        navigate(searchURI(query));
     };
 
     return (
@@ -19,7 +16,7 @@ const SearchBar = () => {
             <input
                 type="text"
                 placeholder="Search..."
-                onChange={(e) => setPrompt(e.target.value)}
+                onChange={(e) => setQuery(e.target.value)}
                 className="w-full p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30 bg-white/10 transition-all text-white"
             />
             <button onClick={() => search()}>

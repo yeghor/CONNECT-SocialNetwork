@@ -138,11 +138,11 @@ export interface ShortPostInterface extends PostBase {
     picturesURLs: string[]
 }
 
-export interface FeedPostResponse extends ShortPostInterface {
+export interface FeedPost extends ShortPostInterface {
     parentPost?: ShortPostInterface
 }
 
-export interface LoadPostResponseInterface extends FeedPostResponse {
+export interface LoadPostResponseInterface extends FeedPost {
     text: string,
     lastUpdated: Date
 }
@@ -154,7 +154,7 @@ export interface PostCommentsResponse extends SuccessfulResponse {
     data: ShortPostInterface[]
 }
 export interface FeedPostsResponse extends SuccessfulResponse {
-    data: FeedPostResponse[]
+    data: FeedPost[]
 }
 
 export interface PostBaseResponse extends SuccessfulResponse {

@@ -1,11 +1,11 @@
 import React from "react";
-import { FeedPostResponse } from "../../../fetching/responseDTOs.ts";
+import { FeedPost } from "../../../fetching/responseDTOs.ts";
 import OwnerComponent from "./owner.tsx";
 import {Link} from "react-router-dom";
 
 import { specificPostURI } from "../../../consts.ts";
 
-const FlowPost = (props: { postData: FeedPostResponse | undefined }) => {
+const FlowPost = (props: { postData: FeedPost | undefined }) => {
     const images = props.postData?.picturesURLs || [];
 
     // Guard for TS

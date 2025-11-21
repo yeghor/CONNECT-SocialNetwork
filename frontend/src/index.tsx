@@ -13,6 +13,7 @@ import LoginForm from './components/auth/loginForm.tsx';
 import RegisterForm from "./components/auth/registerForm.tsx"
 import NavigationBar from "./components/base/navBar.tsx";
 import Footer from "./components/base/footer.tsx";
+import SearchPage from "./components/social/searchPage.tsx";
 
 const container = document.getElementById('root')
 
@@ -52,6 +53,9 @@ if(container) {
                                 } />
                                 <Route path='/register' element={
                                     <RegisterForm />
+                                } />
+                                <Route path="/search" element={
+                                    <SearchPage />
                                 } />
                             </Routes>
                         <Footer />
