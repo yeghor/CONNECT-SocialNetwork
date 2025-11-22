@@ -35,7 +35,7 @@ type SearchData = (SearchResultPost | SearchResultUser)[];
 
 type SearchFilter = "both" | "posts" | "users";
 
-const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFunction, page: number, filter: SearchFilter): Promise<SearchData | undefined> => {
+const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFunction, query: string, page: number, filter: SearchFilter): Promise<SearchData | undefined> => {
     let fetchFunctions: CallableFunction[];
 
     switch (filter) {
@@ -51,7 +51,7 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
 
     let fetchedResults: (FeedPost | ShortUserProfile)[] = [];
     for (let fetcherFunction of fetchFunctions) {
-        const response = await safeAPICall<FeedPostsResponse | ShortUserProfilesResponse>(tokens, fetcherFunction, navigate, undefined, page)
+        const response = await safeAPICall<FeedPostsResponse | ShortUserProfilesResponse>(tokens, fetcherFunction, navigate, undefined, query, page)
         if (response.success) {
             fetchedResults = fetchedResults.concat(response.data);
         } else {
@@ -63,7 +63,7 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
     fetchedResults = arrayShuffle(fetchedResults);
 
     return fetchedResults.map((elem) => {
-        if ((elem as FeedPost).postId !== undefined) {
+        if ("postId" in elem) {
             elem = elem as FeedPost;
 
             let estimateSize: number = estimatePostSize(elem.picturesURLs.length, elem.isReply);
@@ -84,10 +84,10 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
     })
 }
 
-const createSearchInfiniteQueryOptions = (tokens: CookieTokenObject, navigate: NavigateFunction, filter: SearchFilter) => {
+const createSearchInfiniteQueryOptions = (tokens: CookieTokenObject, navigate: NavigateFunction, query: string,  filter: SearchFilter) => {
     return infiniteQueryOptions({
-        queryKey: ["search"],
-        queryFn: ({pageParam}) => getSearchResults(tokens, navigate, pageParam, filter),
+        queryKey: ["search", filter, query],
+        queryFn: ({pageParam}) => getSearchResults(tokens, navigate, query, pageParam, filter),
         initialPageParam: 0,
         getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
             if (lastPage) {
@@ -110,9 +110,10 @@ const SearchPage = () => {
     const [ filter, setFilter ] = useState<SearchFilter>("both");
 
     const [ searchParams ] = useSearchParams();
-    const query = searchParams.get("query");
+    let query = searchParams.get("query");
+    if (query === null) query = "";
 
-    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createSearchInfiniteQueryOptions(tokens, navigate, filter));
+    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createSearchInfiniteQueryOptions(tokens, navigate, query, filter));
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const searchData = (data?.pages.flatMap((page => page)) ?? []).filter((elem) => elem !== undefined);
@@ -129,7 +130,7 @@ const SearchPage = () => {
     const virtualItems= virtualizer.getVirtualItems();
 
     useEffect(() => {
-        const lastItem = virtualItems[useVirtualizer.length - 1];
+        const lastItem = virtualItems[virtualItems.length - 1];
         if (!hasNextPage || isFetchingNextPage || !lastItem) return;
         if (lastItem.index >= searchData.length - 1)
         fetchNextPage();
@@ -144,7 +145,7 @@ const SearchPage = () => {
                         <div
                             key={vItem.key}
                             style={{
-                                transform: `translateY${vItem.start}px`,
+                                transform: `translateY(${vItem.start})px`,
                                 height: `${vItem.size}px`}}
                             className="absolute top-0 left-0 w-full"
                         ></div>
