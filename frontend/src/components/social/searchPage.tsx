@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import {infiniteQueryOptions, useInfiniteQuery} from "@tanstack/react-query";
 
 import { fetchSearchPosts, fetchSearchUsers } from "../../fetching/fetchSocial"
 import { safeAPICall } from "../../fetching/fetchUtils"
@@ -8,13 +10,13 @@ import {
     ShortUserProfile,
     ShortUserProfilesResponse
 } from "../../fetching/responseDTOs"
-import { useSearchParams } from "react-router";
+import {useNavigate, useSearchParams} from "react-router";
 
 import FlowPost from "./post/flowPost.tsx"
 import FlowUser from "./post/flowUser.tsx"
 import estimatePostSize from "../../helpers/postSizeEstimator.ts";
 
-import { CookieTokenObject } from "../../helpers/cookies/cookiesHandler.ts";
+import {CookieTokenObject, getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
 import { arrayShuffle } from "array-shuffle";
 
@@ -29,10 +31,11 @@ interface SearchResultUser {
     data: ShortUserProfile;
 }
 
+type SearchData = (SearchResultPost | SearchResultUser)[];
 
 type SearchFilter = "both" | "posts" | "users";
 
-const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFunction, page: number, filter: SearchFilter): Promise<(SearchResultUser | SearchResultPost)[] | undefined> => {
+const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFunction, page: number, filter: SearchFilter): Promise<SearchData | undefined> => {
     let fetchFunctions: CallableFunction[];
 
     switch (filter) {
@@ -44,49 +47,111 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
             break;
         case "users":
             fetchFunctions = [fetchSearchUsers];
+    }
 
-        let fetchedResults: (FeedPost | ShortUserProfile)[] = [];
-        for (let fetcherFunction of fetchFunctions) {
-            const response = await safeAPICall<FeedPostsResponse | ShortUserProfilesResponse>(tokens, fetcherFunction, navigate, undefined, page)
-            if (response.success) {
-                fetchedResults.concat(response.data);
+    let fetchedResults: (FeedPost | ShortUserProfile)[] = [];
+    for (let fetcherFunction of fetchFunctions) {
+        const response = await safeAPICall<FeedPostsResponse | ShortUserProfilesResponse>(tokens, fetcherFunction, navigate, undefined, page)
+        if (response.success) {
+            fetchedResults = fetchedResults.concat(response.data);
+        } else {
+            return undefined;
+        }
+    }
+
+
+    fetchedResults = arrayShuffle(fetchedResults);
+
+    return fetchedResults.map((elem) => {
+        if ((elem as FeedPost).postId !== undefined) {
+            elem = elem as FeedPost;
+
+            let estimateSize: number = estimatePostSize(elem.picturesURLs.length, elem.isReply);
+
+            return {
+                estimateSize: estimateSize,
+                type: "post",
+                data: elem
+            };
+        } else {
+            elem = elem as ShortUserProfile;
+            return {
+                estimateSize: 250,
+                type: "user",
+                data: elem
+            };
+        }
+    })
+}
+
+const createSearchInfiniteQueryOptions = (tokens: CookieTokenObject, navigate: NavigateFunction, filter: SearchFilter) => {
+    return infiniteQueryOptions({
+        queryKey: ["search"],
+        queryFn: ({pageParam}) => getSearchResults(tokens, navigate, pageParam, filter),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
+            if (lastPage) {
+                if (!lastPage || lastPage.length === 0) {
+                    return undefined;
+                }
+                return lastPageParam + 1;
             } else {
                 return undefined;
             }
         }
-
-        fetchedResults = arrayShuffle(fetchedResults);
-
-        return fetchedResults.map((elem) => {
-            if ((elem as FeedPost).postId !== undefined) {
-                elem = elem as FeedPost;
-
-                let estimateSize: number = estimatePostSize(elem.picturesURLs.length, elem.isReply);
-
-                return {
-                    estimateSize: estimateSize,
-                    type: "post",
-                    data: elem
-                };
-            } else {
-                elem = elem as ShortUserProfile;
-                return {
-                    estimateSize: 250,
-                    type: "user",
-                    data: elem
-                };
-            }
-        })
-    }
+    })
 }
 
 // Initial page - 1
 const SearchPage = () => {
+    const navigate = useNavigate();
+    const tokens = getCookiesOrRedirect(navigate);
+
+    const [ filter, setFilter ] = useState<SearchFilter>("both");
+
     const [ searchParams ] = useSearchParams();
     const query = searchParams.get("query");
 
+    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createSearchInfiniteQueryOptions(tokens, navigate, filter));
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const searchData = (data?.pages.flatMap((page => page)) ?? []).filter((elem) => elem !== undefined);
+
+    const virtualizer = useVirtualizer({
+        count: searchData?.length ?? 0,
+        estimateSize: (index) => {
+            const elem = searchData[index]
+            return elem?.estimateSize ?? 0
+        },
+        getScrollElement: () => scrollRef.current
+    });
+
+    const virtualItems= virtualizer.getVirtualItems();
+
+    useEffect(() => {
+        const lastItem = virtualItems[useVirtualizer.length - 1];
+        if (!hasNextPage || isFetchingNextPage || !lastItem) return;
+        if (lastItem.index >= searchData.length - 1)
+        fetchNextPage();
+    }, [virtualItems, hasNextPage, fetchNextPage]);
+
     return(
-        <div></div>
+        <div ref={scrollRef} className="mx-auto w-2/3 h-screen overflow-y-auto flex flex-col gap-4">
+            <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
+                { virtualizer.getVirtualItems().map((vItem,) => {
+                    const elem = searchData[vItem.index];
+                    return (
+                        <div
+                            key={vItem.key}
+                            style={{
+                                transform: `translateY${vItem.start}px`,
+                                height: `${vItem.size}px`}}
+                            className="absolute top-0 left-0 w-full"
+                        ></div>
+                    )
+                }) }
+            </div>
+        </div>
     );
 };
 

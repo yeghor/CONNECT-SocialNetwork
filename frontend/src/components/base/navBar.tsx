@@ -10,7 +10,7 @@ const NavigationBar = (): ReactNode => {
         <div>
             <nav>
                 <div className="max-w flex items-center justify-between mx-auto p-4">
-                    <Link to={appHomeURI} className="flex items-center space-x-3 rtl:space-x-reverse">
+                    <Link to={appHomeURI} className="w-1/3 flex items-center space-x-3 rtl:space-x-reverse">
                         <img
                             src="/connect-logo-full.png"
                             className="h-15 w-auto hover:scale-110 transition-all"
@@ -18,13 +18,13 @@ const NavigationBar = (): ReactNode => {
                         />
                     </Link>
 
-                    <div className="flex-1 mx-4 flex justify-center">
+                    <div className="w-1/3 flex-1 mx-4 flex justify-center">
                         <div className="w-full max-w-md">
                             <SearchBar />
                         </div>
                     </div>
 
-                    <ul className="flex space-x-4 rtl:space-x-reverse">
+                    <ul className="w-1/3 flex space-x-4 rtl:space-x-reverse">
                         <li>
                             <Link to="/" className="block py-2 px-3" aria-current="page">
                                 <img
