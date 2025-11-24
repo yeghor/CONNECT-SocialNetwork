@@ -7,55 +7,48 @@ import SearchBar from "./searchBar.tsx";
 
 const NavigationBar = (): ReactNode => {
     return (
-        <div>
-            <nav>
-                <div className="max-w flex items-center justify-between mx-auto p-4">
-                    <Link to={appHomeURI} className="w-1/3 flex items-center space-x-3 rtl:space-x-reverse">
+        <nav className="w-full">
+            <div className="flex items-center justify-between w-full p-4">
+
+                {/* LEFT — LOGO */}
+                <div className="flex items-center w-1/3">
+                    <Link to={appHomeURI} className="flex items-center">
                         <img
                             src="/connect-logo-full.png"
                             className="h-15 w-auto hover:scale-110 transition-all"
                             alt="Connect Logo"
                         />
                     </Link>
-
-                    <div className="w-1/3 flex-1 mx-4 flex justify-center">
-                        <div className="w-full max-w-md">
-                            <SearchBar />
-                        </div>
-                    </div>
-
-                    <ul className="w-1/3 flex space-x-4 rtl:space-x-reverse">
-                        <li>
-                            <Link to="/" className="block py-2 px-3" aria-current="page">
-                                <img
-                                    src="/feed-title.png"
-                                    alt="Feed"
-                                    className="h-10 w-auto hover:scale-110 transition-all"
-                                />
-                            </Link>
-                        </li>
-                        <li>
-                            <Link to="/chat" className="block py-2 px-3" aria-current="page">
-                                <img
-                                    src="/chat-title.png"
-                                    alt="Chat"
-                                    className="h-10 w-auto hover:scale-110 transition-all"
-                                />
-                            </Link>
-                        </li>
-                        <li>
-                            <Link to="/my-profile" className="block py-2 px-3" aria-current="page">
-                                <img
-                                    src="/me-title.png"
-                                    alt="Me"
-                                    className="h-10 w-auto hover:scale-110 transition-all"
-                                />
-                            </Link>
-                        </li>
-                    </ul>
                 </div>
-            </nav>
-        </div>
+
+                {/* CENTER — SEARCH */}
+                <div className="flex justify-center w-1/3">
+                    <div className="w-full max-w-md">
+                        <SearchBar />
+                    </div>
+                </div>
+
+                {/* RIGHT — NAVIGATION */}
+                <ul className="flex items-center justify-end w-1/3 space-x-4">
+                    <li>
+                        <Link to="/" className="py-2 px-3" aria-current="page">
+                            <img src="/feed-title.png" alt="Feed" className="h-10 w-auto hover:scale-110 transition-all" />
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/chat" className="py-2 px-3">
+                            <img src="/chat-title.png" alt="Chat" className="h-10 w-auto hover:scale-110 transition-all" />
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/my-profile" className="py-2 px-3">
+                            <img src="/me-title.png" alt="Me" className="h-10 w-auto hover:scale-110 transition-all" />
+                        </Link>
+                    </li>
+                </ul>
+
+            </div>
+        </nav>
     );
 }
 

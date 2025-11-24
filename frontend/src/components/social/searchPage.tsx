@@ -19,6 +19,7 @@ import estimatePostSize from "../../helpers/postSizeEstimator.ts";
 import {CookieTokenObject, getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
 import { arrayShuffle } from "array-shuffle";
+import OwnerComponent from "./post/owner.tsx";
 
 interface SearchResultPost {
     estimateSize: number;
@@ -136,19 +137,35 @@ const SearchPage = () => {
         fetchNextPage();
     }, [virtualItems, hasNextPage, fetchNextPage]);
 
+    console.log(searchData);
+
     return(
         <div ref={scrollRef} className="mx-auto w-2/3 h-screen overflow-y-auto flex flex-col gap-4">
             <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
                 { virtualizer.getVirtualItems().map((vItem,) => {
                     const elem = searchData[vItem.index];
+
+                    if (!elem || !elem.data) return null;
+                    console.log(elem)
+                    let Component;
+                    if (elem.type === "post") {
+                        elem.data = elem.data as FeedPost;
+                        Component = (<FlowPost postData={elem.data} />);
+                    } else {
+                        elem.data = elem.data as ShortUserProfile;
+                        Component = (<FlowUser props={elem.data}/>);
+                    }
+
                     return (
                         <div
                             key={vItem.key}
                             style={{
                                 transform: `translateY(${vItem.start})px`,
                                 height: `${vItem.size}px`}}
-                            className="absolute top-0 left-0 w-full"
-                        ></div>
+                            className="top-0 left-0 w-full p-6 my-5"
+                        >
+                            {Component}
+                        </div>
                     )
                 }) }
             </div>
