@@ -60,8 +60,8 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
         }
     }
 
-
-    fetchedResults = arrayShuffle(fetchedResults);
+        //
+        // fetchedResults = arrayShuffle(fetchedResults);
 
     return fetchedResults.map((elem) => {
         if ("postId" in elem) {
@@ -77,7 +77,7 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
         } else {
             elem = elem as ShortUserProfile;
             return {
-                estimateSize: 250,
+                estimateSize: 300,
                 type: "user",
                 data: elem
             };
@@ -125,7 +125,8 @@ const SearchPage = () => {
             const elem = searchData[index]
             return elem?.estimateSize ?? 0
         },
-        getScrollElement: () => scrollRef.current
+        getScrollElement: () => scrollRef.current,
+        overscan: 48
     });
 
     const virtualItems= virtualizer.getVirtualItems();
@@ -137,32 +138,32 @@ const SearchPage = () => {
         fetchNextPage();
     }, [virtualItems, hasNextPage, fetchNextPage]);
 
-    console.log(searchData);
-
     return(
         <div ref={scrollRef} className="mx-auto w-2/3 h-screen overflow-y-auto flex flex-col gap-4">
             <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
-                { virtualizer.getVirtualItems().map((vItem,) => {
+                { virtualItems.map((vItem,) => {
                     const elem = searchData[vItem.index];
+                    let uniqueIdentifier: string;
 
                     if (!elem || !elem.data) return null;
-                    console.log(elem)
                     let Component;
                     if (elem.type === "post") {
                         elem.data = elem.data as FeedPost;
                         Component = (<FlowPost postData={elem.data} />);
+                        uniqueIdentifier = elem.data.postId
                     } else {
                         elem.data = elem.data as ShortUserProfile;
-                        Component = (<FlowUser props={elem.data}/>);
+                        Component = (<FlowUser userData={elem.data}/>);
+                        uniqueIdentifier = elem.data.userId
                     }
 
                     return (
                         <div
-                            key={vItem.key}
+                            key={vItem.key + uniqueIdentifier}
                             style={{
                                 transform: `translateY(${vItem.start})px`,
                                 height: `${vItem.size}px`}}
-                            className="top-0 left-0 w-full p-6 my-5"
+                            className="top-0 left-0 w-full"
                         >
                             {Component}
                         </div>

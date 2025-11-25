@@ -270,32 +270,28 @@ export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsRes
 
 
 // User profiles
-interface ShortUserDTO {
-    user_id: string,
-    username: string,
-    followers: number
+interface ShortUserDTO extends OwnerDTO {
+    followers: number,
+    joined: string
 }
 
 export type ShortUsersDTOResponse = ShortUserDTO[];
 
 export interface UserProfileDTO extends ShortUserDTO {
-  followed: number,
-  avatar_url: string
+  followed: number
 }
 
-export interface ShortUserProfile {
-    userId: string,
-    username: string,
+export interface ShortUserProfile extends OwnerResponse {
     followers: number
-}
-
-export interface ShortUserProfilesResponse extends SuccessfulResponse{
-    data: ShortUserProfile[],
 }
 
 export interface UserProfileResponse extends ShortUserProfile, SuccessfulResponse {
     followed: number,
-    avatarURL: string,
+    joined: Date,
+}
+
+export interface ShortUserProfilesResponse extends SuccessfulResponse{
+    data: ShortUserProfile[],
 }
 
 export const userShortProfilesMapper = (data: ShortUsersDTOResponse): ShortUserProfilesResponse => {
@@ -303,6 +299,7 @@ export const userShortProfilesMapper = (data: ShortUsersDTOResponse): ShortUserP
         ({
             userId: shortUserDTO.user_id,
             username: shortUserDTO.username,
+            avatarURL: shortUserDTO.avatar_url,
             followers: shortUserDTO.followers
         })
     );
@@ -319,6 +316,7 @@ export const userProfileMapper = (data: UserProfileDTO): UserProfileResponse => 
         followers: data.followers,
         followed: data.followed,
         avatarURL: data.avatar_url,
+        joined: new Date(data.joined),
         success: true
     };
 };

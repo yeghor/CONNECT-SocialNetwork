@@ -78,14 +78,12 @@ class UserShortSchema(UserIDValidate):
 class UserShortSchemaAvatarURL(UserShortSchema):
     avatar_url: str | None
 
+class UserLiteSchema(UserShortSchemaAvatarURL):
+    followers: int
+
 class ChatUserShortSchemaAvatarURL(UserShortSchemaAvatarURL):
     # Boolean state to identify which messages do user own
     me: bool
-
-class UserLiteSchema(UserShortSchema):
-    """Pass to the followers field List[User]!"""
-    followers: int
-
 
 class UserSchema(UserLiteSchema):
     followed: int

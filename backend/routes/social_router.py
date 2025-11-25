@@ -14,7 +14,8 @@ from pydantic_schemas.pydantic_schemas_social import (
     PostDataSchemaBase,
     UserSchema,
     RecentActivitySchema,
-    PostBaseShort
+    PostBaseShort,
+    UserShortSchemaAvatarURL
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
