@@ -138,39 +138,73 @@ const SearchPage = () => {
         fetchNextPage();
     }, [virtualItems, hasNextPage, fetchNextPage]);
 
+    const changeFilter = (newFilter: SearchFilter): void => {
+        if (newFilter !== filter) {
+            setFilter(newFilter);
+        }
+    };
+
     return(
-        <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4">
-            <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
-                { virtualItems.map((vItem,) => {
-                    const elem = searchData[vItem.index];
-                    let uniqueIdentifier: string;
+        <div>
+            <div className="flex justify-center gap-4 text-white w-2/3 mx-auto m-6">
+                <button
+                    className={`px-4 py-2 rounded-3xl ${
+                        filter !== "both" ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30"
+                    }`}
+                    onClick={() => { changeFilter("both"); }}
+                >
+                    Both
+                </button>
+                <button
+                    className={`px-4 py-2 rounded-3xl ${
+                        filter !== "users" ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30"
+                    }`}
+                    onClick={() => { changeFilter("users"); }}
+                >
+                    Users
+                </button>
+                <button
+                    className={`px-4 py-2 rounded-3xl ${
+                        filter !== "posts" ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30"
+                    }`}
+                    onClick={() => { changeFilter("posts"); }}
+                >
+                    Posts
+                </button>
+            </div>
+            <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4">
+                <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
+                    { virtualItems.map((vItem,) => {
+                        const elem = searchData[vItem.index];
+                        let uniqueIdentifier: string;
 
-                    if (!elem || !elem.data) return null;
-                    let Component;
-                    if (elem.type === "post") {
-                        elem.data = elem.data as FeedPost;
-                        Component = (<FlowPost postData={elem.data} />);
-                        uniqueIdentifier = elem.data.postId
-                    } else {
-                        elem.data = elem.data as ShortUserProfile;
-                        Component = (<FlowUser userData={elem.data}/>);
-                        uniqueIdentifier = elem.data.userId
-                    }
+                        if (!elem || !elem.data) return null;
+                        let Component;
+                        if (elem.type === "post") {
+                            elem.data = elem.data as FeedPost;
+                            Component = (<FlowPost postData={elem.data} />);
+                            uniqueIdentifier = elem.data.postId
+                        } else {
+                            elem.data = elem.data as ShortUserProfile;
+                            Component = (<FlowUser userData={elem.data}/>);
+                            uniqueIdentifier = elem.data.userId
+                        }
 
-                    return (
-                        <div
-                            key={vItem.key + uniqueIdentifier}
-                            style={{
-                                transform: `translateY(${vItem.start})px`,
-                                height: `${vItem.size}px`}}
-                            className="top-0 left-0 w-full"
-                        >
-                            <div className="m-4">
-                                {Component}
+                        return (
+                            <div
+                                key={vItem.key + uniqueIdentifier}
+                                style={{
+                                    transform: `translateY(${vItem.start})px`,
+                                    height: `${vItem.size}px`}}
+                                className="top-0 left-0 w-full"
+                            >
+                                <div className="m-4">
+                                    {Component}
+                                </div>
                             </div>
-                        </div>
-                    )
-                }) }
+                        )
+                    }) }
+                </div>
             </div>
         </div>
     );
