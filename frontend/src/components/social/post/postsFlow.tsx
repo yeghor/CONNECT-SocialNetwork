@@ -153,7 +153,7 @@ const PostsFlow = () => {
                         </div>
                     </div>
                 </div>
-                <div ref={scrollRef} className="h-[80vh] overflow-auto relative mx-auto border-gray-300">
+                <div ref={scrollRef} className="h-[650px] overflow-auto mb-16 relative mx-auto border-gray-300">
                     <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
                         {
                             virtualItems.map((vItem) => {

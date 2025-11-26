@@ -139,7 +139,7 @@ const SearchPage = () => {
     }, [virtualItems, hasNextPage, fetchNextPage]);
 
     return(
-        <div ref={scrollRef} className="mx-auto w-2/3 h-screen overflow-y-auto flex flex-col gap-4">
+        <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4">
             <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
                 { virtualItems.map((vItem,) => {
                     const elem = searchData[vItem.index];
@@ -165,7 +165,9 @@ const SearchPage = () => {
                                 height: `${vItem.size}px`}}
                             className="top-0 left-0 w-full"
                         >
-                            {Component}
+                            <div className="m-4">
+                                {Component}
+                            </div>
                         </div>
                     )
                 }) }

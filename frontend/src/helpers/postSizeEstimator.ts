@@ -5,14 +5,14 @@ const estimatePostSize = (pictures: number, isReply: boolean): number => {
         case (pictures <= 0):
             break;
         case (pictures === 1):
-            estimateSize = 350;
+            estimateSize = 300;
             break;
         case (pictures >= 2):
-            estimateSize = 500;
+            estimateSize = 550;
     }
 
     if (isReply) {
-        estimateSize += 100;
+        estimateSize += 75;
     }
 
     return estimateSize;

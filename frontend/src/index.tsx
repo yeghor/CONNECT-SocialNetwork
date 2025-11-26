@@ -27,7 +27,7 @@ if(container) {
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
                     <div
-                        className="min-h-screen w-full bg-cover bg-center bg-no-repeat flex flex-col"
+                        className="h-screen w-full bg-cover bg-center bg-no-repeat flex flex-col"
                         style={{
                             backgroundImage: "url('/background.png')"
                         }}>
