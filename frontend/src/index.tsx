@@ -6,14 +6,14 @@ import "./index.css"
 
 import SocialHomePage from "./components/social/socialHomePage.tsx";
 import ChatPage from "./components/social/chatPage.tsx"
-import MyProfilePage from './components/social/myProfilePage.tsx';
-import ProfilePage from './components/social/profilePage.tsx';
+import ProfilePageWrapper from "./components/social/profilePageWrapper.tsx";
 import PostPage from './components/social/postPage.tsx';
 import LoginForm from './components/auth/loginForm.tsx';
 import RegisterForm from "./components/auth/registerForm.tsx"
 import NavigationBar from "./components/base/navBar.tsx";
 import Footer from "./components/base/footer.tsx";
 import SearchPage from "./components/social/searchPage.tsx";
+import {MyProfilePage} from "./components/social/profilePage.tsx";
 
 const container = document.getElementById('root')
 
@@ -40,10 +40,10 @@ if(container) {
                                     <ChatPage />
                                 }/>
                                 <Route path='/my-profile' element={
-                                    <MyProfilePage />
+                                    <ProfilePageWrapper />
                                 } />
                                 <Route path='/profile/:userId' element={
-                                    <ProfilePage />
+                                    <ProfilePageWrapper />
                                 } />
                                 <Route path='/post/:postId' element={
                                     <PostPage />

@@ -34,6 +34,14 @@ export const searchURI = (query: string): string => {
     return `/search?query=${query}`;
 };
 
+/*
+* Pass me as True and skip userId to get my profile URI
+* Pass me as False with userId to get specific user profile URI
+*  */
+export const specificUserProfileURI = (userId: string) => {
+    return `/profile/${userId}`;
+};
+
 export const passwordNotSecureEnoughMessage = "Come on, you can do better! Make your password better, longer, stronger, and maybe throw in a ’!’ for flair.";
 export const invalidEmailMessage = "That doesn’t look like a valid email. Make sure it includes ’@’ and a domain name.";
 export const invalidUsernameMessage = `Keep your username simple! Use ${UsernameMinLength}–${UsernameMaxLength} characters: letters, numbers, or . _ - ! * ' no spaces or fancy symbols.`;

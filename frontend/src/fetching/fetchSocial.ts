@@ -165,7 +165,7 @@ export const fetchSearchUsers = async (accessJWT: string, prompt: string, page: 
     return await fetchHelper<ShortUserProfilesResponse>(searchUsersURL(prompt, page), requestInit, userShortProfilesMapper);
 }
 
-export const fetchSpecificUser = async (accessJWT: string, userId: string): APIResponse<UserProfileResponse> => {
+export const fetchSpecificUserProfile = async (accessJWT: string, userId: string): APIResponse<UserProfileResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT)

@@ -278,16 +278,23 @@ interface ShortUserDTO extends OwnerDTO {
 export type ShortUsersDTOResponse = ShortUserDTO[];
 
 export interface UserProfileDTO extends ShortUserDTO {
-  followed: number
+    followed: number,
+    me: boolean
 }
 
 export interface ShortUserProfile extends OwnerResponse {
-    followers: number
+    followers: number,
+    joined: Date
 }
 
-export interface UserProfileResponse extends ShortUserProfile, SuccessfulResponse {
+export interface UserProfile extends ShortUserProfile {
     followed: number,
-    joined: Date,
+    me: boolean,
+}
+
+export interface UserProfileResponse extends SuccessfulResponse {
+    data: UserProfile,
+    success: true
 }
 
 export interface ShortUserProfilesResponse extends SuccessfulResponse{
@@ -300,7 +307,8 @@ export const userShortProfilesMapper = (data: ShortUsersDTOResponse): ShortUserP
             userId: shortUserDTO.user_id,
             username: shortUserDTO.username,
             avatarURL: shortUserDTO.avatar_url,
-            followers: shortUserDTO.followers
+            followers: shortUserDTO.followers,
+            joined: new Date(shortUserDTO.joined)
         })
     );
     return {
@@ -311,12 +319,15 @@ export const userShortProfilesMapper = (data: ShortUsersDTOResponse): ShortUserP
 
 export const userProfileMapper = (data: UserProfileDTO): UserProfileResponse => {
     return {
-        userId: data.user_id,
-        username: data.username,
-        followers: data.followers,
-        followed: data.followed,
-        avatarURL: data.avatar_url,
-        joined: new Date(data.joined),
+        data: {
+            userId: data.user_id,
+            username: data.username,
+            followers: data.followers,
+            followed: data.followed,
+            avatarURL: data.avatar_url,
+            joined: new Date(data.joined),
+            me: data.me,
+        },
         success: true
     };
 };

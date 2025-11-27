@@ -87,7 +87,8 @@ class ChatUserShortSchemaAvatarURL(UserShortSchemaAvatarURL):
 
 class UserSchema(UserLiteSchema):
     followed: int
-    avatar_url: str | None
+    joined: datetime
+    me: bool
 
 # =================
 # Body data structure

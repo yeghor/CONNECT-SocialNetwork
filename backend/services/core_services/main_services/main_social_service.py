@@ -392,7 +392,9 @@ class MainServiceSocial(MainServiceBase):
             username=other_user.username,
             followers=len(other_user.followers),
             followed=len(other_user.followed),
-            avatar_url=avatar_token
+            avatar_url=avatar_token,
+            joined=other_user.joined,
+            me=True if user_id == other_user_id else False
         )
     
     @web_exceptions_raiser
@@ -418,7 +420,7 @@ class MainServiceSocial(MainServiceBase):
     async def get_my_profile(self, user: User) -> UserSchema:
         """To use this method you firstly need to get User instance by Bearer token"""
 
-        # To prever SQLalechemy missing greenlet_spawn error. Cause merged model loses relationships
+        # To prevent SQLAlchemy missing greenlet_spawn error. Cause merged_model method can cause loss of self-referential relationships
         user = await self._PostgresService.get_entry_by_id(id_=user.user_id, ModelType=User)
 
         avatar_token = await self._ImageStorage.get_user_avatar_url(user_id=user.user_id)
@@ -429,7 +431,9 @@ class MainServiceSocial(MainServiceBase):
             followers=len(user.followers),
             followed=len(user.followed),
             posts=user.posts,
-            avatar_url=avatar_token
+            avatar_url=avatar_token,
+            joined=user.joined,
+            me=True
         )
 
     @web_exceptions_raiser
