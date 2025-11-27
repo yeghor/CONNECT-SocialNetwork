@@ -13,7 +13,7 @@ const ProfilePageWrapper = () => {
     const tokens = getCookiesOrRedirect(navigate);
     const { userId } = useParams();
 
-    const [ userProfileData, setUserProfileData ] = useState<UserProfileResponse>(undefined);
+    const [ userProfileData, setUserProfileData ] = useState<UserProfileResponse | null>(null);
     const [ loading, setLoading ] = useState(true);
 
     useEffect(() => {
@@ -28,9 +28,10 @@ const ProfilePageWrapper = () => {
         profileFetcher();
     }, [])
 
-    if (loading) {
+    if (loading || !userProfileData) {
         return null
     }
+    console.log(userProfileData.me);
 
     if (!userProfileData.me) {
         return (<MyProfilePage userData={userProfileData} />)
