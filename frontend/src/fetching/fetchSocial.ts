@@ -183,7 +183,7 @@ export const fetchMyProfile = async (accessJWT: string): APIResponse<UserProfile
     return await fetchHelper<UserProfileResponse>(myProfileURL, requestInit, userProfileResponseMapper);
 }
 
-export const fetchFollowPosts = async (accessJWT: string, userId: string): APIResponse<SuccessfulResponse> => {
+export const fetchFollow = async (accessJWT: string, userId: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestTokenHeaders(accessJWT)

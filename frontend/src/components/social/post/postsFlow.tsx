@@ -5,7 +5,6 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
 
-
 import {
     getCookiesOrRedirect,
     CookieTokenObject
@@ -15,9 +14,11 @@ import { FeedPost, FeedPostsResponse } from "../../../fetching/responseDTOs.ts";
 import { useNavigate } from "react-router";
 import { NavigateFunction } from "react-router-dom";
 import FlowPost from "./flowPost.tsx";
-import { fetchFeedPosts, fetchFollowPosts } from "../../../fetching/fetchSocial.ts";
+import { fetchFeedPosts, fetchFollow, fetchFollowedPosts } from "../../../fetching/fetchSocial.ts";
 import { unauthorizedRedirectURI } from "../../../consts.ts"
 import estimatePostSize from "../../../helpers/postSizeEstimator.ts";
+
+import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 
 interface PostsFlowFetcherInterface {
     // Depends on image existence
@@ -42,7 +43,7 @@ const createPostFlowResponse = (data: FeedPost[]): PostsFlowComponents => {
 
 const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolean, navigate: NavigateFunction): Promise<PostsFlowComponents | undefined> => {
     if(tokens.access) {
-        const fetchFunction = feed ? fetchFeedPosts : fetchFollowPosts;
+        const fetchFunction = feed ? fetchFeedPosts : fetchFollowedPosts;
 
         const fetchedPosts = await safeAPICall<FeedPostsResponse>(tokens, fetchFunction, navigate, undefined, page)
 
@@ -95,7 +96,7 @@ const PostsFlow = () => {
             const post = posts[index];
             return post.estimatedSize;
         },
-        measureElement: (element) => { console.log(element?.getBoundingClientRect().height); return element?.getBoundingClientRect().height },
+        measureElement: (element) => { return element?.getBoundingClientRect().height },
         overscan: 16,
         getScrollElement: () => scrollRef.current,
     });
@@ -119,6 +120,8 @@ const PostsFlow = () => {
     const toggleFeed = () => {
         setFeed(!feed);
     }
+
+    const componentProps = posts.map((post) => { return {postData: post.postData} } )
 
     return (
         <div>
@@ -153,27 +156,8 @@ const PostsFlow = () => {
                         </div>
                     </div>
                 </div>
-                <div ref={scrollRef} className="h-[650px] overflow-auto mb-16 relative mx-auto border-gray-300">
-                    <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
-                        {
-                            virtualItems.map((vItem) => {
-                                const post = posts[vItem.index];
-                                return (
-                                    <div key={post.postId + vItem.index} className="absolute top-0 left-0 w-full" data-index={vItem.index}
-                                         style={
-                                             {
-                                                 transform: `translateY(${vItem.start}px)`,
-                                                 height: `${vItem.size}px`,
-                                             }
-                                         }>
-                                        <div className="hover:-translate-y-0.5 hover:border-white hover:border-3 transition-all">
-                                            <FlowPost postData={post.postData} />
-                                        </div>
-                                    </div>
-                                )
-                            })
-                        }
-                    </div>
+                <div ref={scrollRef} className="md:h-[800px] sm:h-[600px] overflow-auto mb-16 relative mx-auto border-gray-300">
+                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} allData={posts} componentProps={componentProps} />
                 </div>
             </div>
         </div>

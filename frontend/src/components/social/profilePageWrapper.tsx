@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 
-import { UserProfileResponse } from "../../fetching/responseDTOs.ts";
+import { UserProfileResponse, UserProfile } from "../../fetching/responseDTOs.ts";
 import { MyProfilePage, ProfilePage } from "./profilePage.tsx";
 import { safeAPICall } from "../../fetching/fetchUtils.ts";
 import { getCookiesOrRedirect } from "../../helpers/cookies/cookiesHandler.ts";
@@ -13,11 +13,11 @@ const ProfilePageWrapper = () => {
     const tokens = getCookiesOrRedirect(navigate);
     const { userId } = useParams();
 
-    const [ userProfileData, setUserProfileData ] = useState<UserProfileResponse | null>(null);
+    const [ userProfileData, setUserProfileData ] = useState<UserProfile | null>(null);
     const [ loading, setLoading ] = useState(true);
 
     useEffect(() => {
-        const profileFetcher = async (): void => {
+        const profileFetcher = async () => {
             setLoading(true);
             const profileData = await safeAPICall<UserProfileResponse>(tokens, fetchSpecificUserProfile, navigate, undefined, userId)
             if (profileData.success) {
