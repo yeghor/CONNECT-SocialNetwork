@@ -1,31 +1,79 @@
-import React from "react";
-import { UserProfile } from "../../fetching/responseDTOs.ts";
+import React, { useState, useEffect } from "react";
+import {SuccessfulResponse, UserProfile} from "../../fetching/responseDTOs.ts";
+import { useNavigate } from "react-router";
+import { getCookiesOrRedirect } from "../../helpers/cookies/cookiesHandler.ts";
+import {safeAPICall} from "../../fetching/fetchUtils.ts";
+import {fetchDeletePost, fetchFollow, fetchUnfollow} from "../../fetching/fetchSocial.ts";
 
 interface ProfilePageProps {
     userData: UserProfile;
     me: boolean;
 }
 
+type ProfilePostsSection = "posts" | "replies" | "likes";
+type OrderPostsBy = "fresh" | "old" | "mostLiked" | "popularNow"
+
 export const ProfilePage = (props: ProfilePageProps) => {
+    const navigate = useNavigate();
+    const tokens = getCookiesOrRedirect(navigate);
+
+    const [ profilePostsSection, setProfilePostsSection ] = useState<ProfilePostsSection>("posts");
+    const [ orderBy, setOrderBy ] = useState<OrderPostsBy>("fresh");
+    const [ isFollowing, setFollowing ] = useState<boolean>(props.userData.isFollowing);
+
+    const changeOrder = (newOrder: OrderPostsBy) => {
+        if (newOrder !== orderBy) {
+            setOrderBy(newOrder);
+        }
+    }
+
+    const changeSection = (newSection: ProfilePostsSection) => {
+        if (newSection !== profilePostsSection) {
+            setProfilePostsSection(newSection);
+        }
+    }
 
     const fetchUserProfilePosts = () => {
 
     };
 
-    const followAction = (follow: boolean) => {
+    useEffect(() => {
 
+    }, [])
+
+    const followAction = async (follow: boolean) => {
+        if (props.me) {
+            return;
+        }
+
+        if (follow && !isFollowing) {
+            await safeAPICall<SuccessfulResponse>(tokens, fetchFollow, navigate, undefined, props.userData.userId);
+            return;
+        }
+        if (!follow && isFollowing) {
+            await safeAPICall<SuccessfulResponse>(tokens, fetchUnfollow, navigate, undefined, props.userData.userId);
+        }
     };
 
     const sendMessage = (message: string) => {
-
+        if (!props.me) {
+            return;
+        }
+        // TODO
     };
 
-    const deletePost = (postId: string) => {
-
+    const deletePost = async (postId: string) => {
+        if (!props.me) {
+            return;
+        }
+        await safeAPICall<SuccessfulResponse>(tokens, fetchDeletePost, navigate, undefined, postId);
+        // TODO: Remove local post
     };
 
     const changePost = (postId: string) => {
-
+        if (!props.me) {
+            return;
+        }
     };
 
 

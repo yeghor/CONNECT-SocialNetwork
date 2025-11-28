@@ -121,7 +121,7 @@ const PostsFlow = () => {
         setFeed(!feed);
     }
 
-    const componentProps = posts.map((post) => { return {postData: post.postData} } )
+    const componentProps = posts.map((post) => { return { postData: post.postData, isMyPost: false} } )
 
     return (
         <div>

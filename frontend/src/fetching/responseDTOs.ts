@@ -279,7 +279,8 @@ export type ShortUsersDTOResponse = ShortUserDTO[];
 
 export interface UserProfileDTO extends ShortUserDTO {
     followed: number,
-    me: boolean
+    me: boolean,
+    is_following: boolean
 }
 
 export interface ShortUserProfile extends OwnerResponse {
@@ -290,6 +291,7 @@ export interface ShortUserProfile extends OwnerResponse {
 export interface UserProfile extends ShortUserProfile {
     followed: number,
     me: boolean,
+    isFollowing: boolean
 }
 
 export interface UserProfileResponse extends SuccessfulResponse {
@@ -327,6 +329,7 @@ export const userProfileMapper = (data: UserProfileDTO): UserProfileResponse => 
             avatarURL: data.avatar_url,
             joined: new Date(data.joined),
             me: data.me,
+            isFollowing: data.is_following,
         },
         success: true
     };

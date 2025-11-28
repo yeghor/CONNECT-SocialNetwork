@@ -5,7 +5,12 @@ import {Link} from "react-router-dom";
 
 import { specificPostURI } from "../../../consts.ts";
 
-const FlowPost = (props: { postData: FeedPost | undefined }) => {
+interface FlowPostProps {
+    postData: FeedPost | undefined,
+    isMyPost: boolean
+}
+
+const FlowPost = (props: FlowPostProps) => {
     const images = props.postData?.picturesURLs || [];
 
     // Guard for TS

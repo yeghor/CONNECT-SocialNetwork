@@ -3,7 +3,7 @@ import {VirtualItem, Virtualizer} from "@tanstack/react-virtual";
 import FlowPost from "../social/post/flowPost.tsx";
 
 interface VirtualizedListProps {
-    DisplayedComponent: React.ComponentType,
+    DisplayedComponent: any, // TODO: add react component type
     virtualizer: Virtualizer<HTMLDivElement, Element>,
     virtualItems: VirtualItem[],
     allData: any[],
