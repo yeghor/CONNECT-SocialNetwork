@@ -8,7 +8,6 @@ import { useNavigate } from "react-router";
 import { CookieTokenObject, getCookiesOrRedirect } from "../../helpers/cookies/cookiesHandler.ts";
 import { safeAPICall } from "../../fetching/fetchUtils.ts";
 import {
-    fetchDeletePost,
     fetchFollow,
     fetchUnfollow,
     fetchUsersPosts,
@@ -137,21 +136,6 @@ export const ProfilePage = (props: ProfilePageProps) => {
         // TODO
     };
 
-    const deletePost = async (postId: string) => {
-        if (!props.me) {
-            return;
-        }
-        await safeAPICall<SuccessfulResponse>(tokens, fetchDeletePost, navigate, undefined, postId);
-        // TODO: Remove local post
-    };
-
-    const changePost = (postId: string) => {
-        if (!props.me) {
-            return;
-        }
-        // TODO
-    };
-
     const virtualizedComponentsProps = profilePostsData.map((post) => { return { postData: post.postData, isMyPost: false} } )
 
     return(
@@ -178,14 +162,22 @@ export const ProfilePage = (props: ProfilePageProps) => {
                 </div>
                 { !props.me ? <div className="flex justify-center gap-4 text-white">
                     <div className="flex justify-center items-center">
-                        <button className="px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all">
-                            Follow
-                        </button>
+                        {
+                            props.userData.me ?
+                                <button className="px-6 py-2 bg-white/20 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all">
+                                    Manage Profile
+                                </button>
+                            :
+                                <button className={`px-6 py-2 ${props.userData.isFollowing ? "bg-white/20" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
+                                    {props.userData.isFollowing ? "Unfollow" : "Follow"}
+                                </button>
+                        }
                     </div>
                     <div className="flex justify-center items-center">
-                        <button className="px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all">
+                        <button className={`px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
                             Message
                         </button>
+
                     </div>
                 </div> : null }
             </div>
