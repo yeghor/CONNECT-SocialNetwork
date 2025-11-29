@@ -47,6 +47,7 @@ import {
     userShortProfilesMapper,
     userProfileMapper as userProfileResponseMapper, PostBaseResponse, postBaseMapper
 } from "./responseDTOs.ts";
+import { OrderPostsByFlag, ProfilePostsSectionFlag } from "../components/social/profilePage.tsx";
 
 // Get Posts
 
@@ -95,15 +96,14 @@ export const fetchSearchPosts = async (accessJWT: string, prompt: string, page: 
     return await fetchHelper<PostsResponse>(searchPostsURL(prompt, page), requestInit, postsResponseMapper);
 }
 
-export const fetchUsersPosts = async (accessJWT: string, userId: string, page: number): APIResponse<PostsResponse> => {
+export const fetchUsersPosts = async (accessJWT: string, userId: string, type: ProfilePostsSectionFlag, order: OrderPostsByFlag, page: number): APIResponse<PostsResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<PostsResponse>(UserPostsURL(userId, page), requestInit, postsResponseMapper);
+    return await fetchHelper<PostsResponse>(UserPostsURL(userId, page, type, order), requestInit, postsResponseMapper);
 }
-
 
 // Actions with posts
 

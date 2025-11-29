@@ -121,7 +121,7 @@ const PostsFlow = () => {
         setFeed(!feed);
     }
 
-    const componentProps = posts.map((post) => { return { postData: post.postData, isMyPost: false} } )
+    const virtualizedComponentsProps = posts.map((post) => { return { postData: post.postData, isMyPost: false} } )
 
     return (
         <div>
@@ -157,7 +157,7 @@ const PostsFlow = () => {
                     </div>
                 </div>
                 <div ref={scrollRef} className="md:h-[800px] sm:h-[600px] overflow-auto mb-16 relative mx-auto border-gray-300">
-                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} allData={posts} componentProps={componentProps} />
+                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} allData={posts} componentProps={virtualizedComponentsProps} />
                 </div>
             </div>
         </div>

@@ -60,9 +60,6 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
         }
     }
 
-        //
-        // fetchedResults = arrayShuffle(fetchedResults);
-
     return fetchedResults.map((elem) => {
         if ("postId" in elem) {
             elem = elem as FeedPost;
@@ -144,6 +141,7 @@ const SearchPage = () => {
         }
     };
 
+
     return(
         <div>
             <div className="flex justify-center gap-4 text-white w-2/3 mx-auto m-6">
@@ -182,11 +180,12 @@ const SearchPage = () => {
                         let Component;
                         if (elem.type === "post") {
                             elem.data = elem.data as FeedPost;
-                            Component = (<FlowPost postData={elem.data} />);
+                            // Setting isMyPost false by default, because user cannot modify or delete post on search page
+                            Component = (<FlowPost postData={elem.data} isMyPost={false} />);
                             uniqueIdentifier = elem.data.postId
                         } else {
                             elem.data = elem.data as ShortUserProfile;
-                            Component = (<FlowUser userData={elem.data}/>);
+                            Component = (<FlowUser userData={elem.data} />);
                             uniqueIdentifier = elem.data.userId
                         }
 

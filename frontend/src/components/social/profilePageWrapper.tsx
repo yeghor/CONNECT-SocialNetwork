@@ -34,9 +34,9 @@ const ProfilePageWrapper = () => {
     console.log(userProfileData.me);
 
     if (!userProfileData.me) {
-        return (<MyProfilePage userData={userProfileData} />)
+        return (<MyProfilePage userData={userProfileData} me={userProfileData.me} />)
     }
-    return (<ProfilePage userData={userProfileData} />)
+    return (<ProfilePage userData={userProfileData} me={userProfileData.me} />)
 };
 
 export default ProfilePageWrapper;

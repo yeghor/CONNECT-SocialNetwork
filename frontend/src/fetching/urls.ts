@@ -1,3 +1,5 @@
+import {OrderPostsByFlag, ProfilePostsSectionFlag} from "../components/social/profilePage.tsx";
+
 const MAINHTTPPROTOCOL = "http://"
 const WSPROTOCOL = "ws://"
 const HOST = "127.0.0.1:8000"
@@ -14,6 +16,7 @@ const searchConstructor = '/search';
 const commentsConstructor = "/comments"
 const chatConstructor = "/chat";
 const mediaConstructor = "/media";
+const repliesConstructor = "/replies";
 
 // Auth
 
@@ -63,8 +66,8 @@ export const postCommentsURL = (postId: string, page: number | string) => {
     return `${BASEURL}${postsConstructor}/${postId}${commentsConstructor}/${page}`;
 }
 
-export const UserPostsURL = (userId: string, page: number | string) => {
-    return `${BASEURL}${usersConstructor}/${userId}${postsConstructor}/${page}`;
+export const UserPostsURL = (userId: string, page: number | string, type: ProfilePostsSectionFlag, order: OrderPostsByFlag) => {
+    return `${BASEURL}${usersConstructor}/${userId}${postsConstructor}/${page}?type=${type}&order=${order}`;
 }
 
 export const BatchChatMessagesURL = (chatId: string, page: number | string) => {

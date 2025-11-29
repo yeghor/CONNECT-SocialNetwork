@@ -10,6 +10,17 @@ interface VirtualizedListProps {
     componentProps: {}[]
 }
 
+/*
+* Use the list with outer divs structure like this:
+* ```
+* <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4">
+*   <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
+*     <VirtualizedList ... />
+*   </div>
+* </div>
+*
+*
+* */
 const VirtualizedList = ({ DisplayedComponent, virtualizer, virtualItems, allData, componentProps }: VirtualizedListProps) => {
     return(
         <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
