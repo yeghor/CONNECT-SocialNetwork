@@ -4,6 +4,7 @@ from services.core_services import MainServiceBase
 from services.postgres_service.models import *
 from post_popularity_rate_task.popularity_rate import POST_ACTIONS
 from mix_posts_consts import *
+from project_types import PostsOrderType, PostsType
 
 from dotenv import load_dotenv
 from datetime import datetime
@@ -398,7 +399,7 @@ class MainServiceSocial(MainServiceBase):
         )
     
     @web_exceptions_raiser
-    async def get_users_posts(self, user_id: str, page: int) -> PostLiteSchema:
+    async def get_users_posts(self, user_id: str, page: int, order: PostsOrderType, posts_type: PostsType) -> PostLiteSchema:
         posts = await self._PostgresService.get_user_posts(user_id=user_id, page=page, n=SMALL_PAGINATION)
 
         return [

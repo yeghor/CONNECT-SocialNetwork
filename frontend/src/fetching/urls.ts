@@ -67,7 +67,7 @@ export const postCommentsURL = (postId: string, page: number | string) => {
 }
 
 export const UserPostsURL = (userId: string, page: number | string, type: ProfilePostsSectionFlag, order: OrderPostsByFlag) => {
-    return `${BASEURL}${usersConstructor}/${userId}${postsConstructor}/${page}?type=${type}&order=${order}`;
+    return `${BASEURL}${usersConstructor}/${userId}${postsConstructor}/${page}?posts_type=${type}&order=${order}`;
 }
 
 export const BatchChatMessagesURL = (chatId: string, page: number | string) => {

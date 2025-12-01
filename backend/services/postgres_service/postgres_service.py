@@ -9,7 +9,7 @@ from uuid import UUID
 from .models import *
 from .models import ActionType
 from .database_utils import postgres_exception_handler
-
+from project_types import PostsOrderType
 from exceptions.custom_exceptions import PostgresError
 
 Models = TypeVar("Models", bound=Base)
@@ -251,7 +251,22 @@ class PostgresService:
         return result.scalars().all()
     
     @postgres_exception_handler(action="Get user's posts")
-    async def get_user_posts(self, user_id: str, page: int, n: int):
+    async def get_user_posts(self, user_id: str, page: int, n: int, order: PostsOrderType):
+
+
+        result = await self.__session.execute(
+            select(Post)
+            .where(and_(Post.owner_id == user_id))
+            .limit(LOAD_MAX_USERS_POST)
+            .order_by(Post.published.desc())
+            .options(selectinload(Post.parent_post))
+            .offset(page*n)
+            .limit(n)
+        )
+        return result.scalars().all()
+
+    @postgres_exception_handler(action="Get user's replies")
+    async def get_user_posts(self, user_id: str, page: int, n: int, order: PostsOrderType):
         result = await self.__session.execute(
             select(Post)
             .where(and_(Post.owner_id == user_id))

@@ -17,9 +17,10 @@ from pydantic_schemas.pydantic_schemas_social import (
     PostBaseShort,
     UserShortSchemaAvatarURL
 )
-from sqlalchemy.ext.asyncio import AsyncSession
+from project_types import PostsOrderType, PostsType
 
-from typing import Annotated, List
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Annotated, List, Literal
 from dotenv import load_dotenv
 from os import getenv
 
@@ -202,17 +203,19 @@ async def get_user_profile(
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
         return await social.get_user_profile(user_id=user.user_id, other_user_id=user_id)
-    
+
 @social.get("/users/{user_id}/posts/{page}")
 @endpoint_exception_handler
 async def get_users_posts(
     user_id: str,
     page: int = Depends(page_validator),
     user_: User = Depends(authorize_request_depends),
-    session: AsyncSession = Depends(get_session_depends)
+    session: AsyncSession = Depends(get_session_depends),
+    order: PostsOrderType = "fresh",
+    posts_type: PostsType = "posts"
 ) -> List[PostLiteSchema]:
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
-        return await social.get_user_posts(user_id, page)
+        return await social.get_user_posts(user_id=user_id, page=page, order=order, posts_type=posts_type)
 
 @social.get("/recent-activity")
 @endpoint_exception_handler
