@@ -268,7 +268,7 @@ class PostgresService:
 
         result = await self.__session.execute(
             select(Post)
-            .where(and_(Post.owner_id == user_id))
+            .where(and_(Post.owner_id == user_id, Post.is_reply == False))
             .limit(LOAD_MAX_USERS_POST)
             .order_by(order_by_statement)
             .options(selectinload(Post.parent_post))
@@ -313,6 +313,8 @@ class PostgresService:
             .offset(page*n)
             .limit(n)
         )
+
+        return result.scalars().all()
 
     @postgres_exception_handler(action="Get chat room by it's id")
     async def get_chat_room(self, room_id: str) -> ChatRoom:

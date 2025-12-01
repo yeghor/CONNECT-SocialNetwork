@@ -72,7 +72,7 @@ export const ProfilePage = (props: ProfilePageProps) => {
     const [ profilePostsSection, setProfilePostsSection ] = useState<ProfilePostsSectionFlag>("posts");
     const [ orderBy, setOrderBy ] = useState<OrderPostsByFlag>("fresh");
     const [ isFollowing, setFollowing ] = useState<boolean>(props.userData.isFollowing);
-
+    const [ followTimeout, setFollowTimeout ] = useState<boolean>(false);
 
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createSearchInfiniteQueryOptions(tokens, navigate, props.userData.userId, orderBy, profilePostsSection))
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -115,18 +115,25 @@ export const ProfilePage = (props: ProfilePageProps) => {
     };
 
 
-    const followAction = async (follow: boolean) => {
-        if (props.me) {
+    const followAction = async () => {
+        if (props.me || followTimeout) {
             return;
         }
+        
+        setFollowTimeout(true);
 
-        if (follow && !isFollowing) {
+        if (!isFollowing) {
+            setFollowing(true);
+            props.userData.followers += 1;
             await safeAPICall<SuccessfulResponse>(tokens, fetchFollow, navigate, undefined, props.userData.userId);
-            return;
-        }
-        if (!follow && isFollowing) {
+        } else {
+            setFollowing(false);
+            props.userData.followers -= 1;
             await safeAPICall<SuccessfulResponse>(tokens, fetchUnfollow, navigate, undefined, props.userData.userId);
         }
+
+        setTimeout(() => setFollowTimeout(false), 300)
+
     };
 
     const sendMessage = (message: string) => {
@@ -160,40 +167,36 @@ export const ProfilePage = (props: ProfilePageProps) => {
                     <p className="font-bold">{props.userData.followed}</p>
                     <p>Following</p>
                 </div>
-                { !props.me ? <div className="flex justify-center gap-4 text-white">
-                    <div className="flex justify-center items-center">
-                        {
-                            props.userData.me ?
-                                <button className="px-6 py-2 bg-white/20 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all">
-                                    Manage Profile
+                <div className="flex justify-center items-center">
+                    {
+                        props.userData.me ?
+                            <button className="px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all">
+                                Manage Profile
+                            </button>
+                        :
+                            <div className="flex justify-start gap-4">
+                                <button onClick={() => followAction()} className={`w-32 px-6 py-2 ${isFollowing ? "bg-white/20" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
+                                    {isFollowing ? "Following" : "Follow"}
                                 </button>
-                            :
-                                <button className={`px-6 py-2 ${props.userData.isFollowing ? "bg-white/20" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
-                                    {props.userData.isFollowing ? "Unfollow" : "Follow"}
+                                <button className={`w-32 px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
+                                    Message
                                 </button>
-                        }
-                    </div>
-                    <div className="flex justify-center items-center">
-                        <button className={`px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
-                            Message
-                        </button>
-
-                    </div>
-                </div> : null }
+                            </div>
+                    }
+                </div>
             </div>
 
             <div className="flex justify-center items-center gap-4 mt-6 text-white">
-                <button className="px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all" >Posts</button>
-                <button className="px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all" >Replies</button>
-                <button className="px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all" >Liked</button>
+                <button onClick={() => changeSection("posts")} className={`px-6 py-2 ${profilePostsSection == "posts" ? "bg-white/20" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Posts</button>
+                <button onClick={() => changeSection("replies")} className={`px-6 py-2 ${profilePostsSection == "replies" ? "bg-white/20" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Replies</button>
+                <button onClick={() => changeSection("likes")} className={`px-6 py-2 ${profilePostsSection == "likes" ? "bg-white/20" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Liked Posts</button>
             </div>
 
-            <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4">
+            <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4 my-8">
                 <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
                     <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} allData={profilePostsData} componentProps={virtualizedComponentsProps} />
                 </div>
             </div>
-
         </div>
     );
 }

@@ -417,7 +417,6 @@ class MainServiceSocial(MainServiceBase):
             case "likes":
                 posts = await self._PostgresService.get_user_liked_posts(**arguments)
 
-
         return [
             PostLiteSchema(
                 post_id=post.post_id,

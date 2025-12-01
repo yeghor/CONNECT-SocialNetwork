@@ -173,7 +173,7 @@ async def follow(
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
         await social.friendship_action(user=user, other_user_id=follow_to_id, follow=True)
 
-@social.delete("/users/{follow_to_id}/follow")
+@social.delete("/users/{unfollow_from_id}/follow")
 @endpoint_exception_handler
 async def unfollow(
     unfollow_from_id: str,

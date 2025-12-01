@@ -189,7 +189,7 @@ export const fetchFollow = async (accessJWT: string, userId: string): APIRespons
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<SuccessfulResponse>(followURL(userId), requestInit, userProfileResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(followURL(userId), requestInit, successfulResponseMapper);
 }
 
 export const fetchUnfollow = async (accessJWT: string, userId: string): APIResponse<SuccessfulResponse> => {
@@ -198,7 +198,7 @@ export const fetchUnfollow = async (accessJWT: string, userId: string): APIRespo
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<SuccessfulResponse>(followURL(userId), requestInit, userProfileResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(followURL(userId), requestInit, successfulResponseMapper);
 }
 
 export const fetchRecentActivity = async (accessJWT: string): APIResponse<RecentActivityResponse> => {

@@ -20,7 +20,7 @@ const PostPage = () => {
     const tokens = getCookiesOrRedirect(navigate);
 
     const [ liked, toggleLikes ] = useState(false);
-    const [ likeDelay, setLikeDelay ] = useState(false);
+    const [ likeTimeout, setLikeTimeout ] = useState(false);
 
     const [ postData, setPostData ] = useState<LoadPostResponseInterface | undefined>(undefined);
 
@@ -45,8 +45,8 @@ const PostPage = () => {
     }
 
     const likeAction = async () => {
-        if (postData && !likeDelay) {
-            setLikeDelay(true);
+        if (postData && !likeTimeout) {
+            setLikeTimeout(true);
             if (liked) {
                 postData.likes -= 1;
                 postData.isLiked = false;
@@ -58,7 +58,7 @@ const PostPage = () => {
                 toggleLikes(postData.isLiked);
                 await safeAPICall<SuccessfulResponse>(tokens, fetchLikePost, navigate, undefined, postId);
             }
-            setTimeout(() => setLikeDelay(false), 200);
+            setTimeout(() => setLikeTimeout(false), 200);
         }
     }
 
@@ -100,7 +100,7 @@ const PostPage = () => {
                     }
                 </div>
                 <div className="flex justify-start items-center gap-3">
-                    <button onClick={()=> { if(!likeDelay) { likeAction() } }}>
+                    <button onClick={()=> { if(!likeTimeout) { likeAction() } }}>
                         <img src={liked ? "/thumbs-up-filled.png" : "/thumbs-up.png"} alt="like-icon" className="h-8 mt-4 hover:scale-110 transition-all" />
                     </button>
                     <div className="mt-4 text-white flex gap-3">
