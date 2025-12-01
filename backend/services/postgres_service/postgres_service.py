@@ -27,6 +27,18 @@ DIVIDE_BASE_PAG_BY = int(getenv("DIVIDE_BASE_PAG_BY"))
 SMALL_PAGINATION = int(getenv("SMALL_PAGINATION"))
 
 class PostgresService:
+    @staticmethod
+    def define_posts_order_by(order: PostsOrderType):
+        match order:
+            case "fresh":
+                return Post.published.desc()
+            case "popularNow":
+                return Post.popularity_rate.desc()
+            case "old":
+                return Post.published
+            case "mostLiked":
+                return Post.likes_count.desc()
+
     def __init__(self, postgres_session: AsyncSession):
         # We don't need to close session. Because Depends func will handle it in endpoints.
         self.__session = postgres_session
@@ -251,14 +263,14 @@ class PostgresService:
         return result.scalars().all()
     
     @postgres_exception_handler(action="Get user's posts")
-    async def get_user_posts(self, user_id: str, page: int, n: int, order: PostsOrderType):
-
+    async def get_user_posts(self, user_id: str, page: int, n: int, order: PostsOrderType) -> List[Post]:
+        order_by_statement = self.define_posts_order_by(order=order)
 
         result = await self.__session.execute(
             select(Post)
             .where(and_(Post.owner_id == user_id))
             .limit(LOAD_MAX_USERS_POST)
-            .order_by(Post.published.desc())
+            .order_by(order_by_statement)
             .options(selectinload(Post.parent_post))
             .offset(page*n)
             .limit(n)
@@ -266,17 +278,41 @@ class PostgresService:
         return result.scalars().all()
 
     @postgres_exception_handler(action="Get user's replies")
-    async def get_user_posts(self, user_id: str, page: int, n: int, order: PostsOrderType):
+    async def get_user_replies(self, user_id: str, page: int, n: int, order: PostsOrderType) -> List[Post]:
+        order_by_statement = self.define_posts_order_by(order=order)
+
         result = await self.__session.execute(
             select(Post)
-            .where(and_(Post.owner_id == user_id))
+            .where(and_(Post.owner_id == user_id, Post.is_reply == True))
             .limit(LOAD_MAX_USERS_POST)
-            .order_by(Post.published.desc())
+            .order_by(order_by_statement)
             .options(selectinload(Post.parent_post))
             .offset(page*n)
             .limit(n)
         )
         return result.scalars().all()
+    
+    @postgres_exception_handler(action="Get user's liked posts")
+    async def get_user_liked_posts(self, user_id: str, page: int, n: int, order: PostsOrderType) -> List[Post]:
+        order_by_statement = self.define_posts_order_by(order=order)
+
+        actions_select = await self.__session.execute(
+            select(PostActions)
+            .where(and_(PostActions.owner_id == user_id, PostActions.action == ActionType.like))
+            .offset(page*n)
+            .limit(n)
+        )
+
+        liked_ids = set(action.post_id for action in actions_select.scalars().all())
+
+        result = await self.__session.execute(
+            select(Post)
+            .where(Post.post_id.in_(liked_ids))
+            .options(selectinload(Post.parent_post))
+            .order_by(order_by_statement)
+            .offset(page*n)
+            .limit(n)
+        )
 
     @postgres_exception_handler(action="Get chat room by it's id")
     async def get_chat_room(self, room_id: str) -> ChatRoom:
@@ -352,3 +388,13 @@ class PostgresService:
         )
 
         return result.scalars().all()
+
+    @postgres_exception_handler(action="Check if user is following another user")
+    async def check_follow(self, user: User, other_user_id: str) -> bool:
+        result = await self.__session.execute(
+            select(User)
+            .where(and_(User.user_id == other_user_id, User.followers.contains(user)))
+        )
+        possible_folower = result.scalar()
+
+        return possible_folower is not None

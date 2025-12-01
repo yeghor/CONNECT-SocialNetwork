@@ -202,6 +202,7 @@ class MainServiceSocial(MainServiceBase):
                 is_reply=post.is_reply,
                 likes=post.likes_count,
                 views=post.views_count,
+                is_my_post=user.user_id == post.owner_id,
                 replies=post.replies_count,
                 owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
@@ -214,7 +215,8 @@ class MainServiceSocial(MainServiceBase):
                     likes=post.parent_post.likes_count,
                     views=post.parent_post.views_count,
                     replies=post.parent_post.replies_count,
-                    pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images])
+                    is_my_post=user.user_id == post.parent_post.owner_id,
+                    pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.parent_post.images])
                 ) if post.parent_post else None
             ) for post in posts
             ]
@@ -257,7 +259,8 @@ class MainServiceSocial(MainServiceBase):
                 is_reply=post.is_reply,
                 likes=post.likes_count,
                 views=post.views_count,
-                replies=post.replies_count,          
+                replies=post.replies_count,
+                is_my_post=user.user_id == post.post_id,          
                 owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
                 parent_post=PostBase(
@@ -269,7 +272,8 @@ class MainServiceSocial(MainServiceBase):
                     likes=post.parent_post.likes_count,
                     views=post.parent_post.views_count,
                     replies=post.parent_post.replies_count,
-                    pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images])
+                    is_my_post=user.user_id == post.parent_post.post_id,
+                    pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.parent_post.images])
                 ) if post.parent_post else None
             ) for post in posts
             ]
@@ -380,11 +384,11 @@ class MainServiceSocial(MainServiceBase):
             fresh_user.followed.remove(other_user)
     
     @web_exceptions_raiser
-    async def get_user_profile(self, user_id: str, other_user_id: str) -> UserSchema:
+    async def get_user_profile(self, user: User, other_user_id: str) -> UserSchema:
         other_user = await self._PostgresService.get_entry_by_id(id_=other_user_id, ModelType=User)
 
         if not other_user: 
-            raise ResourceNotFound(detail=f"User: {user_id} tried to get user: {other_user_id} profile that does not exist.", client_safe_detail="User profile that you trying to get does not exist.")
+            raise ResourceNotFound(detail=f"User: {user.user_id} tried to get user: {other_user_id} profile that does not exist.", client_safe_detail="User profile that you trying to get does not exist.")
 
         avatar_token = await self._ImageStorage.get_user_avatar_url(user_id=other_user.user_id)
 
@@ -395,12 +399,24 @@ class MainServiceSocial(MainServiceBase):
             followed=len(other_user.followed),
             avatar_url=avatar_token,
             joined=other_user.joined,
-            me=True if user_id == other_user_id else False
+            me=True if user.user_id == other_user_id else False,
+            is_following=await self._PostgresService.check_follow(user=user, other_user_id=other_user_id)
         )
     
     @web_exceptions_raiser
-    async def get_users_posts(self, user_id: str, page: int, order: PostsOrderType, posts_type: PostsType) -> PostLiteSchema:
-        posts = await self._PostgresService.get_user_posts(user_id=user_id, page=page, n=SMALL_PAGINATION)
+    async def get_user_posts(self, sender_id: str, user_id: str, page: int, order: PostsOrderType, posts_type: PostsType) -> List[PostLiteSchema]:
+        posts = []
+
+        arguments = {"user_id": user_id, "page": page, "n": SMALL_PAGINATION, "order": order}
+
+        match posts_type:
+            case "posts":
+                posts = await self._PostgresService.get_user_posts(**arguments)
+            case "replies":
+                posts = await self._PostgresService.get_user_replies(**arguments)
+            case "likes":
+                posts = await self._PostgresService.get_user_liked_posts(**arguments)
+
 
         return [
             PostLiteSchema(
@@ -408,12 +424,24 @@ class MainServiceSocial(MainServiceBase):
                 title=post.title,
                 published=post.published,
                 is_reply=post.is_reply,
-                owner=post.owner,
+                owner=UserShortSchemaAvatarURL(user_id=post.owner.user_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner.user_id)),
+                is_my_post=post.owner_id == sender_id,
                 likes=post.likes_count,
                 views=post.views_count,
                 replies=post.replies_count,
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
-                parent_post=post.parent_post
+                parent_post=PostBase(
+                    post_id=post.parent_post.post_id,
+                    title=post.parent_post.title,
+                    published=post.parent_post.published,
+                    is_reply=post.parent_post.is_reply ,
+                    owner=UserShortSchemaAvatarURL(user_id=post.parent_post.owner_id, username=post.parent_post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.parent_post.owner_id)),
+                    likes=post.parent_post.likes_count,
+                    views=post.parent_post.views_count,
+                    replies=post.parent_post.replies_count,
+                    is_my_post=post.owner_id == sender_id,
+                    pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.parent_post.images])
+                ) if post.parent_post else None
             ) for post in posts
         ]
     
@@ -434,6 +462,7 @@ class MainServiceSocial(MainServiceBase):
             posts=user.posts,
             avatar_url=avatar_token,
             joined=user.joined,
+            is_following=False,
             me=True
         )
 
@@ -463,6 +492,7 @@ class MainServiceSocial(MainServiceBase):
             is_liked=True if liked else False,
             views=post.views_count,
             replies=post.replies_count,
+            is_my_post=user.user_id == post.owner_id,
             parent_post=PostBase(
                 post_id=post.parent_post.post_id,
                 title=post.parent_post.title,
@@ -471,14 +501,15 @@ class MainServiceSocial(MainServiceBase):
                 owner=UserShortSchemaAvatarURL(user_id=post.parent_post.owner_id, username=post.parent_post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.parent_post.owner_id)),
                 likes=post.parent_post.likes_count,
                 views=post.parent_post.views_count,
-                replies=post.parent_post.replies_count
+                replies=post.parent_post.replies_count,
+                is_my_post=user.user_id == post.parent_post.owner_id
             ) if post.parent_post else None,
             last_updated=post.last_updated,
             pictures_urls=images_temp_urls,
             is_reply=post.is_reply
         )
 
-    async def _create_post_lite_schema_via_gather(self, post: Post) -> PostBase:
+    async def _create_post_lite_schema_via_gather(self, user_id: str, post: Post) -> PostBase:
         images_coroutines = [self._ImageStorage.get_post_image_urls(images_names=image.image_name) for image in post.images]
 
         images_urls = (await asyncio.gather(*images_coroutines))
@@ -492,33 +523,19 @@ class MainServiceSocial(MainServiceBase):
             post_id=post.post_id,
             title=post.title,
             published=post.published,
+            is_my_post=post.owner_id == user_id,
             is_reply=post.is_reply,
             pictures_urls=images_urls,
             owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
         )
 
     @web_exceptions_raiser
-    async def load_replies(self, post_id: str, page: int) -> List[PostBase]:
+    async def load_replies(self, user_id: str, post_id: str, page: int) -> List[PostBase]:
         replies = await self._PostgresService.get_post_replies(post_id=post_id, page=page, n=SMALL_PAGINATION)
 
         replies_coroutines = [self._create_post_lite_schema_via_gather(reply) for reply in replies]
 
         return await asyncio.gather(*replies_coroutines)
-
-    
-    @web_exceptions_raiser
-    async def get_user_posts(self, user_id: str, page: int) -> List[PostLiteSchema]:
-        user_posts = await self._PostgresService.get_user_posts(user_id=user_id, page=page, n=SMALL_PAGINATION)
-
-        return [PostLiteSchema(
-            post_id=post.post_id,
-            title=post.title,
-            published=post.published,
-            is_reply=post.is_reply,
-            pictures_urls=[await self._ImageStorage.get_post_image_urls(images_names=image.image_name) for image in post.images],
-            owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
-            parent_post=PostBase.model_validate(post.parent_post, from_attributes=True) if post.parent_post else None
-        ) for post in user_posts]
 
     async def _get_recent_action_message(self, action: PostActions) -> Dict | None:
         """

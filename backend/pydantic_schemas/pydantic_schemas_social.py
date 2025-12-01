@@ -50,6 +50,7 @@ class PostBase(PostBaseShort):
     views: int = 0
     replies: int = 0
 
+    is_my_post: bool
 
 class PostLiteSchema(PostBase):
     parent_post: PostBase | None
@@ -88,6 +89,7 @@ class ChatUserShortSchemaAvatarURL(UserShortSchemaAvatarURL):
 class UserSchema(UserLiteSchema):
     followed: int
     joined: datetime
+    is_following: bool
     me: bool
 
 # =================
