@@ -14,7 +14,6 @@ It is a prototype of a social network similar to Twitter _(now X)_.
 **Features:**
 - **Architecture** built on SOLID principles, also it is fully asynchronous and easy to _develop_/_expand_.
 - **Images** support user avatars and post pictures. Storage can be chosen in `.env` file (**AWS S3** via **AioBotocore**, **Local Storage**)
-
 - **Authorization** handled with password hashing and two JWT tokens:
   - **Refresh** token - long termed. Used to refresh access token.
   - **Access** token - short termed.
