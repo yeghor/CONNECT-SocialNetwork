@@ -20,5 +20,4 @@ def test_pw_hashing(prepared_pws):
 @pytest.mark.asyncio
 async def test_jwt_and_redis_jwt_saving():
     """Test JWT handling with jwt and redis async library"""
-
     pass

@@ -9,7 +9,7 @@ from uuid import UUID
 from .models import *
 from .models import ActionType
 from .database_utils import postgres_exception_handler
-
+from project_types import PostsOrderType
 from exceptions.custom_exceptions import PostgresError
 
 Models = TypeVar("Models", bound=Base)
@@ -27,6 +27,18 @@ DIVIDE_BASE_PAG_BY = int(getenv("DIVIDE_BASE_PAG_BY"))
 SMALL_PAGINATION = int(getenv("SMALL_PAGINATION"))
 
 class PostgresService:
+    @staticmethod
+    def define_posts_order_by(order: PostsOrderType):
+        match order:
+            case "fresh":
+                return Post.published.desc()
+            case "popularNow":
+                return Post.popularity_rate.desc()
+            case "old":
+                return Post.published
+            case "mostLiked":
+                return Post.likes_count.desc()
+
     def __init__(self, postgres_session: AsyncSession):
         # We don't need to close session. Because Depends func will handle it in endpoints.
         self.__session = postgres_session
@@ -51,7 +63,7 @@ class PostgresService:
     async def flush(self) -> None:
         await self.__session.flush()
 
-    @postgres_exception_handler(action="Delete model sesion")
+    @postgres_exception_handler(action="Delete model session")
     async def delete_models_and_flush(self, *models: Base) -> None:
         for model in models:
             await self.__session.delete(model)
@@ -121,7 +133,7 @@ class PostgresService:
             result = await self.__session.execute(
                 select(Post)
                 .where(Post.post_id == id_)
-                .options(selectinload(Post.replies))
+                .options(selectinload(Post.replies), selectinload(Post.parent_post))
             )
         else:
             raise TypeError("Unsupported model type!")
@@ -130,7 +142,6 @@ class PostgresService:
     # https://stackoverflow.com/questions/3325467/sqlalchemy-equivalent-to-sql-like-statement
     @postgres_exception_handler(action="Get users by LIKE statement")
     async def get_users_by_username(self, prompt: str, page: int, n: int) -> List[User]:
-        print(prompt)
         result = await self.__session.execute(
             select(User)
             .where(User.username.ilike(f"%{prompt.strip()}%"))
@@ -178,7 +189,7 @@ class PostgresService:
             .where(and_(Post.owner_id.in_(followed_ids), Post.post_id.not_in(exclude_ids)))
             .order_by(Post.popularity_rate.desc(), Post.published.desc())
             .offset(page*n)
-            .limit((page*n) + n)
+            .limit(n)
         )
         return result.scalars().all()
 
@@ -213,7 +224,7 @@ class PostgresService:
         return result.scalars().all()
 
     @postgres_exception_handler(action="Get actions on post by specified type")
-    async def get_post_action_by_type(self, post_id: str, action_type: ActionType) -> List[User]:
+    async def get_post_action_by_type(self, post_id: str, action_type: ActionType) -> List[PostActions]:
         result = await self.__session.execute(
             select(PostActions)
             .where(and_(PostActions.post_id == post_id, PostActions.action == action_type))
@@ -245,22 +256,64 @@ class PostgresService:
             select(Post, likes_subq)
             .where(Post.parent_post_id == post_id)
             .order_by(Post.published.desc(), Post.popularity_rate.desc(), likes_subq.desc())
+            .options(selectinload(Post.parent_post))
             .offset(page*n)
             .limit(n)
         )
         return result.scalars().all()
     
     @postgres_exception_handler(action="Get user's posts")
-    async def get_user_posts(self, user_id: str, page: int, n: int):
+    async def get_user_posts(self, user_id: str, page: int, n: int, order: PostsOrderType) -> List[Post]:
+        order_by_statement = self.define_posts_order_by(order=order)
+
         result = await self.__session.execute(
             select(Post)
-            .where(and_(Post.owner_id == user_id))
+            .where(and_(Post.owner_id == user_id, Post.is_reply == False))
             .limit(LOAD_MAX_USERS_POST)
-            .order_by(Post.published.desc())
+            .order_by(order_by_statement)
             .options(selectinload(Post.parent_post))
             .offset(page*n)
             .limit(n)
         )
+        return result.scalars().all()
+
+    @postgres_exception_handler(action="Get user's replies")
+    async def get_user_replies(self, user_id: str, page: int, n: int, order: PostsOrderType) -> List[Post]:
+        order_by_statement = self.define_posts_order_by(order=order)
+
+        result = await self.__session.execute(
+            select(Post)
+            .where(and_(Post.owner_id == user_id, Post.is_reply == True))
+            .limit(LOAD_MAX_USERS_POST)
+            .order_by(order_by_statement)
+            .options(selectinload(Post.parent_post))
+            .offset(page*n)
+            .limit(n)
+        )
+        return result.scalars().all()
+    
+    @postgres_exception_handler(action="Get user's liked posts")
+    async def get_user_liked_posts(self, user_id: str, page: int, n: int, order: PostsOrderType) -> List[Post]:
+        order_by_statement = self.define_posts_order_by(order=order)
+
+        actions_select = await self.__session.execute(
+            select(PostActions)
+            .where(and_(PostActions.owner_id == user_id, PostActions.action == ActionType.like))
+            .offset(page*n)
+            .limit(n)
+        )
+
+        liked_ids = set(action.post_id for action in actions_select.scalars().all())
+
+        result = await self.__session.execute(
+            select(Post)
+            .where(Post.post_id.in_(liked_ids))
+            .options(selectinload(Post.parent_post))
+            .order_by(order_by_statement)
+            .offset(page*n)
+            .limit(n)
+        )
+
         return result.scalars().all()
 
     @postgres_exception_handler(action="Get chat room by it's id")
@@ -291,7 +344,7 @@ class PostgresService:
         return result.scalars().all()
     
     @postgres_exception_handler(action="Get n user chat rooms excluding exclude_ids list")
-    async def get_n_user_chats(self, user: User, n, page: int, pagination_normalization: int, chat_type: Literal["chat", "not-approved"]) -> List[ChatRoom]:
+    async def get_n_user_chats(self, user: User, n: int, page: int, pagination_normalization: int, chat_type: Literal["chat", "not-approved"]) -> List[ChatRoom]:
         if chat_type == "chat":
             where_stmt = ChatRoom.approved.is_(True)
         elif chat_type == "not-approved":
@@ -315,3 +368,35 @@ class PostgresService:
         )
 
         return result.scalar()
+
+    @postgres_exception_handler(action="Get most fresh followed posts")
+    async def get_fresh_followed_posts(self, user: User, n: int) -> List[Post]:
+        result = await  self.__session.execute(
+            select(Post)
+            .where(Post.owner.in_((user.followed)))
+            .order_by(Post.published.desc())
+            .limit(n)
+        )
+
+        return result.scalars().all()
+
+    @postgres_exception_handler(action="Get most fresh action for a user")
+    async def get_fresh_actions_for_user(self, user: User, n: int) -> List[PostActions]:
+        result = await  self.__session.execute(
+            select(PostActions)
+            .where(PostActions.post.in_(user.posts))
+            .order_by(PostActions.date.desc())
+            .limit(n)
+        )
+
+        return result.scalars().all()
+
+    @postgres_exception_handler(action="Check if user is following another user")
+    async def check_follow(self, user: User, other_user_id: str) -> bool:
+        result = await self.__session.execute(
+            select(User)
+            .where(and_(User.user_id == other_user_id, User.followers.contains(user)))
+        )
+        possible_folower = result.scalar()
+
+        return possible_folower is not None

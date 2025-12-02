@@ -1,0 +1,13 @@
+user1 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTk3MTQwZmYtOWEwZC00NmQwLTkyMDgtZDhkODU3YTMwODhjIiwiaXNzdWVkX2F0IjoxNzU4MTk2Njg0fQ.EOjb4dr6PKUUmNIVnm9iKIVgskjUc3sRkLAnUZN2yFE
+
+user2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZWQ5ZDQxMjAtYWEyZS00ZjhlLWE2YTMtMDY5ZmY4ZjhiMTAwIiwiaXNzdWVkX2F0IjoxNzU4MTk2Njk4fQ.dLF7-J_8JesxGtaOxd8Lkf7FZp9TTRq9LJZhX0jsP40
+id - ed9d4120-aa2e-4f8e-a6a3-069ff8f8b100
+
+{
+  "message": "Hello guys!",
+  "other_participants_ids": [
+    "2716c83c-bb0b-4b5f-b4d7-6c3edcaa4992"
+  ]
+}
+
+

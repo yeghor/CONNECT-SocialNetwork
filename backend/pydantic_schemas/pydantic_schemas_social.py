@@ -5,7 +5,7 @@ from services.postgres_service.models import ActionType
 from pydantic import BaseModel, field_validator, Field, ValidationInfo, model_validator
 from uuid import UUID
 from datetime import datetime
-from typing import List, Any, Annotated
+from typing import List, Any, Annotated, Literal
 from dotenv import load_dotenv
 from os import getenv
 
@@ -44,24 +44,32 @@ class PostBaseShort(PostIDValidate):
     is_reply: bool
 
 class PostBase(PostBaseShort):
-    owner: UserShortSchema | None
-
-    pictures_urls: List[str]
-
-class PostLiteSchema(PostBase):
-    parent_post: PostBase | None
-
-# TODO: Separate urls field to diferent models
-class PostSchema(PostBase):
-    text: str
+    owner: UserShortSchemaAvatarURL | None
 
     likes: int = 0
     views: int = 0
+    replies: int = 0
+
+    is_my_post: bool
+
+class PostLiteSchema(PostBase):
+    parent_post: PostBase | None
+    pictures_urls: List[str]
+
+class PostSchema(PostBase):
+    text: str
+    is_liked: bool
 
     last_updated: datetime
 
     parent_post: PostBase | None
+    pictures_urls: List[str]
 
+class RecentActivitySchema(BaseModel):
+    avatar_url: str
+    type: Literal["post", "like", "reply"]
+    message: str
+    date: datetime
 
 # =====================
 
@@ -70,18 +78,19 @@ class UserShortSchema(UserIDValidate):
 
 class UserShortSchemaAvatarURL(UserShortSchema):
     avatar_url: str | None
-    
-    # Boolean variable to identify which messsages do user own
+
+class UserLiteSchema(UserShortSchemaAvatarURL):
+    followers: int
+
+class ChatUserShortSchemaAvatarURL(UserShortSchemaAvatarURL):
+    # Boolean state to identify which messages do user own
     me: bool
 
-class UserLiteSchema(UserShortSchema):
-    """Pass to the followers field List[User]!"""
-    followers: List[UserShortSchema]
-
-
 class UserSchema(UserLiteSchema):
-    followed: List[UserShortSchema]
-    avatar_url: str | None
+    followed: int
+    joined: datetime
+    is_following: bool
+    me: bool
 
 # =================
 # Body data structure

@@ -2,7 +2,7 @@ from services.core_services import MainServiceBase
 from services.postgres_service.models import *
 from exceptions.custom_exceptions import *
 from exceptions.exceptions_handler import web_exceptions_raiser
-from pydantic_schemas.pydantic_schemas_chat import Chat, MessageSchema, MessageSchemaShort, ExpectedWSData, ChatJWTPayload, CreateDialoqueRoomBody, ChatTokenResponse, CreateGroupRoomBody, MessageSchemaActionIncluded, MessageSchemaShortActionIncluded
+from pydantic_schemas.pydantic_schemas_chat import Chat, MessageSchema, MessageSchemaShort, ExpectedWSData, ChatJWTPayload, CreateDialogueRoomBody, ChatTokenResponse, CreateGroupRoomBody, MessageSchemaActionIncluded, MessageSchemaShortActionIncluded
 from pydantic_schemas.pydantic_schemas_social import UserShortSchema
 from post_popularity_rate_task.popularity_rate import scheduler
 from uuid import uuid4
@@ -51,7 +51,7 @@ class MainChatService(MainServiceBase):
         elif request_data.action == "delete":
             return await self.delete_message(message_data=request_data, user_data=connection_data)
 
-    # @web_exceptions_raiser
+    @web_exceptions_raiser
     async def get_chat_token_participants_avatar_urls(self, room_id: str, user: User) -> ChatTokenResponse:
         chat_room = await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=True)
         chat_token = await self._JWT.generate_save_chat_token(room_id=room_id, user_id=user.user_id, redis=self._RedisService)
@@ -70,7 +70,7 @@ class MainChatService(MainServiceBase):
         await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=False)
 
         pagination_normalization = await self._RedisService.get_user_chat_pagination(user_id=user.user_id)
-        print(pagination_normalization)
+
         message_batch = await self._PostgresService.get_chat_n_fresh_chat_messages(room_id=room_id, page=page, n=BASE_PAGINATION, pagination_normalization=pagination_normalization)
 
         return [
@@ -95,7 +95,7 @@ class MainChatService(MainServiceBase):
             raise InvalidAction(detail=f"ChatService: User: {user.user_id} tried to approve dialogue chat: {room_id} that already approved.", client_safe_detail="You're already approved this chat")
 
         if chat_room.creator_id == user.user_id:
-            raise InvalidAction(detail=f"ChatService: User: {user.user_id} trierd to approve dialoque chat: {room_id} while being the room creator.", client_safe_detail=f"You can't approve chat that you have created")
+            raise InvalidAction(detail=f"ChatService: User: {user.user_id} tried to approve dialoque chat: {room_id} while being the room creator.", client_safe_detail=f"You can't approve chat that you have created")
 
         chat_room.approved = True
     
@@ -107,7 +107,7 @@ class MainChatService(MainServiceBase):
             raise InvalidAction(detail=f"ChatService: User: {user.user_id} tried to disapprove dialogue chat: {room_id} that already approved.", client_safe_detail="You're already approved this chat")
 
         if chat_room.creator_id == user.user_id:
-            raise InvalidAction(detail=f"ChatService: User: {user.user_id} trierd to disapprove dialoque chat: {room_id} while being the room creator.", client_safe_detail=f"You can't disapprove chat that you have created")
+            raise InvalidAction(detail=f"ChatService: User: {user.user_id} tried to disapprove dialoque chat: {room_id} while being the room creator.", client_safe_detail=f"You can't disapprove chat that you have created")
 
         await self._PostgresService.delete_models_and_flush(chat_room)
 
@@ -169,7 +169,7 @@ class MainChatService(MainServiceBase):
         return MessageSchemaShortActionIncluded(action="change", message_id=message.message_id, text=message_data.message)
 
     @web_exceptions_raiser
-    async def create_dialogue_chat(self, data: CreateDialoqueRoomBody, user: User) -> None:
+    async def create_dialogue_chat(self, data: CreateDialogueRoomBody, user: User) -> None:
         other_user = await self._PostgresService.get_user_by_id(data.other_participant_id)
 
         if other_user.user_id == user.user_id:
@@ -210,7 +210,7 @@ class MainChatService(MainServiceBase):
     async def create_group_chat(self, data: CreateGroupRoomBody, user: User) -> None:
         # Adding one to include creator
         if not MIN_CHAT_GROUP_PARTICIPANTS <= len(data.other_participants_ids) + 1 <= MAX_CHAT_GROUP_PARTICIPANTS:
-            raise InvalidResourceProvided(detail=f"ChatService: User: {user.user_id} triedt to create chat with {len(data.other_participants_ids)} participants, which isn't allowed.", client_safe_detail=f"You can't create group with more than {MAX_CHAT_GROUP_PARTICIPANTS} or fewer than {MIN_CHAT_GROUP_PARTICIPANTS} members")
+            raise InvalidResourceProvided(detail=f"ChatService: User: {user.user_id} tried to create chat with {len(data.other_participants_ids)} participants, which isn't allowed.", client_safe_detail=f"You can't create group with more than {MAX_CHAT_GROUP_PARTICIPANTS} or fewer than {MIN_CHAT_GROUP_PARTICIPANTS} members")
 
         participants = await self._PostgresService.get_entries_by_ids(ids=data.other_participants_ids, ModelType=User)
 
@@ -228,9 +228,8 @@ class MainChatService(MainServiceBase):
         participants.append(user)
 
         chat_room = ChatRoom(room_id=chat_room_id, created=datetime.utcnow(), is_group=True, approved=True, participants=participants, creator_id=user.user_id)
-        message = self._create_message(text=data.message, room_id=chat_room_id, owner_id=user.user_id)
 
-        await self._PostgresService.insert_models_and_flush(chat_room, message)
+        await self._PostgresService.insert_models_and_flush(chat_room)
 
     @web_exceptions_raiser
     async def add_participant_to_group(self, room_id: str, participant_id: str, user: User) -> None:

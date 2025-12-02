@@ -14,7 +14,6 @@ from os import getenv
 ActionType = Literal["send", "change", "delete"]
 
 load_dotenv()
-
 MESSAGE_MAX_LEN = int(getenv("MESSAGE_MAX_LEN", "5000"))
 
 class Chat(BaseModel):
@@ -25,7 +24,7 @@ class ActionIncluded(BaseModel):
     action: Literal["send", "change", "delete"] = "send"
 
 class MessageSchemaShort(BaseModel):
-    # Default value "send" for enabling model_validate with Message Postgre model
+    # Default value "send" for enabling model_validate with Message Postgres model
     
     message_id: str
     text: str | None = Field(default=None)
@@ -33,7 +32,7 @@ class MessageSchemaShort(BaseModel):
 class MessageSchema(MessageSchemaShort):
     "Use in main http endpoints"
     text: str
-    sent: datetime = Field(default=datetime.utcnow)
+    sent: datetime
     owner: UserShortSchema
 
 class MessageSchemaActionIncluded(MessageSchema, ActionIncluded):
@@ -52,10 +51,10 @@ class ChatTokenResponse(BaseModel):
 class CreateChatBodyBase(BaseModel):
     message: str
 
-class CreateDialoqueRoomBody(CreateChatBodyBase):
+class CreateDialogueRoomBody(CreateChatBodyBase):
     other_participant_id: str
 
-class CreateGroupRoomBody(CreateChatBodyBase):
+class CreateGroupRoomBody(BaseModel):
     other_participants_ids: List[str]
 
 class ExpectedWSData(BaseModel):

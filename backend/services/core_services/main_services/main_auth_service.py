@@ -1,13 +1,14 @@
 from authorization import jwt_service
+from authorization import password_utils
+from authorization import authorization_utils
 from services.core_services import MainServiceBase
 from services.postgres_service import Post, User
-from authorization import password_utils
 from pydantic_schemas.pydantic_schemas_auth import (
     RegisterSchema,
     RefreshTokenSchema,
-    AccesTokenSchema,
+    AccessTokenSchema,
     LoginSchema,
-    RefreshAccesTokens,
+    RefreshAccessTokens,
     OldNewPassword,
     NewUsername
 )
@@ -20,8 +21,6 @@ import os
 
 from exceptions.exceptions_handler import web_exceptions_raiser
 from exceptions.custom_exceptions import *
-
-POST_IMAGE_MAX_SIZE_MB = int(os.getenv("POST_IMAGE_MAX_SIZE_MB", "25"))
 
 class MainServiceAuth(MainServiceBase):
     @web_exceptions_raiser
@@ -39,7 +38,7 @@ class MainServiceAuth(MainServiceBase):
             if not user:
                 raise Unauthorized(detail=f"AuthService: User tried to authorize request by token: {token}, but specified user id does not exist.", client_safe_detail="Invalid or expired token")
             return user
-        
+
         return None
 
     @web_exceptions_raiser
@@ -51,9 +50,11 @@ class MainServiceAuth(MainServiceBase):
         
         return token
 
-    # TODO: Invalid password is passing.
     @web_exceptions_raiser
-    async def register(self, credentials: RegisterSchema) -> RefreshAccesTokens:
+    async def register(self, credentials: RegisterSchema) -> RefreshAccessTokens:
+        authorization_utils.validate_email(credentials.email)
+        authorization_utils.validate_password(credentials.password)
+
         if await self._PostgresService.get_user_by_username_or_email(username=credentials.username, email=credentials.email):
             raise Collision(detail=f"AuthService: User tried to register with credentials: {credentials.username}, {credentials.email} that already exist.", client_safe_detail="Registered user with these credentials already exist")
 
@@ -66,10 +67,10 @@ class MainServiceAuth(MainServiceBase):
 
         await self._PostgresService.insert_models_and_flush(new_user)
 
-        return await self._JWT.generate_save_refresh_acces_token(user_id=new_user.user_id, redis=self._RedisService)
+        return await self._JWT.generate_save_refresh_access_token(user_id=new_user.user_id, redis=self._RedisService)
 
     @web_exceptions_raiser
-    async def login(self, credentials: LoginSchema) -> RefreshAccesTokens:
+    async def login(self, credentials: LoginSchema) -> RefreshAccessTokens:
         potential_user = await self._PostgresService.get_user_by_username_or_email(username=credentials.username, email=None)
         if not potential_user:
             raise InvalidResourceProvided(detail=f"AuthService: User tried to login to not existing account with credentials: {credentials.username}", client_safe_detail="Account with these credentials does not exist. You may need to sign up first")
@@ -79,22 +80,22 @@ class MainServiceAuth(MainServiceBase):
         
         user_id = potential_user.user_id
         potential_refresh_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="refresh")
-        potential_acces_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="acces")
+        potential_access_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="acces")
 
-        if potential_acces_token:
-            await self._RedisService.delete_jwt(jwt_token=potential_acces_token, token_type="acces")
+        if potential_access_token:
+            await self._RedisService.delete_jwt(jwt_token=potential_access_token, token_type="acces")
         if potential_refresh_token:
             await self._RedisService.delete_jwt(jwt_token=potential_refresh_token, token_type="refresh")
         
-        return await self._JWT.generate_save_refresh_acces_token(user_id=user_id, redis=self._RedisService)
+        return await self._JWT.generate_save_refresh_access_token(user_id=user_id, redis=self._RedisService)
 
     @web_exceptions_raiser
-    async def logout(self, tokens: RefreshAccesTokens) -> None:
+    async def logout(self, tokens: RefreshAccessTokens) -> None:
         await self._RedisService.delete_jwt(jwt_token=tokens.acces_token, token_type="acces")
         await self._RedisService.delete_jwt(jwt_token=tokens.refresh_token, token_type="refresh")
 
     @web_exceptions_raiser
-    async def refresh_token(self, refresh_token: str) -> AccesTokenSchema:
+    async def refresh_token(self, refresh_token: str) -> AccessTokenSchema:
         prepared_token = self._JWT.prepare_token(jwt_token=refresh_token)
         if not await self._RedisService.check_jwt_existence(jwt_token=prepared_token, token_type="refresh"):
             raise Unauthorized(detail=F"AuthService: User with refresh token: {refresh_token} that does not exist tried to refresh tokens.", client_safe_detail="Invalid or expired token")
@@ -103,11 +104,11 @@ class MainServiceAuth(MainServiceBase):
         payload = self._JWT.extract_jwt_payload(jwt_token=prepared_token)
         user_id = payload.user_id
 
-        old_acces_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="acces")
-        new_acces_token = await self._JWT.generate_save_token(user_id=user_id, redis=self._RedisService, token_type="acces")
+        old_access_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="acces")
+        new_access_token = await self._JWT.generate_save_token(user_id=user_id, redis=self._RedisService, token_type="acces")
 
-        await self._RedisService.refresh_acces_token(old_token=old_acces_token, new_token=new_acces_token.acces_token, user_id=user_id)
-        return new_acces_token
+        await self._RedisService.refresh_access_token(old_token=old_access_token, new_token=new_access_token.access_token, user_id=user_id)
+        return new_access_token
     
     @web_exceptions_raiser
     async def change_password(self, user: User, credentials: OldNewPassword) -> None:
@@ -124,7 +125,7 @@ class MainServiceAuth(MainServiceBase):
         if user.username == credentials.new_username:
             raise InvalidResourceProvided(detail=f"AuthService: User: {user.user_id} tried to change username to identical to his old one.", client_safe_detail="New username can't the same as old one")
 
-        await self._PostgresService.change_field_and_flush(model=User, username=new_username)
+        await self._PostgresService.change_field_and_flush(model=user, username=new_username)
 
     @web_exceptions_raiser
     async def delete_user(self, password: str, user: User) -> None:

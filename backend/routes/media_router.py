@@ -22,7 +22,7 @@ This router is only for case when the application use Local image storage.
 async def get_image_user(
     token: str,
     session: AsyncSession = Depends(get_session_depends)
-) -> str:
+) -> Response:
     async with await MainServiceContextManager[MainMediaService].create(MainServiceType=MainMediaService, postgres_session=session) as media:  
         file_contents, mime_type = await media.get_user_avatar_by_token(token=token)
         return Response(content=file_contents, media_type=mime_type)
@@ -32,12 +32,12 @@ async def get_image_user(
 async def get_image_post(
     token: str,
     session: AsyncSession = Depends(get_session_depends)
-) -> str:
+) -> Response:
     async with await MainServiceContextManager[MainMediaService].create(MainServiceType=MainMediaService, postgres_session=session) as media:  
         file_contents, mime_type = await media.get_post_image_by_token(token=token)
         return Response(content=file_contents, media_type=mime_type)
 
-# TODO: Implement file passing.
+# TODO: Implement file passing
 @media_router.post("/media/posts/{post_id}")
 @endpoint_exception_handler
 async def upload_post_picture(
@@ -46,14 +46,16 @@ async def upload_post_picture(
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
+    print("Received upload post picture")
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainMediaService].create(MainServiceType=MainMediaService, postgres_session=session) as media:
         file_contents = await file_.read()
+        print(file_.content_type)
+        print(file_contents[:15])
         await media.upload_post_image(post_id=post_id, user=user, image_contents=file_contents, specified_mime=file_.content_type)
 
-# No need to request user_id - getting it from JWT  
-@media_router.post("/media/users/")
-# @endpoint_exception_handler
+@media_router.post("/media/users")
+@endpoint_exception_handler
 async def upload_user_avatar(
     file: UploadFile = File(...),
     user_: User = Depends(authorize_request_depends),

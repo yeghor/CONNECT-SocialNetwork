@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "jsx": "react",
+    // https://stackoverflow.com/questions/50234481/typescript-2-8-3-type-must-have-a-symbol-iterator-method-that-returns-an-iterato
+    // To prevent: Type 'FileList' must have a '[Symbol.iterator]()' method that returns an iterator.
+    // When working with FileList object
+    "lib": [
+      "es5", "es6", "dom", "dom.iterable"
+    ]
+  }
+}

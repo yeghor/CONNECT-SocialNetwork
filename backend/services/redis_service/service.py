@@ -82,6 +82,9 @@ class RedisService:
 
         self._viewed_post_prefix = "viewed-posts:"
 
+        self.__post_view_timeout_prefix_1 = "post-view-user-"
+        self.__post_view_timeout_prefix_2 = "post:"
+
 
         # Chat
         self.__chat_token_prefix = "chat-jwt-token:"
@@ -93,6 +96,8 @@ class RedisService:
         # Image acces tokens prefix
         self.__post_image_acces_prefix = "post-image-acces:"
         self.__user_image_acces_prefix = "user-image-acces:"
+
+        #
 
 
     # ===============
@@ -118,7 +123,7 @@ class RedisService:
         return self._get_expiry(REFRESH_JWT_EXPIRY_SECONDS)
 
     @redis_error_handler
-    async def refresh_acces_token(self, old_token, new_token: str, user_id: str) -> str:
+    async def refresh_access_token(self, old_token, new_token: str, user_id: str) -> str:
         await self.delete_jwt(jwt_token=old_token, token_type="acces")
         await self.__client.setex(
             name=f"{self.__jwt_acces_prefix}{new_token}",

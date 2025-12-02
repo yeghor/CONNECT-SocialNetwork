@@ -85,11 +85,15 @@ class Post(Base):
 
     is_reply: Mapped[bool] = mapped_column(default=False)
 
-    # Add constraits!!!
     title: Mapped[str] = mapped_column()
     text: Mapped[str]
     published: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     last_updated: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    likes_count: Mapped[int] = mapped_column(default=0)
+    views_count: Mapped[int] = mapped_column(default=0)
+    replies_count: Mapped[int] = mapped_column(default=0)
+
 
     images: Mapped[List["PostImage"]] = relationship(
         "PostImage",
@@ -109,7 +113,6 @@ class Post(Base):
         back_populates="post",
         lazy="selectin"
     )
-
 
     # Self referable one-2-many relationship https://docs.sqlalchemy.org/en/20/orm/self_referential.html
     parent_post: Mapped["Post"] = relationship(
@@ -134,12 +137,12 @@ class Post(Base):
 
     @validates("text")
     def validate_text(self, key, text: str):
-        if not int(getenv("POST_TEXT_MIN_L")) <= len(text) <= int(getenv("POST_TEXT_MAX_L")):
+        if not len(text) <= int(getenv("POST_TEXT_MAX_L")):
             raise ValueError("Post text length is out of range")
         return text
 
     def __repr__(self):
-        return f"Post name: {self.title} | Rate: {self.popularity_rate}"
+        return f"Post name: {self.title} | Rate: {self.popularity_rate} | Post id: {self.post_id}"
 
 class PostImage(Base):
     __tablename__ = "postimages"
@@ -161,7 +164,7 @@ class ActionType(enum.Enum):
     view = "view"
     like = "like"
     reply = "reply"
-    repost = "repost"
+    # repost = "repost"
 
 
 class PostActions(Base):
