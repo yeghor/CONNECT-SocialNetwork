@@ -18,8 +18,6 @@ import estimatePostSize from "../../helpers/postSizeEstimator.ts";
 
 import {CookieTokenObject, getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
-import { arrayShuffle } from "array-shuffle";
-import OwnerComponent from "./post/owner.tsx";
 
 interface SearchResultPost {
     estimateSize: number;

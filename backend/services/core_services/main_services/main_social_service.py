@@ -233,12 +233,24 @@ class MainServiceSocial(MainServiceBase):
                 title=post.title,
                 published=post.published,
                 is_reply=post.is_reply,
-                owner=UserShortSchemaAvatarURL(user_id=post.parent_post.owner_id, username=post.parent_post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.parent_post.owner_id)),
+                owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
                 likes=post.likes_count,
                 views=post.views_count,
+                is_my_post=user.user_id == post.owner_id,
                 replies=post.replies_count,
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
-                parent_post=post.parent_post
+                parent_post=PostBase(
+                    post_id=post.parent_post.post_id,
+                    title=post.parent_post.title,
+                    published=post.parent_post.published,
+                    is_reply=post.parent_post.is_reply ,
+                    owner=UserShortSchemaAvatarURL(user_id=post.parent_post.owner_id, username=post.parent_post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.parent_post.owner_id)),
+                    likes=post.parent_post.likes_count,
+                    views=post.parent_post.views_count,
+                    replies=post.parent_post.replies_count,
+                    is_my_post=user.user_id == post.parent_post.owner_id,
+                    pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.parent_post.images])
+                ) if post.parent_post else None
             ) for post in posts
             ]
     

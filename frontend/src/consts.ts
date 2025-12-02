@@ -26,6 +26,7 @@ export const internalServerErrorURI = "/internal-server-error"
 export const appHomeURI = "/";
 export const appLoginURI = "/login";
 export const appRegisterURI = "/register";
+export const myProfileURI = "my-profile";
 export const unauthorizedRedirectURI = appLoginURI;
 export const specificPostURI = (postId: string) => {
     return `/post/${postId}`;

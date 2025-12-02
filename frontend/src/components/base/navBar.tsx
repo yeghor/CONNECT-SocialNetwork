@@ -2,15 +2,13 @@ import React from "react";
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
-import  { appHomeURI } from "../../consts.ts";
+import  { appHomeURI, myProfileURI } from "../../consts.ts";
 import SearchBar from "./searchBar.tsx";
 
 const NavigationBar = (): ReactNode => {
     return (
         <nav className="w-full">
             <div className="flex items-center justify-between w-full p-4">
-
-                {/* LEFT — LOGO */}
                 <div className="flex items-center w-1/3">
                     <Link to={appHomeURI} className="flex items-center">
                         <img
@@ -20,15 +18,13 @@ const NavigationBar = (): ReactNode => {
                         />
                     </Link>
                 </div>
-
-                {/* CENTER — SEARCH */}
+            
                 <div className="flex justify-center w-1/3">
                     <div className="w-full max-w-md">
                         <SearchBar />
                     </div>
                 </div>
 
-                {/* RIGHT — NAVIGATION */}
                 <ul className="flex items-center justify-end w-1/3 space-x-4">
                     <li>
                         <Link to="/" className="py-2 px-3" aria-current="page">
@@ -41,7 +37,7 @@ const NavigationBar = (): ReactNode => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/my-profile" className="py-2 px-3">
+                        <Link to={myProfileURI} className="py-2 px-3">
                             <img src="/me-title.png" alt="Me" className="h-10 w-auto hover:scale-110 transition-all" />
                         </Link>
                     </li>

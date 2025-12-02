@@ -175,7 +175,7 @@ export const ProfilePage = (props: ProfilePageProps) => {
                             </button>
                         :
                             <div className="flex justify-start gap-4">
-                                <button onClick={() => followAction()} className={`w-32 px-6 py-2 ${isFollowing ? "bg-white/20" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
+                                <button onClick={() => followAction()} className={`w-32 px-6 py-2 ${isFollowing ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
                                     {isFollowing ? "Following" : "Follow"}
                                 </button>
                                 <button className={`w-32 px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
@@ -187,9 +187,24 @@ export const ProfilePage = (props: ProfilePageProps) => {
             </div>
 
             <div className="flex justify-center items-center gap-4 mt-6 text-white">
-                <button onClick={() => changeSection("posts")} className={`px-6 py-2 ${profilePostsSection == "posts" ? "bg-white/20" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Posts</button>
-                <button onClick={() => changeSection("replies")} className={`px-6 py-2 ${profilePostsSection == "replies" ? "bg-white/20" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Replies</button>
-                <button onClick={() => changeSection("likes")} className={`px-6 py-2 ${profilePostsSection == "likes" ? "bg-white/20" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Liked Posts</button>
+                <button onClick={() => changeSection("posts")} className={`px-6 py-2 ${profilePostsSection == "posts" ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Posts</button>
+                <button onClick={() => changeSection("replies")} className={`px-6 py-2 ${profilePostsSection == "replies" ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Replies</button>
+                <button onClick={() => changeSection("likes")} className={`px-6 py-2 ${profilePostsSection == "likes" ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Liked Posts</button>
+            </div>
+
+            <div className="w-2/3 mx-auto flex justify-between items-center mt-8 px-4 py-2 rounded-full bg-white/10 text-white">
+                <button onClick={() => changeOrder("fresh")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "fresh" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
+                    Fresh
+                </button>
+                <button onClick={() => changeOrder("old")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "old" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
+                    Old
+                </button>
+                <button onClick={() => changeOrder("popularNow")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "popularNow" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
+                    Popular
+                </button>
+                <button onClick={() => changeOrder("mostLiked")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "mostLiked" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
+                    Most Liked
+                </button>
             </div>
 
             <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4 my-8">
