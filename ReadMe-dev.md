@@ -70,6 +70,8 @@ Add note about pagination normalization...
 
 Backend must **never** provide successful response with `detail` field. It will break frontend DTO!
 
+Fetchers wrapper over fetching functions that you pass to createInfiniteQueryOptionsUtils must always take page as a last param to prevent automatic infiniteQueryOptions creation crushes.
+
 # Issues 
 
 Pydantic schemas designed poorly. The application often returns unused or extra data. Which is not critical, but influences project support.

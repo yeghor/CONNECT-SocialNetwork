@@ -16,6 +16,7 @@ import { NavigateFunction } from "react-router-dom";
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
 import estimatePostSize from "../../helpers/postSizeEstimator.ts";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { createInfiniteQueryOptionsUtil, infiniteQieryingFetchGuard } from "../butterySmoothScroll/scrollVirtualizationUtils.ts";
 
 interface ProfilePageProps {
     userData: UserProfile;
@@ -47,24 +48,6 @@ const getProfileFetchData = async (tokens: CookieTokenObject, navigate: Navigate
     return undefined;
 }
 
-const createSearchInfiniteQueryOptions = (tokens: CookieTokenObject, navigate: NavigateFunction, userId: string, orderBy: OrderPostsByFlag, section: ProfilePostsSectionFlag) => {
-    return infiniteQueryOptions({
-        queryKey: ["profile", orderBy, section],
-        queryFn: ({pageParam}) => getProfileFetchData(tokens, navigate, userId, orderBy, section, pageParam),
-        initialPageParam: 0,
-        getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
-            if (lastPage) {
-                if (!lastPage || lastPage.length === 0) {
-                    return undefined;
-                }
-                return lastPageParam + 1;
-            } else {
-                return undefined;
-            }
-        }
-    })
-}
-
 export const ProfilePage = (props: ProfilePageProps) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
@@ -74,7 +57,7 @@ export const ProfilePage = (props: ProfilePageProps) => {
     const [ isFollowing, setFollowing ] = useState<boolean>(props.userData.isFollowing);
     const [ followTimeout, setFollowTimeout ] = useState<boolean>(false);
 
-    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createSearchInfiniteQueryOptions(tokens, navigate, props.userData.userId, orderBy, profilePostsSection))
+    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(getProfileFetchData, [tokens, navigate, props.userData.userId, orderBy, profilePostsSection], ["profile", orderBy, profilePostsSection]))
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const profilePostsData = (data?.pages.flatMap((page => page)) ?? []).filter((elem) => elem !== undefined);
@@ -93,9 +76,7 @@ export const ProfilePage = (props: ProfilePageProps) => {
 
     useEffect(() => {
         const lastItem = virtualItems[virtualItems.length - 1];
-        if (!hasNextPage || isFetchingNextPage || !lastItem) return;
-        if (lastItem.index >= profilePostsData.length - 1)
-            fetchNextPage();
+        if (infiniteQieryingFetchGuard(hasNextPage, isFetchingNextPage, lastItem, profilePostsData.length)) fetchNextPage();
     }, [virtualItems, hasNextPage, fetchNextPage]);
 
     const changeOrder = (newOrder: OrderPostsByFlag) => {
@@ -109,11 +90,6 @@ export const ProfilePage = (props: ProfilePageProps) => {
             setProfilePostsSection(newSection);
         }
     }
-
-    const fetchUserProfilePosts = () => {
-
-    };
-
 
     const followAction = async () => {
         if (props.me || followTimeout) {

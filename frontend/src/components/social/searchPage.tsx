@@ -16,8 +16,9 @@ import FlowPost from "./post/flowPost.tsx"
 import FlowUser from "./post/flowUser.tsx"
 import estimatePostSize from "../../helpers/postSizeEstimator.ts";
 
-import {CookieTokenObject, getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
+import { CookieTokenObject, getCookiesOrRedirect } from "../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
+import { createInfiniteQueryOptionsUtil } from "../butterySmoothScroll/scrollVirtualizationUtils.ts";
 
 interface SearchResultPost {
     estimateSize: number;
@@ -34,7 +35,7 @@ type SearchData = (SearchResultPost | SearchResultUser)[];
 
 type SearchFilter = "both" | "posts" | "users";
 
-const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFunction, query: string, page: number, filter: SearchFilter): Promise<SearchData | undefined> => {
+const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFunction, query: string, filter: SearchFilter, page: number): Promise<SearchData | undefined> => {
     let fetchFunctions: CallableFunction[];
 
     switch (filter) {
@@ -80,23 +81,6 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
     })
 }
 
-const createSearchInfiniteQueryOptions = (tokens: CookieTokenObject, navigate: NavigateFunction, query: string,  filter: SearchFilter) => {
-    return infiniteQueryOptions({
-        queryKey: ["search", filter, query],
-        queryFn: ({pageParam}) => getSearchResults(tokens, navigate, query, pageParam, filter),
-        initialPageParam: 0,
-        getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
-            if (lastPage) {
-                if (!lastPage || lastPage.length === 0) {
-                    return undefined;
-                }
-                return lastPageParam + 1;
-            } else {
-                return undefined;
-            }
-        }
-    })
-}
 
 // Initial page - 1
 const SearchPage = () => {
@@ -109,7 +93,7 @@ const SearchPage = () => {
     let query = searchParams.get("query");
     if (query === null) query = "";
 
-    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createSearchInfiniteQueryOptions(tokens, navigate, query, filter));
+    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(getSearchResults, [tokens, navigate, query, filter], ["search", filter, query]));
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const searchData = (data?.pages.flatMap((page => page)) ?? []).filter((elem) => elem !== undefined);
@@ -171,6 +155,9 @@ const SearchPage = () => {
             <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4">
                 <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
                     { virtualItems.map((vItem,) => {
+
+                        // Can't apply here VirtualizedListItem because of mixed elements types
+
                         const elem = searchData[vItem.index];
                         let uniqueIdentifier: string;
 

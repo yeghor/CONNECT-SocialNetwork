@@ -7,7 +7,7 @@ interface VirtualizedListProps {
     virtualizer: Virtualizer<HTMLDivElement, Element>,
     virtualItems: VirtualItem[],
     allData: any[],
-    componentProps: {}[]
+    componentProps: any[]
 }
 
 /*

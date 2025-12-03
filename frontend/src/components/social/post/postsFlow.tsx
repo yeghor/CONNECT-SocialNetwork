@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
@@ -14,11 +14,11 @@ import { FeedPost, FeedPostsResponse } from "../../../fetching/responseDTOs.ts";
 import { useNavigate } from "react-router";
 import { NavigateFunction } from "react-router-dom";
 import FlowPost from "./flowPost.tsx";
-import { fetchFeedPosts, fetchFollow, fetchFollowedPosts } from "../../../fetching/fetchSocial.ts";
-import { unauthorizedRedirectURI } from "../../../consts.ts"
+import { fetchFeedPosts, fetchFollowedPosts } from "../../../fetching/fetchSocial.ts";
 import estimatePostSize from "../../../helpers/postSizeEstimator.ts";
 
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
+import { createInfiniteQueryOptionsUtil, infiniteQieryingFetchGuard } from "../../butterySmoothScroll/scrollVirtualizationUtils.ts";
 
 interface PostsFlowFetcherInterface {
     // Depends on image existence
@@ -41,7 +41,7 @@ const createPostFlowResponse = (data: FeedPost[]): PostsFlowComponents => {
     })
 }
 
-const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolean, navigate: NavigateFunction): Promise<PostsFlowComponents | undefined> => {
+const postFetcher = async (tokens: CookieTokenObject, feed: boolean, navigate: NavigateFunction, page: number): Promise<PostsFlowComponents | undefined> => {
     if(tokens.access) {
         const fetchFunction = feed ? fetchFeedPosts : fetchFollowedPosts;
 
@@ -56,37 +56,13 @@ const postFetcher = async (tokens: CookieTokenObject, page: number, feed: boolea
     }
 }
 
-function createPostsInfiniteQueryOptions(tokens: CookieTokenObject, feed: boolean, navigate: NavigateFunction) {
-    if(!tokens.access || !tokens.refresh) {
-        navigate(unauthorizedRedirectURI);
-    }
-
-    return infiniteQueryOptions({
-        queryKey: ["posts", feed],
-        queryFn: ({ pageParam = 0 }) => postFetcher(tokens, pageParam, feed, navigate),
-        initialPageParam: 0,
-        getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
-            if (lastPage) {
-                if (!lastPage || lastPage.length === 0) {
-                    return undefined;
-                }
-                return lastPageParam + 1;
-            } else {
-                return undefined;
-            }
-        },
-        refetchOnWindowFocus: false,
-    });
-}
-
-// Base Home page with posts
 const PostsFlow = () => {
     const navigate = useNavigate();
 
     const tokens = getCookiesOrRedirect(navigate);
     const [ feed, setFeed ] = useState(true);
 
-    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createPostsInfiniteQueryOptions(tokens, feed, navigate));
+    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(postFetcher, [tokens, feed, navigate], ["posts", feed]));
     const [ posts, setPosts ] = useState<PostsFlowComponents>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -108,9 +84,8 @@ const PostsFlow = () => {
         const flatMapPosts = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((post) => post !== undefined) ?? []
         setPosts(flatMapPosts)
 
-        const lastItem = virtualItems[virtualItems.length - 1];
-        if (!hasNextPage || isFetchingNextPage || !lastItem) return;
-        if (lastItem.index >= posts.length - 1) await fetchNextPage();
+        const lastItem = virtualItems[virtualItems.length - 1]
+        if (infiniteQieryingFetchGuard(hasNextPage, isFetchingNextPage, lastItem, posts.length)) await fetchNextPage();
     }
 
     useEffect(() => {
