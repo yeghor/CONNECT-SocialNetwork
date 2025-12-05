@@ -40,7 +40,6 @@ const ProfilePageWrapper = () => {
     if (loading || !userProfileData) {
         return null
     }
-    console.log(userProfileData.me);
 
     if (!userProfileData.me) {
         return (<MyProfilePage userData={userProfileData} me={userProfileData.me} />)
