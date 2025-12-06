@@ -6,7 +6,7 @@ interface VirtualizedListProps {
     DisplayedComponent: any, // TODO: add react component type to prevent TS from arguing ^_^
     virtualizer: Virtualizer<HTMLDivElement, Element>,
     virtualItems: VirtualItem[],
-    componentProps: any[]
+    componentsProps: any[]
 }
 
 /*
@@ -20,7 +20,7 @@ interface VirtualizedListProps {
 *
 *
 * */
-const VirtualizedList = ({ DisplayedComponent, virtualizer, virtualItems, allData, componentProps }: VirtualizedListProps) => {
+const VirtualizedList = ({ DisplayedComponent, virtualizer, virtualItems, componentsProps }: VirtualizedListProps) => {
     return(
         <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
             {
@@ -34,7 +34,7 @@ const VirtualizedList = ({ DisplayedComponent, virtualizer, virtualItems, allDat
                                  }
                              }>
                             <div className="hover:-translate-y-0.5 hover:border-white hover:border-3 transition-all">
-                                <DisplayedComponent {...componentProps[vItem.index]} />
+                                <DisplayedComponent {...componentsProps[vItem.index]} />
                             </div>
                         </div>
                     )

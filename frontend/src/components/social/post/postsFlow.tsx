@@ -130,7 +130,7 @@ const PostsFlow = () => {
                     </div>
                 </div>
                 <div ref={scrollRef} className="md:h-[800px] sm:h-[600px] overflow-auto mb-16 relative mx-auto border-gray-300">
-                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentProps={virtualizedComponentsProps} />
+                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={virtualizedComponentsProps} />
                 </div>
             </div>
         </div>

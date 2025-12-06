@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 
-interface ActiveChatProps {};
+interface ActiveChatProps {
+    activeChatData: any
+};
 
 const ActiveChat = (props: ActiveChatProps) => {
     return(

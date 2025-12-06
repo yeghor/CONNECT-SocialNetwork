@@ -34,6 +34,9 @@ export const specificPostURI = (postId: string) => {
 export const searchURI = (query: string): string => {
     return `/search?query=${query}`;
 };
+export const specificChatURI = (chatId: string) => {
+    return `/chat/${chatId}`;
+}
 
 /*
 * Pass me as True and skip userId to get my profile URI
