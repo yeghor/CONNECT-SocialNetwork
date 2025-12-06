@@ -148,7 +148,7 @@ export const fetchNotApprovedChats = async (accessJWT: string, page: number): AP
     return await fetchHelper<ChatsResponse>(notApprovedChatsURL(page), requestInit, successfulResponseMapper);
 }
 
-export const fetchAllChats = async (accessJWT: string, page: number): APIResponse<ChatsResponse> => {
+export const fetchChats = async (accessJWT: string, page: number): APIResponse<ChatsResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT)

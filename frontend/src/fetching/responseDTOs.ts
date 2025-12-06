@@ -385,7 +385,7 @@ export interface ChatDTO {
 
 type ChatsDTO = ChatDTO[];
 
-interface ChatResponse {
+export interface ChatResponse {
     chatId: string,
     participants: number
 }

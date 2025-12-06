@@ -41,19 +41,17 @@ const createPostFlowResponse = (data: FeedPost[]): PostsFlowComponents => {
     })
 }
 
-const postFetcher = async (tokens: CookieTokenObject, feed: boolean, navigate: NavigateFunction, page: number): Promise<PostsFlowComponents | undefined> => {
-    if(tokens.access) {
-        const fetchFunction = feed ? fetchFeedPosts : fetchFollowedPosts;
+const postFetcher = async (tokens: CookieTokenObject, feed: boolean, navigate: NavigateFunction, page: number): Promise<PostsFlowComponents> => {
+    const fetchFunction = feed ? fetchFeedPosts : fetchFollowedPosts;
 
-        const fetchedPosts = await safeAPICall<FeedPostsResponse>(tokens, fetchFunction, navigate, undefined, page)
+    const fetchedPosts = await safeAPICall<FeedPostsResponse>(tokens, fetchFunction, navigate, undefined, page)
 
-        if (!fetchedPosts.success) {
-            // safeApiCall will redirect
-            return undefined;
-        }
-
+    if (fetchedPosts.success) {
         return createPostFlowResponse(fetchedPosts.data);
     }
+
+    return [];
+
 }
 
 const PostsFlow = () => {
@@ -67,7 +65,7 @@ const PostsFlow = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const virtualizer = useVirtualizer({
-        count: posts?.length ?? 0,
+        count: posts.length,
         estimateSize: (index) => {
             const post = posts[index];
             return post.estimatedSize;
@@ -132,7 +130,7 @@ const PostsFlow = () => {
                     </div>
                 </div>
                 <div ref={scrollRef} className="md:h-[800px] sm:h-[600px] overflow-auto mb-16 relative mx-auto border-gray-300">
-                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} allData={posts} componentProps={virtualizedComponentsProps} />
+                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentProps={virtualizedComponentsProps} />
                 </div>
             </div>
         </div>

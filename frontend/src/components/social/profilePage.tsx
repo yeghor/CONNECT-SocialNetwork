@@ -32,7 +32,7 @@ type ProfilePosts = ProfilePost[];
 export type ProfilePostsSectionFlag = "posts" | "replies" | "likes";
 export type OrderPostsByFlag = "fresh" | "old" | "mostLiked" | "popularNow"
 
-const getProfileFetchData = async (tokens: CookieTokenObject, navigate: NavigateFunction, userId: string, orderBy: OrderPostsByFlag, section: ProfilePostsSectionFlag, page: number): Promise<ProfilePosts | undefined> => {
+const getProfileFetchData = async (tokens: CookieTokenObject, navigate: NavigateFunction, userId: string, orderBy: OrderPostsByFlag, section: ProfilePostsSectionFlag, page: number): Promise<ProfilePosts> => {
     const fetchedResults = await safeAPICall<FeedPostsResponse>(tokens, fetchUsersPosts, navigate, undefined, userId, section, orderBy, page);
 
     if (fetchedResults.success) {
@@ -45,7 +45,7 @@ const getProfileFetchData = async (tokens: CookieTokenObject, navigate: Navigate
         });
     }
 
-    return undefined;
+    return [];
 }
 
 export const ProfilePage = (props: ProfilePageProps) => {
@@ -185,7 +185,7 @@ export const ProfilePage = (props: ProfilePageProps) => {
 
             <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4 my-8">
                 <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
-                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} allData={profilePostsData} componentProps={virtualizedComponentsProps} />
+                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentProps={virtualizedComponentsProps} />
                 </div>
             </div>
         </div>

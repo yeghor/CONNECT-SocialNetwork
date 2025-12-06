@@ -6,7 +6,6 @@ interface VirtualizedListProps {
     DisplayedComponent: any, // TODO: add react component type to prevent TS from arguing ^_^
     virtualizer: Virtualizer<HTMLDivElement, Element>,
     virtualItems: VirtualItem[],
-    allData: any[],
     componentProps: any[]
 }
 
@@ -26,7 +25,6 @@ const VirtualizedList = ({ DisplayedComponent, virtualizer, virtualItems, allDat
         <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
             {
                 virtualItems.map((vItem) => {
-                    const post = allData[vItem.index];
                     return (
                         <div key={vItem.key} className="absolute top-0 left-0 w-full" data-index={vItem.index}
                              style={
