@@ -39,7 +39,7 @@ class MessageSchemaActionIncluded(MessageSchema, ActionIncluded):
     """Use in websockets 'send' action"""
 
 class MessageSchemaShortActionIncluded(MessageSchemaShort, ActionIncluded):
-    """Use in webosockets 'change' 'delete' actions"""
+    """Use in websockets 'change' 'delete' actions"""
 
 
 

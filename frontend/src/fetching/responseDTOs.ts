@@ -465,15 +465,21 @@ export interface ChatConnectDTO {
     participants_avatar_urls: string[]
 }
 
-export interface ChatConnectResponse extends SuccessfulResponse {
+export interface ChatConnectData {
     token: string,
     participantsAvatarURLs: string[]
 }
 
+export interface ChatConnectResponse extends SuccessfulResponse {
+    data: ChatConnectData
+}
+
 export const chatConnectMapper = (data: ChatConnectDTO): ChatConnectResponse => {
     return {
-        token: data.token,
-        participantsAvatarURLs: data.participants_avatar_urls,
+        data: {
+            token: data.token,
+            participantsAvatarURLs: data.participants_avatar_urls
+        },
         success: true
     };
 };

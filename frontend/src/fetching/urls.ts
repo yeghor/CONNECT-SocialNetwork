@@ -6,7 +6,9 @@ const HOST = "127.0.0.1:8000"
 
 const BASEURL = `${MAINHTTPPROTOCOL}${HOST}`
 
-export const WebSocketURL = `${WSPROTOCOL}${HOST}`
+export const createWebSocketURL = (token: string): string=> {
+    return `${WSPROTOCOL}${HOST}/${token}`;
+};
 
 // Constructors
 const usersConstructor = "/users";
@@ -105,11 +107,11 @@ export const chatMessages = (chatId: string, page: number | string) => {
     return `${BASEURL}${chatConstructor}/${chatId}/messages/${page}`;
 }
 
-export const dialoqueChatURL = `${BASEURL}${chatConstructor}/dialogue`;
+export const dialogueChatURL = `${BASEURL}${chatConstructor}/dialogue`;
 
 export const groupChatURL = `${BASEURL}${chatConstructor}/group`;
 
-export const chatURL = (page: number | string) => {
+export const chatsURL = (page: number | string) => {
     return `${BASEURL}${chatConstructor}/${page}`;
 }
 

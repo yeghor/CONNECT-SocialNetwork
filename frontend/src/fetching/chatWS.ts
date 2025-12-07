@@ -3,15 +3,15 @@ import {
     APIResponse
 } from "./fetchUtils.ts"
 
-import { 
-    WebSocketURL,
+import {
+    createWebSocketURL,
     approveChatURL,
     chatConnectURL,
-    chatURL,
+    chatsURL,
     ChatsURL,
     BatchChatMessagesURL,
     notApprovedChatsURL,
-    dialoqueChatURL,
+    dialogueChatURL,
 } from "./urls.ts"
 
 import {
@@ -48,6 +48,7 @@ export const checkWSConnEstablished = (ws: WebSocket): void => {
     }
 }
 
+
 // Webosckets
 type chatAction = "send" | "change" | "delete";
 const wsClosedErrorMessage = "WebSocket connection is closed"
@@ -56,20 +57,19 @@ class WebsocketNotReady extends Error {
     constructor (msg: string){
         super(msg)
     }
-};
+}
 
 class WebsocketConnectionError extends Error {
     constructor (msg: string){
         super(msg)
     }
-};
-
+}
 
 interface ExpectedWSData {
     action: chatAction,
     message: string | null,
     messageId: string | null
-};
+}
 
 const wsDataMapper = (action: chatAction, message: string | null = null, messageId: string | null = null): string => {
     return JSON.stringify({
@@ -79,8 +79,8 @@ const wsDataMapper = (action: chatAction, message: string | null = null, message
     });
 }
 
-export const connectWSChat = (): WebSocket => {
-    return new WebSocket(WebSocketURL);
+export const connectWSChat = (token: string): WebSocket => {
+    return new WebSocket(createWebSocketURL(token));
 }
 
 const websocketMessageHelper = (ws: WebSocket, action: chatAction, message?: string, messageId?: string): void => {
@@ -125,6 +125,15 @@ export const deleteMessage = (ws: WebSocket, messageId: string): void => {
 }
 
 
+export const fetchChatConnect = async (accessJWT: string, chatId: string): APIResponse<ChatConnectResponse> => {
+    const requestIinit: RequestInit = {
+        method: "GET",
+        headers: requestTokenHeaders(accessJWT),
+    }
+
+    return await fetchHelper(chatConnectURL(chatId), requestIinit, chatConnectMapper);
+}
+
 export const fetchDisapproveChat = async (accessJWT: string, chatId: string): APIResponse<SuccessfulResponse> => {
     // TOOD
     return successfulResponseMapper()
@@ -164,7 +173,7 @@ export const fetchCreateDialogueChat = async (accessJWT: string, participantId: 
         body: JSON.stringify(createDialogueBody(message, participantId))
     };
 
-    return await fetchHelper(dialoqueChatURL, requestInit, successfulResponseMapper);
+    return await fetchHelper(dialogueChatURL, requestInit, successfulResponseMapper);
 }
 
 export const fetchCreateGroupChat = async (accessJWT: string, participantsIds: string[]) => {
@@ -174,5 +183,5 @@ export const fetchCreateGroupChat = async (accessJWT: string, participantsIds: s
         body: JSON.stringify(createGroupBody(participantsIds))
     };
 
-    return await fetchHelper(dialoqueChatURL, requestInit, successfulResponseMapper);
+    return await fetchHelper(dialogueChatURL, requestInit, successfulResponseMapper);
 }

@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 
-const ChatMessage = () => {
+interface ChatMessageProps {
+    messageData: any;
+}
+
+const ChatMessage = (props: ChatMessageProps) => {
     return(
         <div></div>
     );
