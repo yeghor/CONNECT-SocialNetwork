@@ -40,9 +40,12 @@ Also the project has basic **CI** _(Implemented with GitHub actions)_ that runs 
 
 # Usage
 
-> Requirements - Docker, Python 3.12.0 or higher.
-> 
-To run this application, follow these steps:
+## Run
+
+> Requirements - Docker, Python 3.12.0 or higher, JavaScript ES10+
+
+
+To run the application, follow these steps:
 
 **Copy the repository:**
 ```bash
@@ -51,7 +54,7 @@ git clone https://github.com/yeghor/SocialNetwork.git
 
 **Move to repository directory:**
 ```bash
-cd SocialNetwork
+cd CONNECT-SocialNetwork
 ```
 
 **Run `docker-compose.yml`**
@@ -59,6 +62,8 @@ cd SocialNetwork
 docker compose up
 ```
 ---
+
+# Contribute
 
 In case you managed to run the application **not** using `docker-compose`. 
 
@@ -71,5 +76,6 @@ DB_HOST = "localhost" # from "postgres_db"
 ```
 ---
 
-**Acces** your backend application by this URL:
-[https://0.0.0.0:8800/docs](http://127.0.0.1:8800/)
+**Access** your application by these URL:
+- **Backend** - [https://0.0.0.0:8800/docs](http://127.0.0.1:8800/docs)
+- **Frontend** - [https://0.0.0.0:3000/docs](http://127.0.0.1:3000/)
