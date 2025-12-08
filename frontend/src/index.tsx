@@ -13,7 +13,6 @@ import RegisterForm from "./components/auth/registerForm.tsx"
 import NavigationBar from "./components/base/navBar.tsx";
 import Footer from "./components/base/footer.tsx";
 import SearchPage from "./components/social/searchPage.tsx";
-import {MyProfilePage} from "./components/social/profilePage.tsx";
 
 const container = document.getElementById('root')
 
@@ -23,7 +22,7 @@ if(container) {
     const root = ReactDOM.createRoot(container);
 
     root.render(
-        // <StrictMode>
+        <StrictMode>
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
                     <div
@@ -36,8 +35,11 @@ if(container) {
                                 <Route path='/' element={
                                     <SocialHomePage />
                                 }/>
-                                <Route path='/chat/:chatId' element={
-                                    <ChatPage />
+                                <Route path='/chats' element={
+                                    <ChatPage createNew={false} />
+                                }/>
+                                <Route path='/make-chat/:userId' element={
+                                    <ChatPage createNew={true} />
                                 }/>
                                 <Route path='/my-profile' element={
                                     <ProfilePageWrapper />
@@ -62,7 +64,7 @@ if(container) {
                     </div>
                 </BrowserRouter>
             </QueryClientProvider>
-        // </StrictMode>
+        </StrictMode>
     );
 
 } else {

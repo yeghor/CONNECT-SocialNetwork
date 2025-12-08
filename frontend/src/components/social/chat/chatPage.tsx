@@ -12,7 +12,6 @@ import MakeNewChat from "./makeNewChat.tsx";
 
 interface ChatPageProps {
     createNew: boolean,
-    createNewOtherUserId: string | undefined
 }
 
 export const ChatPage = (props: ChatPageProps) => {
@@ -21,6 +20,9 @@ export const ChatPage = (props: ChatPageProps) => {
 
     const [ activeChat, setActiveChat ] = useState<ChatConnectData | null>(); // Add generic type
     const { chatId } = useParams();
+
+    // For chat creation
+    const { userId } = useParams();
 
     useEffect(() => {
         const chatConnect = async () => {
@@ -38,7 +40,7 @@ export const ChatPage = (props: ChatPageProps) => {
         chatConnect();
     }, [chatId]);
 
-    const ActiveChatComponent = (props.createNew && props.createNewOtherUserId ? (<MakeNewChat createNewOtherUserId={props.createNewOtherUserId} />)  : (activeChat ? (<ActiveChat activeChatData={activeChat} />) : null));
+    const ActiveChatComponent = (props.createNew && userId? (<MakeNewChat createNewOtherUserId={userId} />)  : (activeChat ? (<ActiveChat activeChatData={activeChat} />) : null));
 
     return(
         <div className="columns-2 w-full">

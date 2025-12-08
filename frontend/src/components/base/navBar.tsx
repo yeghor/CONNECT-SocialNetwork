@@ -32,7 +32,7 @@ const NavigationBar = (): ReactNode => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/chat" className="py-2 px-3">
+                        <Link to="/chats" className="py-2 px-3">
                             <img src="/chat-title.png" alt="Chat" className="h-10 w-auto hover:scale-110 transition-all" />
                         </Link>
                     </li>

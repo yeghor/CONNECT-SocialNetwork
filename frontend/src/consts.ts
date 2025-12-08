@@ -27,6 +27,10 @@ export const appHomeURI = "/";
 export const appLoginURI = "/login";
 export const appRegisterURI = "/register";
 export const myProfileURI = "my-profile";
+export const chatsURI = "chats";
+export const makeChatURI = (userId: string): string => {
+    return `/make-chat/${userId}`;
+}
 export const unauthorizedRedirectURI = appLoginURI;
 export const specificPostURI = (postId: string) => {
     return `/post/${postId}`;

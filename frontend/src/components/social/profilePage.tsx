@@ -4,7 +4,7 @@ import VirtualizedList from "../butterySmoothScroll/virtualizedList.tsx";
 import FlowPost from "./post/flowPost.tsx";
 
 import { SuccessfulResponse, UserProfile, FeedPostsResponse, FeedPost } from "../../fetching/responseDTOs.ts";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { CookieTokenObject, getCookiesOrRedirect } from "../../helpers/cookies/cookiesHandler.ts";
 import { safeAPICall } from "../../fetching/fetchUtils.ts";
 import {
@@ -154,9 +154,11 @@ export const ProfilePage = (props: ProfilePageProps) => {
                                 <button onClick={() => followAction()} className={`w-32 px-6 py-2 ${isFollowing ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
                                     {isFollowing ? "Following" : "Follow"}
                                 </button>
-                                <button className={`w-32 px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
-                                    Message
-                                </button>
+                                <Link to={`/make-chat/${props.userData.userId}`}>
+                                    <button className={`w-32 px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
+                                        Message
+                                    </button>                                
+                                </Link>
                             </div>
                     }
                 </div>
