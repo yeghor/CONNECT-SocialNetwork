@@ -13,7 +13,7 @@ import {
     fetchUsersPosts,
 } from "../../fetching/fetchSocial.ts";
 import { NavigateFunction } from "react-router-dom";
-import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import estimatePostSize from "../../helpers/postSizeEstimator.ts";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { createInfiniteQueryOptionsUtil, infiniteQieryingFetchGuard } from "../butterySmoothScroll/scrollVirtualizationUtils.ts";

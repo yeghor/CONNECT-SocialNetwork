@@ -18,7 +18,7 @@ export const ChatPage = (props: ChatPageProps) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
-    const [ activeChat, setActiveChat ] = useState<ChatConnectData | null>(); // Add generic type
+    const [ activeChatDataCredentials, setActiveChatDataCredentials ] = useState<ChatConnectData | null>(null); // Add generic type
     const { chatId } = useParams();
 
     // For chat creation
@@ -31,16 +31,16 @@ export const ChatPage = (props: ChatPageProps) => {
                 // fetch chat data
                 const response = await safeAPICall<ChatConnectResponse>(tokens, fetchChatConnect, navigate, undefined, chatId);
                 if (response.success) {
-                    setActiveChat(response.data);
+                    setActiveChatDataCredentials(response.data);
                     return;
                 }
-                setActiveChat(null);
+                setActiveChatDataCredentials(null);
             }
         };
         chatConnect();
     }, [chatId]);
 
-    const ActiveChatComponent = (props.createNew && userId? (<MakeNewChat createNewOtherUserId={userId} />)  : (activeChat ? (<ActiveChat activeChatData={activeChat} />) : null));
+    const ActiveChatComponent = (props.createNew && userId ? (<MakeNewChat createNewOtherUserId={userId} />)  : (chatId ? (activeChatDataCredentials ? (<ActiveChat activeChatData={activeChatDataCredentials} chatId={chatId} />) : null) : null));
 
     return(
         <div className="columns-2 w-full">
@@ -48,7 +48,7 @@ export const ChatPage = (props: ChatPageProps) => {
                 <ChatList />
             </div>
             <div className="w-2/3">
-                {ActiveChatComponent}
+                {ActiveChatComponent ? ActiveChatComponent : <p className="text-2xl text-white">No Chat Selected</p>}
             </div>
         </div>
     );

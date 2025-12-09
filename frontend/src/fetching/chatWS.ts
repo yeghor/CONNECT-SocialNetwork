@@ -33,6 +33,18 @@ import {
     successfulResponseMapper,
 } from "./responseDTOs.ts"
 
+export class WebsocketNotReady extends Error {
+    constructor (msg: string){
+        super(msg)
+    }
+}
+
+export class WebsocketConnectionError extends Error {
+    constructor (msg: string){
+        super(msg)
+    }
+}
+
 /**
  * 
  * @param {WebSocket} ws - takes webosocket object
@@ -52,18 +64,6 @@ export const checkWSConnEstablished = (ws: WebSocket): void => {
 // Webosckets
 type chatAction = "send" | "change" | "delete";
 const wsClosedErrorMessage = "WebSocket connection is closed"
-
-class WebsocketNotReady extends Error {
-    constructor (msg: string){
-        super(msg)
-    }
-}
-
-class WebsocketConnectionError extends Error {
-    constructor (msg: string){
-        super(msg)
-    }
-}
 
 interface ExpectedWSData {
     action: chatAction,
