@@ -4,15 +4,17 @@ import {Link} from "react-router-dom";
 import {specificChatURI} from "../../../consts.ts";
 
 interface FlowChatProps {
-    chatData: ChatResponse;
+    chatId: string
+    participants: number
 }
 
 const FlowChat = (props: FlowChatProps) => {
+    console.log("rendering flowchat")
     return(
-        <Link to={specificChatURI(props.chatData.chatId)}>
-            <div>
-                <p>{props.chatData.chatId}</p>
-                <p>{props.chatData.participants}</p>
+        <Link to={specificChatURI(props.chatId)}>
+            <div className="bg-white">
+                <p>{props.chatId}</p>
+                <p>{props.participants}</p>
             </div>
         </Link>
 

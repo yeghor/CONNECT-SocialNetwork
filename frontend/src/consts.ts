@@ -39,7 +39,7 @@ export const searchURI = (query: string): string => {
     return `/search?query=${query}`;
 };
 export const specificChatURI = (chatId: string) => {
-    return `/chat/${chatId}`;
+    return `/chats/${chatId}`;
 }
 
 /*

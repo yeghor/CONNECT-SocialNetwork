@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts";
 
-import ActiveChat from "./activeChat.tsx";
+import ActiveChat from "./active_chats/activeChat.tsx";
 
 import ChatList from "./chatList.tsx";
 import {ChatConnectData, ChatConnectResponse, ChatResponse} from "../../../fetching/responseDTOs.ts";
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
 import { fetchChatConnect } from "../../../fetching/chatWS.ts";
-import MakeNewChat from "./makeNewChat.tsx";
+import MakeNewChat from "./active_chats/makeNewChat.tsx";
 
 interface ChatPageProps {
     createNew: boolean,
@@ -44,10 +44,10 @@ export const ChatPage = (props: ChatPageProps) => {
 
     return(
         <div className="columns-2 w-full">
-            <div className="w-1/3">
+            <div className="w-2/3">
                 <ChatList />
             </div>
-            <div className="w-2/3">
+            <div className="w-full">
                 {ActiveChatComponent ? ActiveChatComponent : <p className="text-2xl text-white">No Chat Selected</p>}
             </div>
         </div>

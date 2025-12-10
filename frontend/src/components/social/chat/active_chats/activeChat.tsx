@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import MessagesList from "./chatComponents/messagesList.tsx";
-import MessageBar from "./chatComponents/messageBar.tsx";
+import MessagesList from "../chatComponents/messagesList.tsx";
+import MessageBar from "../chatComponents/messageBar.tsx";
 
 import { connectWSChat,
     sendMessage, changeMessage, deleteMessage,
     checkWSConnEstablished,
     WebsocketNotReady,
     WebsocketConnectionError
- } from "../../../fetching/chatWS.ts";
-import { ChatConnectData } from "../../../fetching/responseDTOs.ts";
+ } from "../../../../fetching/chatWS.ts";
+import { ChatConnectData } from "../../../../fetching/responseDTOs.ts";
 
 interface ActiveChatProps {
     activeChatData: ChatConnectData,

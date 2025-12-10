@@ -53,9 +53,10 @@ const ChatList = () => {
         infiniteQuerying();
     }, [virtualItems, hasNextPage, isFetchingNextPage]);
 
+
     return(
-        <div className="w-max bg-white/10 p-8 m-8">
-            <div ref={scrollRef} className="h-screen overflow-auto mb-16 relative mx-auto border-gray-300 rounded-xl">
+        <div className="w-full rounded-xl bg-white/30 p-8 m-8">
+            <div ref={scrollRef} className="h-screen overflow-auto m-16 relative mx-auto border-gray-300 rounded-xl">
                 <VirtualizedList DisplayedComponent={FlowChat} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={chats} />
             </div>
         </div>

@@ -401,6 +401,7 @@ export const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
             participants: chatDTO.participants
         }
     ));
+
     return {
         data: mapped,
         success: true

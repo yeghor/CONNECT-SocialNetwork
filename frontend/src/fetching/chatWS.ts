@@ -163,7 +163,7 @@ export const fetchChats = async (accessJWT: string, page: number): APIResponse<C
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<ChatsResponse>(ChatsURL(page), requestInit, successfulResponseMapper);
+    return await fetchHelper<ChatsResponse>(ChatsURL(page), requestInit, chatResponseMapper);
 }
 
 export const fetchCreateDialogueChat = async (accessJWT: string, participantId: string, message: string): APIResponse<SuccessfulResponse> => {

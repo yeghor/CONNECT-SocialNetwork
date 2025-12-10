@@ -35,7 +35,10 @@ if(container) {
                                 <Route path='/' element={
                                     <SocialHomePage />
                                 }/>
-                                <Route path='/chats' element={
+                                <Route path='/chats/' element={
+                                    <ChatPage createNew={false} />
+                                }/>
+                                <Route path='/chats/:chatId' element={
                                     <ChatPage createNew={false} />
                                 }/>
                                 <Route path='/make-chat/:userId' element={
