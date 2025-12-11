@@ -100,7 +100,7 @@ export const uploadUserImageURL = `${BASEURL}${mediaConstructor}${usersConstruct
 // Chat
 
 export const chatConnectURL = (chatId: string) => {
-    return `${BASEURL}${chatConstructor}/${chatId}`;
+    return `${BASEURL}${chatConstructor}/connect/${chatId}`;
 }
 
 export const chatMessages = (chatId: string, page: number | string) => {

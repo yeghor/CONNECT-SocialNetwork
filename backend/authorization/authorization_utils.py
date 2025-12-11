@@ -27,6 +27,9 @@ async def authorize_request_depends(token: str = Header(..., title="Authorizatio
 
 @endpoint_exception_handler
 async def authorize_chat_token(token: str) -> None:
+    """User with fastAPI Depends()"""
+
+    # To prevent circular import
     from services.core_services import MainServiceContextManager
     from services.core_services.main_services import MainServiceAuth
 

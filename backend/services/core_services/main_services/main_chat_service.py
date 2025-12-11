@@ -33,7 +33,7 @@ class MainChatService(MainServiceBase):
         chat_room = await self._PostgresService.get_chat_room(room_id=room_id)
 
         if not chat_room:
-            raise ResourceNotFound(detail=f"ChatService: User: {user_id} tried to get messages from chat: {room_id} that does not exist.", client_safe_detail="Chat you're tring to access does not exist")
+            raise ResourceNotFound(detail=f"ChatService: User: {user_id} tried to access chat: {room_id} that does not exist.", client_safe_detail="Chat that you're trying to access does not exist")
         
         if not user_id in [participant.user_id for participant in chat_room.participants]:
             raise Unauthorized(detail=f"ChatService: User: {user_id} tried to access chat: {room_id} while not being it's participant.", client_safe_detail="Unauthorized")

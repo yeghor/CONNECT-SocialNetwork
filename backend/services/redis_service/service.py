@@ -246,7 +246,8 @@ class RedisService:
     # ==============
     
     @redis_error_handler
-    async def save_chat_token(self, chat_token, user_id: str) -> None:
+    async def save_chat_token(self, chat_token: str, user_id: str) -> None:
+        print(f"{self.__chat_token_prefix}{chat_token}")
         await self.__client.setex(
             f"{self.__chat_token_prefix}{chat_token}",
             CHAT_TOKEN_EXPIRY_SECONDS,

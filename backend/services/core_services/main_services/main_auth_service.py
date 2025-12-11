@@ -19,7 +19,7 @@ from fastapi import HTTPException
 from uuid import uuid4
 import os
 
-from exceptions.exceptions_handler import web_exceptions_raiser
+from exceptions.exceptions_handler import web_exceptions_raiser, endpoint_exception_handler
 from exceptions.custom_exceptions import *
 
 class MainServiceAuth(MainServiceBase):
@@ -41,12 +41,13 @@ class MainServiceAuth(MainServiceBase):
 
         return None
 
-    @web_exceptions_raiser
+    @endpoint_exception_handler
     async def authorize_chat_token(self, token: str) -> str:
         """Returns original token"""
 
         if not await self._RedisService.check_chat_token_existense(chat_token=token):
-            raise UnauthorizedExc(dev_log_detail=f"AuthService: User tried to connected to th ws chat by expired chat token: {token}", client_safe_detail="Invalid or expired token")
+            print("Token doesn't exist")
+            raise UnauthorizedInWebsocket(dev_log_detail=f"AuthService: User tried to connected to th ws chat by expired chat token: {token}", client_safe_detail="Invalid or expired token")
         
         return token
 

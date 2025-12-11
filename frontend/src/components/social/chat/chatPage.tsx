@@ -21,10 +21,13 @@ export const ChatPage = (props: ChatPageProps) => {
     const [ activeChatDataCredentials, setActiveChatDataCredentials ] = useState<ChatConnectData | null>(null); // Add generic type
     const { chatId } = useParams();
 
+    console.log("new chatId change")
+
     // For chat creation
     const { userId } = useParams();
 
     useEffect(() => {
+        console.log("Reacted to chatId change in useeffect")
         const chatConnect = async () => {
             // Fetch more data to update lower level components data on changing chat
             if (chatId && chatId.trim() !== "") {

@@ -107,7 +107,7 @@ class JWTService:
     async def generate_save_chat_token(cls, room_id: str, user_id: str, redis: RedisService) -> str:
         chat_token = cls.generate_chat_token(room_id=room_id, user_id=user_id)
         await redis.save_chat_token(chat_token=chat_token, user_id=user_id)
-
+        print(chat_token)
         return chat_token
 
     @classmethod

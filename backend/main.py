@@ -54,7 +54,7 @@ async def sync_chroma_postgres_data() -> None:
     finally:
         await session.aclose()
 
-# On app startup. https://fastapi.tiangolo.com/advanced/events/#lifespan
+# On app startup - https://fastapi.tiangolo.com/advanced/events/#lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # await drop_all(engine=engine, Base=Base)    

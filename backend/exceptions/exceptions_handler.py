@@ -27,7 +27,7 @@ def endpoint_exception_handler(func):
             try:
                 return await func(*args, **kwargs)
             
-            except (BadRequestExc, NotFoundExc, ConflictExc, UnauthorizedExc) as e:
+            except (BadRequestExc, NotFoundExc, ConflictExc, UnauthorizedExc, UnauthorizedInWebsocket) as e:
                 logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
                 raise HTTPException(status_code=e.status_code, detail=e.client_safe_detail)
             
@@ -76,6 +76,7 @@ def web_exceptions_raiser(func):
             raise InternalServerErrorExc(
                 client_safe_detail=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE,
                 dev_log_detail=str(e),
+                logging_level=logging_level,
                 exc_type=e
             ) from e
         
@@ -106,7 +107,7 @@ def ws_endpoint_exception_handler(func):
                 logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
                 await websocket.close(code=1009, reason=e.client_safe_detail)
 
-            except UnauthorizedExc as e:
+            except (UnauthorizedExc, UnauthorizedInWebsocket) as e:
                 logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
                 raise HTTPException(detail=e.client_safe_detail, status_code=e.status_code)
                 
@@ -114,7 +115,7 @@ def ws_endpoint_exception_handler(func):
                 logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
                 await websocket.close(code=1008, reason=e.client_safe_detail)
 
-            except UnauthorizedInWebocket as e:
+            except UnauthorizedInWebsocket as e:
                 logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
                 await websocket.close(code=3000, reason=e.client_safe_detail)
                 

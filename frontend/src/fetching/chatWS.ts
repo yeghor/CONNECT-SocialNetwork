@@ -80,6 +80,8 @@ const wsDataMapper = (action: chatAction, message: string | null = null, message
 }
 
 export const connectWSChat = (token: string): WebSocket => {
+    console.log("Creating websocket")
+    console.log(token)
     return new WebSocket(createWebSocketURL(token));
 }
 
