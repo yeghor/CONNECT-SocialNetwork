@@ -15,30 +15,44 @@ interface ActiveChatProps {
     chatId: string
 }
 
+const catchFailedRetriedConnection = (ws: WebSocket, setErrorMessage: CallableFunction) => {
+    try {
+        checkWSConnEstablished(ws);
+    } catch (err) {
+        if (err instanceof WebsocketNotReady) {
+            setTimeout(() => catchFailedRetriedConnection(ws, setErrorMessage), 200);
+        } else if (err instanceof WebsocketConnectionError) {
+            console.error(err);
+            setErrorMessage("Failed WebSocket connection!");
+        }
+    }
+}
+
 const ActiveChat = (props: ActiveChatProps) => {
-    let socket = useRef<WebSocket>(connectWSChat(props.activeChatData.token));
     const [ historyMessages, setHistoryMessages ] = useState([]);
     const [ localMessages, setLocalMessages ] = useState([]);
     const [ retryToggler, setRetryToggler ] = useState(false);
     const [ errorMessage, setErrorMessage ] = useState("");
 
-    const catchFailedRetriedConnection = (ws: WebSocket) => {
-        try {
-            checkWSConnEstablished(ws);
-        } catch (err) {
-            if (err instanceof WebsocketNotReady) {
-                setTimeout(catchFailedRetriedConnection, 200);
-            } else if (err instanceof WebsocketConnectionError) {
-                console.error(err);
-                setErrorMessage("Failed WebSocket connection!");
-            }            
-        }
-    }
+    let socket = useRef<WebSocket>(connectWSChat(props.activeChatData.token));
+    catchFailedRetriedConnection(socket.current, setErrorMessage);
 
     useEffect(() => {
-        const newSocket = connectWSChat(props.activeChatData.token);
-        catchFailedRetriedConnection(newSocket)
-        socket.current = newSocket
+        try {
+            checkWSConnEstablished(socket.current)
+        } catch (err) {
+            if (err instanceof WebsocketConnectionError) {
+                socket.current.close()
+                socket.current = connectWSChat(props.activeChatData.token)
+                catchFailedRetriedConnection(socket.current, setErrorMessage);
+            }
+        }
+
+        return () => {
+            console.log("CLOSING CONNECTION")
+            socket.current.close();
+        }
+
     }, [retryToggler])
     
 

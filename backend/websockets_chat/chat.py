@@ -103,20 +103,19 @@ async def wsconnect(token: str, websocket: WebSocket) -> ChatJWTPayload:
     
     return connection_data
 
-@chat.websocket("/ws/{token}")
+@chat.websocket("/{token}")
 @ws_endpoint_exception_handler
 async def connect_to_websocket_chat_room(
     websocket: WebSocket,
     token: str = Depends(authorize_chat_token),
     session: AsyncSession = Depends(get_session_depends)
 ):
-    print("validated token")
     connection_data = await wsconnect(token=token, websocket=websocket)
-
+    print("got connection")
     try:
         while True:
+            print("waiting for json")
             json_dict = await websocket.receive_json()
-
             # If in json_dict enough data - it passes not related fields
             request_data = ExpectedWSData.model_validate(json_dict, strict=True)
 
@@ -124,7 +123,12 @@ async def connect_to_websocket_chat_room(
                 db_message_data = await chat.execute_action(request_data=request_data, connection_data=connection_data)
 
             await connection.execute_real_time_action(action=request_data.action, connection_data=connection_data, db_message_data=db_message_data)
+    except WebSocketDisconnect:
+        print("disconnected")
+        await connection.disconnect(room_id=connection_data.room_id, websocket=websocket)
+        await websocket.close()
 
     finally:
-        print("gratefully closing websocket")
+        print("disconnected")
         await connection.disconnect(room_id=connection_data.room_id, websocket=websocket)
+        await websocket.close()

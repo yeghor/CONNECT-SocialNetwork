@@ -115,10 +115,6 @@ def ws_endpoint_exception_handler(func):
                 logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
                 await websocket.close(code=1008, reason=e.client_safe_detail)
 
-            except UnauthorizedInWebsocket as e:
-                logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
-                await websocket.close(code=3000, reason=e.client_safe_detail)
-                
             except ResourceNotFound as e:
                 logging.log(level=logging.ERROR, msg=str(e), exc_info=True)
                 await websocket.close(code=1011, reason=e.client_safe_detail)

@@ -62,12 +62,20 @@ class WebsocketConnectionManager:
         if not room_id in self._rooms.keys():
             self._rooms[room_id] = [payload]
         else:
-            self._rooms[room_id].append(payload)
+            conn_exists = False
+            for conn in self._rooms[room_id]:
+                if user_id == conn["user_id"]:
+                    conn_exists = True
+                    break
+
+            if conn_exists:
+               self._rooms[room_id]["websocket"] = websocket
+            else:
+                self._rooms[room_id].append(payload)
 
         print(self._rooms)
 
         await self._redis.connect_user_to_chat(user_id=user_id, room_id=room_id)
-
 
 
     async def disconnect(self, room_id: str, websocket: WebSocket) -> None:

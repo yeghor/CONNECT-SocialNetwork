@@ -34,8 +34,6 @@ async def authorize_chat_token(websocket: WebSocket, token: str) -> None:
     from services.core_services import MainServiceContextManager
     from services.core_services.main_services import MainServiceAuth
 
-    print("starting to authorizing token")
-
     session = await get_session()
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
         return await auth.authorize_chat_token(token=token)
