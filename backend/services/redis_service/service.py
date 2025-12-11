@@ -257,7 +257,9 @@ class RedisService:
 
     @redis_error_handler
     async def check_chat_token_existense(self, chat_token: str) -> bool:
+        print(f"CHECK_EXISTENSE - {self.__chat_token_prefix}{chat_token}")
         potential_token = await self.__client.get(f"{self.__chat_token_prefix}{chat_token}")
+        print(f"CHECK EXISTENSE potential_token - {potential_token}")
         return bool(potential_token)
     
 

@@ -110,6 +110,7 @@ async def connect_to_websocket_chat_room(
     token: str = Depends(authorize_chat_token),
     session: AsyncSession = Depends(get_session_depends)
 ):
+    print("validated token")
     connection_data = await wsconnect(token=token, websocket=websocket)
 
     try:
@@ -125,4 +126,5 @@ async def connect_to_websocket_chat_room(
             await connection.execute_real_time_action(action=request_data.action, connection_data=connection_data, db_message_data=db_message_data)
 
     finally:
+        print("gratefully closing websocket")
         await connection.disconnect(room_id=connection_data.room_id, websocket=websocket)

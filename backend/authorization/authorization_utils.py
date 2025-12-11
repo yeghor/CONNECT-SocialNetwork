@@ -1,6 +1,7 @@
 from services.postgres_service import get_session, User
 
-from fastapi import Header, HTTPException
+from fastapi import Header
+from fastapi.websockets import WebSocket
 
 from dotenv import load_dotenv
 from os import getenv
@@ -8,7 +9,7 @@ from typing import Callable
 import re
 
 from exceptions.custom_exceptions import *
-from exceptions.exceptions_handler import endpoint_exception_handler
+from exceptions.exceptions_handler import endpoint_exception_handler, ws_endpoint_exception_handler
 
 PASSWORD_MIN_L = int(getenv("PASSWORD_MIN_L"))
 PASSWORD_MAX_L = int(getenv("PASSWORD_MAX_L"))
@@ -25,13 +26,15 @@ async def authorize_request_depends(token: str = Header(..., title="Authorizatio
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
         return await auth.authorize_request(token=token, return_user=True)
 
-@endpoint_exception_handler
-async def authorize_chat_token(token: str) -> None:
+@ws_endpoint_exception_handler
+async def authorize_chat_token(websocket: WebSocket, token: str) -> None:
     """User with fastAPI Depends()"""
 
     # To prevent circular import
     from services.core_services import MainServiceContextManager
     from services.core_services.main_services import MainServiceAuth
+
+    print("starting to authorizing token")
 
     session = await get_session()
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
