@@ -135,7 +135,7 @@ def ws_endpoint_exception_handler(func):
                     await websocket.close(code=1011, reason=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE)
 
             except WebSocketDisconnect as e:
-                # Client disconnected, nothing to go here
+                # Client disconnected, nothing to do here
                 pass
 
             except Exception as e:
