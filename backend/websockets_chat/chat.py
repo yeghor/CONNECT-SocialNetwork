@@ -1,5 +1,6 @@
 from fastapi import WebSocket, APIRouter, Depends, Body
 from authorization import authorize_request_depends, authorize_chat_token, JWTService
+from kubernetes.stream.ws_client import websocket_proxycare
 from services.postgres_service import User, get_session_depends, merge_model
 from services.core_services.main_services import MainChatService
 from services.core_services.core_services import MainServiceContextManager
@@ -112,13 +113,16 @@ async def connect_to_websocket_chat_room(
 ):
     connection_data = await wsconnect(token=token, websocket=websocket)
     print("got connection")
-    while True:
-        print("waiting for json")
-        json_dict = await websocket.receive_json()
-        # If in json_dict enough data - it passes not related fields
-        request_data = ExpectedWSData.model_validate(json_dict, strict=True)
+    try:
+        while True:
+            print("waiting for json")
+            json_dict = await websocket.receive_json()
+            # If in json_dict enough data - it passes not related fields
+            request_data = ExpectedWSData.model_validate(json_dict, strict=True)
 
-        async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
-            db_message_data = await chat.execute_action(request_data=request_data, connection_data=connection_data)
+            async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
+                db_message_data = await chat.execute_action(request_data=request_data, connection_data=connection_data)
 
-        await connection.execute_real_time_action(action=request_data.action, connection_data=connection_data, db_message_data=db_message_data)
+            await connection.execute_real_time_action(action=request_data.action, connection_data=connection_data, db_message_data=db_message_data)
+    finally:
+        await connection.disconnect(room_id=connection_data.room_id, websocket=websocket)

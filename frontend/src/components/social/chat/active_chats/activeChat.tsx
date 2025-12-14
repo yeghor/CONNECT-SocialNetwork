@@ -29,7 +29,6 @@ const catchFailedRetriedConnection = (ws: WebSocket, setErrorMessage: CallableFu
 }
 
 const ActiveChat = (props: ActiveChatProps) => {
-    const [ historyMessages, setHistoryMessages ] = useState([]);
     const [ localMessages, setLocalMessages ] = useState([]);
     const [ retryToggler, setRetryToggler ] = useState(false);
     const [ errorMessage, setErrorMessage ] = useState("");

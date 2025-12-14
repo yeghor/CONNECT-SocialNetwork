@@ -1,5 +1,7 @@
 import React from "react";
 
+import ChatMessage from "./message.tsx";
+
 interface ChatProps {
     chatId: string
 }
