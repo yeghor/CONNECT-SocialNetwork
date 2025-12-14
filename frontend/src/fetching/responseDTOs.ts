@@ -428,11 +428,6 @@ export interface MessagesResponse extends SuccessfulResponse {
     data: ChatMessage[]
 }
 
-export interface MessageResponse extends SuccessfulResponse {
-    data: ChatMessage
-}
-
-// DRY THIS
 export const messagesResponseMapper = (data: MessagesDTO): MessagesResponse => {
     const mapped = data.map((messageDTO) => ({
         messageId: messageDTO.message_id,
@@ -448,15 +443,12 @@ export const messagesResponseMapper = (data: MessagesDTO): MessagesResponse => {
     
 };
 
-export const singleMessageResponseMapper = (data: MessageDTO): MessageResponse => {
+export const singleMessageResponseMapper = (data: MessageDTO): ChatMessage => {
     return {
-        data: {
-            messageId: data.message_id,
-            text: data.text,
-            sent: new Date(data.sent),
-            owner: OwnerMapper(data.owner),  
-        },
-        success: true
+        messageId: data.message_id,
+        text: data.text,
+        sent: new Date(data.sent),
+        owner: OwnerMapper(data.owner)
     };
 };
 

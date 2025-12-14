@@ -8,7 +8,11 @@ import { connectWSChat,
     WebsocketNotReady,
     WebsocketConnectionError
  } from "../../../../fetching/chatWS.ts";
-import { ChatConnectData } from "../../../../fetching/responseDTOs.ts";
+import {ChatConnectData, ChatMessage} from "../../../../fetching/responseDTOs.ts";
+import LocalMessagesList from "../chatComponents/localMessagesList.tsx";
+import message from "../chatComponents/message.tsx";
+import {useNavigate} from "react-router";
+import {chatsURI, internalServerErrorURI} from "../../../../consts.ts";
 
 interface ActiveChatProps {
     activeChatData: ChatConnectData,
@@ -29,7 +33,9 @@ const catchFailedRetriedConnection = (ws: WebSocket, setErrorMessage: CallableFu
 }
 
 const ActiveChat = (props: ActiveChatProps) => {
-    const [ localMessages, setLocalMessages ] = useState([]);
+    const navigate = useNavigate();
+
+    const [ localMessages, setLocalMessages ] = useState<ChatMessage[]>([]);
     const [ retryToggler, setRetryToggler ] = useState(false);
     const [ errorMessage, setErrorMessage ] = useState("");
 
@@ -74,9 +80,51 @@ const ActiveChat = (props: ActiveChatProps) => {
         }
     };
 
+    const changeMessageWrapper = (message: string, messageId: string) => {
+        try {
+            checkWSConnEstablished(socket.current);
+            changeMessage(socket.current, message, messageId)
+        } catch(err) {
+            if (err instanceof WebsocketNotReady) {
+                setTimeout(() => changeMessageWrapper(message, messageId), 200);
+            } else if (err instanceof WebsocketConnectionError) {
+                setRetryToggler((prevState) => !prevState);
+            }
+        }
+    };
+
+    const deleteMessageWrapper = (messageId: string) => {
+        try {
+            checkWSConnEstablished(socket.current);
+            deleteMessage(socket.current, messageId);
+        } catch(err) {
+            if (err instanceof WebsocketNotReady) {
+                setTimeout(() => deleteMessageWrapper(messageId), 200);
+                return;
+            } else if (err instanceof WebsocketConnectionError) {
+                setRetryToggler((prevState) => !prevState);
+                return;
+            }
+        }
+    };
+
+    const receiveWebsocketMessage = (websocket: WebSocket, message: MessageEvent) => {
+        console.log("Received Websocket message", websocket);
+    }
+
+    socket.current.addEventListener("message", (event) => {
+        receiveWebsocketMessage(socket.current, event.data);
+    });
+
+    socket.current.addEventListener("close", () => {
+        navigate(chatsURI);
+        window.alert("Connection closed");
+    })
+
     return(
         <div>
             <MessagesList chatId={props.chatId} />
+            <LocalMessagesList messagesData={localMessages} changeMessageFunc={changeMessage} deleteMessageFunc={deleteMessage} />
             <MessageBar sendMessageCallable={sendMessageWrapper} />
         </div>
     );

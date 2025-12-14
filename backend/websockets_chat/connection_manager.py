@@ -1,19 +1,17 @@
 from fastapi.websockets import WebSocket
 from pydantic_schemas.pydantic_schemas_chat import ExpectedWSData, ChatJWTPayload, ActionType, MessageSchema, MessageSchemaShort
 from typing import List, Dict, Literal
-import json
 from exceptions.custom_exceptions import NoActiveConnectionsOrRoomDoesNotExist
 
 from services.redis_service import RedisService
 
 from dotenv import load_dotenv
-from os import getenv
 
 load_dotenv()
 
 class WebsocketConnectionManager:
     _instance=None
-    _isinitialized=False
+    _initialized=False
 
     def __new__(cls):
         if not cls._instance:
@@ -38,9 +36,9 @@ class WebsocketConnectionManager:
         """
         self._redis: RedisService = RedisService(db_pool=mode)
 
-        if self._isinitialized:
+        if self._initialized:
             return
-        self._isinitialized = True
+        self._initialized = True
 
         self._rooms = {}
 
@@ -72,8 +70,6 @@ class WebsocketConnectionManager:
                self._rooms[room_id]["websocket"] = websocket
             else:
                 self._rooms[room_id].append(payload)
-
-        print(self._rooms)
 
         await self._redis.connect_user_to_chat(user_id=user_id, room_id=room_id)
 

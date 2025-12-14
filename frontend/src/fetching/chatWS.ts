@@ -8,8 +8,6 @@ import {
     approveChatURL,
     chatConnectURL,
     chatsURL,
-    chatsURL,
-    batchChatMessagesURL,
     notApprovedChatsURL,
     dialogueChatURL, chatMessages,
 } from "./urls.ts"

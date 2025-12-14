@@ -15,7 +15,7 @@ import {
     infiniteQieryingFetchGuard
 } from "../../../butterySmoothScroll/scrollVirtualizationUtils.ts";
 
-import Message from "./message.tsx";
+import ChatMessageComp from "./message.tsx";
 
 interface ChatProps {
     chatId: string;
@@ -97,7 +97,7 @@ const MessagesList = ({ chatId }: ChatProps) => {
             className="h-[600px] overflow-auto relative"
         >
             <VirtualizedList
-                DisplayedComponent={Message}
+                DisplayedComponent={ChatMessageComp}
                 virtualizer={virtualizer}
                 virtualItems={virtualItems}
                 componentsProps={componentsProps}

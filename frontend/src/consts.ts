@@ -21,6 +21,7 @@ export const postTitleMaxLength = 256;
 export const postTextMaxLength = 4000;
 export const chatMessageMaxLength = 3000;
 
+export const chatMessageSizePX = 72;
 export const maxRequestsQueueLength = 30;
 
 export const internalServerErrorURI = "/internal-server-error"
