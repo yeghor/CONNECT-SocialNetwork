@@ -19,6 +19,7 @@ export const allowedImageExtensions = ["image/jpeg", "image/png", "image/webp"];
 export const postTitleMinLength = 3;
 export const postTitleMaxLength = 256;
 export const postTextMaxLength = 4000;
+export const chatMessageMaxLength = 3000;
 
 export const maxRequestsQueueLength = 30;
 
@@ -60,3 +61,4 @@ export const postTitleIsTooSmallMessage = "Title’s too tiny. Give it at least 
 export const postTitleIsTooLargeMessage = "Easy there, Shakespeare. That title is way too long.";
 export const postTextIsTooLargeMessage = "Your post is overflowing. Trim it down a little.";
 export const tooMuchActivityMessage = "Whoa! You’re smashing that button way too fast. Chill for a sec so we don’t confuse the server.";
+export const chatMessageIsTooBigMessage = "That message is a bit long for chat. Maybe trim it down a little?";

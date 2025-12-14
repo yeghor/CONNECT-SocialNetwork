@@ -41,58 +41,50 @@ export const basePostURL = `${BASEURL}${postsConstructor}`;
 
 export const likePostActionURL = (postId: string) => {
     return `${BASEURL}${postsConstructor}/${postId}/like`;
-}
+};
 
 export const specificPostURL = (postId: string) => {
     return `${BASEURL}${postsConstructor}/${postId}`;
-}
+};
 
 // Page specified required
 export const postsFeedURL = (page: number | string) => {
     return `${BASEURL}${postsConstructor}/feed/${page}`;
-}
+};
 
 export const followedPostsFeedURL = (page: number | string) => {
     return `${BASEURL}${postsConstructor}/following/${page}`;
-}
+};
 
 export const searchPostsURL = (prompt: string, page: number | string) => {
     return `${BASEURL}${searchConstructor}${postsConstructor}/${page}?prompt=${prompt}`;
-}
+};
 
 export const searchUsersURL = (prompt: string, page: number | string) => {
     return `${BASEURL}${searchConstructor}${usersConstructor}/${page}?prompt=${prompt}`;
-}
+};
 
 export const postCommentsURL = (postId: string, page: number | string) => {
     return `${BASEURL}${postsConstructor}/${postId}${commentsConstructor}/${page}`;
-}
+};
 
-export const UserPostsURL = (userId: string, page: number | string, type: ProfilePostsSectionFlag, order: OrderPostsByFlag) => {
+export const userPostsURL = (userId: string, page: number | string, type: ProfilePostsSectionFlag, order: OrderPostsByFlag) => {
     return `${BASEURL}${usersConstructor}/${userId}${postsConstructor}/${page}?posts_type=${type}&order=${order}`;
-}
-
-export const BatchChatMessagesURL = (chatId: string, page: number | string) => {
-    return `${BASEURL}${chatConstructor}/${chatId}/messages/${page}`;
-}
-
-export const ChatsURL = (page: string | number) => {
-    return `${BASEURL}${chatConstructor}/${page}`;
-}
+};
 
 export const specificUserURL = (userId: string) => {
     return `${BASEURL}${usersConstructor}/${userId}`;
-}
+};
 
 export const followURL = (userId: string) => {
     return `${BASEURL}${usersConstructor}/${userId}/follow`;
-}
+};
 
 // Media
 
 export const uploadPostImageURL = (postId: string) => {
     return `${BASEURL}${mediaConstructor}${postsConstructor}/${postId}`;
-}
+};
 
 export const uploadUserImageURL = `${BASEURL}${mediaConstructor}${usersConstructor}`;
 
@@ -101,11 +93,11 @@ export const uploadUserImageURL = `${BASEURL}${mediaConstructor}${usersConstruct
 
 export const chatConnectURL = (chatId: string) => {
     return `${BASEURL}${chatConstructor}/connect/${chatId}`;
-}
+};
 
 export const chatMessages = (chatId: string, page: number | string) => {
     return `${BASEURL}${chatConstructor}/${chatId}/messages/${page}`;
-}
+};
 
 export const dialogueChatURL = `${BASEURL}${chatConstructor}/dialogue`;
 
@@ -113,12 +105,16 @@ export const groupChatURL = `${BASEURL}${chatConstructor}/group`;
 
 export const chatsURL = (page: number | string) => {
     return `${BASEURL}${chatConstructor}/${page}`;
-}
+};
+
+export const batchChatMessagesURL = (chatId: string, page: number | string) => {
+    return `${BASEURL}${chatConstructor}/${chatId}/messages/${page}`;
+};
 
 export const notApprovedChatsURL = (page: number | string) => {
     return `${BASEURL}${chatConstructor}/not-approved/${page}`;
-}
+};
 
 export const approveChatURL = (chatId: string) => {
     return `${BASEURL}${chatConstructor}/approve/${chatId}`;
-}
+};

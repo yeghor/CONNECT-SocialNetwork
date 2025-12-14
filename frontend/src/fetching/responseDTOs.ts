@@ -417,7 +417,7 @@ export interface MessageDTO {
 
 export type MessagesDTO = MessageDTO[]
 
-export interface MessageInterface {
+export interface ChatMessage {
     messageId: string,
     text: string,
     sent: Date,
@@ -425,11 +425,11 @@ export interface MessageInterface {
 }
 
 export interface MessagesResponse extends SuccessfulResponse {
-    data: MessageInterface[]
+    data: ChatMessage[]
 }
 
 export interface MessageResponse extends SuccessfulResponse {
-    data: MessageInterface
+    data: ChatMessage
 }
 
 // DRY THIS

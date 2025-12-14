@@ -4,10 +4,10 @@ interface ChatMessageProps {
     messageData: any;
 }
 
-const ChatMessage = (props: ChatMessageProps) => {
+const ChatMessageComp = (props: ChatMessageProps) => {
     return(
         <div></div>
     );
 };
 
-export default ChatMessage;
+export default ChatMessageComp;

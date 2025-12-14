@@ -17,7 +17,7 @@ import {
     likePostActionURL,
     followURL,
     specificUserURL,
-    UserPostsURL,
+    userPostsURL,
     recentActivityURL
 } from "./urls.ts";
 
@@ -102,7 +102,7 @@ export const fetchUsersPosts = async (accessJWT: string, userId: string, type: P
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<PostsResponse>(UserPostsURL(userId, page, type, order), requestInit, postsResponseMapper);
+    return await fetchHelper<PostsResponse>(userPostsURL(userId, page, type, order), requestInit, postsResponseMapper);
 }
 
 // Actions with posts

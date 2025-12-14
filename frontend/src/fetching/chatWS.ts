@@ -8,10 +8,10 @@ import {
     approveChatURL,
     chatConnectURL,
     chatsURL,
-    ChatsURL,
-    BatchChatMessagesURL,
+    chatsURL,
+    batchChatMessagesURL,
     notApprovedChatsURL,
-    dialogueChatURL,
+    dialogueChatURL, chatMessages,
 } from "./urls.ts"
 
 import {
@@ -21,7 +21,7 @@ import {
     createGroupBody
 } from "./requestConstructors.ts"
 
-import { 
+import {
     ChatConnectResponse,
     chatConnectMapper,
     ChatsResponse,
@@ -30,7 +30,7 @@ import {
     MessagesResponse,
     singleMessageResponseMapper,
     SuccessfulResponse,
-    successfulResponseMapper,
+    successfulResponseMapper, messagesResponseMapper,
 } from "./responseDTOs.ts"
 
 export class WebsocketNotReady extends Error {
@@ -47,7 +47,7 @@ export class WebsocketConnectionError extends Error {
 
 /**
  * 
- * @param {WebSocket} ws - takes webosocket object
+ * @param {WebSocket} ws - takes websocket object
  * @returns {void} Returns null if connections established. Else - raise exceptions `WebsocketNotReady` or `WebsocketConnectionError`
  */
 export const checkWSConnEstablished = (ws: WebSocket): void => {
@@ -61,7 +61,7 @@ export const checkWSConnEstablished = (ws: WebSocket): void => {
 }
 
 
-// Webosckets
+// Websockets
 type chatAction = "send" | "change" | "delete";
 const wsClosedErrorMessage = "WebSocket connection is closed"
 
@@ -131,13 +131,22 @@ export const fetchChatConnect = async (accessJWT: string, chatId: string): APIRe
     const requestIinit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT),
-    }
+    };
 
     return await fetchHelper(chatConnectURL(chatId), requestIinit, chatConnectMapper);
 }
 
+export const fetchChatMessagesBatch = async (accessJWT: string, chatId: string, page: number): APIResponse<MessagesResponse> => {
+    const requestIinit: RequestInit = {
+        method: "GET",
+        headers: requestTokenHeaders(accessJWT),
+    };
+
+    return await fetchHelper(chatMessages(chatId, page), requestIinit, messagesResponseMapper);
+}
+
 export const fetchDisapproveChat = async (accessJWT: string, chatId: string): APIResponse<SuccessfulResponse> => {
-    // TOOD
+    // TODO
     return successfulResponseMapper()
 }
 
@@ -165,7 +174,7 @@ export const fetchChats = async (accessJWT: string, page: number): APIResponse<C
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<ChatsResponse>(ChatsURL(page), requestInit, chatResponseMapper);
+    return await fetchHelper<ChatsResponse>(chatsURL(page), requestInit, chatResponseMapper);
 }
 
 export const fetchCreateDialogueChat = async (accessJWT: string, participantId: string, message: string): APIResponse<SuccessfulResponse> => {

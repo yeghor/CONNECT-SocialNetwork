@@ -65,7 +65,7 @@ export const checkUnauthorizedResponse = (response: BadResponse | SuccessfulResp
 /*
 If 401 again - redirecting to unauthorized URI *(login or register)* and returning null.
 
-Do **NOT** provide old accessJWT in fetchArgs. And make sure that args are in correct order. Do NOT pass auth token manually as e fetchFunc arg!
+Do **NOT** provide old accessJWT in fetchArgs. And make sure that args are in correct order. Do NOT pass auth token manually as e fetchFunc argument!
 */
 export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, refreshToken: string, navigate: NavigateFunction, setErrorMessage?: CallableFunction, ...fetchArgs: any[]): Promise<APIResponse<R>> => {
     const tokensResponse = await refreshTokens(navigate, refreshToken);
@@ -75,7 +75,7 @@ export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, 
 
         const retryResponse: BadResponse | SuccessfulResponse = await fetchFunc(tokensResponse.accessToken, ...fetchArgs);
 
-        // Extra !retryResponse.success check to tell ts that response type is BadRepones. And it has statusCode field
+        // Extra !retryResponse.success check to tell ts that response type is BadResponse, and it has statusCode field
         if(!validateGETResponse(retryResponse, setErrorMessage,  navigate) && !retryResponse.success) {
             if (checkUnauthorizedResponse(retryResponse)) {
                 navigate(unauthorizedRedirectURI);
