@@ -27,6 +27,7 @@ const messagesFetcher = async (
     chatId: string,
     page: number
 ): Promise<ChatMessage[]> => {
+
     const fetched = await safeAPICall<MessagesResponse>(
         tokens,
         fetchChatMessagesBatch,
@@ -39,7 +40,14 @@ const messagesFetcher = async (
     return fetched.success ? fetched.data : [];
 };
 
-const MessagesList = ({ chatId }: ChatProps) => {
+interface ChatMessageListProps {
+    chatId: string;
+    changeMessageCallable: (message: string, messageId: string) => void;
+    deleteMessageCallable: (messageId: string) => void
+}
+
+
+const MessagesList = (props: ChatMessageListProps) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
@@ -47,8 +55,8 @@ const MessagesList = ({ chatId }: ChatProps) => {
         useInfiniteQuery(
             createInfiniteQueryOptionsUtil(
                 messagesFetcher,
-                [tokens, navigate, chatId],
-                ["chatMessages", chatId]
+                [tokens, navigate, props.chatId],
+                ["chatMessages", props.chatId]
             )
         );
 
@@ -89,12 +97,16 @@ const MessagesList = ({ chatId }: ChatProps) => {
         infiniteQuerying();
     }, [virtualItems, hasNextPage, isFetchingNextPage]);
 
-    const componentsProps = messages.map(msg => ({ message: msg }));
+    const componentsProps = messages.map(msg => ({
+        messageData: msg,
+        changeMessageCallable: props.changeMessageCallable,
+        deleteMessageCallable: props.deleteMessageCallable
+    }));
 
     return (
         <div
             ref={scrollRef}
-            className="h-[600px] overflow-auto relative"
+            className="h-screen overflow-auto relative"
         >
             <VirtualizedList
                 DisplayedComponent={ChatMessageComp}

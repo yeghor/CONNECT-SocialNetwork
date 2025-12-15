@@ -39,10 +39,14 @@ const ActiveChat = (props: ActiveChatProps) => {
     const [ retryToggler, setRetryToggler ] = useState(false);
     const [ errorMessage, setErrorMessage ] = useState("");
 
-    let socket = useRef<WebSocket>(connectWSChat(props.activeChatData.token));
-    catchFailedRetriedConnection(socket.current, setErrorMessage);
+    const socket = useRef<WebSocket | null>(null);
 
     useEffect(() => {
+        const wsocket = connectWSChat(props.activeChatData.token)
+        socket.current = wsocket;
+
+        catchFailedRetriedConnection(socket.current, setErrorMessage);
+
         try {
             checkWSConnEstablished(socket.current)
         } catch (err) {
@@ -53,24 +57,39 @@ const ActiveChat = (props: ActiveChatProps) => {
             }
         }
 
+        const receiveWebsocketMessageListener = (event: MessageEvent) => {
+            receiveWebsocketMessage(wsocket, event.data);
+        }
+
+        const websocketCloseEventListener = () => {
+            navigate(chatsURI);
+            window.alert("Connection unexpectedly closed");
+        }
+
+        socket.current.addEventListener("message", receiveWebsocketMessageListener);
+        socket.current.addEventListener("close", websocketCloseEventListener);
+
         return () => {
             console.log("CLOSING CONNECTION")
-            socket.current.close();
+            wsocket.close();
+            wsocket.removeEventListener("message", receiveWebsocketMessageListener);
+            wsocket.removeEventListener("close", websocketCloseEventListener);
         }
 
     }, [retryToggler])
-    
 
-
-    socket.current.addEventListener("message", (event) => {
-        console.log("Message from WS connection");
-        console.log(event.data);
-    })
+    const getSocket = (): WebSocket => {
+        if (!socket.current) {
+            throw new WebsocketNotReady("Connection not ready yet.");
+        }
+        return socket.current;
+    }
 
     const sendMessageWrapper = (message: string) => {
+        const socket = getSocket();
         try {
-            checkWSConnEstablished(socket.current);
-            sendMessage(socket.current, message);
+            checkWSConnEstablished(socket);
+            sendMessage(socket, message);
         } catch(err) {
             if (err instanceof WebsocketNotReady) {
                 setTimeout(() => sendMessageWrapper(message), 200);
@@ -80,26 +99,28 @@ const ActiveChat = (props: ActiveChatProps) => {
         }
     };
 
-    const changeMessageWrapper = (message: string, messageId: string) => {
+    const changeMessageWrapper = (message: string, messageId: string, local: boolean) => {
+        const socket = getSocket();
         try {
-            checkWSConnEstablished(socket.current);
-            changeMessage(socket.current, message, messageId)
+            checkWSConnEstablished(socket);
+            changeMessage(socket, message, messageId)
         } catch(err) {
             if (err instanceof WebsocketNotReady) {
-                setTimeout(() => changeMessageWrapper(message, messageId), 200);
+                setTimeout(() => changeMessageWrapper(message, messageId, local), 200);
             } else if (err instanceof WebsocketConnectionError) {
                 setRetryToggler((prevState) => !prevState);
             }
         }
     };
 
-    const deleteMessageWrapper = (messageId: string) => {
+    const deleteMessageWrapper = (messageId: string, local: boolean) => {
+        const socket = getSocket();
         try {
-            checkWSConnEstablished(socket.current);
-            deleteMessage(socket.current, messageId);
+            checkWSConnEstablished(socket);
+            deleteMessage(socket, messageId);
         } catch(err) {
             if (err instanceof WebsocketNotReady) {
-                setTimeout(() => deleteMessageWrapper(messageId), 200);
+                setTimeout(() => deleteMessageWrapper(messageId, local), 200);
                 return;
             } else if (err instanceof WebsocketConnectionError) {
                 setRetryToggler((prevState) => !prevState);
@@ -107,24 +128,21 @@ const ActiveChat = (props: ActiveChatProps) => {
             }
         }
     };
+
+    const deleteMessageHistory = (messageId: string) => deleteMessageWrapper(messageId, false);
+    const changeMessageHistory = (message: string, messageId: string) => changeMessageWrapper(message, messageId, false)
+
+    const deleteMessageLocal = (messageId: string) => deleteMessageWrapper(messageId, true);
+    const changeMessageLocal = (message: string, messageId: string) => changeMessageWrapper(message, messageId, true);
 
     const receiveWebsocketMessage = (websocket: WebSocket, message: MessageEvent) => {
         console.log("Received Websocket message", websocket);
     }
 
-    socket.current.addEventListener("message", (event) => {
-        receiveWebsocketMessage(socket.current, event.data);
-    });
-
-    socket.current.addEventListener("close", () => {
-        navigate(chatsURI);
-        window.alert("Connection closed");
-    })
-
     return(
         <div>
-            <MessagesList chatId={props.chatId} />
-            <LocalMessagesList messagesData={localMessages} changeMessageFunc={changeMessage} deleteMessageFunc={deleteMessage} />
+            <MessagesList chatId={props.chatId} changeMessageCallable={changeMessageHistory} deleteMessageCallable={deleteMessageHistory} />
+            <LocalMessagesList messagesData={localMessages} changeMessageFunc={changeMessageLocal} deleteMessageFunc={deleteMessageLocal} />
             <MessageBar sendMessageCallable={sendMessageWrapper} />
         </div>
     );

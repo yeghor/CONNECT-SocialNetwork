@@ -24,7 +24,6 @@ import {
     chatConnectMapper,
     ChatsResponse,
     chatResponseMapper,
-    MessageResponse,
     MessagesResponse,
     singleMessageResponseMapper,
     SuccessfulResponse,
