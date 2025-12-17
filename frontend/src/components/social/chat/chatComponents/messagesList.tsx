@@ -41,6 +41,7 @@ const messagesFetcher = async (
 };
 
 interface ChatMessageListProps {
+    websocket: WebSocket;
     chatId: string;
     changeMessageCallable: (message: string, messageId: string) => void;
     deleteMessageCallable: (messageId: string) => void
@@ -96,6 +97,14 @@ const MessagesList = (props: ChatMessageListProps) => {
     useEffect(() => {
         infiniteQuerying();
     }, [virtualItems, hasNextPage, isFetchingNextPage]);
+
+    const receiveWSMessage = async (event: MessageEvent) => {
+        const incomingMessage = event.data as MessageEvent;
+    };
+
+    useEffect(() => {
+        props.websocket.addEventListener("message", receiveWSMessage);
+    }, []);
 
     const componentsProps = messages.map(msg => ({
         messageData: msg,
