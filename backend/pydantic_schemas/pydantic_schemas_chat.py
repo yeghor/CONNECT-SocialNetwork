@@ -30,7 +30,7 @@ class MessageSchemaShort(BaseModel):
     text: str | None = Field(default=None)
 
 class MessageSchema(MessageSchemaShort):
-    "Use in main http endpoints"
+    """Use in main http endpoints"""
     text: str
     sent: datetime
     owner: UserShortSchema

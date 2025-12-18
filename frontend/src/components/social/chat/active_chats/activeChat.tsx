@@ -35,7 +35,6 @@ const catchFailedRetriedConnection = (ws: WebSocket, setErrorMessage: CallableFu
 const ActiveChat = (props: ActiveChatProps) => {
     const navigate = useNavigate();
 
-    const [ localMessages, setLocalMessages ] = useState<ChatMessage[]>([]);
     const [ retryToggler, setRetryToggler ] = useState(false);
     const [ errorMessage, setErrorMessage ] = useState("");
 
@@ -118,7 +117,7 @@ const ActiveChat = (props: ActiveChatProps) => {
     return(
         <div>
             <MessagesList chatId={props.chatId} changeMessageCallable={changeMessageHistory} deleteMessageCallable={deleteMessageHistory} websocket={socket.current} />
-            <LocalMessagesList messagesData={localMessages} changeMessageFunc={changeMessageLocal} deleteMessageFunc={deleteMessageLocal} websocket={socket.current} />
+            <LocalMessagesList changeMessageFunc={changeMessageLocal} deleteMessageFunc={deleteMessageLocal} websocket={socket.current} />
             <MessageBar sendMessageCallable={sendMessageWrapper} />
         </div>
     );
