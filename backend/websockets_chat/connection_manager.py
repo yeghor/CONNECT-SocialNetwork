@@ -43,12 +43,12 @@ class WebsocketConnectionManager:
         self._rooms = {}
 
 
-    async def execute_real_time_action(self, action: ActionType, connection_data: ChatJWTPayload, db_message_data: MessageSchemaShort | MessageSchema ) -> None:
-        if action == "send":
+    async def execute_real_time_action(self, connection_data: ChatJWTPayload, db_message_data: MessageSchemaActionIncluded | MessageSchemaShortActionIncluded ) -> None:
+        if db_message_data.action == "send":
             await self._send_message(db_message_data=db_message_data, room_id=connection_data.room_id, sender_id=connection_data.user_id)
-        elif action == "change":
+        elif db_message_data.action == "change":
             await self._change_message(db_message_data=db_message_data, room_id=connection_data.room_id, sender_id=connection_data.user_id)
-        elif action == "delete":
+        elif db_message_data.action == "delete":
             await self._delete_message(db_message_data=db_message_data, room_id=connection_data.room_id, sender_id=connection_data.user_id)
 
     async def connect(self, room_id: str, user_id: str, websocket: WebSocket) -> None:
@@ -85,7 +85,7 @@ class WebsocketConnectionManager:
         await self._redis.disconect_from_chat(room_id=room_id, user_id=connections[room_id]["user_id"])
 
 
-    async def _send_message(self, db_message_data: MessageSchema, room_id: str, sender_id: str) -> None:
+    async def _send_message(self, db_message_data: MessageSchemaActionIncluded, room_id: str, sender_id: str) -> None:
         """Sends message to room and all online room members"""
         connections = self._get_room_connections(room_id=room_id)
 
@@ -100,7 +100,7 @@ class WebsocketConnectionManager:
             )
 
 
-    async def _delete_message(self, db_message_data: MessageSchemaShort, room_id: str, sender_id: str) -> None:
+    async def _delete_message(self, db_message_data: MessageSchemaShortActionIncluded, room_id: str, sender_id: str) -> None:
         connections = self._get_room_connections(room_id=room_id)
 
         for conn in connections:
@@ -113,7 +113,7 @@ class WebsocketConnectionManager:
                 db_message_data.model_dump_json()
             )
 
-    async def _change_message(self, db_message_data: MessageSchema, room_id: str, sender_id: str) -> None:
+    async def _change_message(self, db_message_data: MessageSchemaActionIncluded, room_id: str, sender_id: str) -> None:
         connections = self._get_room_connections(room_id=room_id)
         
         for conn in connections:

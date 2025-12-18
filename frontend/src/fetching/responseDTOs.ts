@@ -408,24 +408,35 @@ export const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
     };
 };
 
-export interface MessageDTO {
+interface MessageTextRequired {
+    text: string
+}
+interface MessageTextNotRequired {
+    text: string | null
+}
+interface ChatMesageBaseDTO {
     message_id: string,
-    text: string,
     sent: string,
     owner: OwnerDTO
 }
 
-export type MessagesDTO = MessageDTO[]
-
-export interface ChatMessage {
+interface ChatMessageBase {
     messageId: string,
-    text: string,
     sent: Date,
     owner: OwnerResponse
 }
 
+export interface MessageDTO extends ChatMesageBaseDTO, MessageTextRequired {}
+export type MessagesDTO = MessageDTO[]
+
+export interface ChatMessage extends ChatMessageBase, MessageTextRequired {}
+
 export interface MessagesResponse extends SuccessfulResponse {
     data: ChatMessage[]
+}
+
+export interface WebsocketReceivedMessageSchema extends ChatMessageBase, MessageTextNotRequired {
+    action: "send" | "change" | "delete"
 }
 
 export const messagesResponseMapper = (data: MessagesDTO): MessagesResponse => {

@@ -21,7 +21,7 @@ class Chat(BaseModel):
     participants: int
 
 class ActionIncluded(BaseModel):
-    action: Literal["send", "change", "delete"] = "send"
+    action: Literal["send", "change", "delete"]
 
 class MessageSchemaShort(BaseModel):
     # Default value "send" for enabling model_validate with Message Postgres model

@@ -41,7 +41,7 @@ class MainChatService(MainServiceBase):
         return chat_room if return_chat_room else None
 
     @web_exceptions_raiser
-    async def execute_action(self, request_data: ExpectedWSData, connection_data: ChatJWTPayload) -> MessageSchema | MessageSchemaShort:
+    async def execute_action(self, request_data: ExpectedWSData, connection_data: ChatJWTPayload) -> MessageSchemaActionIncluded | MessageSchemaShortActionIncluded:
         """Returns MessageSchema in case user is **sending** message, othervise - MessageSchemaShort"""
 
         if request_data.action == "send":

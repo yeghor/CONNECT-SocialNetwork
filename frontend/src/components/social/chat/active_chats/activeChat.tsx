@@ -10,7 +10,7 @@ import { connectWSChat,
  } from "../../../../fetching/chatWS.ts";
 import {ChatConnectData, ChatMessage} from "../../../../fetching/responseDTOs.ts";
 import LocalMessagesList from "../chatComponents/localMessagesList.tsx";
-import message from "../chatComponents/message.tsx";
+
 import {useNavigate} from "react-router";
 import {chatsURI, internalServerErrorURI} from "../../../../consts.ts";
 
