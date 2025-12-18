@@ -80,26 +80,26 @@ const ActiveChat = (props: ActiveChatProps) => {
         }
     };
 
-    const changeMessageWrapper = (message: string, messageId: string, local: boolean) => {
+    const changeMessageWrapper = (message: string, messageId: string) => {
         try {
             checkWSConnEstablished(socket.current);
             changeMessage(socket.current, message, messageId)
         } catch(err) {
             if (err instanceof WebsocketNotReady) {
-                setTimeout(() => changeMessageWrapper(message, messageId, local), 50);
+                setTimeout(() => changeMessageWrapper(message, messageId), 50);
             } else if (err instanceof WebsocketConnectionError) {
                 setRetryToggler((prevState) => !prevState);
             }
         }
     };
 
-    const deleteMessageWrapper = (messageId: string, local: boolean) => {
+    const deleteMessageWrapper = (messageId: string) => {
         try {
             checkWSConnEstablished(socket.current);
             deleteMessage(socket.current, messageId);
         } catch(err) {
             if (err instanceof WebsocketNotReady) {
-                setTimeout(() => deleteMessageWrapper(messageId, local), 50);
+                setTimeout(() => deleteMessageWrapper(messageId), 50);
                 return;
             } else if (err instanceof WebsocketConnectionError) {
                 setRetryToggler((prevState) => !prevState);
@@ -108,11 +108,11 @@ const ActiveChat = (props: ActiveChatProps) => {
         }
     };
 
-    const deleteMessageHistory = (messageId: string) => deleteMessageWrapper(messageId, false);
-    const changeMessageHistory = (message: string, messageId: string) => changeMessageWrapper(message, messageId, false)
+    const deleteMessageHistory = (messageId: string) => deleteMessageWrapper(messageId);
+    const changeMessageHistory = (message: string, messageId: string) => changeMessageWrapper(message, messageId)
 
-    const deleteMessageLocal = (messageId: string) => deleteMessageWrapper(messageId, true);
-    const changeMessageLocal = (message: string, messageId: string) => changeMessageWrapper(message, messageId, true);
+    const deleteMessageLocal = (messageId: string) => deleteMessageWrapper(messageId);
+    const changeMessageLocal = (message: string, messageId: string) => changeMessageWrapper(message, messageId);
 
     return(
         <div>
