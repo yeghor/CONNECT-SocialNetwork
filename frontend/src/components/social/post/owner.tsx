@@ -1,9 +1,9 @@
 import React, {} from "react"
 
-import { OwnerResponse } from "../../../fetching/responseDTOs.ts"
+import { Owner } from "../../../fetching/responseDTOs.ts"
 
 interface ownerProps {
-    ownerData: OwnerResponse
+    ownerData: Owner
     postPublished: Date;
     avatarHeight: number;
 }

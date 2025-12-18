@@ -39,7 +39,7 @@ export const createBadResponseManually = (detail: string, statusCode: number): B
     };
 };
 
-const OwnerMapper = (data: OwnerDTO): OwnerResponse => {
+const ownerMapper = (data: OwnerDTO): Owner => {
     return {
         userId: data.user_id,
         username: data.username,
@@ -85,7 +85,7 @@ interface OwnerDTO {
     avatar_url: string | null;
 }
 
-export interface OwnerResponse {
+export interface Owner {
     userId: string;
     username: string;
     avatarURL: string | null;
@@ -130,7 +130,7 @@ interface PostBase {
 }
 
 export interface ShortPostInterface extends PostBase {
-    owner: OwnerResponse;
+    owner: Owner;
     likes: number,
     views: number,
     isLiked: boolean,
@@ -181,7 +181,7 @@ export const loadPostResponseMapper = (postDTO: LoadPostResponseDTO): LoadPostRe
             title: postDTO.title,
             published: new Date(postDTO.published),
             isReply: postDTO.is_reply,
-            owner: OwnerMapper(postDTO.owner),
+            owner: ownerMapper(postDTO.owner),
             likes: postDTO.likes,
             views: postDTO.views,
             isLiked: postDTO.is_liked,
@@ -195,7 +195,7 @@ export const loadPostResponseMapper = (postDTO: LoadPostResponseDTO): LoadPostRe
                     title: postDTO.parent_post.title,
                     published: new Date(postDTO.parent_post.published),
                     isReply: postDTO.parent_post.is_reply,
-                    owner: OwnerMapper(postDTO.parent_post.owner),
+                    owner: ownerMapper(postDTO.parent_post.owner),
                     likes: postDTO.parent_post.likes,
                     views: postDTO.parent_post.views,
                     isLiked: postDTO.parent_post.is_liked,
@@ -217,7 +217,7 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
     title: postDTO.title,
     published: new Date(postDTO.published),
     isReply: postDTO.is_reply,
-    owner: OwnerMapper(postDTO.owner),
+    owner: ownerMapper(postDTO.owner),
     likes: postDTO.likes,
     views: postDTO.views,
     isLiked: postDTO.is_liked,
@@ -229,7 +229,7 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
             title: postDTO.parent_post.title,
             published: new Date(postDTO.parent_post.published),
             isReply: postDTO.parent_post.is_reply,
-            owner: OwnerMapper(postDTO.parent_post.owner),
+            owner: ownerMapper(postDTO.parent_post.owner),
             likes: postDTO.parent_post.likes,
             views: postDTO.parent_post.views,
             isLiked: postDTO.parent_post.is_liked,
@@ -257,7 +257,7 @@ export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsRes
             views: commentDTO.views,
             isLiked: commentDTO.is_liked,
             replies: commentDTO.replies,
-            owner: OwnerMapper(commentDTO.owner),
+            owner: ownerMapper(commentDTO.owner),
             picturesURLs: commentDTO.pictures_urls
         }
     ));
@@ -283,7 +283,7 @@ export interface UserProfileDTO extends ShortUserDTO {
     is_following: boolean
 }
 
-export interface ShortUserProfile extends OwnerResponse {
+export interface ShortUserProfile extends Owner {
     followers: number,
     joined: Date
 }
@@ -414,6 +414,9 @@ interface MessageTextRequired {
 interface MessageTextNotRequired {
     text: string | null
 }
+interface ChatAction {
+    action: "send" | "change" | "delete"
+}
 interface ChatMesageBaseDTO {
     message_id: string,
     sent: string,
@@ -423,7 +426,7 @@ interface ChatMesageBaseDTO {
 interface ChatMessageBase {
     messageId: string,
     sent: Date,
-    owner: OwnerResponse
+    owner: Owner
 }
 
 export interface MessageDTO extends ChatMesageBaseDTO, MessageTextRequired {}
@@ -435,16 +438,25 @@ export interface MessagesResponse extends SuccessfulResponse {
     data: ChatMessage[]
 }
 
-export interface WebsocketReceivedMessageSchema extends ChatMessageBase, MessageTextNotRequired {
-    action: "send" | "change" | "delete"
-}
+interface WebsocketReceivedMessageSchemaDTO extends ChatMesageBaseDTO, MessageTextNotRequired, ChatAction {}
+export interface WebsocketReceivedMessage extends ChatMessageBase, MessageTextNotRequired, ChatAction {}
+
+export const mapWebsocketReceivedMessage = (data: WebsocketReceivedMessageSchemaDTO): WebsocketReceivedMessage  => {
+    return {
+        action: data.action,
+        messageId: data.message_id,
+        text: data.text,
+        sent: new Date(data.sent),
+        owner: ownerMapper(data.owner)
+    };
+};
 
 export const messagesResponseMapper = (data: MessagesDTO): MessagesResponse => {
     const mapped = data.map((messageDTO) => ({
         messageId: messageDTO.message_id,
         text: messageDTO.text,
         sent: new Date(messageDTO.sent),
-        owner: OwnerMapper(messageDTO.owner)
+        owner: ownerMapper(messageDTO.owner)
     }));
 
     return {
@@ -459,9 +471,13 @@ export const singleMessageResponseMapper = (data: MessageDTO): ChatMessage => {
         messageId: data.message_id,
         text: data.text,
         sent: new Date(data.sent),
-        owner: OwnerMapper(data.owner)
+        owner: ownerMapper(data.owner)
     };
 };
+
+export const mapSingleMessage = (messageId: string, text: string, sent: Date, owner: Owner): ChatMessage => {
+    return { messageId, text, sent, owner }
+}
 
 // Chat access
 export interface ChatConnectDTO {
