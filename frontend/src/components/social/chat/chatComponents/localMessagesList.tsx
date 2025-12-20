@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { ChatMessage, mapSingleMessage, mapWebsocketReceivedMessage } from "../../../../fetching/responseDTOs.ts";
 
+import MessageBar from "./messageBar.tsx";
+
 interface LocalMessagesListProps {
     websocket: WebSocket;
-    changeMessageFunc: CallableFunction;
-    deleteMessageFunc: CallableFunction;
+    changeMessageFunc: (message: string, messageId: string) => void;
+    deleteMessageFunc: (messageId: string) => void;
 }
 
-const LocalMessagesList = (props: LocalMessagesListProps) => {
+// TODO: Optimistic render
+
+const LocalMessagesHandler = (props: LocalMessagesListProps) => {
     const [ localMessages, setLocalMessages ] = useState<ChatMessage[]>([]);
     const [ currentMessageEditing, setCurrentMessageEditing ] = useState<null | string>(null);
     const [ currentMessageEditingId, setCurrentMessageEditingId ] = useState<null | string>(null);
+
+    const sendMessageOptimistically = (message: string): void => {
+
+    } 
 
     const deleteMessageFromState = (messageId: string): void => {
         let newMessagesDelete = [...localMessages];
@@ -20,6 +28,9 @@ const LocalMessagesList = (props: LocalMessagesListProps) => {
         });
 
         setLocalMessages(newMessagesDelete);
+        props.deleteMessageFunc(messageId);
+        setCurrentMessageEditing(null);
+        setCurrentMessageEditingId(null);
     }
 
     const changeMessageInState = (newMessage: string | null, messageId: string): void => {
@@ -36,6 +47,10 @@ const LocalMessagesList = (props: LocalMessagesListProps) => {
         })
 
         setLocalMessages(newMessagesChange);
+
+        props.changeMessageFunc(newMessage, messageId);
+        setCurrentMessageEditing(null);
+        setCurrentMessageEditingId(null);
     }
 
     const receiveWSMessageLocal = (event: MessageEvent): void => {
@@ -58,21 +73,21 @@ const LocalMessagesList = (props: LocalMessagesListProps) => {
         }
     };
 
-    const changeLocalMessage = (message: string, messageId: string) => {
-        if (!currentMessageEditing || !currentMessageEditingId) {
-            return;
-        }
-        changeMessageInState(message, messageId);
-    };
+    // const changeLocalMessage = (message: string, messageId: string) => {
+    //     if (!currentMessageEditing || !currentMessageEditingId) {
+    //         return;
+    //     }
+    //     changeMessageInState(message, messageId);
+    // };
 
-    const deleteLocalMessage = (messageId: string) => {
-        deleteMessageFromState(messageId);
-    }
+    // const deleteLocalMessage = (messageId: string) => {
+    //     deleteMessageFromState(messageId);
+    // }
 
-    // component logic useEffect
-    useEffect(() => {
+    // // component logic useEffect
+    // useEffect(() => {
 
-    }, []);
+    // }, []);
 
     // websocket handling useEffect
     useEffect(() => {
@@ -83,16 +98,19 @@ const LocalMessagesList = (props: LocalMessagesListProps) => {
     }, []);
 
     return (
-        <ul>
-            {localMessages.map((message, index) => (
-                <li key={message.messageId}>
-                    <div className="rounded-full bg-white">
-                        <p className="text-black">{message.text}</p>
-                    </div>
-                </li>
-            ))}
-        </ul>
+        <div>
+            <ul>
+                {localMessages.map((message, index) => (
+                    <li key={message.messageId}>
+                        <div className="rounded-full bg-white">
+                            <p className="text-black">{message.text}</p>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+            <MessageBar sendMessageLocally={sendMessageOptimistically} />            
+        </div>
     );
 };
 
-export default LocalMessagesList;
+export default LocalMessagesHandler;

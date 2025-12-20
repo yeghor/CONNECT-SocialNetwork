@@ -26,7 +26,7 @@ const MakeNewChat = (props: MakeNewChatProps) => {
     return (
         <div>
             <p className="text-2xl text-white">Create chat</p>
-            <MessageBar sendMessageCallable={sendMessageWrapper} />
+            <MessageBar sendMessageLocally={sendMessageWrapper} />
         </div>
     );
 };

@@ -136,6 +136,8 @@ def ws_endpoint_exception_handler(func):
 
             except WebSocketDisconnect as e:
                 # Client disconnected, no need to close websocket connection
+                print("client disconnected")
+                print(check_websocket_state(ws=websocket))
                 pass
 
             except Exception as e:

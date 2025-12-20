@@ -9,7 +9,7 @@ import { connectWSChat,
     WebsocketConnectionError
  } from "../../../../fetching/chatWS.ts";
 import {ChatConnectData, ChatMessage} from "../../../../fetching/responseDTOs.ts";
-import LocalMessagesList from "../chatComponents/localMessagesList.tsx";
+import LocalMessagesHandler from "../chatComponents/localMessagesList.tsx";
 
 import {useNavigate} from "react-router";
 import {chatsURI, internalServerErrorURI} from "../../../../consts.ts";
@@ -28,8 +28,8 @@ const catchFailedRetriedConnection = (ws: WebSocket, setErrorMessage: CallableFu
         } else if (err instanceof WebsocketConnectionError) {
             console.error(err);
             setErrorMessage("Failed Websocket connection!");
+            }
         }
-    }
 }
 
 const ActiveChat = (props: ActiveChatProps) => {
@@ -52,7 +52,7 @@ const ActiveChat = (props: ActiveChatProps) => {
         }
 
         const websocketCloseEventListener = () => {
-            navigate(chatsURI);
+            navigate(`/${chatsURI}`);
             window.alert("Connection unexpectedly closed");
         }
 
@@ -108,17 +108,13 @@ const ActiveChat = (props: ActiveChatProps) => {
         }
     };
 
-    const deleteMessageHistory = (messageId: string) => deleteMessageWrapper(messageId);
-    const changeMessageHistory = (message: string, messageId: string) => changeMessageWrapper(message, messageId)
-
-    const deleteMessageLocal = (messageId: string) => deleteMessageWrapper(messageId);
-    const changeMessageLocal = (message: string, messageId: string) => changeMessageWrapper(message, messageId);
+    const deleteMessageProps = (messageId: string) => deleteMessageWrapper(messageId);
+    const changeMessageProps = (message: string, messageId: string) => changeMessageWrapper(message, messageId)
 
     return(
         <div>
-            <MessagesList chatId={props.chatId} changeMessageCallable={changeMessageHistory} deleteMessageCallable={deleteMessageHistory} websocket={socket.current} />
-            <LocalMessagesList changeMessageFunc={changeMessageLocal} deleteMessageFunc={deleteMessageLocal} websocket={socket.current} />
-            <MessageBar sendMessageCallable={sendMessageWrapper} />
+            <MessagesList chatId={props.chatId} changeMessageCallable={changeMessageProps} deleteMessageCallable={deleteMessageProps} websocket={socket.current} />
+            <LocalMessagesHandler changeMessageFunc={changeMessageProps} deleteMessageFunc={deleteMessageProps} websocket={socket.current} />
         </div>
     );
 };

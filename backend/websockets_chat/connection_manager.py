@@ -1,5 +1,5 @@
 from fastapi.websockets import WebSocket
-from pydantic_schemas.pydantic_schemas_chat import ExpectedWSData, ChatJWTPayload, ActionType, MessageSchema, MessageSchemaShort
+from pydantic_schemas.pydantic_schemas_chat import ExpectedWSData, ChatJWTPayload, ActionType, MessageSchemaActionIncluded, MessageSchemaShortActionIncluded
 from typing import List, Dict, Literal
 from exceptions.custom_exceptions import NoActiveConnectionsOrRoomDoesNotExist
 

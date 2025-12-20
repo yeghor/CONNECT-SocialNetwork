@@ -3,6 +3,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useNavigate } from "react-router";
 
+import { queryClient } from "../../../../index.tsx";
+
 import { ChatMessage, MessagesResponse } from "../../../../fetching/responseDTOs.ts";
 import { CookieTokenObject, getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
@@ -98,10 +100,32 @@ const HistoryMessagesList = (props: ChatMessageListProps) => {
         infiniteQuerying();
     }, [virtualItems, hasNextPage, isFetchingNextPage]);
 
+
+    const changeMessageHistoryWrapper = (message: string, messageId: string): void => {
+        queryClient.setQueryData(["chatMessages"], (oldData: ChatMessage[]) => {
+            return oldData.map((msg) => {
+                if (msg.messageId == messageId) {
+                    msg.text = message;
+                }
+                return msg;
+            })
+        });
+        props.changeMessageCallable(message, messageId)
+        
+    };
+    const deleteMessageHistoryWrapper = (messageId: string): void => {
+        queryClient.setQueryData(["chatMessages"], (oldData: ChatMessage[]) => {
+            return oldData.filter((msg) => {
+                return !(msg.messageId == messageId);
+            });
+        });
+        props.deleteMessageCallable(messageId)
+    };
+
     const componentsProps = messages.map(msg => ({
         messageData: msg,
-        changeMessageCallable: props.changeMessageCallable,
-        deleteMessageCallable: props.deleteMessageCallable
+        changeMessageCallable: deleteMessageHistoryWrapper,
+        deleteMessageCallable: changeMessageHistoryWrapper
     }));
 
     return (
