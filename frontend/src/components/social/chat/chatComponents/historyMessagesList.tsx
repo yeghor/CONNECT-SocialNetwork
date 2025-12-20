@@ -19,10 +19,6 @@ import {
 
 import ChatMessageComp from "./message.tsx";
 
-interface ChatProps {
-    chatId: string;
-}
-
 const messagesFetcher = async (
     tokens: CookieTokenObject,
     navigate: NavigateFunction,
@@ -43,7 +39,6 @@ const messagesFetcher = async (
 };
 
 interface ChatMessageListProps {
-    socket: WebSocket;
     chatId: string;
     changeMessageCallable: (message: string, messageId: string) => void;
     deleteMessageCallable: (messageId: string) => void

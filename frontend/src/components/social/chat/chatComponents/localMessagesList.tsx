@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { RefObject, useEffect, useState } from "react";
 import { ChatMessage, mapSingleMessage, mapWebsocketReceivedMessage } from "../../../../fetching/responseDTOs.ts";
 
 import MessageBar from "./messageBar.tsx";
 
-interface LocalMessagesListProps {
-    websocket: WebSocket;
+// Exporting for ref forwarding function in ActiveChat
+export interface LocalMessagesListProps {
+    websocketRef: RefObject<WebSocket>;
     changeMessageFunc: (message: string, messageId: string) => void;
     deleteMessageFunc: (messageId: string) => void;
 }
@@ -91,9 +92,9 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
 
     // websocket handling useEffect
     useEffect(() => {
-        props.websocket.addEventListener("message", receiveWSMessageLocal);
+        props.websocketRef.current.addEventListener("message", receiveWSMessageLocal);
         return () => {
-            props.websocket.removeEventListener("message", receiveWSMessageLocal);
+            props.websocketRef.current.removeEventListener("message", receiveWSMessageLocal);
         }
     }, []);
 

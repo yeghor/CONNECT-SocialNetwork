@@ -21,8 +21,6 @@ export const ChatPage = (props: ChatPageProps) => {
     const [ activeChatDataCredentials, setActiveChatDataCredentials ] = useState<ChatConnectData | null>(null); // Add generic type
     const { chatId } = useParams();
 
-    console.log("new chatId change")
-
     // For chat creation
     const { userId } = useParams();
 
