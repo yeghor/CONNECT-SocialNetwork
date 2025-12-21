@@ -8,7 +8,7 @@ import { connectWSChat,
     WebsocketConnectionError
  } from "../../../../fetching/chatWS.ts";
 import {ChatConnectData, ChatMessage} from "../../../../fetching/responseDTOs.ts";
-import LocalMessagesHandler, { LocalMessagesListProps } from "../chatComponents/localMessagesList.tsx";
+import LocalMessagesHandler from "../chatComponents/localMessagesList.tsx";
 
 import { useNavigate } from "react-router";
 import { chatsURI, internalServerErrorURI } from "../../../../consts.ts";
@@ -82,9 +82,9 @@ const ActiveChat = (props: ActiveChatProps) => {
         }
     };
 
+    const sendMessageProps = (message: string, tempId: string) => sendMessageWrapper(socket.current as WebSocket, message, tempId);
     const deleteMessageProps = (messageId: string) => deleteMessageWrapper(socket.current as WebSocket, messageId);
     const changeMessageProps = (message: string, messageId: string) => changeMessageWrapper(socket.current as WebSocket, message, messageId)
-    
 
     const websocketCloseEventListener = (event: CloseEvent) => {
         // in question
@@ -133,7 +133,7 @@ const ActiveChat = (props: ActiveChatProps) => {
     return(
         <div className="p-8">
             <HistoryMessagesList chatId={props.chatId} changeMessageCallable={changeMessageProps} deleteMessageCallable={deleteMessageProps} />
-            <LocalMessagesHandler changeMessageFunc={changeMessageProps} deleteMessageFunc={deleteMessageProps} websocketRef={socket as RefObject<WebSocket>} />
+            <LocalMessagesHandler changeMessageCallable={changeMessageProps} deleteMessageCallable={deleteMessageProps} sendMessageCallable={sendMessageProps}  websocketRef={socket as RefObject<WebSocket>} />
         </div>
     );  
 

@@ -4,14 +4,12 @@ import { ChatMessage, mapSingleMessage, mapWebsocketReceivedMessage } from "../.
 import MessageBar from "./messageBar.tsx";
 
 // Exporting for ref forwarding function in ActiveChat
-export interface LocalMessagesListProps {
+interface LocalMessagesListProps {
     websocketRef: RefObject<WebSocket>,
-    changeMessageFunc: (message: string, messageId: string) => void,
-    deleteMessageFunc: (messageId: string) => void,
-    sendMessageFunc: (message: string, tempId: string) => void
+    changeMessageCallable: (message: string, messageId: string) => void,
+    deleteMessageCallable: (messageId: string) => void,
+    sendMessageCallable: (message: string, tempId: string) => void
 }
-
-// TODO: Optimistic render
 
 const LocalMessagesHandler = (props: LocalMessagesListProps) => {
     const [ localMessages, setLocalMessages ] = useState<ChatMessage[]>([]);
@@ -21,14 +19,13 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
     const sendMessageOptimistically = (message: string): void => {
         const oldLocalMessages = [...localMessages];
 
-
         // Creating temp sample message, until backend websocket message distribution
         const tempId = crypto.randomUUID()
         const newLocalMessages = [...oldLocalMessages, mapSingleMessage(tempId, message, new Date(), { userId: tempId, username: "", avatarURL: null }, tempId)];
 
         setLocalMessages(newLocalMessages);
 
-        props.sendMessageFunc(message, tempId);
+        props.sendMessageCallable(message, tempId);
     } 
 
     const deleteMessageFromState = (messageId: string): void => {
@@ -39,7 +36,7 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
         });
         
         setLocalMessages(newMessagesDelete);
-        props.deleteMessageFunc(messageId);
+        props.deleteMessageCallable(messageId);
         setCurrentMessageEditing(null);
         setCurrentMessageEditingId(null);
     }
@@ -59,9 +56,20 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
 
         setLocalMessages(newMessagesChange);
 
-        props.changeMessageFunc(newMessage, messageId);
+        props.changeMessageCallable(newMessage, messageId);
         setCurrentMessageEditing(null);
         setCurrentMessageEditingId(null);
+    }
+
+    const updateMessageStatusInState = (newMsg: ChatMessage): void => {
+        const oldLocalMessages = [...localMessages];
+        
+        const newLocalMessages = oldLocalMessages.map((msg) => {
+            if (msg.tempId == newMsg.tempId) return newMsg
+            return msg;
+        })        
+
+        setLocalMessages(newLocalMessages);
     }
 
     const receiveWSMessageLocal = (event: MessageEvent): void => {
@@ -70,19 +78,9 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
 
         switch (incomingMessage.action) {
             case "send":
-                if (!mappedMessage.text) {
-                    return;
-                }
-                const newLocalMessage = mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner, null);
-                const oldLocalMessages = [...localMessages];
-                
-                const newLocalMessages = oldLocalMessages.map((msg) => {
-                    if (msg.tempId == mappedMessage.tempId) {
-                        return newLocalMessage;
-                    }
-                    return msg;
-                })
-                
+                if (!mappedMessage.text) return;
+
+                updateMessageStatusInState(mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner, null));
                 break;
             case "change":
                 changeMessageInState(mappedMessage.text, mappedMessage.messageId);
@@ -116,8 +114,6 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
             props.websocketRef.current.removeEventListener("message", receiveWSMessageLocal);
         }
     }, []);
-
-    console.log("rendering local messages")
 
     return (
         <div>
