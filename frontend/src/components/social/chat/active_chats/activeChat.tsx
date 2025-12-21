@@ -37,35 +37,11 @@ const ActiveChat = (props: ActiveChatProps) => {
 
     const [ retryToggler, setRetryToggler ] = useState(false);
     const [ errorMessage, setErrorMessage ] = useState("");
+    const [ toRender, setToRender ] = useState(false);
 
     const socket = useRef<WebSocket | null>(null);
 
     console.log("RENRERING ACTIVE CHAT");
-
-    useEffect(() => {
-        socket.current = connectWSChat(props.activeChatData.token);
-
-        const websocketCloseEventListener = (event: CloseEvent) => {
-            navigate(`/${chatsURI}`);
-            window.alert("Connection unexpectedly closed");
-        }
-
-        socket.current.addEventListener("close", websocketCloseEventListener);
-
-        return () => {
-            if (!socket.current) {
-                return;
-            }
-
-            console.log("CLOSING CONNECTION")
-            socket.current.removeEventListener("close", websocketCloseEventListener);
-            if (socket.current.readyState !== socket.current.CLOSED) {
-                socket.current.close();
-            }
-        }
-
-    }, [])
-
 
     const sendMessageWrapper = (socket: WebSocket, message: string) => {
         try {
@@ -109,14 +85,59 @@ const ActiveChat = (props: ActiveChatProps) => {
 
     const deleteMessageProps = (messageId: string) => deleteMessageWrapper(socket.current as WebSocket, messageId);
     const changeMessageProps = (message: string, messageId: string) => changeMessageWrapper(socket.current as WebSocket, message, messageId)
+    
 
+    const websocketCloseEventListener = (event: CloseEvent) => {
+        // in question
+        setToRender(false);
+
+        navigate(`/${chatsURI}`);
+        window.alert("Connection unexpectedly closed");
+    }
+
+    /* Toggles toRender flag to safely render nested components when WebSocket connection is ready */
+    const webscoketOpenEventListener = () => {
+        setToRender(true);
+    }
+
+    useEffect(() => {
+        socket.current = connectWSChat(props.activeChatData.token);
+
+        socket.current.addEventListener("open", webscoketOpenEventListener);
+        socket.current.addEventListener("close", websocketCloseEventListener);
+
+        return () => {
+            if (!socket.current) {
+                return;
+            }
+
+            console.log("CLOSING CONNECTION");
+
+            socket.current.removeEventListener("open", webscoketOpenEventListener);
+            socket.current.removeEventListener("close", websocketCloseEventListener);
+            
+            if (socket.current.readyState !== socket.current.CLOSED) {
+                socket.current.close();
+            }
+        }
+
+    }, [])
+
+    if (!toRender) {
+        return (
+            <div className="text-white">
+                Loading
+            </div>
+        );
+    };
 
     return(
         <div>
             <HistoryMessagesList chatId={props.chatId} changeMessageCallable={changeMessageProps} deleteMessageCallable={deleteMessageProps} />
             <LocalMessagesHandler changeMessageFunc={changeMessageProps} deleteMessageFunc={deleteMessageProps} websocketRef={socket as RefObject<WebSocket>} />
         </div>
-    );
+    );  
+
 };
 
 export default ActiveChat;
