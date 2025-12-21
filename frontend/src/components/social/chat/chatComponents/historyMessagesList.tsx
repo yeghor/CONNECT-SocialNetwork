@@ -126,7 +126,7 @@ const HistoryMessagesList = (props: ChatMessageListProps) => {
     return (
         <div
             ref={scrollRef}
-            className="h-screen overflow-auto relative"
+            className="h-[600px] overflow-auto relative my-16"
         >
             <VirtualizedList
                 DisplayedComponent={ChatMessageComp}

@@ -37,9 +37,11 @@ class MessageSchema(MessageSchemaShort):
 
 class MessageSchemaActionIncluded(MessageSchema, ActionIncluded):
     """Use in websockets 'send' action"""
+    temp_id: str | None = Field(default=None)
 
 class MessageSchemaShortActionIncluded(MessageSchemaShort, ActionIncluded):
-    """Use in websockets 'change' 'delete' actions"""
+    """Use in websockets 'change' and 'delete' actions"""
+    temp_id: str | None = Field(default=None)
 
 
 
@@ -62,6 +64,9 @@ class ExpectedWSData(BaseModel):
 
     message: str | None
     message_id: str | None
+
+    # See ReadMe-dev.md for explanation
+    temp_id: str | None
 
     @model_validator(mode="after")
     def validate_fields(self) -> Self:

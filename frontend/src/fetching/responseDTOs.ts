@@ -417,19 +417,25 @@ interface MessageTextNotRequired {
 interface ChatAction {
     action: "send" | "change" | "delete"
 }
-interface ChatMesageBaseDTO {
+interface ChatMessageBaseDTO {
     message_id: string,
     sent: string,
     owner: OwnerDTO
+
+    // Frontend given ID that backend returns on websocket distribution - see ReadMe-dev.md
+    temp_id: string | null
 }
 
 interface ChatMessageBase {
     messageId: string,
     sent: Date,
     owner: Owner
+
+    // See explanation in ChatMessageDTO
+    tempId: string | null
 }
 
-export interface MessageDTO extends ChatMesageBaseDTO, MessageTextRequired {}
+export interface MessageDTO extends ChatMessageBaseDTO, MessageTextRequired {}
 export type MessagesDTO = MessageDTO[]
 
 export interface ChatMessage extends ChatMessageBase, MessageTextRequired {}
@@ -438,7 +444,7 @@ export interface MessagesResponse extends SuccessfulResponse {
     data: ChatMessage[]
 }
 
-interface WebsocketReceivedMessageSchemaDTO extends ChatMesageBaseDTO, MessageTextNotRequired, ChatAction {}
+interface WebsocketReceivedMessageSchemaDTO extends ChatMessageBaseDTO, MessageTextNotRequired, ChatAction {}
 export interface WebsocketReceivedMessage extends ChatMessageBase, MessageTextNotRequired, ChatAction {}
 
 export const mapWebsocketReceivedMessage = (data: WebsocketReceivedMessageSchemaDTO): WebsocketReceivedMessage  => {
@@ -447,7 +453,8 @@ export const mapWebsocketReceivedMessage = (data: WebsocketReceivedMessageSchema
         messageId: data.message_id,
         text: data.text,
         sent: new Date(data.sent),
-        owner: ownerMapper(data.owner)
+        owner: ownerMapper(data.owner),
+        tempId: data.temp_id
     };
 };
 
@@ -456,7 +463,8 @@ export const messagesResponseMapper = (data: MessagesDTO): MessagesResponse => {
         messageId: messageDTO.message_id,
         text: messageDTO.text,
         sent: new Date(messageDTO.sent),
-        owner: ownerMapper(messageDTO.owner)
+        owner: ownerMapper(messageDTO.owner),
+        tempId: messageDTO.temp_id
     }));
 
     return {
@@ -471,12 +479,13 @@ export const singleMessageResponseMapper = (data: MessageDTO): ChatMessage => {
         messageId: data.message_id,
         text: data.text,
         sent: new Date(data.sent),
-        owner: ownerMapper(data.owner)
+        owner: ownerMapper(data.owner),
+        tempId: data.temp_id
     };
 };
 
-export const mapSingleMessage = (messageId: string, text: string, sent: Date, owner: Owner): ChatMessage => {
-    return { messageId, text, sent, owner }
+export const mapSingleMessage = (messageId: string, text: string, sent: Date, owner: Owner, tempId: string | null): ChatMessage => {
+    return { messageId, text, sent, owner, tempId }
 }
 
 // Chat access

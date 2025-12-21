@@ -124,13 +124,11 @@ class MainChatService(MainServiceBase):
 
         await self._PostgresService.insert_models_and_flush(new_message)
 
-        # To prevent Missing Greenlet error
+        # To prevent SQLalchemy Missing Greenlet error
         await self._PostgresService.refresh_model(new_message)
 
         connections = await self._RedisService.get_chat_connections(room_id=user_data.room_id)
-        print(connections)
         for conn in connections:
-            print(conn)
             await self._RedisService.user_chat_pagination_action(user_id=conn, room_id=user_data.room_id, increment=True)
 
         return MessageSchemaActionIncluded.model_validate(new_message, from_attributes=True)

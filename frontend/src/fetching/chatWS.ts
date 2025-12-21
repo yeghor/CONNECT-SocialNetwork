@@ -62,17 +62,13 @@ export const checkWSConnEstablished = (ws: WebSocket): void => {
 type chatAction = "send" | "change" | "delete";
 const wsClosedErrorMessage = "WebSocket connection is closed"
 
-interface ExpectedWSData {
-    action: chatAction,
-    message: string | null,
-    messageId: string | null
-}
 
-const wsDataMapper = (action: chatAction, message: string | null = null, messageId: string | null = null): string => {
+const wsDataMapper = (action: chatAction, message?: string, messageId?: string, tempId?: string): string => {
     return JSON.stringify({
         action: action,
         message: message,
-        messageId: messageId
+        messageId: messageId,
+        tempId: tempId
     });
 }
 
@@ -82,13 +78,13 @@ export const connectWSChat = (token: string): WebSocket => {
     return new WebSocket(createWebSocketURL(token));
 }
 
-const websocketMessageHelper = (ws: WebSocket, action: chatAction, message?: string, messageId?: string): void => {
+const websocketMessageHelper = (ws: WebSocket, action: chatAction, message?: string, messageId?: string, tempId?: string): void => {
     try {
         let wsData: string;
 
         switch (action) {
             case "send":
-                wsData = wsDataMapper(action, message);
+                wsData = wsDataMapper(action, message, undefined, tempId);
                 break;
             case "change":
                 wsData = wsDataMapper(action, message, messageId);
@@ -111,8 +107,8 @@ const websocketMessageHelper = (ws: WebSocket, action: chatAction, message?: str
     }
 }
 
-export const sendMessage = (ws: WebSocket, message: string): void => {
-    websocketMessageHelper(ws, "send", message);
+export const sendMessage = (ws: WebSocket, message: string, tempId: string): void => {
+    websocketMessageHelper(ws, "send", message, undefined, tempId);
 }
 
 export const changeMessage = (ws: WebSocket, message: string, messageId: string): void => {

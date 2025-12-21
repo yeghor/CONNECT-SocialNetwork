@@ -17,9 +17,6 @@ import {
 
 import ChatMessageComp from "./message.tsx";
 
-interface ChatProps {
-    chatId: string;
-}
 
 const messagesFetcher = async (
     tokens: CookieTokenObject,

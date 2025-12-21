@@ -43,13 +43,13 @@ const ActiveChat = (props: ActiveChatProps) => {
 
     console.log("RENRERING ACTIVE CHAT");
 
-    const sendMessageWrapper = (socket: WebSocket, message: string) => {
+    const sendMessageWrapper = (socket: WebSocket, message: string, tempId: string) => {
         try {
             checkWSConnEstablished(socket);
-            sendMessage(socket, message);
+            sendMessage(socket, message, tempId);
         } catch(err) {
             if (err instanceof WebsocketNotReady) {
-                setTimeout(() => sendMessageWrapper(socket, message), 50);
+                setTimeout(() => sendMessageWrapper(socket, message, tempId), 50);
             } else if (err instanceof WebsocketConnectionError) {
                 setRetryToggler((prevState) => !prevState);
             }
@@ -81,7 +81,6 @@ const ActiveChat = (props: ActiveChatProps) => {
             }
         }
     };
-
 
     const deleteMessageProps = (messageId: string) => deleteMessageWrapper(socket.current as WebSocket, messageId);
     const changeMessageProps = (message: string, messageId: string) => changeMessageWrapper(socket.current as WebSocket, message, messageId)
@@ -132,7 +131,7 @@ const ActiveChat = (props: ActiveChatProps) => {
     };
 
     return(
-        <div>
+        <div className="p-8">
             <HistoryMessagesList chatId={props.chatId} changeMessageCallable={changeMessageProps} deleteMessageCallable={deleteMessageProps} />
             <LocalMessagesHandler changeMessageFunc={changeMessageProps} deleteMessageFunc={deleteMessageProps} websocketRef={socket as RefObject<WebSocket>} />
         </div>

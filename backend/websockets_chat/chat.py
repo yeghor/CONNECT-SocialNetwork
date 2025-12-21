@@ -117,6 +117,7 @@ async def connect_to_websocket_chat_room(
         while True:
             print("waiting for json")
             json_dict = await websocket.receive_json()
+            
             # If in json_dict enough data - it passes not related fields
             request_data = ExpectedWSData.model_validate(json_dict, strict=True)
 

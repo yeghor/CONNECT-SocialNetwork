@@ -43,7 +43,7 @@ class WebsocketConnectionManager:
         self._rooms = {}
 
 
-    async def execute_real_time_action(self, connection_data: ChatJWTPayload, db_message_data: MessageSchemaActionIncluded | MessageSchemaShortActionIncluded ) -> None:
+    async def execute_real_time_action(self, connection_data: ChatJWTPayload, db_message_data: MessageSchemaActionIncluded | MessageSchemaShortActionIncluded) -> None:
         if db_message_data.action == "send":
             await self._send_message(db_message_data=db_message_data, room_id=connection_data.room_id, sender_id=connection_data.user_id)
         elif db_message_data.action == "change":
@@ -86,13 +86,10 @@ class WebsocketConnectionManager:
 
 
     async def _send_message(self, db_message_data: MessageSchemaActionIncluded, room_id: str, sender_id: str) -> None:
-        """Sends message to room and all online room members"""
+        """Sends message to room and all online room members, including sender."""
         connections = self._get_room_connections(room_id=room_id)
 
         for conn in connections:
-            if conn["user_id"] == sender_id:
-                continue
-
             websocket: WebSocket = conn["websocket"]
             
             await websocket.send_json(

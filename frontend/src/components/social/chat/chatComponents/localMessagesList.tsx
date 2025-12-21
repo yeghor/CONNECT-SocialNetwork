@@ -5,9 +5,10 @@ import MessageBar from "./messageBar.tsx";
 
 // Exporting for ref forwarding function in ActiveChat
 export interface LocalMessagesListProps {
-    websocketRef: RefObject<WebSocket>;
-    changeMessageFunc: (message: string, messageId: string) => void;
-    deleteMessageFunc: (messageId: string) => void;
+    websocketRef: RefObject<WebSocket>,
+    changeMessageFunc: (message: string, messageId: string) => void,
+    deleteMessageFunc: (messageId: string) => void,
+    sendMessageFunc: (message: string, tempId: string) => void
 }
 
 // TODO: Optimistic render
@@ -18,7 +19,16 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
     const [ currentMessageEditingId, setCurrentMessageEditingId ] = useState<null | string>(null);
 
     const sendMessageOptimistically = (message: string): void => {
+        const oldLocalMessages = [...localMessages];
 
+
+        // Creating temp sample message, until backend websocket message distribution
+        const tempId = crypto.randomUUID()
+        const newLocalMessages = [...oldLocalMessages, mapSingleMessage(tempId, message, new Date(), { userId: tempId, username: "", avatarURL: null }, tempId)];
+
+        setLocalMessages(newLocalMessages);
+
+        props.sendMessageFunc(message, tempId);
     } 
 
     const deleteMessageFromState = (messageId: string): void => {
@@ -27,7 +37,7 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
         newMessagesDelete = newMessagesDelete.filter((localMessage) => {
             return localMessage.messageId != messageId;
         });
-
+        
         setLocalMessages(newMessagesDelete);
         props.deleteMessageFunc(messageId);
         setCurrentMessageEditing(null);
@@ -42,7 +52,7 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
         let newMessagesChange = [...localMessages];
         newMessagesChange = newMessagesChange.map((localMessage) => {
             if (localMessage.messageId == messageId && newMessage) {
-                return mapSingleMessage(messageId, newMessage, localMessage.sent, localMessage.owner);
+                return mapSingleMessage(messageId, newMessage, localMessage.sent, localMessage.owner, null);
             } 
             return localMessage;
         })
@@ -63,8 +73,16 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
                 if (!mappedMessage.text) {
                     return;
                 }
-                const newLocalMessage = mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner);
-                setLocalMessages((prevState) => [...prevState, newLocalMessage]);
+                const newLocalMessage = mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner, null);
+                const oldLocalMessages = [...localMessages];
+                
+                const newLocalMessages = oldLocalMessages.map((msg) => {
+                    if (msg.tempId == mappedMessage.tempId) {
+                        return newLocalMessage;
+                    }
+                    return msg;
+                })
+                
                 break;
             case "change":
                 changeMessageInState(mappedMessage.text, mappedMessage.messageId);
@@ -91,12 +109,15 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
     // }, []);
 
     // websocket handling useEffect
+
     useEffect(() => {
         props.websocketRef.current.addEventListener("message", receiveWSMessageLocal);
         return () => {
             props.websocketRef.current.removeEventListener("message", receiveWSMessageLocal);
         }
     }, []);
+
+    console.log("rendering local messages")
 
     return (
         <div>
