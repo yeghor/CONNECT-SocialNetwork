@@ -344,7 +344,7 @@ class PostgresService:
         return result.scalars().all()
     
     @postgres_exception_handler(action="Get n user chat rooms excluding exclude_ids list")
-    async def get_n_user_chats(self, user: User, n: int, page: int, pagination_normalization: int, chat_type: Literal["chat", "not-approved"]) -> List[ChatRoom]:
+    async def get_n_user_chats(self, user: User, n: int, page: int, chat_type: Literal["chat", "not-approved"]) -> List[ChatRoom]:
         if chat_type == "chat":
             where_stmt = ChatRoom.approved.is_(True)
         elif chat_type == "not-approved":
@@ -354,7 +354,7 @@ class PostgresService:
             select(ChatRoom)
             .where(and_(ChatRoom.participants.contains(user), where_stmt))
             .order_by(ChatRoom.last_message_time.desc())
-            .offset((page*n) + pagination_normalization)
+            .offset(page*n)
             .limit(n)
         )
 

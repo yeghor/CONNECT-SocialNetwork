@@ -60,6 +60,7 @@ class WebsocketConnectionManager:
         if not room_id in self._rooms.keys():
             self._rooms[room_id] = [payload]
         else:
+            # TODO: Optimize loops
             conn_exists = False
             for conn in self._rooms[room_id]:
                 if user_id == conn["user_id"]:
@@ -67,7 +68,9 @@ class WebsocketConnectionManager:
                     break
 
             if conn_exists:
-               self._rooms[room_id]["websocket"] = websocket
+               for conn in self._rooms[room_id]:
+                   if conn["user_id"] == user_id:
+                       conn["websocket"] = websocket
             else:
                 self._rooms[room_id].append(payload)
 
@@ -80,9 +83,10 @@ class WebsocketConnectionManager:
         for conn in connections   :
             if conn["websocket"] == websocket:
                 connections.remove(conn)
-                return
+                break
         
         await self._redis.disconect_from_chat(room_id=room_id, user_id=connections[room_id]["user_id"])
+        await self._redis.reset_user_chat_pagination(user_id=connections[room_id]["user_id"])
 
 
     async def _send_message(self, db_message_data: MessageSchemaActionIncluded, room_id: str, sender_id: str) -> None:

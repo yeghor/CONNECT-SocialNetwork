@@ -19,7 +19,7 @@ chat = APIRouter()
 connection = WebsocketConnectionManager()
 
 @chat.get("/chat/connect/{chat_id}")
-# @endpoint_exception_handler
+@endpoint_exception_handler
 async def get_chat_token_participants_avatar_urls(
     chat_id: str,
     user_: User = Depends(authorize_request_depends),
@@ -117,7 +117,9 @@ async def connect_to_websocket_chat_room(
         while True:
             print("waiting for json")
             json_dict = await websocket.receive_json()
-            
+            print("received json")
+            print(json_dict)
+
             # If in json_dict enough data - it passes not related fields
             request_data = ExpectedWSData.model_validate(json_dict, strict=True)
 
@@ -126,4 +128,5 @@ async def connect_to_websocket_chat_room(
 
             await connection.execute_real_time_action(action=request_data.action, connection_data=connection_data, db_message_data=db_message_data)
     finally:
+        print("calling disconnect")
         await connection.disconnect(room_id=connection_data.room_id, websocket=websocket)

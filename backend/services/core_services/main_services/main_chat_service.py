@@ -70,7 +70,6 @@ class MainChatService(MainServiceBase):
         await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=False)
 
         pagination_normalization = await self._RedisService.get_user_chat_pagination(user_id=user.user_id)
-
         message_batch = await self._PostgresService.get_chat_n_fresh_chat_messages(room_id=room_id, page=page, n=BASE_PAGINATION, pagination_normalization=pagination_normalization)
 
         return [
@@ -80,9 +79,7 @@ class MainChatService(MainServiceBase):
         
     @web_exceptions_raiser
     async def get_chat_batch(self, user: User, page: int, chat_type: Literal["chat", "noе-approved"]) -> List[Chat]:
-        
-        pagination_normalization = await self._RedisService.get_user_chat_pagination(user_id=user.user_id)
-        chat_batch = await self._PostgresService.get_n_user_chats(user=user, page=page, n=BASE_PAGINATION, pagination_normalization=pagination_normalization, chat_type=chat_type)
+        chat_batch = await self._PostgresService.get_n_user_chats(user=user, page=page, n=BASE_PAGINATION, chat_type=chat_type)
 
         return [Chat(chat_id=chat.room_id, participants=len(chat.participants)) for chat in chat_batch]
 
@@ -107,13 +104,13 @@ class MainChatService(MainServiceBase):
             raise InvalidAction(detail=f"ChatService: User: {user.user_id} tried to disapprove dialogue chat: {room_id} that already approved.", client_safe_detail="You're already approved this chat")
 
         if chat_room.creator_id == user.user_id:
-            raise InvalidAction(detail=f"ChatService: User: {user.user_id} tried to disapprove dialoque chat: {room_id} while being the room creator.", client_safe_detail=f"You can't disapprove chat that you have created")
+            raise InvalidAction(detail=f"ChatService: User: {user.user_id} tried to disapprove dialogue chat: {room_id} while being the room creator.", client_safe_detail=f"You can't disapprove chat that you have created")
 
         await self._PostgresService.delete_models_and_flush(chat_room)
 
     @web_exceptions_raiser
     async def disconnect(self, user: User) -> None:
-        """Necessarily call this methods when error occured or user disconnected from websocket to clear all excluding."""
+        """Necessarily call this methods when error occurred or user disconnected from websocket to clear all excluding."""
         await self._RedisService.clear_exclude_chat_ids(user_id=user.user_id, exclude_type="message")
 
     @web_exceptions_raiser
@@ -124,10 +121,11 @@ class MainChatService(MainServiceBase):
 
         await self._PostgresService.insert_models_and_flush(new_message)
 
-        # To prevent SQLalchemy Missing Greenlet error
+        # To prevent SQAlchemy Missing Greenlet error
         await self._PostgresService.refresh_model(new_message)
 
         connections = await self._RedisService.get_chat_connections(room_id=user_data.room_id)
+        print(connections)
         for conn in connections:
             await self._RedisService.user_chat_pagination_action(user_id=conn, room_id=user_data.room_id, increment=True)
 

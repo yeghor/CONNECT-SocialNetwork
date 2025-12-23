@@ -264,13 +264,23 @@ class RedisService:
     @redis_error_handler
     async def connect_user_to_chat(self, user_id: str, room_id: str) -> None:
         pattern = f"{self.__chat_connection_prefix}{room_id}"
-        await self.__client.rpush(pattern, user_id)
+
+        conn_exists =  False
+        connections_list = await self.__client.lrange(pattern, 0, -1)
+        for conn_key in connections_list:
+            print(conn_key)
+            if conn_key == user_id:
+                conn_exists = True
+        print(f"length - {len(connections_list)}")
+
+        if not conn_exists:
+            await self.__client.rpush(pattern, user_id)
 
 
     @redis_error_handler
     async def disconect_from_chat(self, user_id: str, room_id: str) -> None:
         pattern = f"{self.__chat_connection_prefix}{room_id}"
-        await self.__client.lrem(pattern, value=user_id)
+        await self.__client.lrem(pattern, value=user_id, count=1)
 
     @redis_error_handler
     async def get_chat_connections(self, room_id: str) -> List[str]:
@@ -302,8 +312,7 @@ class RedisService:
         if increment:
             await self.__client.incr(pattern, amount=1)
         else:
-            await self.__client.decr(pattern)
-            new_value = await self.__client.get(pattern)
-            if int(new_value) < 0:
-                await self.__client.set(pattern, 0)
+            value = await self.__client.get(pattern)
 
+            if not int(value) <= 0:
+                await self.__client.decr(pattern)

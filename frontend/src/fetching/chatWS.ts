@@ -59,16 +59,16 @@ export const checkWSConnEstablished = (ws: WebSocket): void => {
 
 
 // Websockets
-type chatAction = "send" | "change" | "delete";
+type ChatAction = "send" | "change" | "delete";
 const wsClosedErrorMessage = "WebSocket connection is closed"
 
 
-const wsDataMapper = (action: chatAction, message?: string, messageId?: string, tempId?: string): string => {
+const wsDataMapper = (action: ChatAction, message?: string, messageId?: string, tempId?: string): string => {
     return JSON.stringify({
         action: action,
-        message: message,
-        messageId: messageId,
-        tempId: tempId
+        message: message ?? null,
+        message_id: messageId ?? null,
+        temp_id: tempId ?? null
     });
 }
 
@@ -78,7 +78,7 @@ export const connectWSChat = (token: string): WebSocket => {
     return new WebSocket(createWebSocketURL(token));
 }
 
-const websocketMessageHelper = (ws: WebSocket, action: chatAction, message?: string, messageId?: string, tempId?: string): void => {
+const websocketMessageHelper = (ws: WebSocket, action: ChatAction, message?: string, messageId?: string, tempId?: string): void => {
     try {
         let wsData: string;
 

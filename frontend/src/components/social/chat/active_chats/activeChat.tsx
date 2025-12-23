@@ -8,7 +8,7 @@ import { connectWSChat,
     WebsocketConnectionError
  } from "../../../../fetching/chatWS.ts";
 import {ChatConnectData, ChatMessage} from "../../../../fetching/responseDTOs.ts";
-import LocalMessagesHandler from "../chatComponents/localMessagesList.tsx";
+import LocalMessagesHandler from "../chatComponents/localMessagesHandler.tsx";
 
 import { useNavigate } from "react-router";
 import { chatsURI, internalServerErrorURI } from "../../../../consts.ts";
@@ -40,8 +40,6 @@ const ActiveChat = (props: ActiveChatProps) => {
     const [ toRender, setToRender ] = useState(false);
 
     const socket = useRef<WebSocket | null>(null);
-
-    console.log("RENRERING ACTIVE CHAT");
 
     const sendMessageWrapper = (socket: WebSocket, message: string, tempId: string) => {
         try {
@@ -92,6 +90,7 @@ const ActiveChat = (props: ActiveChatProps) => {
 
         navigate(`/${chatsURI}`);
         window.alert("Connection unexpectedly closed");
+        console.log(event.code, event.reason);
     }
 
     /* Toggles toRender flag to safely render nested components when WebSocket connection is ready */
