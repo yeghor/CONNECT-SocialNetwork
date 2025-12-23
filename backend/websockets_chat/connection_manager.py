@@ -80,17 +80,20 @@ class WebsocketConnectionManager:
     async def disconnect(self, room_id: str, websocket: WebSocket) -> None:
         connections = self._get_room_connections(room_id=room_id)
 
+        user_id = None
         for conn in connections   :
             if conn["websocket"] == websocket:
+                user_id = conn["user_id"]
                 connections.remove(conn)
                 break
-        
-        await self._redis.disconect_from_chat(room_id=room_id, user_id=connections[room_id]["user_id"])
-        await self._redis.reset_user_chat_pagination(user_id=connections[room_id]["user_id"])
+
+        if user_id:
+            await self._redis.disconect_from_chat(room_id=room_id, user_id=user_id)
+            await self._redis.reset_user_chat_pagination(user_id=user_id)
 
 
     async def _send_message(self, db_message_data: MessageSchemaActionIncluded, room_id: str, sender_id: str) -> None:
-        """Sends message to room and all online room members, including sender."""
+        """Distribute message to room and all online room members, including sender."""
         connections = self._get_room_connections(room_id=room_id)
 
         for conn in connections:

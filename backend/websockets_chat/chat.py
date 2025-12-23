@@ -126,7 +126,7 @@ async def connect_to_websocket_chat_room(
             async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
                 db_message_data = await chat.execute_action(request_data=request_data, connection_data=connection_data)
 
-            await connection.execute_real_time_action(action=request_data.action, connection_data=connection_data, db_message_data=db_message_data)
+            await connection.execute_real_time_action(connection_data=connection_data, db_message_data=db_message_data)
     finally:
         print("calling disconnect")
         await connection.disconnect(room_id=connection_data.room_id, websocket=websocket)

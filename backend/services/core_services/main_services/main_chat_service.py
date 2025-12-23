@@ -125,11 +125,18 @@ class MainChatService(MainServiceBase):
         await self._PostgresService.refresh_model(new_message)
 
         connections = await self._RedisService.get_chat_connections(room_id=user_data.room_id)
-        print(connections)
+
         for conn in connections:
             await self._RedisService.user_chat_pagination_action(user_id=conn, room_id=user_data.room_id, increment=True)
 
-        return MessageSchemaActionIncluded.model_validate(new_message, from_attributes=True)
+        return MessageSchemaActionIncluded(
+            message_id=new_message.message_id,
+            text=new_message.text,
+            sent=new_message.sent,
+            owner=UserShortSchema.model_validate(new_message.owner, from_attributes=True),
+            temp_id=message_data.temp_id,
+            action=message_data.action
+        )
 
     @web_exceptions_raiser
     async def delete_message(self, message_data: ExpectedWSData, user_data: ChatJWTPayload) -> MessageSchemaShortActionIncluded:
