@@ -98,9 +98,8 @@ class WebsocketConnectionManager:
 
         for conn in connections:
             websocket: WebSocket = conn["websocket"]
-            
             await websocket.send_json(
-                db_message_data.model_dump_json()
+                db_message_data.model_dump(mode="json")
             )
 
 

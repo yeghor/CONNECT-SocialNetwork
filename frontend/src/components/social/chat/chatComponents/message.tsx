@@ -12,8 +12,6 @@ const ChatMessageComp = (props: ChatMessageProps) => {
     const [ deleteMessage, setDeleteMessage ] = useState(false);
     const [ currentMessage, setCurrentMessage ] = useState(props.messageData.text ?? "");
 
-    console.log(props);
-
     return(
         <div>
             <p>{props.messageData.messageId}</p>

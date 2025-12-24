@@ -94,14 +94,14 @@ const ActiveChat = (props: ActiveChatProps) => {
     }
 
     /* Toggles toRender flag to safely render nested components when WebSocket connection is ready */
-    const webscoketOpenEventListener = () => {
+    const websocketOpenEventListener = () => {
         setToRender(true);
     }
 
     useEffect(() => {
         socket.current = connectWSChat(props.activeChatData.token);
 
-        socket.current.addEventListener("open", webscoketOpenEventListener);
+        socket.current.addEventListener("open", websocketOpenEventListener);
         socket.current.addEventListener("close", websocketCloseEventListener);
 
         return () => {
@@ -111,7 +111,7 @@ const ActiveChat = (props: ActiveChatProps) => {
 
             console.log("CLOSING CONNECTION");
 
-            socket.current.removeEventListener("open", webscoketOpenEventListener);
+            socket.current.removeEventListener("open", websocketOpenEventListener);
             socket.current.removeEventListener("close", websocketCloseEventListener);
             
             if (socket.current.readyState !== socket.current.CLOSED) {

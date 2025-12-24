@@ -73,13 +73,12 @@ const LocalMessagesHandler = (props: LocalMessagesListProps) => {
     }
 
     const receiveWSMessageLocal = (event: MessageEvent): void => {
-        const incomingMessage = event.data;
+        const incomingMessage = JSON.parse(event.data);
         const mappedMessage = mapWebsocketReceivedMessage(incomingMessage);
 
         switch (incomingMessage.action) {
             case "send":
                 if (!mappedMessage.text) return;
-
                 updateMessageStatusInState(mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner, null));
                 break;
             case "change":

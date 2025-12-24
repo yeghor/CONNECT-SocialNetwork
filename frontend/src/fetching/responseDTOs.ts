@@ -39,11 +39,13 @@ export const createBadResponseManually = (detail: string, statusCode: number): B
     };
 };
 
+
 const ownerMapper = (data: OwnerDTO): Owner => {
+
     return {
         userId: data.user_id,
         username: data.username,
-        avatarURL: data.avatar_url
+        avatarURL: data.avatar_url ?? null
     };
 };
 
