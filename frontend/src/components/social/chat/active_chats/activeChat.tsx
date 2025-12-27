@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, forwardRef, RefObject } from "react";
-import HistoryMessagesList from "../chatComponents/historyMessagesList.tsx";
+import ChatMessagesHandler from "../chatComponents/chatMessagesHandler.tsx";
 
 import { connectWSChat,
     sendMessage, changeMessage, deleteMessage,
@@ -127,12 +127,12 @@ const ActiveChat = (props: ActiveChatProps) => {
                 Loading
             </div>
         );
-    };
+    }
 
+    // Passing socket as RefObject<WebSocket> because code above guarantees that it isn't null
     return(
         <div className="p-8">
-            <HistoryMessagesList chatId={props.chatId} changeMessageCallable={changeMessageProps} deleteMessageCallable={deleteMessageProps} />
-            <LocalMessagesHandler changeMessageCallable={changeMessageProps} deleteMessageCallable={deleteMessageProps} sendMessageCallable={sendMessageProps}  websocketRef={socket as RefObject<WebSocket>} />
+            <ChatMessagesHandler websocketRef={socket as RefObject<WebSocket>} chatId={props.chatId} sendMessageCallable={sendMessageProps} changeMessageCallable={changeMessageProps} deleteMessageCallable={deleteMessageProps} />
         </div>
     );  
 

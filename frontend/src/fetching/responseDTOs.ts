@@ -456,7 +456,7 @@ export const mapWebsocketReceivedMessage = (data: WebsocketReceivedMessageSchema
         text: data.text,
         sent: new Date(data.sent),
         owner: ownerMapper(data.owner),
-        tempId: data.temp_id
+        tempId: data.temp_id ?? null
     };
 };
 
@@ -466,7 +466,7 @@ export const messagesResponseMapper = (data: MessagesDTO): MessagesResponse => {
         text: messageDTO.text,
         sent: new Date(messageDTO.sent),
         owner: ownerMapper(messageDTO.owner),
-        tempId: messageDTO.temp_id
+        tempId: messageDTO.temp_id ?? null
     }));
 
     return {
@@ -482,7 +482,7 @@ export const singleMessageResponseMapper = (data: MessageDTO): ChatMessage => {
         text: data.text,
         sent: new Date(data.sent),
         owner: ownerMapper(data.owner),
-        tempId: data.temp_id
+        tempId: data.temp_id ?? null
     };
 };
 
