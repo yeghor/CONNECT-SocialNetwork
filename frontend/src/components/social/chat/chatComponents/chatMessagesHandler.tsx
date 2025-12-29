@@ -58,8 +58,6 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
-    const [ reRenderFlag, setReRenderFlag ] = useState<boolean>(false);
-
     const [ messages, setMessages ] = useState<ChatMessage[]>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -107,23 +105,35 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     };
 
     const changeMessageOptimistically = (message: string, messageId: string): void => {
-        queryClient.setQueryData(currentChatQueryKeys, (oldData: { [key: number | string]: ChatMessage[] }) => {
-            return oldData.map((msg) => {
-                if (msg.messageId == messageId && msg.tempId === null) {
-                    msg.text = message;
-                }
-                return msg;
-            })
+        queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
+            return {
+                ...oldData,
+                pages: oldData.pages.map((page: ChatMessage[]) => {
+                    page.map((msg: ChatMessage) => {
+                        if (msg.messageId == messageId && msg.tempId === null) {
+                            msg.text = message;
+                        }
+                        return msg;                      
+                    })
+                    return page;
+                })
+            }
         });
         props.changeMessageCallable(message, messageId)
         
     };
     const deleteMessageOptimistically = (messageId: string): void => {
-        queryClient.setQueryData(currentChatQueryKeys, (oldData: { [key: number | string]: ChatMessage[] }) => {
-            return oldData.filter((msg) => {
-                if (msg.tempId) { return true }
-                return !(msg.messageId == messageId);
-            });
+        queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
+            return {
+                ...oldData,
+                pages: oldData.pages.map((page: ChatMessage[]) => {
+                    page.map((msg: ChatMessage) => {
+                        if (msg.tempId) { return true }
+                        return !(msg.messageId == messageId);                       
+                    })
+                    return page;
+                })
+            }
         });
         props.deleteMessageCallable(messageId)
     };
