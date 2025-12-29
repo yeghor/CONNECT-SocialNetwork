@@ -9,6 +9,7 @@
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "@types/ungap__structured-clone": "^1.2.0",
     "array-shuffle": "^4.0.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -16,6 +17,7 @@
     "react-router-dom": "^7.9.3",
     "react-scripts": "5.0.1",
     "react-window": "^2.2.1",
+    "structured-clone": "^0.2.2",
     "universal-cookie": "^8.0.1",
     "web-vitals": "^2.1.4"
   },

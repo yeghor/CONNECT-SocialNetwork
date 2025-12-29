@@ -13,7 +13,7 @@ const ChatMessageComp = (props: ChatMessageProps) => {
     const [ currentMessage, setCurrentMessage ] = useState(props.messageData.text ?? "");
 
     return(
-        <div>
+        <div className="bg-red-700">
             <p>{props.messageData.messageId}</p>
             <p>{props.messageData.text}</p>
             <div onClick={() => setChangeMessage((prevState) => !prevState)} className="bg-white p-1 m-2">change</div>
