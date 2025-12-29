@@ -58,7 +58,6 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
-    const [ messages, setMessages ] = useState<ChatMessage[]>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const currentChatQueryKeys = [ "chatMessages", props.chatId ]
@@ -72,6 +71,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             )
         );
 
+    const messages = data?.pages.flatMap(page => page ?? []) ?? [];
 
     const virtualizer = useVirtualizer({
         count: messages.length,
@@ -85,11 +85,6 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     const virtualItems = virtualizer.getVirtualItems();
 
     const infiniteQuerying = async () => {
-        const flatMessages =
-            data?.pages.flatMap(page => page ?? []) ?? [];
-
-        setMessages(flatMessages);
-
         const lastItem = virtualItems[virtualItems.length - 1];
 
         if (
@@ -108,7 +103,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             return {
                 ...oldData,
-                pages: oldData.pages.map((page: ChatMessage[]) => {
+                pages: [ ...oldData.pages ].map((page: ChatMessage[]) => {
                     page.map((msg: ChatMessage) => {
                         if (msg.messageId == messageId && msg.tempId === null) {
                             msg.text = message;
@@ -119,6 +114,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 })
             }
         });
+
         props.changeMessageCallable(message, messageId)
         
     };
@@ -126,7 +122,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             return {
                 ...oldData,
-                pages: oldData.pages.map((page: ChatMessage[]) => {
+                pages: [ ...oldData.pages ].map((page: ChatMessage[]) => {
                     page.map((msg: ChatMessage) => {
                         if (msg.tempId) { return true }
                         return !(msg.messageId == messageId);                       
@@ -139,7 +135,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     };
 
     const sendMessageOptimistically = (message: string): void => {
-        const tempId = crypto.randomUUID()
+        const tempId = crypto.randomUUID();
 
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             if (!oldData) return oldData;
@@ -148,7 +144,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
             return {
                 ...oldData,
-                pages: oldData.pages.map((page: any, index: number) => {
+                pages: [ ...oldData.pages ].map((page: any, index: number) => {
                     if (index == 0) {
                         return [newMessage, ...page];
                     }
@@ -156,6 +152,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 })
             };
         })
+        
         props.sendMessageCallable(message, tempId);
     }
 
@@ -163,7 +160,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             return {
                 ...oldData,
-                pages: oldData.pages.map((page: ChatMessage[], index: any) => {
+                pages: [ ...oldData.pages ].map((page: ChatMessage[], index: any) => {
                     page.map((msg: ChatMessage) => {
                         if (msg.tempId === incomingMessage.tempId) {
                             incomingMessage.tempId = null;
