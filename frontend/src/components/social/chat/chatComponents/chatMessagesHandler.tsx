@@ -231,9 +231,11 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
     return (
         <div>
+            <button className="bg-white p-1 text-black" onClick={() => virtualizer.scrollBy(750 , { behavior: "smooth" })}>Scroll up</button>
+            <button className="bg-white p-1 text-black" onClick={() => virtualizer.scrollToIndex(0)}>Scroll down</button>
             <div
                 ref={scrollRef}
-                className="h-[600px] overflow-auto relative my-16"
+                className="h-[600px] overflow-auto scroll-smooth relative my-16 mx-4"
                 style={{
                     // https://github.com/TanStack/virtual/discussions/195 Thank You
                     transform: "scaleY(-1)"

@@ -26,7 +26,7 @@ const ChatMessageComp = (props: ChatMessageProps) => {
         <div className="w-full h-full bg-white">
             <p>{props.messageData.messageId}</p>
 
-            { messageAction === "delete" ? <p className="break-normal w-max w-full">{props.messageData.text}</p> : <input onChange={(e) => setCurrentMessage(e.target.value)} type="text" defaultValue={`${props.messageData.text}`} /> }
+            { messageAction === "change" ? <input onChange={(e) => setCurrentMessage(e.target.value)} type="text" defaultValue={`${props.messageData.text}`} /> : <p className="break-normal w-full">{props.messageData.text}</p> }
 
 
             <div onClick={ () =>  setMessageAction("change") } className="bg-white p-1 m-2">change</div>
