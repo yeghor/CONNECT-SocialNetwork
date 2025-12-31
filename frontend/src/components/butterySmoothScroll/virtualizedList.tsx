@@ -6,7 +6,8 @@ interface VirtualizedListProps {
     DisplayedComponent: any, // TODO: add react component type to prevent TS from arguing ^_^
     virtualizer: Virtualizer<HTMLDivElement, Element>,
     virtualItems: VirtualItem[],
-    componentsProps: any[]
+    componentsProps: any[],
+    reverse?: boolean
 }
 
 /*
@@ -20,18 +21,19 @@ interface VirtualizedListProps {
 *
 *
 * */
-const VirtualizedList = ({ DisplayedComponent, virtualizer, virtualItems, componentsProps }: VirtualizedListProps) => {
+const VirtualizedList = ({ DisplayedComponent, virtualizer, virtualItems, componentsProps, reverse = false }: VirtualizedListProps) => {
     return(
-        <div className="relative" style={{height: `${virtualizer.getTotalSize()}px`}}>
+        <div className="relative flex flex-col-reverse" style={{height: `${virtualizer.getTotalSize()}px`}}>
             {
                 virtualItems.map((vItem) => {
                     return (
                         <div key={vItem.key} className="absolute top-0 left-0 w-full" data-index={vItem.index}
                              style={
-                                 {
-                                     transform: `translateY(${vItem.start}px)`,
-                                     height: `${vItem.size}px`,
-                                 }
+                                {
+                                    // https://github.com/TanStack/virtual/discussions/195 THANK YOU
+                                    transform: `translateY(${vItem.start}px) ${reverse ? "scaleY(-1)" : ""}`,
+                                    height: `${vItem.size}px`,
+                                }
                              }>
                             <div className="hover:-translate-y-0.5 hover:border-white hover:border-3 transition-all">
                                 <DisplayedComponent {...componentsProps[vItem.index]} />

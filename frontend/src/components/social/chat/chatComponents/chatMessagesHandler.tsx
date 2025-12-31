@@ -104,13 +104,12 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             return {
                 ...oldData,
                 pages: [ ...oldData.pages ].map((page: ChatMessage[]) => {
-                    page.map((msg: ChatMessage) => {
+                    return page.map((msg: ChatMessage) => {
                         if (msg.messageId == messageId && msg.tempId === null) {
                             msg.text = message;
                         }
                         return msg;                      
                     })
-                    return page;
                 })
             }
         });
@@ -123,11 +122,10 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             return {
                 ...oldData,
                 pages: [ ...oldData.pages ].map((page: ChatMessage[]) => {
-                    page.map((msg: ChatMessage) => {
+                    return page.map((msg: ChatMessage) => {
                         if (msg.tempId) { return true }
                         return !(msg.messageId == messageId);                       
                     })
-                    return page;
                 })
             }
         });
@@ -161,14 +159,13 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             return {
                 ...oldData,
                 pages: [ ...oldData.pages ].map((page: ChatMessage[], index: any) => {
-                    page.map((msg: ChatMessage) => {
+                    return page.map((msg: ChatMessage) => {
                         if (msg.tempId === incomingMessage.tempId) {
                             incomingMessage.tempId = null;
                             return incomingMessage;
                         }
                         return msg                        
                     })
-                    return page;
                 })
             }
         });
@@ -211,17 +208,43 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         }
     }, []);
 
+    // // https://github.com/TanStack/virtual/discussions/195 Thank You
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+
+        const invertedWheelScroll = (event: WheelEvent) => {
+            // el.scrollTop -= event.deltaY;
+            el.scrollTo({
+                top: el.scrollTop -= event.deltaY,
+                behavior: "smooth"
+            })
+            event.preventDefault();
+        };
+
+        el.addEventListener('wheel', invertedWheelScroll, false);
+
+        return () => {
+            el.removeEventListener('wheel', invertedWheelScroll, false);
+        };
+    }, [scrollRef.current]);
+
     return (
         <div>
             <div
                 ref={scrollRef}
                 className="h-[600px] overflow-auto relative my-16"
+                style={{
+                    // https://github.com/TanStack/virtual/discussions/195 Thank You
+                    transform: "scaleY(-1)"
+                }}
             >
                 <VirtualizedList
                     DisplayedComponent={ChatMessageComp}
                     virtualizer={virtualizer}
                     virtualItems={virtualItems}
                     componentsProps={componentsProps}
+                    reverse={true}
                 />
             </div>
             <MessageBar sendMessageLocally={sendMessageOptimistically} />

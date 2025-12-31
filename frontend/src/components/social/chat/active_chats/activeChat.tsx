@@ -8,7 +8,6 @@ import { connectWSChat,
     WebsocketConnectionError
  } from "../../../../fetching/chatWS.ts";
 import {ChatConnectData, ChatMessage} from "../../../../fetching/responseDTOs.ts";
-import LocalMessagesHandler from "../chatComponents/localMessagesHandler.tsx";
 
 import { useNavigate } from "react-router";
 import { chatsURI, internalServerErrorURI } from "../../../../consts.ts";
@@ -18,19 +17,6 @@ interface ActiveChatProps {
     activeChatData: ChatConnectData,
     chatId: string
 }
-
-// const catchFailedRetriedConnection = (ws: WebSocket, setErrorMessage: CallableFunction) => {
-//     try {
-//         checkWSConnEstablished(ws);
-//     } catch (err) {
-//         if (err instanceof WebsocketNotReady) {
-//             setTimeout(() => catchFailedRetriedConnection(ws, setErrorMessage), 50);
-//         } else if (err instanceof WebsocketConnectionError) {
-//             console.error(err);
-//             setErrorMessage("Failed Websocket connection!");
-//             }
-//         }
-// }
 
 const ActiveChat = (props: ActiveChatProps) => {
     const navigate = useNavigate();
@@ -131,7 +117,7 @@ const ActiveChat = (props: ActiveChatProps) => {
 
     // Passing socket as RefObject<WebSocket> because code above guarantees that it isn't null
     return(
-        <div className="p-8">
+        <div>
             <ChatMessagesHandler websocketRef={socket as RefObject<WebSocket>} chatId={props.chatId} sendMessageCallable={sendMessageProps} changeMessageCallable={changeMessageProps} deleteMessageCallable={deleteMessageProps} />
         </div>
     );  
