@@ -203,8 +203,8 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
     const componentsProps = messages.map(msg => ({
         messageData: msg,
-        changeMessageCallable: deleteMessageOptimistically,
-        deleteMessageCallable: changeMessageOptimistically
+        changeMessageCallable: changeMessageOptimistically,
+        deleteMessageCallable: deleteMessageOptimistically
     }));
 
     // Infinite querying effect
@@ -239,6 +239,8 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             el.removeEventListener('wheel', invertedWheelScroll, false);
         };
     }, [scrollRef.current]);
+
+    // TODO: Add opacity 0.7 to messages that are pending
 
     return (
         <div>
