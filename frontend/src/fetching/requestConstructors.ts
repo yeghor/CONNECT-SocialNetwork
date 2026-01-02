@@ -25,7 +25,7 @@ export const requestTokenHeaders = (JWT: string): TokenHeaderType => {
 export const requestTokenMultipartHeaders = (JWT: string): TokenHeaderType => {
     return {
         // https://stackoverflow.com/questions/39280438/fetch-missing-boundary-in-multipart-form-data-post
-        // Now setting Content-type to prevent - Missing boundary in multipart/form-data from the backend
+        // Not setting Content-type to prevent - Missing boundary in multipart/form-data from the backend
         //@ts-ignore
         "token": createBearerToken(JWT)
     };

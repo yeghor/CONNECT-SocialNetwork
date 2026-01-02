@@ -129,7 +129,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 })
             }
         });
-        props.deleteMessageCallable(messageId)
+        props.deleteMessageCallable(messageId);1
     };
 
     const sendMessageOptimistically = (message: string): void => {
@@ -137,37 +137,49 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             if (!oldData) return oldData;
+            console.log("old data - ", oldData);
 
+            // TODO: add user's owner data
             const newMessage = mapSingleMessage(tempId, message, new Date(), { userId: crypto.randomUUID(), username: "",  avatarURL: null }, tempId);
 
+            // const firstPageShifted: any = [];
+            // for (let pageElem of oldData.pages[0]) {
+            //     console.log("page elem ", pageElem)
+            //     const [ msgIndex, msg ] = pageElem.values();
+            //     const shiftedIndex: number = msgIndex + 1;
+            //     const msgObjToPush: any = {};
+            //     msgObjToPush[shiftedIndex] = msg;
+            //     firstPageShifted.push(msgObjToPush);
+            // }
+
+            const newFirstPage: any = [ newMessage, ...oldData.pages[0] ]; 
+            
             return {
                 ...oldData,
-                pages: [ ...oldData.pages ].map((page: any, index: number) => {
-                    if (index == 0) {
-                        return [newMessage, ...page];
-                    }
-                    return page;
-                })
+                pages: [ newFirstPage, ...oldData.pages.slice(1) ]
             };
-        })
-        
-        props.sendMessageCallable(message, tempId);
-    }
+        });
+
+            props.sendMessageCallable(message, tempId);
+        }
 
     const updateSentMessage = (incomingMessage: ChatMessage): void => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
+            const newFirstPage: ChatMessage[] = [];
+
+            console.log(oldData.pages[0])
+
+            oldData.pages[0].map((msg: ChatMessage) => {
+                if (msg.tempId === incomingMessage.tempId || msg.messageId === incomingMessage.tempId) {
+                    return newFirstPage.push(incomingMessage);
+                }
+                return newFirstPage.push(msg);                
+            })
+
             return {
                 ...oldData,
-                pages: [ ...oldData.pages ].map((page: ChatMessage[], index: any) => {
-                    return page.map((msg: ChatMessage) => {
-                        if (msg.tempId === incomingMessage.tempId) {
-                            incomingMessage.tempId = null;
-                            return incomingMessage;
-                        }
-                        return msg                        
-                    })
-                })
-            }
+                pages: [ newFirstPage, oldData.pages.slice(1) ]
+            };
         });
     };
 
@@ -214,10 +226,9 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         if (!el) return;
 
         const invertedWheelScroll = (event: WheelEvent) => {
-            // el.scrollTop -= event.deltaY;
             el.scrollTo({
-                top: el.scrollTop -= event.deltaY,
-                behavior: "smooth"
+                // Multiplying by 10 to make scroll more convinient
+                top: el.scrollTop -= event.deltaY*10,
             })
             event.preventDefault();
         };
