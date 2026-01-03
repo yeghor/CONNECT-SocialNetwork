@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, model_validator, field_validator
 from typing import List, Literal, Any
 from typing_extensions import Self
 from datetime import datetime
-from pydantic_schemas.pydantic_schemas_social import UserShortSchema
+from pydantic_schemas.pydantic_schemas_social import UserShortSchema, ChatUserShortSchemaAvatarURL
 from exceptions.custom_exceptions import WSInvalidData, WSMessageIsTooBig
 from services.postgres_service import User
 from dotenv import load_dotenv
@@ -43,12 +43,11 @@ class MessageSchemaShortActionIncluded(MessageSchemaShort, ActionIncluded):
     """Use in websockets 'change' and 'delete' actions"""
     temp_id: str | None = Field(default=None)
 
-
-
 class ChatTokenResponse(BaseModel):
     token: str
 
-    participants_avatar_urls: List[str]
+    # Include the user, the user schema with boolean field me setted to True
+    participants_data: List[ChatUserShortSchemaAvatarURL]
 
 class CreateChatBodyBase(BaseModel):
     message: str

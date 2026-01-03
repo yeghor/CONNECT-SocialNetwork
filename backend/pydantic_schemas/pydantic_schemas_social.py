@@ -83,7 +83,7 @@ class UserLiteSchema(UserShortSchemaAvatarURL):
     followers: int
 
 class ChatUserShortSchemaAvatarURL(UserShortSchemaAvatarURL):
-    # Boolean state to identify which messages do user own
+    # Boolean state to identify which messages do user own. Used in chats
     me: bool
 
 class UserSchema(UserLiteSchema):

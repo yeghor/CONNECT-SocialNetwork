@@ -6,7 +6,7 @@ import {
     createInfiniteQueryOptionsUtil,
     infiniteQieryingFetchGuard
 } from "../../butterySmoothScroll/scrollVirtualizationUtils.ts";
-import {fetchChats} from "../../../fetching/chatWS.ts";
+import {fetchChats} from "../../../fetching/fetchChatWS.ts";
 import {safeAPICall} from "../../../fetching/fetchUtils.ts";
 import {ChatResponse, ChatsResponse} from "../../../fetching/responseDTOs.ts";
 import {useVirtualizer} from "@tanstack/react-virtual";

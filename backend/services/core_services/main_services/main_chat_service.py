@@ -3,7 +3,7 @@ from services.postgres_service.models import *
 from exceptions.custom_exceptions import *
 from exceptions.exceptions_handler import web_exceptions_raiser
 from pydantic_schemas.pydantic_schemas_chat import Chat, MessageSchema, MessageSchemaShort, ExpectedWSData, ChatJWTPayload, CreateDialogueRoomBody, ChatTokenResponse, CreateGroupRoomBody, MessageSchemaActionIncluded, MessageSchemaShortActionIncluded
-from pydantic_schemas.pydantic_schemas_social import UserShortSchema
+from pydantic_schemas.pydantic_schemas_social import UserShortSchema, ChatUserShortSchemaAvatarURL
 from post_popularity_rate_task.popularity_rate import scheduler
 from uuid import uuid4
 
@@ -52,18 +52,22 @@ class MainChatService(MainServiceBase):
             return await self.delete_message(message_data=request_data, user_data=connection_data)
 
     @web_exceptions_raiser
-    async def get_chat_token_participants_avatar_urls(self, room_id: str, user: User) -> ChatTokenResponse:
+    async def get_chat_token_including_participants_data(self, room_id: str, user: User) -> ChatTokenResponse:
         chat_room = await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=True)
         chat_token = await self._JWT.generate_save_chat_token(room_id=room_id, user_id=user.user_id, redis=self._RedisService)
 
-        avatar_urls = []
+        ## TODO: Optimize avatar URLs via asyncio gather
+        mapped_participants = [
+            ChatUserShortSchemaAvatarURL(
+                user_id=user_participant.user_id,
+                username=user_participant.username,
+                avatar_url=await self._ImageStorage.get_user_avatar_url(user_participant.user_id),
+                me=user_participant.user_id == user.user_id
+            )
+            for user_participant in chat_room.participants   
+        ]
 
-        for participant in chat_room.participants:
-            url = await self._ImageStorage.get_user_avatar_url(participant.user_id)
-            if url:
-                avatar_urls.append(url)
-
-        return ChatTokenResponse(token=chat_token, participants_avatar_urls=avatar_urls)
+        return ChatTokenResponse(token=chat_token, participants_data=mapped_participants)
 
     @web_exceptions_raiser
     async def get_messages_batch(self, room_id: str, user: User, page: int) -> List[MessageSchema]:

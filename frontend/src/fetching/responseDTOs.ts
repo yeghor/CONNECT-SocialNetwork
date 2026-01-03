@@ -40,7 +40,7 @@ export const createBadResponseManually = (detail: string, statusCode: number): B
 };
 
 
-const ownerMapper = (data: OwnerDTO): Owner => {
+const ownerMapper = (data: UserDTO): User => {
 
     return {
         userId: data.user_id,
@@ -81,13 +81,13 @@ export const authTokensResponseMapper = (data: AuthResponseDTO): AuthTokensRespo
     };
 };
 
-interface OwnerDTO {
+interface UserDTO {
     user_id: string;
     username: string;
     avatar_url: string | null;
 }
 
-export interface Owner {
+export interface User {
     userId: string;
     username: string;
     avatarURL: string | null;
@@ -103,7 +103,7 @@ interface PostBaseDTO {
 }
 
 interface ShortPostDTO extends PostBaseDTO {
-    owner: OwnerDTO;
+    owner: UserDTO;
     likes: number,
     views: number,
     is_liked: boolean,
@@ -132,7 +132,7 @@ interface PostBase {
 }
 
 export interface ShortPostInterface extends PostBase {
-    owner: Owner;
+    owner: User;
     likes: number,
     views: number,
     isLiked: boolean,
@@ -272,7 +272,7 @@ export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsRes
 
 
 // User profiles
-interface ShortUserDTO extends OwnerDTO {
+interface ShortUserDTO extends UserDTO {
     followers: number,
     joined: string
 }
@@ -285,7 +285,7 @@ export interface UserProfileDTO extends ShortUserDTO {
     is_following: boolean
 }
 
-export interface ShortUserProfile extends Owner {
+export interface ShortUserProfile extends User {
     followers: number,
     joined: Date
 }
@@ -422,7 +422,7 @@ interface ChatAction {
 interface ChatMessageBaseDTO {
     message_id: string,
     sent: string,
-    owner: OwnerDTO
+    owner: UserDTO
 
     // Frontend given ID that backend returns on websocket distribution - see ReadMe-dev.md
     temp_id: string | null
@@ -431,7 +431,7 @@ interface ChatMessageBaseDTO {
 interface ChatMessageBase {
     messageId: string,
     sent: Date,
-    owner: Owner
+    owner: User
 
     // See explanation in ChatMessageDTO
     tempId: string | null
@@ -486,19 +486,26 @@ export const singleMessageResponseMapper = (data: MessageDTO): ChatMessage => {
     };
 };
 
-export const mapSingleMessage = (messageId: string, text: string, sent: Date, owner: Owner, tempId: string | null): ChatMessage => {
+export const mapSingleMessage = (messageId: string, text: string, sent: Date, owner: User, tempId: string | null): ChatMessage => {
     return { messageId, text, sent, owner, tempId }
+}
+
+interface ChatParticipantDataDTO extends UserDTO {
+    me: boolean;
+}
+export interface ChatParticipantData extends User {
+    me: boolean;
 }
 
 // Chat access
 export interface ChatConnectDTO {
     token: string,
-    participants_avatar_urls: string[]
+    participants_data: ChatParticipantDataDTO[]
 }
 
 export interface ChatConnectData {
     token: string,
-    participantsAvatarURLs: string[]
+    participantsData: ChatParticipantData[]
 }
 
 export interface ChatConnectResponse extends SuccessfulResponse {
@@ -506,10 +513,19 @@ export interface ChatConnectResponse extends SuccessfulResponse {
 }
 
 export const chatConnectMapper = (data: ChatConnectDTO): ChatConnectResponse => {
+    const mappedParticipantsData = data.participants_data.map((userDTO) => {
+        return {
+            userId: userDTO.user_id,
+            username: userDTO.username,
+            avatarURL: userDTO.avatar_url,
+            me: userDTO.me
+        };
+    });
+
     return {
         data: {
             token: data.token,
-            participantsAvatarURLs: data.participants_avatar_urls
+            participantsData: mappedParticipantsData
         },
         success: true
     };

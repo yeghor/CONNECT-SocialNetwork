@@ -6,12 +6,11 @@ import { connectWSChat,
     checkWSConnEstablished,
     WebsocketNotReady,
     WebsocketConnectionError
- } from "../../../../fetching/chatWS.ts";
-import {ChatConnectData, ChatMessage} from "../../../../fetching/responseDTOs.ts";
+ } from "../../../../fetching/fetchChatWS.ts";
+import { ChatConnectData } from "../../../../fetching/responseDTOs.ts";
 
 import { useNavigate } from "react-router";
-import { chatsURI, internalServerErrorURI } from "../../../../consts.ts";
-import { C } from "react-router/dist/development/index-react-server-client-DKvU8YRr";
+import { chatsURI } from "../../../../consts.ts";
 
 interface ActiveChatProps {
     activeChatData: ChatConnectData,
@@ -118,7 +117,12 @@ const ActiveChat = (props: ActiveChatProps) => {
     // Passing socket as RefObject<WebSocket> because code above guarantees that it isn't null
     return(
         <div>
-            <ChatMessagesHandler websocketRef={socket as RefObject<WebSocket>} chatId={props.chatId} sendMessageCallable={sendMessageProps} changeMessageCallable={changeMessageProps} deleteMessageCallable={deleteMessageProps} />
+            <ChatMessagesHandler
+                websocketRef={socket as RefObject<WebSocket>}
+                participantsData={props.activeChatData.participantsData}
+                chatId={props.chatId} sendMessageCallable={sendMessageProps}
+                changeMessageCallable={changeMessageProps}
+                deleteMessageCallable={deleteMessageProps} />
         </div>
     );  
 

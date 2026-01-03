@@ -7,7 +7,7 @@ import ActiveChat from "./active_chats/activeChat.tsx";
 import ChatList from "./chatList.tsx";
 import {ChatConnectData, ChatConnectResponse, ChatResponse} from "../../../fetching/responseDTOs.ts";
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
-import { fetchChatConnect } from "../../../fetching/chatWS.ts";
+import { fetchChatConnect } from "../../../fetching/fetchChatWS.ts";
 import MakeNewChat from "./active_chats/makeNewChat.tsx";
 
 interface ChatPageProps {
@@ -18,30 +18,28 @@ export const ChatPage = (props: ChatPageProps) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
-    const [ activeChatDataCredentials, setActiveChatDataCredentials ] = useState<ChatConnectData | null>(null); // Add generic type
+    const [ activeChatData, setActiveChatData ] = useState<ChatConnectData | null>(null); // Add generic type
     const { chatId } = useParams();
 
     // For chat creation
     const { userId } = useParams();
 
     useEffect(() => {
-        console.log("Reacted to chatId change in useeffect")
         const chatConnect = async () => {
             // Fetch more data to update lower level components data on changing chat
             if (chatId && chatId.trim() !== "") {
-                // fetch chat data
                 const response = await safeAPICall<ChatConnectResponse>(tokens, fetchChatConnect, navigate, undefined, chatId);
                 if (response.success) {
-                    setActiveChatDataCredentials(response.data);
+                    setActiveChatData(response.data);
                     return;
                 }
-                setActiveChatDataCredentials(null);
+                setActiveChatData(null);
             }
         };
         chatConnect();
     }, [chatId]);
 
-    const ActiveChatComponent = (props.createNew && userId ? (<MakeNewChat createNewOtherUserId={userId} />)  : (chatId ? (activeChatDataCredentials ? (<ActiveChat activeChatData={activeChatDataCredentials} chatId={chatId} />) : null) : null));
+    const ActiveChatComponent = (props.createNew && userId ? (<MakeNewChat createNewOtherUserId={userId} />)  : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : null) : null));
 
     return(
         <div className="columns-2 w-full">

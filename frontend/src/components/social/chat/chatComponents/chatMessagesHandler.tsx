@@ -7,6 +7,7 @@ import { queryClient } from "../../../../index.tsx";
 
 import {
     ChatMessage,
+    ChatParticipantData,
     mapSingleMessage,
     mapWebsocketReceivedMessage,
     MessagesResponse
@@ -14,7 +15,7 @@ import {
 import { CookieTokenObject, getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
 import { safeAPICall } from "../../../../fetching/fetchUtils.ts";
-import { fetchChatMessagesBatch } from "../../../../fetching/chatWS.ts";
+import { fetchChatMessagesBatch } from "../../../../fetching/fetchChatWS.ts";
 
 import VirtualizedList from "../../../butterySmoothScroll/virtualizedList.tsx";
 import {
@@ -22,7 +23,7 @@ import {
     infiniteQieryingFetchGuard
 } from "../../../butterySmoothScroll/scrollVirtualizationUtils.ts";
 
-import ChatMessageComp from "./message.tsx";
+import ChatMessageComp, { ChatMessageProps } from "./message.tsx";
 import MessageBar from "./messageBar.tsx";
 
 
@@ -48,6 +49,7 @@ const messagesFetcher = async (
 interface ChatMessageListProps {
     websocketRef: RefObject<WebSocket>;
     chatId: string;
+    participantsData: ChatParticipantData[];
     sendMessageCallable: (message: string, tempId: string) => void;
     changeMessageCallable: (message: string, messageId: string) => void;
     deleteMessageCallable: (messageId: string) => void;
@@ -57,6 +59,9 @@ interface ChatMessageListProps {
 const ChatMessagesHandler = (props: ChatMessageListProps) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
+
+    // There is no change, that user isn't on participants data, so passing as ChatParticipantData type
+    const meAsParticipantData: ChatParticipantData = props.participantsData.find((participant) => participant.me) as ChatParticipantData
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -71,12 +76,12 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             )
         );
 
-    const messages = data?.pages.flatMap(page => page ?? []) ?? [];
+    const messages: ChatMessage[] = data?.pages.flatMap(page => page ?? []) ?? [];
 
     const virtualizer = useVirtualizer({
         count: messages.length,
-        estimateSize: () => 300,
-        overscan: 20,
+        estimateSize: () => 200,
+        overscan: 72,
         getScrollElement: () => scrollRef.current,
         measureElement: el => el?.getBoundingClientRect().height
     });
@@ -129,7 +134,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 })
             }
         });
-        props.deleteMessageCallable(messageId);1
+        props.deleteMessageCallable(messageId);
     };
 
     const sendMessageOptimistically = (message: string): void => {
@@ -140,18 +145,8 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             console.log("old data - ", oldData);
 
             // TODO: add user's owner data
-            const newMessage = mapSingleMessage(tempId, message, new Date(), { userId: crypto.randomUUID(), username: "",  avatarURL: null }, tempId);
-
-            // const firstPageShifted: any = [];
-            // for (let pageElem of oldData.pages[0]) {
-            //     console.log("page elem ", pageElem)
-            //     const [ msgIndex, msg ] = pageElem.values();
-            //     const shiftedIndex: number = msgIndex + 1;
-            //     const msgObjToPush: any = {};
-            //     msgObjToPush[shiftedIndex] = msg;
-            //     firstPageShifted.push(msgObjToPush);
-            // }
-
+            const newMessage = mapSingleMessage(tempId, message, new Date(), { userId: meAsParticipantData.userId, username: meAsParticipantData.username,  avatarURL: meAsParticipantData.avatarURL }, tempId);
+            console.log("new message ", newMessage)
             const newFirstPage: any = [ newMessage, ...oldData.pages[0] ]; 
             
             return {
@@ -165,20 +160,18 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
     const updateSentMessage = (incomingMessage: ChatMessage): void => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
-            const newFirstPage: ChatMessage[] = [];
-
-            console.log(oldData.pages[0])
-
-            oldData.pages[0].map((msg: ChatMessage) => {
-                if (msg.tempId === incomingMessage.tempId || msg.messageId === incomingMessage.tempId) {
-                    return newFirstPage.push(incomingMessage);
+            const newFirstPage: ChatMessage[] = oldData.pages[0].map((msg: ChatMessage) => {
+                if (incomingMessage.tempId && (msg.tempId === incomingMessage.tempId || msg.messageId === incomingMessage.tempId)) {
+                    // Message that is recorded to the DB doesn't need tempId
+                    incomingMessage.tempId = null;
+                    return incomingMessage
                 }
-                return newFirstPage.push(msg);                
+                return msg;                
             })
 
             return {
                 ...oldData,
-                pages: [ newFirstPage, oldData.pages.slice(1) ]
+                pages: [ newFirstPage, ...oldData.pages.slice(1) ]
             };
         });
     };
@@ -201,11 +194,17 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         }
     };
 
-    const componentsProps = messages.map(msg => ({
+
+    const componentsProps: ChatMessageProps[] = messages.map(msg => {
+        console.log("props ", msg)
+        return {
         messageData: msg,
+        ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId)) as ChatParticipantData,
+        // Only pending messags have tempId value
+        isSending: msg.tempId !== null,
         changeMessageCallable: changeMessageOptimistically,
         deleteMessageCallable: deleteMessageOptimistically
-    }));
+    }});
 
     // Infinite querying effect
     useEffect(() => {
@@ -228,7 +227,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         const invertedWheelScroll = (event: WheelEvent) => {
             el.scrollTo({
                 // Multiplying by 10 to make scroll more convinient
-                top: el.scrollTop -= event.deltaY*10,
+                top: el.scrollTop -= event.deltaY*5,
             })
             event.preventDefault();
         };

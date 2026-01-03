@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import MessageBar from "../chatComponents/messageBar";
-import { fetchCreateDialogueChat } from "../../../../fetching/chatWS";
+import { fetchCreateDialogueChat } from "../../../../fetching/fetchChatWS";
 import { useNavigate } from "react-router";
 import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler";
 import { safeAPICall } from "../../../../fetching/fetchUtils";
