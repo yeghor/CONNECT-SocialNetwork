@@ -23,7 +23,7 @@ interface VirtualizedListProps {
 * */
 const VirtualizedList = ({ DisplayedComponent, virtualizer, virtualItems, componentsProps, reverse = false }: VirtualizedListProps) => {
     return(
-        <div className="relative flex flex-col-reverse" style={{height: `${virtualizer.getTotalSize()}px`}}>
+        <div className={`relative ${reverse ? "flex flex-col-reverse" : null}`} style={{height: `${virtualizer.getTotalSize()}px`}}>
             {
                 virtualItems.map((vItem) => {
                     return (
@@ -35,7 +35,7 @@ const VirtualizedList = ({ DisplayedComponent, virtualizer, virtualItems, compon
                                     height: `${vItem.size}px`,
                                 }
                              }>
-                            <div className="hover:-translate-y-0.5 hover:border-white hover:border-3 transition-all">
+                            <div className="hover:border-white hover:border-3 transition-all">
                                 <DisplayedComponent {...componentsProps[vItem.index]} />
                             </div>
                         </div>

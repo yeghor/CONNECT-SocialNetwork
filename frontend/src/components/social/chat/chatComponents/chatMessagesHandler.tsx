@@ -81,7 +81,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     const virtualizer = useVirtualizer({
         count: messages.length,
         estimateSize: () => 200,
-        overscan: 72,
+        overscan: 5,
         getScrollElement: () => scrollRef.current,
         measureElement: el => el?.getBoundingClientRect().height
     });
@@ -158,20 +158,26 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             props.sendMessageCallable(message, tempId);
         }
 
-    const updateSentMessage = (incomingMessage: ChatMessage): void => {
+    const updateOrApplySentMessage = (incomingMessage: ChatMessage): void => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
+            let appliedMessage = false;
+
             const newFirstPage: ChatMessage[] = oldData.pages[0].map((msg: ChatMessage) => {
                 if (incomingMessage.tempId && (msg.tempId === incomingMessage.tempId || msg.messageId === incomingMessage.tempId)) {
                     // Message that is recorded to the DB doesn't need tempId
                     incomingMessage.tempId = null;
-                    return incomingMessage
-                }
+                    appliedMessage = true;
+                    return incomingMessage;
+                } 
                 return msg;                
             })
 
+            // Nulling tempId in case the message isn't ours
+            incomingMessage.tempId = null;
+
             return {
                 ...oldData,
-                pages: [ newFirstPage, ...oldData.pages.slice(1) ]
+                pages: [ appliedMessage ? newFirstPage : [incomingMessage, ...newFirstPage], ...oldData.pages.slice(1) ]
             };
         });
     };
@@ -183,7 +189,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         switch (incomingMessage.action) {
             case "send":
                 if (!mappedMessage.text) return;
-                updateSentMessage(mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner, mappedMessage.tempId));
+                updateOrApplySentMessage(mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner, mappedMessage.tempId));
                 break;
             case "change":
                 if (!mappedMessage.text) return;
@@ -196,15 +202,15 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
 
     const componentsProps: ChatMessageProps[] = messages.map(msg => {
-        console.log("props ", msg)
         return {
-        messageData: msg,
-        ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId)) as ChatParticipantData,
-        // Only pending messags have tempId value
-        isSending: msg.tempId !== null,
-        changeMessageCallable: changeMessageOptimistically,
-        deleteMessageCallable: deleteMessageOptimistically
-    }});
+            messageData: msg,
+            ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId)) as ChatParticipantData,
+            // Only pending messags have tempId value
+            isSending: msg.tempId !== null,
+            changeMessageCallable: changeMessageOptimistically,
+            deleteMessageCallable: deleteMessageOptimistically
+        }
+    });
 
     // Infinite querying effect
     useEffect(() => {
@@ -225,10 +231,11 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         if (!el) return;
 
         const invertedWheelScroll = (event: WheelEvent) => {
-            el.scrollTo({
-                // Multiplying by 10 to make scroll more convinient
-                top: el.scrollTop -= event.deltaY*5,
-            })
+            el.scrollTop -= event.deltaY*5;
+            // el.scrollTo({
+            //     // Multiplying by 10 to make scroll more convinient
+            //     top: el.scrollTop -= event.deltaY*5,
+            // })
             event.preventDefault();
         };
 
@@ -239,15 +246,13 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         };
     }, [scrollRef.current]);
 
-    // TODO: Add opacity 0.7 to messages that are pending
-
     return (
         <div>
             <button className="bg-white p-1 text-black" onClick={() => virtualizer.scrollBy(750 , { behavior: "smooth" })}>Scroll up</button>
             <button className="bg-white p-1 text-black" onClick={() => virtualizer.scrollToIndex(0)}>Scroll down</button>
             <div
                 ref={scrollRef}
-                className="h-[600px] overflow-auto scroll-smooth relative my-16 mx-4"
+                className="h-[600px] overflow-auto scroll-smooth my-16 mx-4"
                 style={{
                     // https://github.com/TanStack/virtual/discussions/195 Thank You
                     transform: "scaleY(-1)"
