@@ -128,5 +128,6 @@ async def connect_to_websocket_chat_room(
 
             await connection.execute_real_time_action(connection_data=connection_data, db_message_data=db_message_data)
     finally:
-        print("calling disconnect")
+        # Hehe
+        print("calling disconnect with a shame")
         await connection.disconnect(room_id=connection_data.room_id, websocket=websocket)

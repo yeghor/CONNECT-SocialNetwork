@@ -10,7 +10,7 @@ import {
     ChatParticipantData,
     mapSingleMessage,
     mapWebsocketReceivedMessage,
-    MessagesResponse
+    MessagesResponse,
 } from "../../../../fetching/responseDTOs.ts";
 import { CookieTokenObject, getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
@@ -111,7 +111,9 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 pages: [ ...oldData.pages ].map((page: ChatMessage[]) => {
                     return page.map((msg: ChatMessage) => {
                         if (msg.messageId == messageId && msg.tempId === null) {
-                            msg.text = message;
+                            const newMsg = { ...msg };
+                            newMsg.text = message;
+                            return newMsg;
                         }
                         return msg;                      
                     })
@@ -127,8 +129,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             return {
                 ...oldData,
                 pages: [ ...oldData.pages ].map((page: ChatMessage[]) => {
-                    return page.map((msg: ChatMessage) => {
-                        if (msg.tempId) { return true }
+                    return page.filter((msg: ChatMessage) => {
                         return !(msg.messageId == messageId);                       
                     })
                 })
@@ -142,7 +143,6 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             if (!oldData) return oldData;
-            console.log("old data - ", oldData);
 
             // TODO: add user's owner data
             const newMessage = mapSingleMessage(tempId, message, new Date(), { userId: meAsParticipantData.userId, username: meAsParticipantData.username,  avatarURL: meAsParticipantData.avatarURL }, tempId);
@@ -184,11 +184,14 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
     const applyUpcomingWSMessage = (event: MessageEvent): void => {
         const incomingMessage = JSON.parse(event.data);
-        const mappedMessage = mapWebsocketReceivedMessage(incomingMessage);
+        console.log(incomingMessage)
+        let mappedMessage = mapWebsocketReceivedMessage(incomingMessage);
 
         switch (incomingMessage.action) {
             case "send":
                 if (!mappedMessage.text) return;
+                // See responseDTOs.ts line:489 for explanation
+                //@ts-ignore
                 updateOrApplySentMessage(mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner, mappedMessage.tempId));
                 break;
             case "change":
@@ -196,6 +199,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 changeMessageOptimistically(mappedMessage.messageId, mappedMessage.text);
                 break;
             case "delete":
+                console.log("at least mapped")
                 deleteMessageOptimistically(mappedMessage.messageId);
         }
     };

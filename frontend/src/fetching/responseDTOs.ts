@@ -413,16 +413,33 @@ export const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
 interface MessageTextRequired {
     text: string
 }
+
 interface MessageTextNotRequired {
     text: string | null
 }
-interface ChatAction {
-    action: "send" | "change" | "delete"
+
+interface SendAction {
+    action: "send"
 }
+
+interface ChangeDeleteAction {
+    action: "change" | "delete"
+}
+
+interface ShortChatMessageBaseDTO {
+    message_id: string,
+    text: string | null
+}
+
+interface ShortChatMessageBase {
+    messageId: string,
+    text: string | null
+}
+
 interface ChatMessageBaseDTO {
     message_id: string,
     sent: string,
-    owner: UserDTO
+    owner: UserDTO,
 
     // Frontend given ID that backend returns on websocket distribution - see ReadMe-dev.md
     temp_id: string | null
@@ -431,7 +448,7 @@ interface ChatMessageBaseDTO {
 interface ChatMessageBase {
     messageId: string,
     sent: Date,
-    owner: User
+    owner: User,
 
     // See explanation in ChatMessageDTO
     tempId: string | null
@@ -446,18 +463,32 @@ export interface MessagesResponse extends SuccessfulResponse {
     data: ChatMessage[]
 }
 
-interface WebsocketReceivedMessageSchemaDTO extends ChatMessageBaseDTO, MessageTextNotRequired, ChatAction {}
-export interface WebsocketReceivedMessage extends ChatMessageBase, MessageTextNotRequired, ChatAction {}
+interface SendWebsocketReceivedMessageSchemaDTO extends ChatMessageBaseDTO, MessageTextRequired, SendAction {}
+export interface ChangeDeleteWebsocketReceivedMessageDTO extends ShortChatMessageBaseDTO, ChangeDeleteAction {}
+export interface SendWebsocketReceivedMessage extends ChatMessageBase, MessageTextRequired, SendAction {}
+export interface ChangeDeleteWebsocketReceivedMessage extends ShortChatMessageBase, ChangeDeleteAction {}
 
-export const mapWebsocketReceivedMessage = (data: WebsocketReceivedMessageSchemaDTO): WebsocketReceivedMessage  => {
-    return {
+export const mapWebsocketReceivedMessage = (data: SendWebsocketReceivedMessageSchemaDTO | ChangeDeleteWebsocketReceivedMessageDTO): SendWebsocketReceivedMessage | ChangeDeleteWebsocketReceivedMessage  => {
+    const shortResponse = {
         action: data.action,
         messageId: data.message_id,
         text: data.text,
-        sent: new Date(data.sent),
-        owner: ownerMapper(data.owner),
-        tempId: data.temp_id ?? null
     };
+    if (data.action === "send") {
+        const sendResponsePart = {
+            sent: new Date(data.sent),
+            owner: ownerMapper(data.owner),
+            tempId: data.temp_id ?? null
+        }
+        // @ts-ignore
+        return { ...shortResponse, ...sendResponsePart };
+    }
+    // @ts-ignore
+    return shortResponse
+
+    /*
+    * The TypeScript ignore is **temporar** and **safe**, it won't cause any errors if backend sends expected data.
+    */
 };
 
 export const messagesResponseMapper = (data: MessagesDTO): MessagesResponse => {

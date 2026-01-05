@@ -85,10 +85,10 @@ const websocketMessageHelper = (ws: WebSocket, action: ChatAction, message?: str
                 wsData = wsDataMapper(action, message, undefined, tempId);
                 break;
             case "change":
-                wsData = wsDataMapper(action, message, messageId);
+                wsData = wsDataMapper(action, message, messageId, undefined);
                 break;
             case "delete":
-                wsData = wsDataMapper(action, messageId);
+                wsData = wsDataMapper(action, undefined, messageId, undefined);
                 break;
             default:
                 throw new Error(`Unknown chat action: ${action}`);
@@ -110,11 +110,11 @@ export const sendMessage = (ws: WebSocket, message: string, tempId: string): voi
 }
 
 export const changeMessage = (ws: WebSocket, message: string, messageId: string): void => {
-    websocketMessageHelper(ws, "change", message, messageId);
+    websocketMessageHelper(ws, "change", message, messageId, undefined);
 }
 
 export const deleteMessage = (ws: WebSocket, messageId: string): void => {
-    websocketMessageHelper(ws, "delete", undefined, messageId);
+    websocketMessageHelper(ws, "delete", undefined, messageId, undefined);
 }
 
 

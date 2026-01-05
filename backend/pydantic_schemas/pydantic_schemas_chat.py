@@ -24,8 +24,6 @@ class ActionIncluded(BaseModel):
     action: Literal["send", "change", "delete"]
 
 class MessageSchemaShort(BaseModel):
-    # Default value "send" for enabling model_validate with Message Postgres model
-    
     message_id: str
     text: str | None = Field(default=None)
 
@@ -74,7 +72,7 @@ class ExpectedWSData(BaseModel):
                 raise WSInvalidData(f"Pydantic ExpectedWSData: The Schema received invalid data. Action - {self.action}. Message or it's id missing.")
         elif self.action == "delete":
             if not self.message_id:
-                raise WSInvalidData("Pydantic ExpectedWSData: ExpectedWSData schema received invalid data.")
+                raise WSInvalidData("Pydantic ExpectedWSData: The schema received invalid data.")
         else:
             if not self.message:
                 raise WSInvalidData(f"Pydantic ExpectedWSData: The Schema received invalid data. Action - {self.action}. Message missing.")
