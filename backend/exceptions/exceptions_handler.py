@@ -124,7 +124,7 @@ def ws_endpoint_exception_handler(func):
                 if check_websocket_state(ws=websocket):
                     await websocket.close(code=1008, reason=e.client_safe_detail)
 
-            except ResourceNotFound as e:
+            except NotFoundExc as e:
                 logging.log(level=logging.ERROR, msg=str(e), exc_info=True)
                 if check_websocket_state(ws=websocket):
                     await websocket.close(code=1011, reason=e.client_safe_detail)

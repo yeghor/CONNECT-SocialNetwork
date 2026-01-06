@@ -71,7 +71,6 @@ const PostsFlow = () => {
             return post.estimatedSize;
         },
         measureElement: (element) => { return element?.getBoundingClientRect().height },
-        overscan: 16,
         getScrollElement: () => scrollRef.current,
     });
 

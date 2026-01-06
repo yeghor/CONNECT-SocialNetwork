@@ -487,7 +487,7 @@ export const mapWebsocketReceivedMessage = (data: SendWebsocketReceivedMessageSc
     return shortResponse
 
     /*
-    * The TypeScript ignore is **temporar** and **safe**, it won't cause any errors if backend sends expected data.
+    * The TypeScript ignore is **temporar**, use owner and sent attributes only if action="send".
     */
 };
 

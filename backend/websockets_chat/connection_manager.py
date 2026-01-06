@@ -99,6 +99,7 @@ class WebsocketConnectionManager:
         for conn in connections:
             websocket: WebSocket = conn["websocket"]
             await websocket.send_json(
+                # Sending Python JSON serializable object. Not JSON string!
                 db_message_data.model_dump(mode="json")
             )
 
@@ -113,7 +114,8 @@ class WebsocketConnectionManager:
             websocket: WebSocket = conn["websocket"]
             print(db_message_data)
             await websocket.send_json(
-                db_message_data.model_dump_json()
+                # Sending Python JSON serializable object. Not JSON string!
+                db_message_data.model_dump(mode="json")
             )
 
     async def _change_message(self, db_message_data: MessageSchemaActionIncluded, room_id: str, sender_id: str) -> None:
@@ -126,5 +128,6 @@ class WebsocketConnectionManager:
             websocket: WebSocket = conn["websocket"]
 
             await websocket.send_json(
-                db_message_data.model_dump_json()
+                # Sending Python JSON serializable object. Not JSON string!
+                db_message_data.model_dump(mode="json")
             )

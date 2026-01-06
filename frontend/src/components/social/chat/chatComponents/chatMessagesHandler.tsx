@@ -104,7 +104,15 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         }
     };
 
-    const changeMessageOptimistically = (message: string, messageId: string): void => {
+    /**
+     * @param isRemoteUpdate - If true, the update originated from another user.
+     * If false, the update is local and triggers a network request.
+     * * @remarks
+     * This function handles both local UI updates and remote synchronization. 
+     * It filters for messages where `tempId === null` to ensure we only edit 
+     * messages already confirmed by the server.
+     **/
+    const changeMessageOptimistically = (message: string, messageId: string, isRemoteUpdate: boolean): void => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             return {
                 ...oldData,
@@ -120,11 +128,20 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 })
             }
         });
-
-        props.changeMessageCallable(message, messageId)
-        
+        if (!isRemoteUpdate) {
+            props.changeMessageCallable(message, messageId);
+        }
     };
-    const deleteMessageOptimistically = (messageId: string): void => {
+
+    /**
+     * @param isRemoteUpdate - If true, the update originated from another user.
+     * If false, the update is local and triggers a network request.
+     * * @remarks
+     * This function handles both local UI updates and remote synchronization. 
+     * It filters for messages where `tempId === null` to ensure we only edit 
+     * messages already confirmed by the server.
+     **/
+    const deleteMessageOptimistically = (messageId: string, isRemoteUpdate: boolean): void => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             return {
                 ...oldData,
@@ -135,10 +152,12 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 })
             }
         });
-        props.deleteMessageCallable(messageId);
+        if (!isRemoteUpdate) {
+            props.deleteMessageCallable(messageId);
+        }
     };
 
-    const sendMessageOptimistically = (message: string): void => {
+    const sendMessageOptimistically = (message: string,): void => {
         const tempId = crypto.randomUUID();
 
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
@@ -184,23 +203,23 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
     const applyUpcomingWSMessage = (event: MessageEvent): void => {
         const incomingMessage = JSON.parse(event.data);
-        console.log(incomingMessage)
+        console.log(incomingMessage)    
         let mappedMessage = mapWebsocketReceivedMessage(incomingMessage);
-
+        console.log("INCOMING WS MESSAGE: ", mappedMessage)
         switch (incomingMessage.action) {
             case "send":
                 if (!mappedMessage.text) return;
                 // See responseDTOs.ts line:489 for explanation
-                //@ts-ignore
+                // @ts-ignore
                 updateOrApplySentMessage(mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner, mappedMessage.tempId));
                 break;
             case "change":
                 if (!mappedMessage.text) return;
-                changeMessageOptimistically(mappedMessage.text, mappedMessage.messageId);
+                changeMessageOptimistically(mappedMessage.text, mappedMessage.messageId, true);
                 break;
             case "delete":
                 console.log("at least mapped")
-                deleteMessageOptimistically(mappedMessage.messageId);
+                deleteMessageOptimistically(mappedMessage.messageId, true);
         }
     };
 
@@ -211,8 +230,8 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId)) as ChatParticipantData,
             // Only pending messags have tempId value
             isSending: msg.tempId !== null,
-            changeMessageCallable: changeMessageOptimistically,
-            deleteMessageCallable: deleteMessageOptimistically
+            changeMessageCallable: (message, messageId) => changeMessageOptimistically(message, messageId, false),
+            deleteMessageCallable: (messageId) => deleteMessageOptimistically(messageId, false)
         }
     });
 
