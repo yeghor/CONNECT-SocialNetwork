@@ -248,17 +248,13 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         }
     }, []);
 
-    // // https://github.com/TanStack/virtual/discussions/195 Thank You
+    // https://github.com/TanStack/virtual/discussions/195 Thank You
     useEffect(() => {
         const el = scrollRef.current;
         if (!el) return;
 
         const invertedWheelScroll = (event: WheelEvent) => {
             el.scrollTop -= event.deltaY*5;
-            // el.scrollTo({
-            //     // Multiplying by 10 to make scroll more convinient
-            //     top: el.scrollTop -= event.deltaY*5,
-            // })
             event.preventDefault();
         };
 

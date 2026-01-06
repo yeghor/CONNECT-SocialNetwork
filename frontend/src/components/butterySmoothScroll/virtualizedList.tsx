@@ -27,14 +27,18 @@ const VirtualizedList = ({ DisplayedComponent, virtualizer, virtualItems, compon
             {
                 virtualItems.map((vItem) => {
                     return (
-                        <div key={vItem.key} className="absolute top-0 left-0 w-full" data-index={vItem.index}
-                             style={
+                        <div
+                            key={vItem.key}
+                            className="absolute top-0 left-0 w-full"
+                            /*  */
+                            data-index={vItem.index} //needed for dynamic row height measurement
+                            ref={(node) => virtualizer.measureElement(node)} //measure dynamic row height
+                            style={
                                 {
                                     // https://github.com/TanStack/virtual/discussions/195 THANK YOU
                                     transform: `translateY(${vItem.start}px) ${reverse ? "scaleY(-1)" : ""}`,
-                                    height: `${vItem.size}px`,
                                 }
-                             }>
+                            }>
                             <div className="hover:border-white hover:border-3 transition-all">
                                 <DisplayedComponent {...componentsProps[vItem.index]} />
                             </div>

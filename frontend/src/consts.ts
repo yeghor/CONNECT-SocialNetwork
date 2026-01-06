@@ -13,6 +13,7 @@ export const passwordRegexp = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]){8,}/;
 
 export const maxPostImagesUpload = 3;
 export const imageMaxSizeMB = 5;
+
 // Mime types
 export const allowedImageExtensions = ["image/jpeg", "image/png", "image/webp"];
 

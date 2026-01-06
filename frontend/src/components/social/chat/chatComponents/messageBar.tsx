@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { chatMessageIsTooBigMessage, chatMessageMaxLength } from "../../../../consts";
 
 interface MessageBarProps {
     sendMessageLocally: (message: string) => void;
@@ -7,9 +8,13 @@ interface MessageBarProps {
 const MessageBar = (props: MessageBarProps) => {
     const [ message, setMessage ] = useState("");
     const [ sendTimeout, setSendTimeout ] = useState(false);
+    const [ errorMesssage, setErrorMessage ] = useState<string | null>(null);
 
     const sendMessage = (message: string): void => {
         if (sendTimeout) {
+            return;
+        } else if (message.length > chatMessageMaxLength) {
+            setErrorMessage(chatMessageIsTooBigMessage);
             return;
         }
         setSendTimeout(true);
@@ -25,7 +30,10 @@ const MessageBar = (props: MessageBarProps) => {
             className="w-full rounded-full"
             placeholder="..."
             />
-            <button className="bg-white/20" onClick={() => props.sendMessageLocally(message)}>Send</button>
+            <button className="bg-white/20" onClick={() => sendMessage(message)}>Send</button>
+            <div className="text-red">
+                {errorMesssage}
+            </div>
         </div>
     );
 };

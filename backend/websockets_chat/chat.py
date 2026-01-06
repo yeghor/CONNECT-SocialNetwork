@@ -104,6 +104,8 @@ async def wsconnect(token: str, websocket: WebSocket) -> ChatJWTPayload:
     
     return connection_data
 
+import asyncio
+
 @chat.websocket("/{token}")
 @ws_endpoint_exception_handler
 async def connect_to_websocket_chat_room(
@@ -119,7 +121,7 @@ async def connect_to_websocket_chat_room(
             json_dict = await websocket.receive_json()
             print("received json")
             print(json_dict)
-
+            await asyncio.sleep(1)
             # If in json_dict enough data - it passes not related fields
             request_data = ExpectedWSData.model_validate(json_dict, strict=True)
 

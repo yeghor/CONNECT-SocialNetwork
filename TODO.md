@@ -64,3 +64,5 @@ Traceback (most recent call last):
   File "C:\Users\Yehor\Documents\SocialNetwork\backend\exceptions\exceptions_handler.py", line 64, in wrapper
     raise NotFoundExc(client_safe_detail=e.client_safe_detail, dev_log_detail=str(e), exc_type=e) from e
 exceptions.custom_exceptions.NotFoundExc: ChatService: Userda5dbfc8-4197-4bb9-9282-be59a1d238f9 tried to delete message: e3617555-6bbb-45a7-a3f7-529ba846a59c that doesn't exist. 
+
+2. Debug mode bug
