@@ -196,7 +196,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 break;
             case "change":
                 if (!mappedMessage.text) return;
-                changeMessageOptimistically(mappedMessage.messageId, mappedMessage.text);
+                changeMessageOptimistically(mappedMessage.text, mappedMessage.messageId);
                 break;
             case "delete":
                 console.log("at least mapped")
