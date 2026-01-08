@@ -41,7 +41,7 @@ if(container) {
                                 <Route path='/chats/:chatId' element={
                                     <ChatPage createNew={false} />
                                 }/>
-                                <Route path='/make-chat/:userId' element={
+                                <Route path='/make-chat/:otherUserId' element={
                                     <ChatPage createNew={true} />
                                 }/>
                                 <Route path='/my-profile' element={

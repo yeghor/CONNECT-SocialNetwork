@@ -5,7 +5,7 @@ import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts
 import ActiveChat from "./active_chats/activeChat.tsx";
 
 import ChatList from "./chatList.tsx";
-import {ChatConnectData, ChatConnectResponse, ChatResponse} from "../../../fetching/responseDTOs.ts";
+import { ChatConnectData, ChatConnectResponse, ChatResponse } from "../../../fetching/responseDTOs.ts";
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
 import { fetchChatConnect } from "../../../fetching/fetchChatWS.ts";
 import MakeNewChat from "./active_chats/makeNewChat.tsx";
@@ -18,13 +18,17 @@ export const ChatPage = (props: ChatPageProps) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
-    const [ activeChatData, setActiveChatData ] = useState<ChatConnectData | null>(null); // Add generic type
+    const [ activeChatData, setActiveChatData ] = useState<ChatConnectData | null>(null);
     const { chatId } = useParams();
 
     // For chat creation
-    const { userId } = useParams();
+    const { otherUserId } = useParams();
 
     useEffect(() => {
+        if (props.createNew) {
+            return;
+        }
+
         const chatConnect = async () => {
             // Fetch more data to update lower level components data on changing chat
             if (chatId && chatId.trim() !== "") {
@@ -39,7 +43,7 @@ export const ChatPage = (props: ChatPageProps) => {
         chatConnect();
     }, [chatId]);
 
-    const ActiveChatComponent = (props.createNew && userId ? (<MakeNewChat createNewOtherUserId={userId} />)  : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : null) : null));
+    const ActiveChatComponent = (props.createNew && otherUserId ? (<MakeNewChat otherUserId={otherUserId} />)  : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : null) : null));
 
     return(
         <div className="columns-2 w-full">
@@ -47,7 +51,7 @@ export const ChatPage = (props: ChatPageProps) => {
                 <ChatList />
             </div>
             <div className="w-full">
-                {ActiveChatComponent ? ActiveChatComponent : <p className="text-2xl text-white">No Chat Selected</p>}
+                {ActiveChatComponent ? ActiveChatComponent : null}
             </div>
         </div>
     );

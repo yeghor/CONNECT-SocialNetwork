@@ -12,15 +12,31 @@ interface NotSuccessfulResponse {
 }
 
 interface BadResponseDTO extends NotSuccessfulResponse {
-    detail: string,
+    detail: string
 }
 
 export interface BadResponse extends BadResponseDTO, NotSuccessfulResponse {
     statusCode: number
 }
 
+export interface StringResponse extends SuccessfulResponse {
+    string: string | null
+}
+
+export const booleanResponseMapper = (booleanFlag: string | null): StringResponse => {
+    return {
+        success: true,
+        string: booleanFlag
+    };
+};
+
 export const isBadResponse = (data: any): data is BadResponseDTO => {
-    return "detail" in data;
+    if (typeof data === "object") {
+        return "detail" in data;
+    };
+    // If response is not object, ti ensures that the server returned a successful request
+    return false;
+    
 };
 
 export const badResponseMapper = (data: BadResponseDTO, statusCode: number): BadResponse => {
