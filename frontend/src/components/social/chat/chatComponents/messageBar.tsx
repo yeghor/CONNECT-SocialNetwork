@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { chatMessageIsTooBigMessage, chatMessageMaxLength } from "../../../../consts";
+import { measureElement } from "@tanstack/react-virtual";
 
 interface MessageBarProps {
     sendMessageLocally: (message: string) => void;
@@ -13,7 +14,7 @@ const MessageBar = (props: MessageBarProps) => {
     const sendMessage = (message: string): void => {
         if (sendTimeout) {
             return;
-        } else if (message.length > chatMessageMaxLength) {
+        } else if (message.length > chatMessageMaxLength || message.length === 0) {
             setErrorMessage(chatMessageIsTooBigMessage);
             return;
         }
