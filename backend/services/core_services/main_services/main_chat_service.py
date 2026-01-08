@@ -29,14 +29,16 @@ class MainChatService(MainServiceBase):
         return user in other_user.followed and user in other_user.followers
 
 
-    async def _get_and_authorize_chat_room(self, room_id: str, user_id: str, return_chat_room: bool = False) -> ChatRoom | None:
+    async def _get_and_authorize_chat_room(self, room_id: str, user_id: str, return_chat_room: bool = False, clarify_log_detail: str | None =None) -> ChatRoom | None:
+        """In case you want to clarify exception detail field that is being logged, pass you message to clarify_log_detail. It adds your message at the end of the detail field"""
+
         chat_room = await self._PostgresService.get_chat_room(room_id=room_id)
 
         if not chat_room:
-            raise ResourceNotFound(detail=f"ChatService: User: {user_id} tried to access chat: {room_id} that does not exist.", client_safe_detail="Chat that you're trying to access does not exist")
+            raise ResourceNotFound(detail=f"ChatService: User: {user_id} tried to access chat: {room_id} that does not exist. Clarified detail: {clarify_log_detail}", client_safe_detail="Chat that you're trying to access does not exist")
         
         if not user_id in [participant.user_id for participant in chat_room.participants]:
-            raise Unauthorized(detail=f"ChatService: User: {user_id} tried to access chat: {room_id} while not being it's participant.", client_safe_detail="Unauthorized")
+            raise Unauthorized(detail=f"ChatService: User: {user_id} tried to access chat: {room_id} while not being it's participant. Clarified detail: {clarify_log_detail}", client_safe_detail="Unauthorized")
 
         return chat_room if return_chat_room else None
 
@@ -252,4 +254,14 @@ class MainChatService(MainServiceBase):
 
         if new_participant in chat_room.participants:
             raise InvalidAction(detail=f"User: {user.user_id} tried to add participant: {participant_id} to group: {room_id} that that already participating in this group.")
-        
+    
+    @web_exceptions_raiser
+    async def get_dialoque_id_by_other_user_id(self, other_user_id: str, user: User) -> str | None:
+        other_user = await self._PostgresService.get_user_by_id(user_id=other_user_id)
+
+        if not other_user:
+            raise ResourceNotFound(detail=f"ChatService: User: {user.user_id} tried to get dialogue with user: {other_user_id} that doesn't exist.", client_safe_detail="User that you're trying to chat with doesn't exist")
+
+        chat_room = await self._PostgresService.get_dialogue_by_users(user_1=user, user_2=other_user)
+
+        return chat_room.room_id if chat_room else None
