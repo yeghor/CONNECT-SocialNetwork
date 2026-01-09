@@ -55,8 +55,8 @@ const ChatList = () => {
 
 
     return(
-        <div className="w-full rounded-xl bg-white/30 p-8 m-8">
-            <div ref={scrollRef} className="h-screen overflow-auto m-16 relative mx-auto border-gray-300 rounded-xl">
+        <div className="w-full rounded-xl bg-white/10 border border-white/20 border-2 p-4">
+            <div ref={scrollRef} className="h-[800px] overflow-auto relative mx-auto border-gray-300 rounded-xl">
                 <VirtualizedList DisplayedComponent={FlowChat} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={chats} />
             </div>
         </div>

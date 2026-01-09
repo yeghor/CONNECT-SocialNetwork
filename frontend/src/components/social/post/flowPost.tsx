@@ -19,7 +19,7 @@ const FlowPost = (props: FlowPostProps) => {
     }
 
     return (
-        <div className="bg-white/10 border-white/30 rounded-lg shadow-sm overflow-hidden flex flex-col hover:scale-105 transition-all m-6">
+        <div className="border bg-white/10 border-white/20 border-3 rounded-lg shadow-sm flex flex-col hover:scale-105 transition-all m-6">
             {props.postData?.isReply && props.postData?.parentPost && (
                 <Link to={specificPostURI(props.postData.parentPost.postId)}>
                     <div className="bg-white/10 text-white text-sm p-2 rounded m-2">

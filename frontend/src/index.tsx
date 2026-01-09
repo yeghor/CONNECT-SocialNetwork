@@ -26,43 +26,47 @@ if(container) {
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
                     <div
-                        className="min-h-screen w-full bg-cover bg-center bg-no-repeat flex flex-col"
+                        className="min-h-screen w-full bg-cover bg-center"
                         style={{
                             backgroundImage: "url('/background.png')"
                         }}>
-                        <NavigationBar />
-                            <Routes>
-                                <Route path='/' element={
-                                    <SocialHomePage />
-                                }/>
-                                <Route path='/chats/' element={
-                                    <ChatPage createNew={false} />
-                                }/>
-                                <Route path='/chats/:chatId' element={
-                                    <ChatPage createNew={false} />
-                                }/>
-                                <Route path='/make-chat/:userId' element={
-                                    <ChatPage createNew={true} />
-                                }/>
-                                <Route path='/my-profile' element={
-                                    <ProfilePageWrapper />
-                                } />
-                                <Route path='/profile/:userId' element={
-                                    <ProfilePageWrapper />
-                                } />
-                                <Route path='/post/:postId' element={
-                                    <PostPage />
-                                } />
-                                <Route path='/login' element={
-                                    <LoginForm />
-                                } />
-                                <Route path='/register' element={
-                                    <RegisterForm />
-                                } />
-                                <Route path="/search" element={
-                                    <SearchPage />
-                                } />
-                            </Routes>
+                        <div className='flex-1 flex flex-col'>
+                            <NavigationBar />
+                                <div className="overflow-auto">
+                                    <Routes>
+                                        <Route path='/' element={
+                                            <SocialHomePage />
+                                        }/>
+                                        <Route path='/chats/' element={
+                                            <ChatPage createNew={false} />
+                                        }/>
+                                        <Route path='/chats/:chatId' element={
+                                            <ChatPage createNew={false} />
+                                        }/>
+                                        <Route path='/make-chat/:otherUserId' element={
+                                            <ChatPage createNew={true} />
+                                        }/>
+                                        <Route path='/my-profile' element={
+                                            <ProfilePageWrapper />
+                                        } />
+                                        <Route path='/profile/:userId' element={
+                                            <ProfilePageWrapper />
+                                        } />
+                                        <Route path='/post/:postId' element={
+                                            <PostPage />
+                                        } />
+                                        <Route path='/login' element={
+                                            <LoginForm />
+                                        } />
+                                        <Route path='/register' element={
+                                            <RegisterForm />
+                                        } />
+                                        <Route path="/search" element={
+                                            <SearchPage />
+                                        } />
+                                    </Routes>
+                                </div>
+                        </div>
                         <Footer />
                     </div>
                 </BrowserRouter>

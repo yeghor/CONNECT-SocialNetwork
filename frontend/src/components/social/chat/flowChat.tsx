@@ -9,7 +9,7 @@ interface FlowChatProps {
 }
 
 const FlowChat = (props: FlowChatProps) => {
-    console.log("rendering flowchat")
+
     return(
         <Link to={specificChatURI(props.chatId)}>
             <div className="bg-white">

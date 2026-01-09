@@ -41,7 +41,7 @@ const ChatMessageComp = (props: ChatMessageProps) => {
             )}
 
             <div 
-                className={`relative w-1/3 px-4 py-3 rounded-xl shadow-lg transition-all border ${
+                className={`relative w-1/3 px-4 py-3 rounded-xl shadow-lg transition-all border bg-white/10 border-white/20 border-3 ${
                 isSending ? "opacity-50" : "opacity-100"
                 } ${
                 isMe 
