@@ -21,7 +21,7 @@ const RecentActivityComponent = () => {
 
 
     useEffect(() => {
-        const fetched = async () => {
+        const effectFetcher = async () => {
             // TS Guard
             if(!tokens.access || !tokens.refresh) { return; }
             try {
@@ -48,15 +48,16 @@ const RecentActivityComponent = () => {
                 navigate(internalServerErrorURI);
             }
         }
-    }, [])
+        // effectFetcher(); Currently backend recent activity feature is not working
+    }, []);
 
     const defineActionURI = (rc: RecentActivity): string => {
         return specificPostURI(rc.postId)
-    }
+    };
 
     const calculateElapsedTime = (date: Date): string => {
         return  ""
-    }
+    };
 
     return (
         <div>

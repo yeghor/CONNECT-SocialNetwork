@@ -108,7 +108,7 @@ export const safeAPICall = async <ResponseType>(
 
     try {
         let response = await fetchFunc(tokens.access, ...funcArgs);
-        if (!validateGETResponse(response, setErrorMessage,  navigate)) {
+        if (!validateGETResponse(response, setErrorMessage, navigate)) {
             return response;
         }
         if(checkUnauthorizedResponse(response)) {

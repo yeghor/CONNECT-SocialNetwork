@@ -26,8 +26,8 @@ async def get_chat_token_including_participants_data(
     session: AsyncSession = Depends(get_session_depends)
 ) -> ChatTokenResponse:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
-        return await chat.get_chat_token_including_participants_data(room_id=chat_id, user=user)
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.get_chat_token_including_participants_data(room_id=chat_id, user=user)
 
 @chat.get("/chat/{chat_id}/messages/{page}")
 @endpoint_exception_handler
@@ -38,8 +38,8 @@ async def get_batch_of_chat_messages(
     session: AsyncSession = Depends(get_session_depends)
 ) -> List[MessageSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
-        return await chat.get_messages_batch(room_id=chat_id, user=user, page=page)
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.get_messages_batch(room_id=chat_id, user=user, page=page)
 
 @chat.post("/chat/dialogue")
 @endpoint_exception_handler
@@ -49,8 +49,8 @@ async def create_dialogue_chat(
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
-        return await chat.create_dialogue_chat(data=data, user=user)
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.create_dialogue_chat(data=data, user=user)
 
 @chat.post("/chat/group")
 @endpoint_exception_handler
@@ -60,8 +60,8 @@ async def create_group_chat(
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
-        await chat.create_group_chat(data=data, user=user)
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        await chat_service.create_group_chat(data=data, user=user)
 
 @chat.get("/chat/{page}")
 @endpoint_exception_handler
@@ -71,8 +71,8 @@ async def get_my_chats(
     session: AsyncSession = Depends(get_session_depends)  
 ) -> List[Chat]:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
-        return await chat.get_chat_batch(user=user, page=page, chat_type="chat")
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.get_chat_batch(user=user, page=page, chat_type="chat")
 
 @chat.get("/chat/not-approved/{page}")
 @endpoint_exception_handler
@@ -82,8 +82,8 @@ async def get_not_approved_chats(
     session: AsyncSession = Depends(get_session_depends)  
 ) -> List[Chat]:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
-        return await chat.get_chat_batch(user=user, page=page, chat_type="not-approved")
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.get_chat_batch(user=user, page=page, chat_type="not-approved")
 
 @chat.post("/chat/approve/{chat_id}")
 @endpoint_exception_handler
@@ -93,8 +93,19 @@ async def approve_chat(
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat:
-        return await chat.approve_chat(room_id=chat_id, user=user)
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.approve_chat(room_id=chat_id, user=user)
+
+@chat.get("/chat/id/{other_user_id}")
+@endpoint_exception_handler
+async def get_dialoque_id_by_other_user_id(
+    other_user_id: str,
+    user_: User = Depends(authorize_request_depends),
+    session: AsyncSession = Depends(get_session_depends)
+) -> str | None:
+    user = await merge_model(postgres_session=session, model_obj=user_)
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.get_dialoque_id_by_other_user_id(other_user_id=other_user_id, user=user)
 
 async def wsconnect(token: str, websocket: WebSocket) -> ChatJWTPayload:
     connection_data = JWTService.extract_chat_jwt_payload(jwt_token=token)
@@ -114,14 +125,10 @@ async def connect_to_websocket_chat_room(
     session: AsyncSession = Depends(get_session_depends)
 ):
     connection_data = await wsconnect(token=token, websocket=websocket)
-    print("got connection")
     try:
         while True:
-            print("waiting for json")
             json_dict = await websocket.receive_json()
-            print("received json")
-            print(json_dict)
-            await asyncio.sleep(0.3)
+
             # If in json_dict enough data - it passes not related fields
             request_data = ExpectedWSData.model_validate(json_dict, strict=True)
 
@@ -130,6 +137,4 @@ async def connect_to_websocket_chat_room(
 
             await connection.execute_real_time_action(connection_data=connection_data, db_message_data=db_message_data)
     finally:
-        # Hehe
-        print("calling disconnect with a shame")
         await connection.disconnect(room_id=connection_data.room_id, websocket=websocket)

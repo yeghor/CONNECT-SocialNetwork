@@ -18,8 +18,7 @@ export const validateGETResponse = (response: BadResponse | SuccessfulResponse, 
     } else {
         if (response.statusCode === 500) { 
             if (navigate) {
-                navigate(internalServerErrorURI);
-                return false;                
+                navigate(internalServerErrorURI);                
             }
         }
         if (setErrorMessage) {

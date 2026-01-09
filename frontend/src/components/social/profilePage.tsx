@@ -32,7 +32,7 @@ type ProfilePosts = ProfilePost[];
 export type ProfilePostsSectionFlag = "posts" | "replies" | "likes";
 export type OrderPostsByFlag = "fresh" | "old" | "mostLiked" | "popularNow"
 
-const getProfileFetchData = async (tokens: CookieTokenObject, navigate: NavigateFunction, userId: string, orderBy: OrderPostsByFlag, section: ProfilePostsSectionFlag, page: number): Promise<ProfilePosts> => {
+const getProfileData = async (tokens: CookieTokenObject, navigate: NavigateFunction, userId: string, orderBy: OrderPostsByFlag, section: ProfilePostsSectionFlag, page: number): Promise<ProfilePosts> => {
     const fetchedResults = await safeAPICall<FeedPostsResponse>(tokens, fetchUsersPosts, navigate, undefined, userId, section, orderBy, page);
 
     if (fetchedResults.success) {
@@ -57,7 +57,7 @@ export const ProfilePage = (props: ProfilePageProps) => {
     const [ isFollowing, setFollowing ] = useState<boolean>(props.userData.isFollowing);
     const [ followTimeout, setFollowTimeout ] = useState<boolean>(false);
 
-    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(getProfileFetchData, [tokens, navigate, props.userData.userId, orderBy, profilePostsSection], ["profile", orderBy, profilePostsSection]))
+    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(getProfileData, [tokens, navigate, props.userData.userId, orderBy, profilePostsSection], ["profile", orderBy, profilePostsSection]))
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const profilePostsData = (data?.pages.flatMap((page => page)) ?? []).filter((elem) => elem !== undefined);
@@ -110,13 +110,6 @@ export const ProfilePage = (props: ProfilePageProps) => {
 
         setTimeout(() => setFollowTimeout(false), 300)
 
-    };
-
-    const sendMessage = (message: string) => {
-        if (!props.me) {
-            return;
-        }
-        // TODO
     };
 
     const virtualizedComponentsProps = profilePostsData.map((post) => { return { postData: post.postData, isMyPost: false} } )

@@ -1,26 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MessageBar from "../chatComponents/messageBar";
-import { fetchCreateDialogueChat } from "../../../../fetching/fetchChatWS";
+import { fetchCreateDialogueChat, fetchDialoqueId  } from "../../../../fetching/fetchChatWS";
 import { useNavigate } from "react-router";
 import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler";
 import { safeAPICall } from "../../../../fetching/fetchUtils";
-import { SuccessfulResponse } from "../../../../fetching/responseDTOs";
+import { StringResponse, SuccessfulResponse } from "../../../../fetching/responseDTOs";
+import { specificChatURI } from "../../../../consts";
 
 interface MakeNewChatProps {
-    createNewOtherUserId: string
+    otherUserId: string
 }
 
 const MakeNewChat = (props: MakeNewChatProps) => {
+    console.log("make new chat rendering")
+
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
+    const [ loading, setLoading ] = useState(true);
 
     const sendMessageWrapper = async (message: string): Promise<void> => {
-        // Guard for typescript. Because if some token does not exist, the app will navigate user to login page
         if (!tokens.access || !tokens.refresh) {
             return;
         }
 
-        await safeAPICall<SuccessfulResponse>(tokens, fetchCreateDialogueChat, navigate, undefined, props.createNewOtherUserId, message);
+        await safeAPICall<SuccessfulResponse>(tokens, fetchCreateDialogueChat, navigate, undefined, props.otherUserId, message);
+    }
+
+    useEffect(() => {
+        const effectFetcher = async () => {
+            setLoading(true);
+
+            const response = await safeAPICall<StringResponse>(tokens, fetchDialoqueId, navigate, undefined, props.otherUserId)
+
+            if (response.success && response.string) {
+                navigate(specificChatURI(response.string));
+                return;
+            }
+            setLoading(false);
+        }
+        effectFetcher()
+    }, []);
+
+    if (loading) {
+        return (null);
     }
 
     return (

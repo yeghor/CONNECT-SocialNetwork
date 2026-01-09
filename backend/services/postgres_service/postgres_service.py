@@ -317,7 +317,7 @@ class PostgresService:
         return result.scalars().all()
 
     @postgres_exception_handler(action="Get chat room by it's id")
-    async def get_chat_room(self, room_id: str) -> ChatRoom:
+    async def get_chat_room(self, room_id: str) -> ChatRoom | None:
         result = await self.__session.execute(
             select(ChatRoom)
             .where(ChatRoom.room_id == room_id)
