@@ -192,8 +192,8 @@ class PostActions(Base):
 
 # CHAT MODELS
 
-# Room represents group or chat between users. Contain participants data and messages
 class ChatRoom(Base):
+    """Room represents group or chat between users. Contains participants data and messages"""
     __tablename__ = "chatroom"
 
     room_id: Mapped[str] = mapped_column(primary_key=True)

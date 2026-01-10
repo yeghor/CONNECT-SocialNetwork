@@ -16,9 +16,11 @@ ActionType = Literal["send", "change", "delete"]
 load_dotenv()
 MESSAGE_MAX_LEN = int(getenv("MESSAGE_MAX_LEN", "5000"))
 
-class Chat(BaseModel):
+class ChatSchema(BaseModel):
     chat_id: str
-    participants: int
+    chat_name: str
+    participants_count: int
+    chat_image_url: str | None
 
 class ActionIncluded(BaseModel):
     action: Literal["send", "change", "delete"]

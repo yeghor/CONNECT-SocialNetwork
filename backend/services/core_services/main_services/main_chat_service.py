@@ -2,7 +2,7 @@ from services.core_services import MainServiceBase
 from services.postgres_service.models import *
 from exceptions.custom_exceptions import *
 from exceptions.exceptions_handler import web_exceptions_raiser
-from pydantic_schemas.pydantic_schemas_chat import Chat, MessageSchema, MessageSchemaShort, ExpectedWSData, ChatJWTPayload, CreateDialogueRoomBody, ChatTokenResponse, CreateGroupRoomBody, MessageSchemaActionIncluded, MessageSchemaShortActionIncluded
+from pydantic_schemas.pydantic_schemas_chat import ChatSchema, MessageSchema, MessageSchemaShort, ExpectedWSData, ChatJWTPayload, CreateDialogueRoomBody, ChatTokenResponse, CreateGroupRoomBody, MessageSchemaActionIncluded, MessageSchemaShortActionIncluded
 from pydantic_schemas.pydantic_schemas_social import UserShortSchema, ChatUserShortSchemaAvatarURL
 from post_popularity_rate_task.popularity_rate import scheduler
 from uuid import uuid4
@@ -28,6 +28,28 @@ class MainChatService(MainServiceBase):
     def _check_if_users_are_friends(user: User, other_user: User) -> bool:
         return user in other_user.followed and user in other_user.followers
 
+    @staticmethod
+    def _define_chat_display_name(chat: ChatRoom, my_id: str) -> str:
+        if chat.is_group:
+            participants_usernames = [participant.username for participant in chat.participants]
+            return ", ".join(participants_usernames)
+        else:
+            other_username = ""
+            for user in chat.participants:
+                other_username = user.username if user.user_id != my_id else ""
+            return other_username if other_username else "Deleted user"
+
+    @staticmethod
+    def _define_chat_image_name(chat: ChatRoom, my_id: str) -> str | None:
+        if chat.is_group:
+            # TODO: Implement group chat display image
+            return None
+        else:
+            for user in chat.participants:
+                if user.user_id != my_id:
+                    return user.avatar_image_name
+        
+        return None
 
     async def _get_and_authorize_chat_room(self, room_id: str, user_id: str, return_chat_room: bool = False, clarify_log_detail: str | None =None) -> ChatRoom | None:
         """In case you want to clarify exception detail field that is being logged, pass you message to clarify_log_detail. It adds your message at the end of the detail field"""
@@ -84,10 +106,21 @@ class MainChatService(MainServiceBase):
         ]
         
     @web_exceptions_raiser
-    async def get_chat_batch(self, user: User, page: int, chat_type: Literal["chat", "noе-approved"]) -> List[Chat]:
-        chat_batch = await self._PostgresService.get_n_user_chats(user=user, page=page, n=BASE_PAGINATION, chat_type=chat_type)
+    async def get_chat_batch(self, user: User, page: int, approved: bool) -> List[ChatSchema]:
+        chat_batch = await self._PostgresService.get_n_user_chats(user=user, page=page, n=BASE_PAGINATION, approved=approved)
+        chat_display_names = [
+            self._define_chat_display_name(chat=chat, my_id=user.user_id)
+            for chat in chat_batch
+        ]
 
-        return [Chat(chat_id=chat.room_id, participants=len(chat.participants)) for chat in chat_batch]
+        return [
+            ChatSchema(
+                chat_id=chat.room_id,
+                chat_name=f"{chat_display_names[i]}",
+                participants_count=len(chat.participants),
+                # TODO: Group chat display image
+                chat_image_url=await self._ImageStorage.get_user_avatar_url(image_name=self._define_chat_image_name(chat=chat, my_id=user.user_id)) if not chat.is_group else None
+        ) for i, chat in enumerate(chat_batch)]
 
 
     @web_exceptions_raiser

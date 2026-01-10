@@ -398,25 +398,31 @@ export const recentActivityMapper = (data: RecentActivityDTO): RecentActivityRes
 // Chat
 export interface ChatDTO {
     chat_id: string,
-    participants: number
+    chat_name: string,
+    participants_count: number,
+    chat_image_url: string | null
 }
 
 type ChatsDTO = ChatDTO[];
 
-export interface ChatResponse {
+export interface Chat {
     chatId: string,
-    participants: number
+    chatName: string,
+    participantsCount: number,
+    chatImageURL: string | null
 }
 
 export interface ChatsResponse extends SuccessfulResponse{
-    data: ChatResponse[],
+    data: Chat[],
 }
 
 export const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
     const mapped = data.map((chatDTO) => (
         {
             chatId: chatDTO.chat_id,
-            participants: chatDTO.participants
+            chatName: chatDTO.chat_name,
+            participantsCount: chatDTO.participants_count,
+            chatImageURL: chatDTO.chat_image_url
         }
     ));
 

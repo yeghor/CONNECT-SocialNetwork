@@ -8,13 +8,13 @@ import {
 } from "../../butterySmoothScroll/scrollVirtualizationUtils.ts";
 import {fetchChats} from "../../../fetching/fetchChatWS.ts";
 import {safeAPICall} from "../../../fetching/fetchUtils.ts";
-import {ChatResponse, ChatsResponse} from "../../../fetching/responseDTOs.ts";
+import {Chat, ChatsResponse} from "../../../fetching/responseDTOs.ts";
 import {useVirtualizer} from "@tanstack/react-virtual";
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 
 import FlowChat from "./flowChat.tsx";
 
-const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, page: number): Promise<ChatResponse[]> => {
+const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, page: number): Promise<Chat[]> => {
     const fetchedChats = await safeAPICall<ChatsResponse>(tokens, fetchChats, navigate, undefined, page);
 
     if (fetchedChats.success) {
@@ -29,7 +29,7 @@ const ChatList = () => {
     const tokens = getCookiesOrRedirect(navigate);
 
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(chatsFetcher, [tokens, navigate], ["chats"]))
-    const [ chats, setChats ] = useState<ChatResponse[]>([]);
+    const [ chats, setChats ] = useState<Chat[]>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const virtualizer = useVirtualizer({
@@ -55,7 +55,7 @@ const ChatList = () => {
 
 
     return(
-        <div className="w-full rounded-xl bg-white/10 border border-white/20 border-2 p-4">
+        <div className="w-full rounded-xl border border-white/20 border-2 p-4">
             <div ref={scrollRef} className="h-[800px] overflow-auto relative mx-auto border-gray-300 rounded-xl">
                 <VirtualizedList DisplayedComponent={FlowChat} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={chats} />
             </div>

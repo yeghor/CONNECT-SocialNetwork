@@ -83,7 +83,7 @@ class ImageStorageABC(ABC):
         """Get temprorary n's post image URL with jwt token in URL including. Returns empty list, if not post image"""
 
     @abstractmethod
-    async def get_user_avatar_url(self, user_id: str) -> str | None:
+    async def get_user_avatar_url(self, image_name: str) -> str | None:
         """Returns temprorary user avatar URL. Returns None, if no user avatar"""
 
 # =======================
@@ -202,16 +202,16 @@ class S3Storage(ImageStorageABC):
             
             return urls
 
-    async def get_user_avatar_url(self, user_id: str) -> str:
+    async def get_user_avatar_url(self, image_name: str) -> str:
         async with self._client() as s3:
             try:
                 return await s3.generate_presigned_url(
                     "get_object",
-                    Params=self._define_boto_Params(key=user_id),
+                    Params=self._define_boto_Params(key=image_name),
                     ExpiresIn=IMAGE_VIEW_ACCES_SECONDS
                 )
             except Exception as e:
-                raise MediaError(f"S3 Storage: Failed to get user avatar presigned. Image name - {user_id}. Exception: {e}") from e
+                raise MediaError(f"S3 Storage: Failed to get user avatar presigned. Image name - {image_name}. Exception: {e}") from e
 
 import secrets
 
@@ -339,11 +339,11 @@ class LocalStorage(ImageStorageABC):
             urls.append(url)
         return urls
 
-    async def get_user_avatar_url(self, user_id: str) -> str | None:
+    async def get_user_avatar_url(self, image_name: str) -> str | None:
         urlsafe_token = self._generate_url_token()
 
         # Searching for potential 
-        filenames = glob.glob(f"{user_id}*", root_dir=self.__media_avatar_path)
+        filenames = glob.glob(f"{image_name}*", root_dir=self.__media_avatar_path)
         if not filenames:
             return None
         filename = filenames[0]

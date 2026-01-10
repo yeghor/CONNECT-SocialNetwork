@@ -402,7 +402,7 @@ class MainServiceSocial(MainServiceBase):
         if not other_user: 
             raise ResourceNotFound(detail=f"User: {user.user_id} tried to get user: {other_user_id} profile that does not exist.", client_safe_detail="User profile that you trying to get does not exist.")
 
-        avatar_token = await self._ImageStorage.get_user_avatar_url(user_id=other_user.user_id)
+        avatar_token = await self._ImageStorage.get_user_avatar_url(image_name=other_user.user_id)
 
         return UserSchema(
             user_id=other_user.user_id,
@@ -463,7 +463,7 @@ class MainServiceSocial(MainServiceBase):
         # To prevent SQLAlchemy missing greenlet_spawn error. Cause merged_model method can cause loss of self-referential relationships
         user = await self._PostgresService.get_entry_by_id(id_=user.user_id, ModelType=User)
 
-        avatar_token = await self._ImageStorage.get_user_avatar_url(user_id=user.user_id)
+        avatar_token = await self._ImageStorage.get_user_avatar_url(image_name=user.user_id)
 
         return UserSchema(
             user_id=user.user_id,

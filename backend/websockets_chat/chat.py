@@ -69,10 +69,10 @@ async def get_my_chats(
     page: int = Depends(page_validator),
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)  
-) -> List[Chat]:
+) -> List[ChatSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
-        return await chat_service.get_chat_batch(user=user, page=page, chat_type="chat")
+        return await chat_service.get_chat_batch(user=user, page=page, approved=True)
 
 @chat.get("/chat/not-approved/{page}")
 @endpoint_exception_handler
@@ -80,10 +80,10 @@ async def get_not_approved_chats(
     page: int = Depends(page_validator),
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)  
-) -> List[Chat]:
+) -> List[ChatSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
-        return await chat_service.get_chat_batch(user=user, page=page, chat_type="not-approved")
+        return await chat_service.get_chat_batch(user=user, page=page, approved=False)
 
 @chat.post("/chat/approve/{chat_id}")
 @endpoint_exception_handler

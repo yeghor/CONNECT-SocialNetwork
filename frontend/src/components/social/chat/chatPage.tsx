@@ -5,7 +5,7 @@ import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts
 import ActiveChat from "./active_chats/activeChat.tsx";
 
 import ChatList from "./chatList.tsx";
-import { ChatConnectData, ChatConnectResponse, ChatResponse } from "../../../fetching/responseDTOs.ts";
+import { ChatConnectData, ChatConnectResponse, Chat } from "../../../fetching/responseDTOs.ts";
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
 import { fetchChatConnect } from "../../../fetching/fetchChatWS.ts";
 import MakeNewChat from "./active_chats/makeNewChat.tsx";
