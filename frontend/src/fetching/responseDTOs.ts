@@ -56,7 +56,7 @@ export const createBadResponseManually = (detail: string, statusCode: number): B
 };
 
 
-const ownerMapper = (data: UserDTO): User => {
+const userMapper = (data: UserDTO): User => {
 
     return {
         userId: data.user_id,
@@ -199,7 +199,7 @@ export const loadPostResponseMapper = (postDTO: LoadPostResponseDTO): LoadPostRe
             title: postDTO.title,
             published: new Date(postDTO.published),
             isReply: postDTO.is_reply,
-            owner: ownerMapper(postDTO.owner),
+            owner: userMapper(postDTO.owner),
             likes: postDTO.likes,
             views: postDTO.views,
             isLiked: postDTO.is_liked,
@@ -213,7 +213,7 @@ export const loadPostResponseMapper = (postDTO: LoadPostResponseDTO): LoadPostRe
                     title: postDTO.parent_post.title,
                     published: new Date(postDTO.parent_post.published),
                     isReply: postDTO.parent_post.is_reply,
-                    owner: ownerMapper(postDTO.parent_post.owner),
+                    owner: userMapper(postDTO.parent_post.owner),
                     likes: postDTO.parent_post.likes,
                     views: postDTO.parent_post.views,
                     isLiked: postDTO.parent_post.is_liked,
@@ -235,7 +235,7 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
     title: postDTO.title,
     published: new Date(postDTO.published),
     isReply: postDTO.is_reply,
-    owner: ownerMapper(postDTO.owner),
+    owner: userMapper(postDTO.owner),
     likes: postDTO.likes,
     views: postDTO.views,
     isLiked: postDTO.is_liked,
@@ -247,7 +247,7 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
             title: postDTO.parent_post.title,
             published: new Date(postDTO.parent_post.published),
             isReply: postDTO.parent_post.is_reply,
-            owner: ownerMapper(postDTO.parent_post.owner),
+            owner: userMapper(postDTO.parent_post.owner),
             likes: postDTO.parent_post.likes,
             views: postDTO.parent_post.views,
             isLiked: postDTO.parent_post.is_liked,
@@ -275,7 +275,7 @@ export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsRes
             views: commentDTO.views,
             isLiked: commentDTO.is_liked,
             replies: commentDTO.replies,
-            owner: ownerMapper(commentDTO.owner),
+            owner: userMapper(commentDTO.owner),
             picturesURLs: commentDTO.pictures_urls
         }
     ));
@@ -401,6 +401,7 @@ export interface ChatDTO {
     chat_name: string,
     participants_count: number,
     chat_image_url: string | null
+    last_message: ChatMessageDTO
 }
 
 type ChatsDTO = ChatDTO[];
@@ -409,7 +410,8 @@ export interface Chat {
     chatId: string,
     chatName: string,
     participantsCount: number,
-    chatImageURL: string | null
+    chatImageURL: string | null 
+    lastMessage: ChatMessage
 }
 
 export interface ChatsResponse extends SuccessfulResponse{
@@ -422,7 +424,15 @@ export const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
             chatId: chatDTO.chat_id,
             chatName: chatDTO.chat_name,
             participantsCount: chatDTO.participants_count,
-            chatImageURL: chatDTO.chat_image_url
+            chatImageURL: chatDTO.chat_image_url,
+            lastMessage: mapSingleMessage(
+                chatDTO.last_message.message_id,
+                chatDTO.last_message.text,
+                new Date(chatDTO.last_message.sent),
+                userMapper(chatDTO.last_message.owner),
+                chatDTO.last_message.me,
+                chatDTO.last_message.temp_id
+            )
         }
     ));
 
@@ -462,6 +472,7 @@ interface ChatMessageBaseDTO {
     message_id: string,
     sent: string,
     owner: UserDTO,
+    me: boolean,
 
     // Frontend given ID that backend returns on websocket distribution - see ReadMe-dev.md
     temp_id: string | null
@@ -471,13 +482,14 @@ interface ChatMessageBase {
     messageId: string,
     sent: Date,
     owner: User,
+    me: boolean,
 
     // See explanation in ChatMessageDTO
     tempId: string | null
 }
 
-export interface MessageDTO extends ChatMessageBaseDTO, MessageTextRequired {}
-export type MessagesDTO = MessageDTO[]
+export interface ChatMessageDTO extends ChatMessageBaseDTO, MessageTextRequired {}
+export type ChatMessagesDTO = ChatMessageDTO[]
 
 export interface ChatMessage extends ChatMessageBase, MessageTextRequired {}
 
@@ -499,7 +511,7 @@ export const mapWebsocketReceivedMessage = (data: SendWebsocketReceivedMessageSc
     if (data.action === "send") {
         const sendResponsePart = {
             sent: new Date(data.sent),
-            owner: ownerMapper(data.owner),
+            owner: userMapper(data.owner),
             tempId: data.temp_id ?? null
         }
         // @ts-ignore
@@ -513,12 +525,13 @@ export const mapWebsocketReceivedMessage = (data: SendWebsocketReceivedMessageSc
     */
 };
 
-export const messagesResponseMapper = (data: MessagesDTO): MessagesResponse => {
+export const messagesResponseMapper = (data: ChatMessagesDTO): MessagesResponse => {
     const mapped = data.map((messageDTO) => ({
         messageId: messageDTO.message_id,
         text: messageDTO.text,
         sent: new Date(messageDTO.sent),
-        owner: ownerMapper(messageDTO.owner),
+        owner: userMapper(messageDTO.owner),
+        me: messageDTO.me,
         tempId: messageDTO.temp_id ?? null
     }));
 
@@ -529,18 +542,19 @@ export const messagesResponseMapper = (data: MessagesDTO): MessagesResponse => {
     
 };
 
-export const singleMessageResponseMapper = (data: MessageDTO): ChatMessage => {
+export const singleMessageResponseMapper = (data: ChatMessageDTO): ChatMessage => {
     return {
         messageId: data.message_id,
         text: data.text,
         sent: new Date(data.sent),
-        owner: ownerMapper(data.owner),
+        owner: userMapper(data.owner),
+        me: data.me,
         tempId: data.temp_id ?? null
     };
 };
 
-export const mapSingleMessage = (messageId: string, text: string, sent: Date, owner: User, tempId: string | null): ChatMessage => {
-    return { messageId, text, sent, owner, tempId }
+export const mapSingleMessage = (messageId: string, text: string, sent: Date, owner: User, me: boolean, tempId: string | null): ChatMessage => {
+    return { messageId, text, sent, owner, me, tempId }
 }
 
 interface ChatParticipantDataDTO extends UserDTO {

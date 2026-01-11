@@ -3,7 +3,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from dotenv import load_dotenv
 from os import getenv
-from typing import Type, TypeVar, List, Union, Literal
+from typing import Type, TypeVar, List, Dict
 from pydantic_schemas.pydantic_schemas_social import PostDataSchemaID
 from uuid import UUID
 from .models import *
@@ -365,6 +365,21 @@ class PostgresService:
         )
 
         return result.scalar()
+    
+    @postgres_exception_handler(action="Get chats last message")
+    async def get_chats_last_message(self, room_ids: List[str]) -> dict[str, Message]:
+        result = await self.__session.execute(
+            select(Message)
+            .distinct(Message.room_id)
+            .where(Message.room_id.in_(room_ids))
+            # The DISTINCT ON expression must always match the leftmost expression in the ORDER BY clause to ensure predictable results.
+            # See: https://www.geeksforgeeks.org/postgresql/postgresql-distinct-on-expression/
+            .order_by(Message.room_id, Message.sent.desc())
+        )
+
+        ready_messages = result.scalars().all()
+        
+        return { message.room_id: message for message in ready_messages }
 
     @postgres_exception_handler(action="Get most fresh followed posts")
     async def get_fresh_followed_posts(self, user: User, n: int) -> List[Post]:

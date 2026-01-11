@@ -21,6 +21,7 @@ class ChatSchema(BaseModel):
     chat_name: str
     participants_count: int
     chat_image_url: str | None
+    last_message: "MessageSchema"
 
 class ActionIncluded(BaseModel):
     action: Literal["send", "change", "delete"]
@@ -34,13 +35,20 @@ class MessageSchema(MessageSchemaShort):
     text: str
     sent: datetime
     owner: UserShortSchema
+    me: bool
 
 class MessageSchemaActionIncluded(MessageSchema, ActionIncluded):
     """Use in websockets 'send' action"""
+
+    # Messages that circulate in Websockets can't have `me` attribute
+    me: None = Field(default=None)
     temp_id: str | None = Field(default=None)
 
 class MessageSchemaShortActionIncluded(MessageSchemaShort, ActionIncluded):
     """Use in websockets 'change' and 'delete' actions"""
+
+    # Messages that circulate in Websockets can't have `me` attribute
+    me: None = Field(default=None)
     temp_id: str | None = Field(default=None)
 
 class ChatTokenResponse(BaseModel):

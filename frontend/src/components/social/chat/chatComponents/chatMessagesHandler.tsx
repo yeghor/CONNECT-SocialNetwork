@@ -164,7 +164,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             if (!oldData) return oldData;
 
             // TODO: add user's owner data
-            const newMessage = mapSingleMessage(tempId, message, new Date(), { userId: meAsParticipantData.userId, username: meAsParticipantData.username,  avatarURL: meAsParticipantData.avatarURL }, tempId);
+            const newMessage = mapSingleMessage(tempId, message, new Date(), { userId: meAsParticipantData.userId, username: meAsParticipantData.username,  avatarURL: meAsParticipantData.avatarURL }, true,  tempId);
             console.log("new message ", newMessage)
             const newFirstPage: any = [ newMessage, ...oldData.pages[0] ]; 
             
@@ -196,7 +196,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
             return {
                 ...oldData,
-                pages: [ appliedMessage ? newFirstPage : [incomingMessage, ...newFirstPage], ...oldData.pages.slice(1) ]
+                pages: [ appliedMessage ? newFirstPage : [incomingMessage, ...oldData.pages[0].slice(1)], ...oldData.pages.slice(1) ]
             };
         });
     };

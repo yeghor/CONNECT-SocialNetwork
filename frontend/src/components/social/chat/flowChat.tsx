@@ -19,6 +19,7 @@ const FlowChat = (props: Chat) => {
                 { props.participantsCount > 2 ? <p className="text-sm text-gray-200">
                     {props.participantsCount} Participants
                 </p> : null }
+                <p className="flex justify-start gap-4 text-white"><span>{props.lastMessage.text.slice(0, 20)}...</span>{props.lastMessage.sent.toDateString()}<span></span></p>
             </div>
         </Link>
     );

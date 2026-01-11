@@ -94,14 +94,20 @@ class MainChatService(MainServiceBase):
         return ChatTokenResponse(token=chat_token, participants_data=mapped_participants)
 
     @web_exceptions_raiser
-    async def get_messages_batch(self, room_id: str, user: User, page: int) -> List[MessageSchema]:
+    async def get_chat_messages_batch(self, room_id: str, user: User, page: int) -> List[MessageSchema]:
         await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=False)
 
         pagination_normalization = await self._RedisService.get_user_chat_pagination(user_id=user.user_id)
         message_batch = await self._PostgresService.get_chat_n_fresh_chat_messages(room_id=room_id, page=page, n=BASE_PAGINATION, pagination_normalization=pagination_normalization)
 
         return [
-            MessageSchema.model_validate(message, from_attributes=True)
+            MessageSchema(
+                message_id=message.message_id,
+                text=message.text,
+                sent=message.sent,
+                owner=UserShortSchema.model_validate(message.owner, from_attributes=True),
+                me=message.owner_id == user.user_id,
+            )
             for message in message_batch
         ]
         
@@ -112,12 +118,20 @@ class MainChatService(MainServiceBase):
             self._define_chat_display_name(chat=chat, my_id=user.user_id)
             for chat in chat_batch
         ]
+        last_messages = await self._PostgresService.get_chats_last_message(room_ids=[chat.room_id for chat in chat_batch])
 
         return [
             ChatSchema(
                 chat_id=chat.room_id,
                 chat_name=f"{chat_display_names[i]}",
                 participants_count=len(chat.participants),
+                last_message=MessageSchema(
+                    message_id=last_messages[chat.room_id].message_id,
+                    text=last_messages[chat.room_id].text,
+                    sent=last_messages[chat.room_id].sent,
+                    owner=UserShortSchema.model_validate(last_messages[chat.room_id].owner, from_attributes=True),
+                    me=last_messages[chat.room_id].owner_id == user.user_id
+                ),
                 # TODO: Group chat display image
                 chat_image_url=await self._ImageStorage.get_user_avatar_url(image_name=self._define_chat_image_name(chat=chat, my_id=user.user_id)) if not chat.is_group else None
         ) for i, chat in enumerate(chat_batch)]

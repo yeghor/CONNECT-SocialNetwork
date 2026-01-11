@@ -39,7 +39,7 @@ async def get_batch_of_chat_messages(
 ) -> List[MessageSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
-        return await chat_service.get_messages_batch(room_id=chat_id, user=user, page=page)
+        return await chat_service.get_chat_messages_batch(room_id=chat_id, user=user, page=page)
 
 @chat.post("/chat/dialogue")
 @endpoint_exception_handler
