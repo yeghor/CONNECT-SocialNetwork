@@ -4,7 +4,7 @@ import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts
 
 import ActiveChat from "./active_chats/activeChat.tsx";
 
-import ChatList from "./chatsFlow.tsx";
+import ChatsFlow from "./chatsFlow.tsx";
 import { ChatConnectData, ChatConnectResponse, Chat } from "../../../fetching/responseDTOs.ts";
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
 import { fetchChatConnect } from "../../../fetching/fetchChatWS.ts";
@@ -46,9 +46,9 @@ export const ChatPage = (props: ChatPageProps) => {
     const ActiveChatComponent = (props.createNew && otherUserId ? (<MakeNewChat otherUserId={otherUserId} />)  : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : null) : null));
 
     return(
-        <div className="columns-2 w-full">
+        <div className="flex w-full">
             <div className="w-2/3">
-                <ChatList />
+                <ChatsFlow />
             </div>
             <div className="w-full">
                 {ActiveChatComponent ? ActiveChatComponent : null}

@@ -1,21 +1,23 @@
-import React, {useState, useEffect, useRef} from "react";
-import {NavigateFunction, useNavigate} from "react-router-dom";
-import {CookieTokenObject, getCookiesOrRedirect} from "../../../helpers/cookies/cookiesHandler.ts";
-import {useInfiniteQuery} from "@tanstack/react-query";
+import React, { useState, useEffect, useRef } from "react";
+import { NavigateFunction, useNavigate } from "react-router-dom";
+import { CookieTokenObject, getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import {
     createInfiniteQueryOptionsUtil,
     infiniteQieryingFetchGuard
 } from "../../butterySmoothScroll/scrollVirtualizationUtils.ts";
-import {fetchChats} from "../../../fetching/fetchChatWS.ts";
-import {safeAPICall} from "../../../fetching/fetchUtils.ts";
-import {Chat, ChatsResponse} from "../../../fetching/responseDTOs.ts";
-import {useVirtualizer} from "@tanstack/react-virtual";
+import { fetchChats, fetchNotApprovedChats } from "../../../fetching/fetchChatWS.ts";
+import { safeAPICall } from "../../../fetching/fetchUtils.ts";
+import { Chat, ChatsResponse } from "../../../fetching/responseDTOs.ts";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 
 import FlowChat from "./flowChat.tsx";
 
-const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, page: number): Promise<Chat[]> => {
-    const fetchedChats = await safeAPICall<ChatsResponse>(tokens, fetchChats, navigate, undefined, page);
+const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, approved: boolean, page: number): Promise<Chat[]> => {
+    const fetcher = approved ? fetchChats : fetchNotApprovedChats
+
+    const fetchedChats = await safeAPICall<ChatsResponse>(tokens, fetcher, navigate, undefined, page);
 
     if (fetchedChats.success) {
         return fetchedChats.data;
@@ -24,18 +26,20 @@ const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunctio
     return [];
 }
 
-const ChatList = () => {
+const ChatsFlow = () => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
-    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(chatsFetcher, [tokens, navigate], ["chats"]))
+    const [ showApprovedChats, setShowApprovedChats ] = useState(true);
+
+
+    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(chatsFetcher, [tokens, navigate, showApprovedChats], ["chats", showApprovedChats]))
     const [ chats, setChats ] = useState<Chat[]>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const virtualizer = useVirtualizer({
         count: chats.length,
         estimateSize: () => 120,
-        overscan: 16,
         getScrollElement: () => scrollRef.current
     });
 
@@ -56,11 +60,40 @@ const ChatList = () => {
 
     return(
         <div className="w-full rounded-xl border border-white/20 border-2 p-4">
-            <div ref={scrollRef} className="lg:h-[700px] md:h-[600px] sm:h-[400px] overflow-auto relative mx-auto border-gray-300 rounded-xl">
+            <div className="flex justify-center gap-2 text-white m-4">
+                <button
+                    className={`px-4 py-2 rounded-3xl ${
+                        !showApprovedChats ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30"
+                    }`}
+                    onClick={() => {
+                        if(!showApprovedChats) {
+                            console.log()
+                            setShowApprovedChats((prevState) => !prevState);
+                        }
+                    }}
+                >
+                    Your Chats
+                </button>
+                <button
+                    className={`px-4 py-2 rounded-3xl ${
+                        showApprovedChats ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30"
+                    }`}
+                    onClick={() => {
+                        if(showApprovedChats) {
+                            console.log(showApprovedChats)
+                            setShowApprovedChats((prevState) => !prevState);
+                        }
+                    }}
+                >
+                    Pending
+                </button>
+            </div>
+
+            <div ref={scrollRef} className="h-[calc(100vh-300px)] overflow-auto relative mx-auto border-gray-300 rounded-xl">
                 <VirtualizedList DisplayedComponent={FlowChat} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={chats} />
             </div>
         </div>
     );
 };
 
-export default ChatList;
+export default ChatsFlow;

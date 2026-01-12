@@ -90,7 +90,7 @@ const PostsFlow = () => {
     }, [virtualItems, hasNextPage, isFetchingNextPage, feed]);
 
     const toggleFeed = () => {
-        setFeed(!feed);
+        setFeed((prevState) => !prevState);
     }
 
     const virtualizedComponentsProps = posts.map((post) => { return { postData: post.postData, isMyPost: false} } )
