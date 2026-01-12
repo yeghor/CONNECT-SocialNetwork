@@ -78,7 +78,7 @@ class PostgresService:
     async def get_user_by_id(self, user_id: str) -> User | None:
         result = await self.__session.execute(
             select(User)
-            .options(selectinload(User.followed), selectinload(User.followers)) # Manually passing selection load. Because of self ref. m2m2
+            .options(selectinload(User.followed), selectinload(User.followers))
             .where(User.user_id == user_id)
         )
         return result.scalar()
@@ -89,6 +89,7 @@ class PostgresService:
             select(Post)
             .where(and_(Post.owner_id != user.user_id, Post.post_id.not_in(exclude_ids)))
             .order_by(Post.popularity_rate.desc(), Post.published.desc())
+            .options(selectinload(Post.parent_post))
             .offset((page*n))
             .limit(n)
         )
@@ -116,6 +117,7 @@ class PostgresService:
             result = await self.__session.execute(
                 select(Post)
                 .where(Post.post_id.in_(ids))
+                .options(selectinload(Post.parent_post))
             )
         else:
             raise TypeError("Unsupported model type!")
@@ -188,6 +190,7 @@ class PostgresService:
             select(Post)
             .where(and_(Post.owner_id.in_(followed_ids), Post.post_id.not_in(exclude_ids)))
             .order_by(Post.popularity_rate.desc(), Post.published.desc())
+            .options(selectinload(Post.parent_post))
             .offset(page*n)
             .limit(n)
         )

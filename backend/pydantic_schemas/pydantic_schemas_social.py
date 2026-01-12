@@ -46,9 +46,9 @@ class PostBaseShort(PostIDValidate):
 class PostBase(PostBaseShort):
     owner: UserShortSchemaAvatarURL | None
 
-    likes: int = 0
-    views: int = 0
-    replies: int = 0
+    likes: int = Field(default=0)
+    views: int = Field(default=0)
+    replies: int = Field(default=0)
 
     is_my_post: bool
 
