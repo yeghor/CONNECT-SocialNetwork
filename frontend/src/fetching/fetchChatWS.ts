@@ -10,7 +10,8 @@ import {
     chatsURL,
     notApprovedChatsURL,
     dialogueChatURL, chatMessages,
-    getDialoqueId
+    getDialoqueId,
+    notApprovedChatsAmountURL
 } from "./urls.ts"
 
 import {
@@ -29,7 +30,7 @@ import {
     singleMessageResponseMapper,
     SuccessfulResponse,
     successfulResponseMapper, messagesResponseMapper,
-    booleanResponseMapper, StringResponse
+    customSimpleResponseMapper, CustomSimpleResponse
 } from "./responseDTOs.ts"
 
 export class WebsocketNotReady extends Error {
@@ -190,11 +191,20 @@ export const fetchCreateGroupChat = async (accessJWT: string, participantsIds: s
     return await fetchHelper(dialogueChatURL, requestInit, successfulResponseMapper);
 };
 
-export const fetchDialoqueId = async (accessJWT: string, otherUserId: string): APIResponse<StringResponse> => {
+export const fetchDialoqueId = async (accessJWT: string, otherUserId: string): APIResponse<CustomSimpleResponse<string | null>> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper(getDialoqueId(otherUserId), requestInit, booleanResponseMapper);
+    return await fetchHelper(getDialoqueId(otherUserId), requestInit, customSimpleResponseMapper<string | null>);
 };
+
+export const fetchNotApprovedChatsAmount = async (accessJWT: string): APIResponse<CustomSimpleResponse<number>> => {
+    const requestInit: RequestInit = {
+        method: "GET",
+        headers: requestTokenHeaders(accessJWT),
+    };
+
+    return await fetchHelper(notApprovedChatsAmountURL, requestInit, customSimpleResponseMapper<number>);
+}

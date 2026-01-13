@@ -6,9 +6,9 @@ import {
     createInfiniteQueryOptionsUtil,
     infiniteQieryingFetchGuard
 } from "../../butterySmoothScroll/scrollVirtualizationUtils.ts";
-import { fetchChats, fetchNotApprovedChats } from "../../../fetching/fetchChatWS.ts";
+import { fetchChats, fetchNotApprovedChats, fetchNotApprovedChatsAmount } from "../../../fetching/fetchChatWS.ts";
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
-import { Chat, ChatsResponse } from "../../../fetching/responseDTOs.ts";
+import { Chat, ChatsResponse, CustomSimpleResponse } from "../../../fetching/responseDTOs.ts";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 
@@ -31,7 +31,7 @@ const ChatsFlow = () => {
     const tokens = getCookiesOrRedirect(navigate);
 
     const [ showApprovedChats, setShowApprovedChats ] = useState(true);
-
+    const [ notApprovedChatsAmount, setNotApprovedChatsAmount ] = useState(0);
 
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(chatsFetcher, [tokens, navigate, showApprovedChats], ["chats", showApprovedChats]))
     const [ chats, setChats ] = useState<Chat[]>([]);
@@ -40,15 +40,16 @@ const ChatsFlow = () => {
     const virtualizer = useVirtualizer({
         count: chats.length,
         estimateSize: () => 120,
+        overscan: 3,
         getScrollElement: () => scrollRef.current
     });
 
     const virtualItems = virtualizer.getVirtualItems();
 
-    const infiniteQuerying = async () => {
-        const flatMapPChats = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((chat) => chat !== undefined) ?? []
-        setChats(flatMapPChats);
+    const flatMapPChats = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((chat) => chat !== undefined) ?? []
 
+    const infiniteQuerying = async () => {
+        setChats(flatMapPChats);
         const lastItem = virtualItems[virtualItems.length - 1]
         if (infiniteQieryingFetchGuard(hasNextPage, isFetchingNextPage, lastItem, chats.length)) await fetchNextPage();
     }
@@ -57,9 +58,18 @@ const ChatsFlow = () => {
         infiniteQuerying();
     }, [virtualItems, hasNextPage, isFetchingNextPage]);
 
+    useEffect(() => {
+        const fetcher = async () => {
+            const response = await safeAPICall<CustomSimpleResponse<number>>(tokens, fetchNotApprovedChatsAmount, navigate, undefined)
+            if (response.success) {
+                setNotApprovedChatsAmount(response.content);
+            }
+        }
+        fetcher();
+    }, []);
 
     return(
-        <div className="w-full rounded-xl border border-white/20 border-2 p-4">
+        <div className="w-full rounded-xl border border-white/20 border-2 p-4 mx-8">
             <div className="flex justify-center gap-2 text-white m-4">
                 <button
                     className={`px-4 py-2 rounded-3xl ${
@@ -67,7 +77,6 @@ const ChatsFlow = () => {
                     }`}
                     onClick={() => {
                         if(!showApprovedChats) {
-                            console.log()
                             setShowApprovedChats((prevState) => !prevState);
                         }
                     }}
@@ -76,16 +85,15 @@ const ChatsFlow = () => {
                 </button>
                 <button
                     className={`px-4 py-2 rounded-3xl ${
-                        showApprovedChats ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30"
+                        notApprovedChatsAmount > 0 ? (showApprovedChats  ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30") : "bg-white/10 text-gray-300"
                     }`}
                     onClick={() => {
-                        if(showApprovedChats) {
-                            console.log(showApprovedChats)
+                        if(showApprovedChats && notApprovedChatsAmount > 0) {
                             setShowApprovedChats((prevState) => !prevState);
                         }
                     }}
                 >
-                    Pending
+                    Pending: {notApprovedChatsAmount}
                 </button>
             </div>
 

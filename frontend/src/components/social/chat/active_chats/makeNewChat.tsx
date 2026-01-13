@@ -4,7 +4,7 @@ import { fetchCreateDialogueChat, fetchDialoqueId  } from "../../../../fetching/
 import { useNavigate } from "react-router";
 import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler";
 import { safeAPICall } from "../../../../fetching/fetchUtils";
-import { StringResponse, SuccessfulResponse } from "../../../../fetching/responseDTOs";
+import { CustomSimpleResponse, SuccessfulResponse } from "../../../../fetching/responseDTOs";
 import { specificChatURI } from "../../../../consts";
 
 interface MakeNewChatProps {
@@ -30,10 +30,10 @@ const MakeNewChat = (props: MakeNewChatProps) => {
         const effectFetcher = async () => {
             setLoading(true);
 
-            const response = await safeAPICall<StringResponse>(tokens, fetchDialoqueId, navigate, undefined, props.otherUserId)
+            const response = await safeAPICall<CustomSimpleResponse<string | null>>(tokens, fetchDialoqueId, navigate, undefined, props.otherUserId)
 
-            if (response.success && response.string) {
-                navigate(specificChatURI(response.string));
+            if (response.success && response.content) {
+                navigate(specificChatURI(response.content));
                 return;
             }
             setLoading(false);

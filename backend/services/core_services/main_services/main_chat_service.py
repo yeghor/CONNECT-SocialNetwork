@@ -312,3 +312,8 @@ class MainChatService(MainServiceBase):
         chat_room = await self._PostgresService.get_dialogue_by_users(user_1=user, user_2=other_user)
 
         return chat_room.room_id if chat_room else None
+    
+    @web_exceptions_raiser
+    async def get_number_of_not_approved_chats(self, user: User) -> int:
+        chat_rooms = await self._PostgresService.get_user_chats(user=user, approved=False)
+        return len(chat_rooms)

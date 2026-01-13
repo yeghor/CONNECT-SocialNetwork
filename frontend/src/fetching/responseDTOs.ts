@@ -19,14 +19,14 @@ export interface BadResponse extends BadResponseDTO, NotSuccessfulResponse {
     statusCode: number
 }
 
-export interface StringResponse extends SuccessfulResponse {
-    string: string | null
+export interface CustomSimpleResponse<T> extends SuccessfulResponse {
+    content: T
 }
 
-export const booleanResponseMapper = (booleanFlag: string | null): StringResponse => {
+export const customSimpleResponseMapper = <T>(content: T): CustomSimpleResponse<T> => {
     return {
         success: true,
-        string: booleanFlag
+        content: content
     };
 };
 

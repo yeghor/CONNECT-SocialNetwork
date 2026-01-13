@@ -1,6 +1,5 @@
 from fastapi import WebSocket, APIRouter, Depends, Body
 from authorization import authorize_request_depends, authorize_chat_token, JWTService
-from kubernetes.stream.ws_client import websocket_proxycare
 from services.postgres_service import User, get_session_depends, merge_model
 from services.core_services.main_services import MainChatService
 from services.core_services.core_services import MainServiceContextManager
@@ -63,7 +62,7 @@ async def create_group_chat(
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
         await chat_service.create_group_chat(data=data, user=user)
 
-@chat.get("/chat/{page}")
+@chat.get("/chat/approved/{page}")
 @endpoint_exception_handler
 async def get_my_chats(
     page: int = Depends(page_validator),
@@ -106,6 +105,16 @@ async def get_dialoque_id_by_other_user_id(
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
         return await chat_service.get_dialoque_id_by_other_user_id(other_user_id=other_user_id, user=user)
+
+@chat.get("/chat/not-approved")
+@endpoint_exception_handler
+async def get_number_of_not_approved_chats(
+    user_: User = Depends(authorize_request_depends),
+    session: AsyncSession = Depends(get_session_depends)
+) -> int:
+    user = await merge_model(postgres_session=session, model_obj=user_)
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.get_number_of_not_approved_chats(user=user) 
 
 async def wsconnect(token: str, websocket: WebSocket) -> ChatJWTPayload:
     connection_data = JWTService.extract_chat_jwt_payload(jwt_token=token)

@@ -104,7 +104,7 @@ export const dialogueChatURL = `${BASEURL}${chatConstructor}/dialogue`;
 export const groupChatURL = `${BASEURL}${chatConstructor}/group`;
 
 export const chatsURL = (page: number | string) => {
-    return `${BASEURL}${chatConstructor}/${page}`;
+    return `${BASEURL}${chatConstructor}/approved/${page}`;
 };
 
 export const batchChatMessagesURL = (chatId: string, page: number | string) => {
@@ -122,3 +122,5 @@ export const approveChatURL = (chatId: string) => {
 export const getDialoqueId = (otherUserId: string) => {
     return `${BASEURL}${chatConstructor}/id/${otherUserId}`;
 }
+
+export const notApprovedChatsAmountURL = `${BASEURL}${chatConstructor}/not-approved`

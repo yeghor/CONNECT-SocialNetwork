@@ -71,16 +71,16 @@ const PostsFlow = () => {
             return post.estimatedSize;
         },
         measureElement: (element) => { return element?.getBoundingClientRect().height },
+        overscan: 3,
         getScrollElement: () => scrollRef.current,
     });
 
     const virtualItems = virtualizer.getVirtualItems();
 
+    const flatMapPosts = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((post) => post !== undefined) ?? []
 
     const infiniteQuerying = async () => {
-        const flatMapPosts = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((post) => post !== undefined) ?? []
         setPosts(flatMapPosts)
-
         const lastItem = virtualItems[virtualItems.length - 1]
         if (infiniteQieryingFetchGuard(hasNextPage, isFetchingNextPage, lastItem, posts.length)) await fetchNextPage();
     }
@@ -128,7 +128,7 @@ const PostsFlow = () => {
                         </div>
                     </div>
                 </div>
-                <div ref={scrollRef} className="lg:h-[700px] md:h-[600px] sm:h-[400px] overflow-auto mb-16 relative mx-auto border-gray-300">
+                <div ref={scrollRef} className="h-[calc(100vh-300px)] overflow-auto mb-16 relative mx-auto border-gray-300">
                     <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={virtualizedComponentsProps} />
                 </div>
             </div>

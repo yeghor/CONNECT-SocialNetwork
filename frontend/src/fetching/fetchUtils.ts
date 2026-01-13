@@ -24,8 +24,7 @@ export const fetchHelper = async <ResponseType>(requestURL: string, requestInit:
     const response = await fetch(requestURL, requestInit);
     const responseDTO = await response.json();
 
-    if(!responseDTO) {
-        console.log("no response dto")
+    if(responseDTO === undefined) {
         if(response.status === 200) {
             // The code is safe
             // @ts-ignore

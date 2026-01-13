@@ -384,6 +384,15 @@ class PostgresService:
         
         return { message.room_id: message for message in ready_messages }
 
+    @postgres_exception_handler(action="Get all user chats")
+    async def get_user_chats(self, user: User, approved: bool) -> ChatRoom:
+        result = await self.__session.execute(
+            select(ChatRoom)
+            .where(and_(ChatRoom.participants.contains(user), ChatRoom.approved == approved))
+        )
+
+        return result.scalars().all()
+
     @postgres_exception_handler(action="Get most fresh followed posts")
     async def get_fresh_followed_posts(self, user: User, n: int) -> List[Post]:
         result = await  self.__session.execute(
