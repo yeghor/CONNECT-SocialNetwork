@@ -1,7 +1,7 @@
 import {
     BadResponse,
     isBadResponse,
-    badResponseMapper, UserProfileResponse, AccessTokenResponse, SuccessfulResponse, createBadResponseManually,
+    badResponseMapper, AccessTokenResponse, SuccessfulResponse, createBadResponseManually,
     successfulResponseMapper
 } from "./responseDTOs.ts"
 import { NavigateFunction}  from "react-router-dom";

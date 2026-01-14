@@ -116,7 +116,7 @@ const ActiveChat = (props: ActiveChatProps) => {
 
     // Passing socket as RefObject<WebSocket> because code above guarantees that it isn't null
     return(
-        <div>
+        <div className="h-max">
             <ChatMessagesHandler
                 websocketRef={socket as RefObject<WebSocket>}
                 participantsData={props.activeChatData.participantsData}

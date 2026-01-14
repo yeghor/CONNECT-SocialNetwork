@@ -97,8 +97,8 @@ const ChatsFlow = () => {
                 </button>
             </div>
 
-            <div ref={scrollRef} className="h-[calc(100vh-300px)] overflow-auto relative mx-auto border-gray-300 rounded-xl">
-                <VirtualizedList DisplayedComponent={FlowChat} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={chats} />
+            <div ref={scrollRef} className="h-[calc(100vh-400px)] overflow-auto relative mx-auto border-gray-300 rounded-xl">
+                <VirtualizedList DisplayedComponent={FlowChat} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={chats} interactive={true} />
             </div>
         </div>
     );

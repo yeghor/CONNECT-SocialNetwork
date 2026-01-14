@@ -31,10 +31,14 @@ export const customSimpleResponseMapper = <T>(content: T): CustomSimpleResponse<
 };
 
 export const isBadResponse = (data: any): data is BadResponseDTO => {
-    if (typeof data === "object") {
+    console.log("incoming data", data)
+    console.log(data === null)
+    if (data && data !== null && data !== undefined) {
+        console.log("THE FUCK")
         return "detail" in data;
     };
-    // If response is not object, ti ensures that the server returned a successful request
+    // If response is not object, it ensures that the server returned a successful request
+    // Because the backend's bad response always has `detail` property
     return false;
     
 };

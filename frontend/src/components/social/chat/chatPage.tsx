@@ -46,11 +46,11 @@ export const ChatPage = (props: ChatPageProps) => {
     const ActiveChatComponent = (props.createNew && otherUserId ? (<MakeNewChat otherUserId={otherUserId} />)  : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : null) : null));
 
     return(
-        <div className="flex w-full">
-            <div className="w-2/3">
+        <div className="flex w-full gap-16">
+            <div className="w-1/3">
                 <ChatsFlow />
             </div>
-            <div className="w-full">
+            <div className="w-2/3">
                 {ActiveChatComponent ? ActiveChatComponent : null}
             </div>
         </div>

@@ -254,7 +254,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         if (!el) return;
 
         const invertedWheelScroll = (event: WheelEvent) => {
-            el.scrollTop -= event.deltaY*5;
+            el.scrollTop -= event.deltaY*10;
             event.preventDefault();
         };
 
@@ -267,11 +267,13 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
     return (
         <div>
-            <button className="bg-white p-1 text-black" onClick={() => virtualizer.scrollBy(750 , { behavior: "smooth" })}>Scroll up</button>
-            <button className="bg-white p-1 text-black" onClick={() => virtualizer.scrollToIndex(0)}>Scroll down</button>
+            <div>
+                <button className="bg-white/10 hover:bg-white/20 text-white text-[11px] uppercase font-bold tracking-wider px-5 py-2.5 rounded-xl border border-white/10 transition-all active:scale-95" onClick={() => virtualizer.scrollToIndex(0, { align: "start" })}>Scroll bottom</button>
+            </div>
+
             <div
                 ref={scrollRef}
-                className="h-[600px] overflow-auto scroll-smooth my-16 mx-4"
+                className="h-[calc(100vh-500px)] overflow-auto scroll-smooth my-16 mx-4"
                 style={{
                     // https://github.com/TanStack/virtual/discussions/195 Thank You
                     transform: "scaleY(-1)"
