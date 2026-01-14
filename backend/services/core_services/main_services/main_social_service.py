@@ -544,7 +544,7 @@ class MainServiceSocial(MainServiceBase):
     async def load_replies(self, user_id: str, post_id: str, page: int) -> List[PostBase]:
         replies = await self._PostgresService.get_post_replies(post_id=post_id, page=page, n=SMALL_PAGINATION)
 
-        replies_coroutines = [self._create_post_lite_schema_via_gather(reply) for reply in replies]
+        replies_coroutines = [self._create_post_lite_schema_via_gather(user_id=user_id, post=reply) for reply in replies]
 
         return await asyncio.gather(*replies_coroutines)
 
