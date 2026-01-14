@@ -31,10 +31,7 @@ export const customSimpleResponseMapper = <T>(content: T): CustomSimpleResponse<
 };
 
 export const isBadResponse = (data: any): data is BadResponseDTO => {
-    console.log("incoming data", data)
-    console.log(data === null)
     if (data && data !== null && data !== undefined) {
-        console.log("THE FUCK")
         return "detail" in data;
     };
     // If response is not object, it ensures that the server returned a successful request

@@ -9,7 +9,7 @@ export interface ChatMessageProps {
     deleteMessageCallable: (messageId: string) => void
 }
 
-const ChatMessageComp = (props: ChatMessageProps) => {
+const FlowMessage = (props: ChatMessageProps) => {
     const [messageAction, setMessageAction] = useState<"change" | "delete" | null>(null);
     const [currentMessage, setCurrentMessage] = useState(props.messageData.text ?? "");
 
@@ -107,4 +107,4 @@ const ChatMessageComp = (props: ChatMessageProps) => {
     );
 };
 
-export default ChatMessageComp;
+export default FlowMessage;

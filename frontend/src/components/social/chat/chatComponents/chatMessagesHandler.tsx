@@ -23,7 +23,7 @@ import {
     infiniteQieryingFetchGuard
 } from "../../../butterySmoothScroll/scrollVirtualizationUtils.ts";
 
-import ChatMessageComp, { ChatMessageProps } from "./message.tsx";
+import FlowMessage, { ChatMessageProps } from "./message.tsx";
 import MessageBar from "./messageBar.tsx";
 
 
@@ -273,14 +273,14 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
             <div
                 ref={scrollRef}
-                className="h-[calc(100vh-500px)] overflow-auto scroll-smooth my-16 mx-4"
+                className="h-[calc(100vh-510px)] overflow-auto scroll-smooth my-16 mx-4"
                 style={{
                     // https://github.com/TanStack/virtual/discussions/195 Thank You
                     transform: "scaleY(-1)"
                 }}
             >
                 <VirtualizedList
-                    DisplayedComponent={ChatMessageComp}
+                    DisplayedComponent={FlowMessage}
                     virtualizer={virtualizer}
                     virtualItems={virtualItems}
                     componentsProps={componentsProps}
