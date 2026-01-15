@@ -159,7 +159,7 @@ export const fetchNotApprovedChats = async (accessJWT: string, page: number): AP
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<ChatsResponse>(notApprovedChatsURL(page), requestInit, successfulResponseMapper);
+    return await fetchHelper<ChatsResponse>(notApprovedChatsURL(page), requestInit, chatResponseMapper);
 };
 
 export const fetchChats = async (accessJWT: string, page: number): APIResponse<ChatsResponse> => {

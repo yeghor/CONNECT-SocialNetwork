@@ -37,7 +37,6 @@ export const fetchHelper = async <ResponseType>(requestURL: string, requestInit:
     if(isBadResponse(responseDTO)) {
         return badResponseMapper(responseDTO, response.status);
     } else {
-        console.log(responseDTO)
         return DTOMapper(responseDTO);
     }
 }

@@ -33,7 +33,7 @@ const ChatsFlow = () => {
     const [ showApprovedChats, setShowApprovedChats ] = useState(true);
     const [ notApprovedChatsAmount, setNotApprovedChatsAmount ] = useState(0);
 
-    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(chatsFetcher, [tokens, navigate, showApprovedChats], ["chats", showApprovedChats]))
+    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(chatsFetcher, [tokens, navigate, showApprovedChats], ["chatsList", showApprovedChats]))
     const [ chats, setChats ] = useState<Chat[]>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +56,7 @@ const ChatsFlow = () => {
 
     useEffect(() => {
         infiniteQuerying();
-    }, [virtualItems, hasNextPage, isFetchingNextPage]);
+    }, [virtualItems, hasNextPage, isFetchingNextPage, showApprovedChats]);
 
     useEffect(() => {
         const fetcher = async () => {
