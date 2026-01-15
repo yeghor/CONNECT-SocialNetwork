@@ -23,10 +23,24 @@ async def get_chat_token_including_participants_data(
     chat_id: str,
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
-) -> ChatTokenResponse:
+) -> ChatConnect:
+    """Can be used only with approved chats or groups"""
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
         return await chat_service.get_chat_token_including_participants_data(room_id=chat_id, user=user)
+
+@chat.get("/chat/not-approved/connect/{chat_id}")
+@endpoint_exception_handler
+async def get_not_approved_chat_token_including_participants_data(
+    chat_id: str,
+    user_: User = Depends(authorize_request_depends),
+    session: AsyncSession = Depends(get_session_depends)
+) -> NotApprovedChatData:
+    """Can be used only with not approved dialogue chats"""
+    user = await merge_model(postgres_session=session, model_obj=user_)
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.get_not_approved_chat_data(room_id=chat_id, user=user)
+
 
 @chat.get("/chat/{chat_id}/messages/{page}")
 @endpoint_exception_handler

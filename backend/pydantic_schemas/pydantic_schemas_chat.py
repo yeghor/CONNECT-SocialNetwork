@@ -51,11 +51,16 @@ class MessageSchemaShortActionIncluded(MessageSchemaShort, ActionIncluded):
     me: None = Field(default=None)
     temp_id: str | None = Field(default=None)
 
-class ChatTokenResponse(BaseModel):
+class ChatConnect(BaseModel):
     token: str
 
     # Include the user, the user schema with boolean field me setted to True
     participants_data: List[ChatUserShortSchemaAvatarURL]
+
+class NotApprovedChatData(BaseModel):
+    message: MessageSchema
+    initiator_user: ChatUserShortSchemaAvatarURL
+    initiated_by_me: bool
 
 class CreateChatBodyBase(BaseModel):
     message: str

@@ -73,8 +73,8 @@ const ActiveChat = (props: ActiveChatProps) => {
         // in question
         setToRender(false);
 
-        navigate(`/${chatsURI}`);
         window.alert("Connection unexpectedly closed");
+        navigate(`/${chatsURI}`);
         console.log(event.code, event.reason);
     }
 
@@ -122,7 +122,8 @@ const ActiveChat = (props: ActiveChatProps) => {
                 participantsData={props.activeChatData.participantsData}
                 chatId={props.chatId} sendMessageCallable={sendMessageProps}
                 changeMessageCallable={changeMessageProps}
-                deleteMessageCallable={deleteMessageProps} />
+                deleteMessageCallable={deleteMessageProps}
+            />
         </div>
     );  
 

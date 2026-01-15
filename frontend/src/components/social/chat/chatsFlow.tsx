@@ -12,7 +12,7 @@ import { Chat, ChatsResponse, CustomSimpleResponse } from "../../../fetching/res
 import { useVirtualizer } from "@tanstack/react-virtual";
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 
-import FlowChat from "./flowChat.tsx";
+import FlowChat from "./flowChats.tsx";
 
 const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, approved: boolean, page: number): Promise<Chat[]> => {
     const fetcher = approved ? fetchChats : fetchNotApprovedChats

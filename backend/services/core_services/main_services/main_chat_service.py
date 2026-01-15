@@ -2,7 +2,7 @@ from services.core_services import MainServiceBase
 from services.postgres_service.models import *
 from exceptions.custom_exceptions import *
 from exceptions.exceptions_handler import web_exceptions_raiser
-from pydantic_schemas.pydantic_schemas_chat import ChatSchema, MessageSchema, MessageSchemaShort, ExpectedWSData, ChatJWTPayload, CreateDialogueRoomBody, ChatTokenResponse, CreateGroupRoomBody, MessageSchemaActionIncluded, MessageSchemaShortActionIncluded
+from pydantic_schemas.pydantic_schemas_chat import *
 from pydantic_schemas.pydantic_schemas_social import UserShortSchema, ChatUserShortSchemaAvatarURL
 from post_popularity_rate_task.popularity_rate import scheduler
 from uuid import uuid4
@@ -76,8 +76,12 @@ class MainChatService(MainServiceBase):
             return await self.delete_message(message_data=request_data, user_data=connection_data)
 
     @web_exceptions_raiser
-    async def get_chat_token_including_participants_data(self, room_id: str, user: User) -> ChatTokenResponse:
+    async def get_chat_token_including_participants_data(self, room_id: str, user: User) -> ChatConnect:
         chat_room = await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=True)
+
+        if not chat_room.approved:
+            raise InvalidAction(detail=f"MainChatService: User: {user.user_id} tried to get chat: {chat_room.room_id} connection data, while the chat wasn't approved.", client_safe_detail="You can access this chat when other user approve it, try again later")
+
         chat_token = await self._JWT.generate_save_chat_token(room_id=room_id, user_id=user.user_id, redis=self._RedisService)
 
         ## TODO: Optimize avatar URLs via asyncio gather
@@ -91,7 +95,38 @@ class MainChatService(MainServiceBase):
             for user_participant in chat_room.participants   
         ]
 
-        return ChatTokenResponse(token=chat_token, participants_data=mapped_participants)
+        return ChatConnect(token=chat_token, participants_data=mapped_participants)
+
+    @web_exceptions_raiser
+    async def get_not_approved_chat_data(self, room_id: str, user: User) -> NotApprovedChatData:
+        chat_room = await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=True)
+
+        if chat_room.approved:
+            raise InvalidAction(detail=f"MainChatService: User: {user.user_id} tried to get not approved chat: {chat_room.room_id} connection data, while the chat was already approved", client_safe_detail="You can access this chat when other user approve it, try again later")
+
+        initiator = user if chat_room.creator_id == user.user_id else await self._PostgresService.get_user_by_id(user_id=chat_room.creator_id)
+
+        message = await self._PostgresService.get_chat_last_message(room_id=chat_room.room_id)
+
+        # If the not chat doesn't contain a single message. It means that initiator user deleted the message, and not-approved chat should be deleted.
+        if not message:
+            raise ResourceNotFound(detail=f"User: {user.user_id} tried to access not approved chat: {chat_room.room_id} data, while the chat original message was deleted.", client_safe_detail="Chat that you're trying to access does not exist")
+
+        return NotApprovedChatData(
+            message=MessageSchema(
+                message_id=message.message_id,
+                text=message.text,
+                sent=message.sent,
+                owner=UserShortSchema.model_validate(message.owner, from_attributes=True),
+                me=message.owner_id == user.user_id
+            ),
+            initiator_user=ChatUserShortSchemaAvatarURL(
+                user_id=initiator.user_id,
+                username=initiator.username,
+                avatar_url=await self._ImageStorage.get_user_avatar_url(image_name=initiator.avatar_image_name)
+            ),
+            initiated_by_me=user.user_id == initiator.user_id
+        )
 
     @web_exceptions_raiser
     async def get_chat_messages_batch(self, room_id: str, user: User, page: int) -> List[MessageSchema]:

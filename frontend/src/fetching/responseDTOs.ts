@@ -576,6 +576,7 @@ export interface ChatConnectData {
     participantsData: ChatParticipantData[]
 }
 
+
 export interface ChatConnectResponse extends SuccessfulResponse {
     data: ChatConnectData
 }

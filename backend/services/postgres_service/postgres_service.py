@@ -327,6 +327,17 @@ class PostgresService:
         )
         return result.scalar()
     
+    @postgres_exception_handler
+    async def get_chat_last_message(self, room_id: str) -> Message | None:
+        result = await self.__session.execute(
+            select(Message)
+            .where(Message.room_id == room_id)
+            .order_by(Message.sent.desc())
+            .limit(1)
+        )
+
+        return result.scalar()
+
     @postgres_exception_handler(action="Get dialogue chat by two users")
     async def get_dialogue_by_users(self, user_1: User, user_2: User) -> ChatRoom | None:
         result = await self.__session.execute(
