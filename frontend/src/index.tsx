@@ -13,6 +13,8 @@ import RegisterForm from "./components/auth/registerForm.tsx"
 import NavigationBar from "./components/base/navBar.tsx";
 import Footer from "./components/base/footer.tsx";
 import SearchPage from "./components/social/searchPage.tsx";
+import PendingChat from './components/social/chat/active_chats/pendingChag.tsx';
+import MakeNewChat from './components/social/chat/active_chats/makeNewChat.tsx';
 
 const container = document.getElementById('root')
 

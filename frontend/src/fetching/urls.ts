@@ -95,6 +95,14 @@ export const chatConnectURL = (chatId: string) => {
     return `${BASEURL}${chatConstructor}/connect/${chatId}`;
 };
 
+export const pendingChatConnectURL = (chatId: string) => {
+    return `${BASEURL}${chatConstructor}/not-approved/connect/${chatId}`;
+};
+
+export const isChatPendingURL = (chatId: string) => {
+    return `${BASEURL}${chatConstructor}/is-approved/${chatId}`;
+};
+
 export const chatMessages = (chatId: string, page: number | string) => {
     return `${BASEURL}${chatConstructor}/${chatId}/messages/${page}`;
 };

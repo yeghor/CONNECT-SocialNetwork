@@ -59,8 +59,9 @@ class MainChatService(MainServiceBase):
         if not chat_room:
             raise ResourceNotFound(detail=f"ChatService: User: {user_id} tried to access chat: {room_id} that does not exist. Clarified detail: {clarify_log_detail}", client_safe_detail="Chat that you're trying to access does not exist")
         
-        if not user_id in [participant.user_id for participant in chat_room.participants]:
-            raise Unauthorized(detail=f"ChatService: User: {user_id} tried to access chat: {room_id} while not being it's participant. Clarified detail: {clarify_log_detail}", client_safe_detail="Unauthorized")
+        if not any(user_id == participant.user_id for participant in chat_room.participants):
+            # While the state when user doesn't have permission to the chat room is suitable for Unauthorized, we raise ResourceNotFound, to keep chat room details confedetial
+            raise ResourceNotFound(detail=f"ChatService: User: {user_id} tried to access chat: {room_id} while not being it's participant. Clarified detail: {clarify_log_detail}", client_safe_detail="Chat that you're trying to access does not exist")
 
         return chat_room if return_chat_room else None
 
@@ -98,6 +99,15 @@ class MainChatService(MainServiceBase):
         return ChatConnect(token=chat_token, participants_data=mapped_participants)
 
     @web_exceptions_raiser
+    async def check_chat_not_approved(self, room_id: str, user: User) -> bool:
+        """Returns `True` if chat is not approved yet, `False` if the chat is approved or it's a group or chat doesn't exist"""
+        try:
+            chat_room = await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=True)
+            return not chat_room.approved
+        except ResourceNotFound:
+            return False
+
+    @web_exceptions_raiser
     async def get_not_approved_chat_data(self, room_id: str, user: User) -> NotApprovedChatData:
         chat_room = await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=True)
 
@@ -123,7 +133,8 @@ class MainChatService(MainServiceBase):
             initiator_user=ChatUserShortSchemaAvatarURL(
                 user_id=initiator.user_id,
                 username=initiator.username,
-                avatar_url=await self._ImageStorage.get_user_avatar_url(image_name=initiator.avatar_image_name)
+                avatar_url=await self._ImageStorage.get_user_avatar_url(image_name=initiator.avatar_image_name),
+                me=user.user_id == initiator.user_id
             ),
             initiated_by_me=user.user_id == initiator.user_id
         )

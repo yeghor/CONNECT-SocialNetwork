@@ -327,7 +327,7 @@ class PostgresService:
         )
         return result.scalar()
     
-    @postgres_exception_handler
+    @postgres_exception_handler(action="Get chat last message`")
     async def get_chat_last_message(self, room_id: str) -> Message | None:
         result = await self.__session.execute(
             select(Message)

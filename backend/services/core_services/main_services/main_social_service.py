@@ -9,20 +9,8 @@ from project_types import PostsOrderType, PostsType
 from dotenv import load_dotenv
 from datetime import datetime
 from os import getenv
-from typing import List, TypeVar, Type, Literal, Iterable, NamedTuple, Union, Awaitable, Dict, Coroutine, Any
-from pydantic_schemas.pydantic_schemas_social import (
-    PostBaseShort,
-    PostSchema,
-    PostDataSchemaID,
-    MakePostDataSchema,
-    PostLiteSchema,
-    UserLiteSchema,
-    UserSchema,
-    UserShortSchema,
-    UserShortSchemaAvatarURL,
-    PostBase,
-    RecentActivitySchema
-)
+from typing import List, TypeVar, Type, Literal, Iterable, NamedTuple, Union, Dict
+from pydantic_schemas.pydantic_schemas_social import *
 
 from exceptions.exceptions_handler import web_exceptions_raiser
 from exceptions.custom_exceptions import *
@@ -139,7 +127,7 @@ class MainServiceSocial(MainServiceBase):
 
     @web_exceptions_raiser
     async def sync_postgres_chroma_DEV_METHOD(self) -> None:
-        # TEMPORARY!
+        # TEMPORARY! Not the actual MainSocialService method
         await self._ChromaService.drop_all()
         posts = await self._PostgresService.get_all_from_model(ModelType=Post)
         await self._ChromaService.add_posts_data(posts=posts)

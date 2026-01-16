@@ -7,7 +7,7 @@ import { queryClient } from "../../../../index.tsx";
 
 import {
     ChatMessage,
-    ChatParticipantData,
+    ChatParticipant,
     mapSingleMessage,
     mapWebsocketReceivedMessage,
     MessagesResponse,
@@ -49,7 +49,7 @@ const messagesFetcher = async (
 interface ChatMessageListProps {
     websocketRef: RefObject<WebSocket>;
     chatId: string;
-    participantsData: ChatParticipantData[];
+    participantsData: ChatParticipant[];
     sendMessageCallable: (message: string, tempId: string) => void;
     changeMessageCallable: (message: string, messageId: string) => void;
     deleteMessageCallable: (messageId: string) => void;
@@ -61,7 +61,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     const tokens = getCookiesOrRedirect(navigate);
 
     // There is no change, that user isn't on participants data, so passing as ChatParticipantData type
-    const meAsParticipantData: ChatParticipantData = props.participantsData.find((participant) => participant.me) as ChatParticipantData
+    const meAsParticipantData: ChatParticipant = props.participantsData.find((participant) => participant.me) as ChatParticipant
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -227,7 +227,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     const componentsProps: ChatMessageProps[] = messages.map(msg => {
         return {
             messageData: msg,
-            ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId)) as ChatParticipantData,
+            ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId)) as ChatParticipant,
             // Only pending messags have tempId value
             isSending: msg.tempId !== null,
             changeMessageCallable: (message, messageId) => changeMessageOptimistically(message, messageId, false),

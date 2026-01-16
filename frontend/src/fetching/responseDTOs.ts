@@ -558,37 +558,40 @@ export const mapSingleMessage = (messageId: string, text: string, sent: Date, ow
     return { messageId, text, sent, owner, me, tempId }
 }
 
-interface ChatParticipantDataDTO extends UserDTO {
+interface ChatParticipantDTO extends UserDTO {
     me: boolean;
 }
-export interface ChatParticipantData extends User {
+export interface ChatParticipant extends User {
     me: boolean;
 }
 
 // Chat access
-export interface ChatConnectDTO {
+interface ChatConnectDTO {
     token: string,
-    participants_data: ChatParticipantDataDTO[]
+    participants_data: ChatParticipantDTO[]
 }
 
 export interface ChatConnectData {
     token: string,
-    participantsData: ChatParticipantData[]
+    participantsData: ChatParticipant[]
 }
-
 
 export interface ChatConnectResponse extends SuccessfulResponse {
     data: ChatConnectData
 }
 
+const chatUserMapper = (chatUser: ChatParticipantDTO): ChatParticipant => {
+    return {
+        userId: chatUser.user_id,
+        username: chatUser.username,
+        avatarURL: chatUser.avatar_url,
+        me: chatUser.me
+    };
+};
+
 export const chatConnectMapper = (data: ChatConnectDTO): ChatConnectResponse => {
     const mappedParticipantsData = data.participants_data.map((userDTO) => {
-        return {
-            userId: userDTO.user_id,
-            username: userDTO.username,
-            avatarURL: userDTO.avatar_url,
-            me: userDTO.me
-        };
+        return chatUserMapper(userDTO);
     });
 
     return {
@@ -599,3 +602,30 @@ export const chatConnectMapper = (data: ChatConnectDTO): ChatConnectResponse => 
         success: true
     };
 };
+
+interface PendingChatConnectDTO {
+    message: ChatMessageDTO,
+    initiator_user: ChatParticipantDTO,
+    initiated_by_me: boolean
+}
+
+export interface PendingChatConnect {
+    message: ChatMessage,
+    initiatorUser: ChatParticipant,
+    initiatedByMe: boolean
+}
+
+export interface PendingChatConnectResponse extends SuccessfulResponse {
+    data: PendingChatConnect
+}
+
+export const pendingChatConnectResponseMapper = (data: PendingChatConnectDTO): PendingChatConnectResponse => {
+    return {
+        data: {
+            message: singleMessageResponseMapper(data.message),
+            initiatorUser: chatUserMapper(data.initiator_user),
+            initiatedByMe: data.initiated_by_me
+        },
+        success: true
+    }
+}

@@ -11,7 +11,9 @@ import {
     notApprovedChatsURL,
     dialogueChatURL, chatMessages,
     getDialoqueId,
-    notApprovedChatsAmountURL
+    notApprovedChatsAmountURL,
+    pendingChatConnectURL,
+    isChatPendingURL
 } from "./urls.ts"
 
 import {
@@ -30,7 +32,9 @@ import {
     singleMessageResponseMapper,
     SuccessfulResponse,
     successfulResponseMapper, messagesResponseMapper,
-    customSimpleResponseMapper, CustomSimpleResponse
+    customSimpleResponseMapper, CustomSimpleResponse,
+    pendingChatConnectResponseMapper,
+    PendingChatConnectResponse,
 } from "./responseDTOs.ts"
 
 export class WebsocketNotReady extends Error {
@@ -129,6 +133,24 @@ export const fetchChatConnect = async (accessJWT: string, chatId: string): APIRe
 
     return await fetchHelper(chatConnectURL(chatId), requestIinit, chatConnectMapper);
 };
+
+export const fetchPendingChatConnect = async (accessJWT: string, chatId: string): APIResponse<PendingChatConnectResponse> => {
+    const requestIinit: RequestInit = {
+        method: "GET",
+        headers: requestTokenHeaders(accessJWT),
+    };
+    
+    return await fetchHelper<PendingChatConnectResponse>(pendingChatConnectURL(chatId), requestIinit, pendingChatConnectResponseMapper);
+}
+
+export const fetchIsChatPending = async (accessJWT: string, chatId: string): APIResponse<CustomSimpleResponse<boolean>> => {
+    const requestIinit: RequestInit = {
+        method: "GET",
+        headers: requestTokenHeaders(accessJWT),
+    };
+    
+    return await fetchHelper<CustomSimpleResponse<boolean>>(isChatPendingURL(chatId), requestIinit, customSimpleResponseMapper);
+}
 
 export const fetchChatMessagesBatch = async (accessJWT: string, chatId: string, page: number): APIResponse<MessagesResponse> => {
     const requestIinit: RequestInit = {

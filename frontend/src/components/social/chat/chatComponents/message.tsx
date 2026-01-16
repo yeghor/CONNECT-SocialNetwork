@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { ChatMessage, ChatParticipantData } from "../../../../fetching/responseDTOs.ts";
+import { ChatMessage, ChatParticipant } from "../../../../fetching/responseDTOs.ts";
 
 export interface ChatMessageProps {
     messageData: ChatMessage;
-    ownerData: ChatParticipantData;
+    ownerData: ChatParticipant;
     isSending: boolean;
     changeMessageCallable: (message: string, messageId: string) => void;
     deleteMessageCallable: (messageId: string) => void
