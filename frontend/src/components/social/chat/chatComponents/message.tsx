@@ -5,8 +5,8 @@ export interface ChatMessageProps {
     messageData: ChatMessage;
     ownerData: ChatParticipant;
     isSending: boolean;
-    changeMessageCallable: (message: string, messageId: string) => void;
-    deleteMessageCallable: (messageId: string) => void
+    changeMessageCallable: ((message: string, messageId: string) => void);
+    deleteMessageCallable: ((messageId: string) => void);
 }
 
 const FlowMessage = (props: ChatMessageProps) => {

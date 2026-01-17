@@ -22,6 +22,9 @@ export const ChatPage = (props: ChatPageProps) => {
     const [ activeChatData, setActiveChatData ] = useState<ChatConnectData | null>(null);
     const [ pendingChatData, setpendingChatData ] = useState<PendingChatConnect | null>(null);
 
+    // This toggler allows to update current chat component on approving pending chat, prop drilled to PendingChatComponent
+    const [ reRenderChats, setReRenderChats ] = useState(false);
+
     const { chatId } = useParams();
 
     // For chat creation
@@ -33,22 +36,22 @@ export const ChatPage = (props: ChatPageProps) => {
         }
 
         const chatConnectFetcher = async () => {
-            // Fetch more data to update lower level components data on changing chat
             if (chatId && chatId.trim() !== "") {
                 const chatPendingFlagResponse = await safeAPICall<CustomSimpleResponse<boolean>>(tokens, fetchIsChatPending, navigate, undefined, chatId);
-                
+                console.log("pending chat flag response: ", chatPendingFlagResponse)
                 if (chatPendingFlagResponse.success) {
                     if (chatPendingFlagResponse.content === true) {
-                        const response = await safeAPICall<PendingChatConnectResponse>(tokens, fetchPendingChatConnect, navigate, undefined, chatId);
-                        if (response.success) {
-                            setpendingChatData(response.data);
+                        const pendingChatresponse = await safeAPICall<PendingChatConnectResponse>(tokens, fetchPendingChatConnect, navigate, undefined, chatId);
+                        console.log("pending chat response: ", pendingChatresponse)
+                        if (pendingChatresponse.success) {
+                            setpendingChatData(pendingChatresponse.data);
                             return;
                         }
                         setActiveChatData(null);
                     } else {
-                        const response = await safeAPICall<ChatConnectResponse>(tokens, fetchChatConnect, navigate, undefined, chatId);
-                        if (response.success) {
-                            setActiveChatData(response.data);
+                        const approvedChatResponse = await safeAPICall<ChatConnectResponse>(tokens, fetchChatConnect, navigate, undefined, chatId);
+                        if (approvedChatResponse.success) {
+                            setActiveChatData(approvedChatResponse.data);
                             return;
                         }
                         setActiveChatData(null);
@@ -58,9 +61,10 @@ export const ChatPage = (props: ChatPageProps) => {
         };
 
         chatConnectFetcher();
-    }, [chatId]);
+    }, [chatId, reRenderChats]);
 
-    const ActiveChatComponent = (props.createNew && otherUserId ? (<MakeNewChat otherUserId={otherUserId} />) : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : pendingChatData ? (<PendingChat chatData={pendingChatData} />) : null) : null));
+    //@ts-ignore WILL BE FIXED IN THE NEST COMMIT
+    const ActiveChatComponent = (props.createNew && otherUserId ? (<MakeNewChat otherUserId={otherUserId} />) : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : pendingChatData ? (<PendingChat chatData={pendingChatData} setReRenderOnApprove={setReRenderChats} chatId={chatId} changeMessageCallable={() => {}} />) : null) : null));
 
     return(
         <div className="flex w-full gap-16">
