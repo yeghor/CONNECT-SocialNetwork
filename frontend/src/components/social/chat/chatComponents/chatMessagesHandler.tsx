@@ -179,13 +179,13 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
     const updateOrApplySentMessage = (incomingMessage: ChatMessage): void => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
-            let appliedMessage = false;
+            let messageApplied = false;
 
             const newFirstPage: ChatMessage[] = oldData.pages[0].map((msg: ChatMessage) => {
                 if (incomingMessage.tempId && (msg.tempId === incomingMessage.tempId || msg.messageId === incomingMessage.tempId)) {
                     // Message that is recorded to the DB doesn't need tempId
                     incomingMessage.tempId = null;
-                    appliedMessage = true;
+                    messageApplied = true;
                     return incomingMessage;
                 } 
                 return msg;                
@@ -196,7 +196,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
             return {
                 ...oldData,
-                pages: [ appliedMessage ? newFirstPage : [incomingMessage, ...oldData.pages[0].slice(1)], ...oldData.pages.slice(1) ]
+                pages: messageApplied ? [newFirstPage, ...oldData.pages.slice(1)] : [incomingMessage, ...(incomingMessage.me ? oldData.pages[0].slice(1) : oldData.pages[0]), ...oldData.pages.slice(1)]
             };
         });
     };
@@ -240,13 +240,13 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         infiniteQuerying();
     }, [virtualItems, hasNextPage, isFetchingNextPage]);
 
-    // Websockets event assigner
+    // Websockets event listener assigner effect
     useEffect(() => {
         props.websocketRef.current.addEventListener("message", applyUpcomingWSMessage);
         return () => {
             props.websocketRef.current.removeEventListener("message", applyUpcomingWSMessage);
         }
-    }, []);
+    }, [props.chatId]);
 
     // https://github.com/TanStack/virtual/discussions/195 Thank You
     useEffect(() => {

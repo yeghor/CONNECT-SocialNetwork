@@ -21,10 +21,12 @@ const PendingChat = (props: PendingChatProps) => {
     const tokens = getCookiesOrRedirect(navigate);
 
     const approveChat = async (): Promise<void> => {
+        console.log("approving chat");
         const response = await safeAPICall<SuccessfulResponse>(tokens, fetchApproveChat, navigate, undefined, props.chatId);
-        
+        console.log("sent approving request");
         if (response.success) {
-            props.setReRenderOnApprove((prevState) => !prevState);
+            console.log("approved request success");
+            props.setReRenderOnApprove((prevState) => { console.log("oldstate, ", prevState, "newstate", !prevState); return !prevState; });
         }
     };
 
@@ -32,7 +34,7 @@ const PendingChat = (props: PendingChatProps) => {
         const response = await safeAPICall<SuccessfulResponse>(tokens, fetchDisapproveChat, navigate, undefined, props.chatId);
         
         if (response.success) {
-            navigate(chatsURI);
+            navigate(`/${chatsURI}`);
         }
     };
 
@@ -42,7 +44,7 @@ const PendingChat = (props: PendingChatProps) => {
 return (
         <div className="h-[calc(100vh-300px)] mx-4 flex flex-col">
             <div className="flex flex-col justify-center items-center grow wy-auto gap-4">
-                <p className="text-start text-sm text-gray-400">Tip: Click to see his profile</p>
+                <p className="text-start text-sm text-gray-400">Tip: Click to see profile</p>
                 <Link to={specificUserProfileURI(props.chatData.initiatorUser.userId)} className="flex flex-col justify-center items-center hover:border-2 border-white/30 rounded-xl transition-all p-2">
                     <img src={props.chatData.initiatorUser.avatarURL ?? "/uknown-user-image.jpg"} className="w-32 h-32 rounded-full" />
                     <div className="text-center">
@@ -65,14 +67,14 @@ return (
                 <div className="flex gap-3 w-full">
                     <button 
                         className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-200 text-[11px] uppercase font-bold tracking-wider px-5 py-2.5 rounded-xl border border-red-500/30 transition-all active:scale-95" 
-                        onClick={() => approveChat()}
+                        onClick={ async () => await disapproveChat()}
                     >
                         Disapprove
                     </button>
                     
                     <button 
                         className="flex-1 bg-white/10 hover:bg-white/20 text-white text-[11px] uppercase font-bold tracking-wider px-5 py-2.5 rounded-xl border border-white/20 transition-all" 
-                        onClick={() => disapproveChat()}
+                        onClick={ async () => await approveChat()}
                     >
                         Approve
                     </button>

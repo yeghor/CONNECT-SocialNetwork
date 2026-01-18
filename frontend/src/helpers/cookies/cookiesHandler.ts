@@ -1,15 +1,13 @@
 import Cookies from 'universal-cookie';
-import { RedirectFunction } from 'react-router';
 
 import { TokenCookieExpiryHours } from "../../consts.ts"
-import { refreshTokenURL } from "../../fetching/urls.ts";
+import { NavigateFunction } from "react-router-dom";
 
 import {
     AccessTokenCookieKey,
     RefreshTokenCookieKey,
     appLoginURI
 } from "../../consts.ts"
-import { NavigateFunction } from "react-router-dom";
 
 const cookies = new Cookies();
 
@@ -28,13 +26,9 @@ export const removeCookie = (key: string): void => {
     cookies.remove(key);
 }
 
-
-type AccessKey = string;
-type RefreshKey = string;
-
 export interface CookieTokenObject {
-    access: AccessKey | undefined,
-    refresh: RefreshKey | undefined
+    access: string | undefined,
+    refresh: string | undefined
 }
 
 export const getCookies = (): CookieTokenObject => {

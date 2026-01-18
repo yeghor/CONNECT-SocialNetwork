@@ -36,6 +36,7 @@ export const ChatPage = (props: ChatPageProps) => {
         }
 
         const chatConnectFetcher = async () => {
+            console.log("toggled rerender chats", reRenderChats)
             if (chatId && chatId.trim() !== "") {
                 const chatPendingFlagResponse = await safeAPICall<CustomSimpleResponse<boolean>>(tokens, fetchIsChatPending, navigate, undefined, chatId);
                 console.log("pending chat flag response: ", chatPendingFlagResponse)
