@@ -21,11 +21,9 @@ const PendingChat = (props: PendingChatProps) => {
     const tokens = getCookiesOrRedirect(navigate);
 
     const approveChat = async (): Promise<void> => {
-        console.log("approving chat");
         const response = await safeAPICall<SuccessfulResponse>(tokens, fetchApproveChat, navigate, undefined, props.chatId);
-        console.log("sent approving request");
+
         if (response.success) {
-            console.log("approved request success");
             props.setReRenderOnApprove((prevState) => { console.log("oldstate, ", prevState, "newstate", !prevState); return !prevState; });
         }
     };
@@ -38,10 +36,7 @@ const PendingChat = (props: PendingChatProps) => {
         }
     };
 
-
-    console.log("Rendered Pending chat, props: ", props)
-
-return (
+    return (
         <div className="h-[calc(100vh-300px)] mx-4 flex flex-col">
             <div className="flex flex-col justify-center items-center grow wy-auto gap-4">
                 <p className="text-start text-sm text-gray-400">Tip: Click to see profile</p>

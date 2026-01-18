@@ -308,7 +308,7 @@ class RedisService:
     async def user_chat_pagination_action(self, user_id: str, room_id: str, increment: bool):
         """Set `increment` to True to increment value. False - to decrement"""
         pattern = f"{self.__user_chat_pagination_prefix}{user_id}"
-        print("INCREMENTING")
+
         if increment:
             await self.__client.incr(pattern, amount=1)
         else:

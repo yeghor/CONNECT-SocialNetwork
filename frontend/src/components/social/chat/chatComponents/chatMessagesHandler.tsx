@@ -181,6 +181,8 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             let messageApplied = false;
 
+            console.log(incomingMessage.tempId)
+
             const newFirstPage: ChatMessage[] = oldData.pages[0].map((msg: ChatMessage) => {
                 if (incomingMessage.tempId && (msg.tempId === incomingMessage.tempId || msg.messageId === incomingMessage.tempId)) {
                     // Message that is recorded to the DB doesn't need tempId
@@ -191,12 +193,14 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 return msg;                
             })
 
-            // Nulling tempId in case the message isn't ours
+            console.log(messageApplied)
+
+            // Nulling tempId in case the message isn't applied yet
             incomingMessage.tempId = null;
 
             return {
                 ...oldData,
-                pages: messageApplied ? [newFirstPage, ...oldData.pages.slice(1)] : [incomingMessage, ...(incomingMessage.me ? oldData.pages[0].slice(1) : oldData.pages[0]), ...oldData.pages.slice(1)]
+                pages: messageApplied ? [ newFirstPage, ...oldData.pages.slice(1) ] : [ [ incomingMessage, ...oldData.pages[0]  ], ...oldData.pages.slice(1) ]
             };
         });
     };
@@ -211,7 +215,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 if (!mappedMessage.text) return;
                 // See responseDTOs.ts line:489 for explanation
                 // @ts-ignore
-                updateOrApplySentMessage(mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner, mappedMessage.tempId));
+                updateOrApplySentMessage(mapSingleMessage(mappedMessage.messageId, mappedMessage.text, mappedMessage.sent, mappedMessage.owner, mappedMessage.me, mappedMessage.tempId));
                 break;
             case "change":
                 if (!mappedMessage.text) return;
