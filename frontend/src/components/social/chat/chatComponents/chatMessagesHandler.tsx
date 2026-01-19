@@ -227,12 +227,15 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         }
     };
 
-    console.log("meAsParticipant", meAsParticipantData)
-    console.log("participantsData", props.participantsData)
+
+    const fallbackUserID = crypto.randomUUID();
     const componentsProps: ChatMessageProps[] = messages.map(msg => {
         return {
             messageData: msg,
-            ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId) ?? { userId: crypto.randomUUID(), username: "", avatarURL: null, me: false }) as ChatParticipant,
+            // Passing temporary fake user data as a fallback, in case we didn't find owner data
+            // When chatId changes, participantsData updates with a delay
+            // Passing undefined to ownerData to flowMessage would crush the component. 
+            ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId) ?? { userId: fallbackUserID, username: "Loading", avatarURL: null, me: false }) as ChatParticipant,
             // Only pending messags have tempId value
             isSending: msg.tempId !== null,
             changeMessageCallable: (message, messageId) => changeMessageOptimistically(message, messageId, false),
