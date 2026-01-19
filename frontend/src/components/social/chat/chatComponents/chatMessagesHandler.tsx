@@ -227,11 +227,12 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         }
     };
 
-
+    console.log("meAsParticipant", meAsParticipantData)
+    console.log("participantsData", props.participantsData)
     const componentsProps: ChatMessageProps[] = messages.map(msg => {
         return {
             messageData: msg,
-            ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId)) as ChatParticipant,
+            ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId) ?? { userId: crypto.randomUUID(), username: "", avatarURL: null, me: false }) as ChatParticipant,
             // Only pending messags have tempId value
             isSending: msg.tempId !== null,
             changeMessageCallable: (message, messageId) => changeMessageOptimistically(message, messageId, false),
@@ -242,7 +243,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     // Infinite querying effect
     useEffect(() => {
         infiniteQuerying();
-    }, [virtualItems, hasNextPage, isFetchingNextPage]);
+    }, [virtualItems, hasNextPage, isFetchingNextPage, props.chatId]);
 
     // Websockets event listener assigner effect
     useEffect(() => {

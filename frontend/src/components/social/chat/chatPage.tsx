@@ -9,7 +9,7 @@ import { ChatConnectData, ChatConnectResponse, Chat, CustomSimpleResponse, Pendi
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
 import { fetchChatConnect, fetchIsChatPending, fetchPendingChatConnect } from "../../../fetching/fetchChatWS.ts";
 import MakeNewChat from "./active_chats/makeNewChat.tsx";
-import PendingChat from "./active_chats/pendingChag.tsx";
+import PendingChat from "./active_chats/pendingChat.tsx";
 
 interface ChatPageProps {
     createNew: boolean,
@@ -46,6 +46,7 @@ export const ChatPage = (props: ChatPageProps) => {
                         console.log("pending chat response: ", pendingChatresponse)
                         if (pendingChatresponse.success) {
                             setpendingChatData(pendingChatresponse.data);
+                            setActiveChatData(null);
                             return;
                         }
                         setActiveChatData(null);
@@ -53,6 +54,7 @@ export const ChatPage = (props: ChatPageProps) => {
                         const approvedChatResponse = await safeAPICall<ChatConnectResponse>(tokens, fetchChatConnect, navigate, undefined, chatId);
                         if (approvedChatResponse.success) {
                             setActiveChatData(approvedChatResponse.data);
+                            setpendingChatData(null);
                             return;
                         }
                         setActiveChatData(null);
@@ -65,7 +67,7 @@ export const ChatPage = (props: ChatPageProps) => {
     }, [chatId, reRenderChats]);
 
     //@ts-ignore WILL BE FIXED IN THE NEST COMMIT
-    const ActiveChatComponent = (props.createNew && otherUserId ? (<MakeNewChat otherUserId={otherUserId} />) : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : pendingChatData ? (<PendingChat chatData={pendingChatData} setReRenderOnApprove={setReRenderChats} chatId={chatId} changeMessageCallable={() => {}} />) : null) : null));
+    const ActiveChatComponent = (props.createNew && otherUserId ? (<MakeNewChat otherUserId={otherUserId} />) : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : (pendingChatData ? (<PendingChat chatData={pendingChatData} setReRenderOnApprove={setReRenderChats} chatId={chatId} changeMessageCallable={() => {}} />) : null)) : null));
 
     return(
         <div className="flex w-full gap-16">

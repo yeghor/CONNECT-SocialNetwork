@@ -12,7 +12,7 @@ import { Chat, ChatsResponse, CustomSimpleResponse } from "../../../fetching/res
 import { useVirtualizer } from "@tanstack/react-virtual";
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 
-import FlowChat from "./flowChats.tsx";
+import FlowChat from "./flowChat.tsx";
 
 const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, approved: boolean, page: number): Promise<Chat[]> => {
     const fetcher = approved ? fetchChats : fetchNotApprovedChats
@@ -41,7 +41,8 @@ const ChatsFlow = () => {
         count: chats.length,
         estimateSize: () => 120,
         overscan: 3,
-        getScrollElement: () => scrollRef.current
+        getScrollElement: () => scrollRef.current,
+        gap: 8
     });
 
     const virtualItems = virtualizer.getVirtualItems();

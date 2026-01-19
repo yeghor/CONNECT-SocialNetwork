@@ -36,7 +36,7 @@ class MainChatService(MainServiceBase):
         else:
             other_username = ""
             for user in chat.participants:
-                other_username = user.username if user.user_id != my_id else ""
+                other_username = user.username if user.user_id != my_id else other_username
             return other_username if other_username else "Deleted user"
 
     @staticmethod
