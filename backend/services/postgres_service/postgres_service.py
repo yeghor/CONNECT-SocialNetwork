@@ -1,5 +1,5 @@
-from sqlalchemy import select, delete, update, or_, inspect, and_, func
-from sqlalchemy.orm import selectinload
+from sqlalchemy import select, delete, update, or_, inspect, and_, func, union
+from sqlalchemy.orm import selectinload, aliased
 from sqlalchemy.ext.asyncio import AsyncSession
 from dotenv import load_dotenv
 from os import getenv
@@ -152,6 +152,26 @@ class PostgresService:
             .limit(n)
         )
         return result.scalars().all()
+
+    @postgres_exception_handler(action="Get user's friends")
+    async def get_friendships(self, user: User) -> List[User]:
+        # I don't understand how it works for god sake, taken from AI.
+        # I promise, that in future I will come back to this.
+        F1 = aliased(Friendship)
+        F2 = aliased(Friendship)
+
+        stmt = (
+            select(User)
+            .join(F1, F1.followed_id == User.user_id)
+            .join(F2, F2.follower_id == User.user_id)
+            .where(
+                F1.follower_id == user.user_id,
+                F2.followed_id == user.user_id,
+            )
+        )
+
+        result = await self.__session.execute(stmt)
+        return result.scalars().all
 
     @postgres_exception_handler(action="Change field and flush")
     async def change_field_and_flush(self, model: Base, **kwargs) -> None:

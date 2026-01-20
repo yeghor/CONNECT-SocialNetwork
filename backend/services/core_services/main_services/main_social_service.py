@@ -566,7 +566,6 @@ class MainServiceSocial(MainServiceBase):
             "date": followed_post.published
         }
 
-
     @web_exceptions_raiser
     async def get_recent_activity(self, user: User) -> List[RecentActivitySchema]:
         followed_posts = await self._PostgresService.get_fresh_followed_posts(user)
@@ -579,3 +578,16 @@ class MainServiceSocial(MainServiceBase):
         activity = filter(lambda i: bool(i), activity)
 
         return sorted(activity, key=lambda message: message.get("date"), reverse=True)[:RECENT_ACTIVITY_ENTRIES]
+    
+    @web_exceptions_raiser
+    async def get_my_friends(self, user: User) -> List[UserLiteSchema]:
+        friends = await self._PostgresService.get_friendships(user=user)
+
+        return [
+            UserLiteSchema(
+                user_id=user.user_id,
+                username=user.username,
+                avatar_url=await self._ImageStorage.get_user_avatar_url(user.image_path),
+                followers=len(user.followers)
+            ) for user in friends
+        ]
