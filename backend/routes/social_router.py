@@ -229,12 +229,12 @@ async def get_recent_activity(
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
         return await social.get_recent_activity(user)
     
-@social.get("/users/friends")
+@social.get("/friends")
 async def get_my_friends(
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> List[UserLiteSchema]:
-    user = await merge_model(user_, User)
+    user = await merge_model(session, user_)
     async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
         return await social.get_my_friends(user)
     

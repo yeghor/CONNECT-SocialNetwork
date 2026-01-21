@@ -18,7 +18,8 @@ import {
     followURL,
     specificUserURL,
     userPostsURL,
-    recentActivityURL
+    recentActivityURL,
+    myFriendsURL
 } from "./urls.ts";
 
 import {
@@ -44,7 +45,7 @@ import {
     // Users
     ShortUserProfilesResponse,
     UserProfileResponse,
-    userShortProfilesMapper,
+    shortUserProfilesMapper,
     userProfileMapper as userProfileResponseMapper, PostBaseResponse, postBaseMapper
 } from "./responseDTOs.ts";
 import { OrderPostsByFlag, ProfilePostsSectionFlag } from "../components/social/profilePage.tsx";
@@ -162,7 +163,7 @@ export const fetchSearchUsers = async (accessJWT: string, prompt: string, page: 
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<ShortUserProfilesResponse>(searchUsersURL(prompt, page), requestInit, userShortProfilesMapper);
+    return await fetchHelper<ShortUserProfilesResponse>(searchUsersURL(prompt, page), requestInit, shortUserProfilesMapper);
 }
 
 export const fetchSpecificUserProfile = async (accessJWT: string, userId: string): APIResponse<UserProfileResponse> => {
@@ -208,4 +209,13 @@ export const fetchRecentActivity = async (accessJWT: string): APIResponse<Recent
     }
 
     return await fetchHelper<RecentActivityResponse>(recentActivityURL, requestInit, recentActivityMapper);
+}
+
+export const fetchMyFriends = async (accessJWT: string): APIResponse<ShortUserProfilesResponse> => {
+    const requestInit: RequestInit = {
+        method: "GET",
+        headers: requestTokenHeaders(accessJWT)
+    }
+
+    return await fetchHelper<ShortUserProfilesResponse>(myFriendsURL, requestInit, shortUserProfilesMapper);
 }

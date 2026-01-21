@@ -281,7 +281,7 @@ class MainServiceSocial(MainServiceBase):
     @web_exceptions_raiser
     async def search_users(self, prompt: str,  request_user: User, page: int) -> List[UserLiteSchema]:
         users = await self._PostgresService.get_users_by_username(prompt=prompt, page=page, n=BASE_PAGINATION)
-        return [UserLiteSchema(user_id=user.user_id, username=user.username, followers=len(user.followers), avatar_url=await self._ImageStorage.get_user_avatar_url(user.user_id)) for user in users]
+        return [UserLiteSchema(user_id=user.user_id, username=user.username, followers=len(user.followers), joined=user.joinedx, avatar_url=await self._ImageStorage.get_user_avatar_url(user.user_id)) for user in users]
 
     @web_exceptions_raiser  
     async def make_post(self, data: MakePostDataSchema, user: User) -> PostBaseShort:
@@ -558,6 +558,7 @@ class MainServiceSocial(MainServiceBase):
     async def _get_recent_followed_post_message(self, followed_post: Post) -> Dict | None:
         """
         Returns dict that compatible to Pydantic RecentActivitySchema model
+        Use with function that is wrapper with `@web_exceptions_raiser`
         """
 
         return {
@@ -588,6 +589,7 @@ class MainServiceSocial(MainServiceBase):
                 user_id=user.user_id,
                 username=user.username,
                 avatar_url=await self._ImageStorage.get_user_avatar_url(user.image_path),
+                joined=user.joined,
                 followers=len(user.followers)
             ) for user in friends
         ]

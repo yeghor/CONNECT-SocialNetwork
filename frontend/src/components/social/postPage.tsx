@@ -24,26 +24,6 @@ const PostPage = () => {
 
     const [ postData, setPostData ] = useState<LoadPostResponseInterface | undefined>(undefined);
 
-    const postFetcher = async (): Promise<void> => {
-        // If statement to prevent TS errors. Cause if no tokens - getCookiesOrRedirect will redirect user to auth page
-        if(!(tokens.access && tokens.refresh && postId)) { return; }
-
-            const response = await safeAPICall<LoadPostResponse>(
-                tokens,
-                fetchLoadPost,
-                navigate,
-                undefined,
-                postId
-            );
-
-            if(response.success) {
-                setPostData(response.data);
-                if (response.data.isLiked) {
-                    toggleLikes(true);
-                }
-            }
-    }
-
     const likeAction = async () => {
         if (postData && !likeTimeout) {
             setLikeTimeout(true);
@@ -63,6 +43,26 @@ const PostPage = () => {
     }
 
     useEffect(() => {
+        const postFetcher = async (): Promise<void> => {
+            // If statement to prevent TS errors. Cause if no tokens - getCookiesOrRedirect will redirect user to auth page
+            if(!(tokens.access && tokens.refresh && postId)) { return; }
+
+                const response = await safeAPICall<LoadPostResponse>(
+                    tokens,
+                    fetchLoadPost,
+                    navigate,
+                    undefined,
+                    postId
+                );
+
+                if(response.success) {
+                    setPostData(response.data);
+                    if (response.data.isLiked) {
+                        toggleLikes(true);
+                    }
+                }
+        }
+
         toggleLikes(false);
         setPostData(undefined);
         postFetcher();

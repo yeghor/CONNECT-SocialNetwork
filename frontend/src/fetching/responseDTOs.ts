@@ -322,7 +322,7 @@ export interface ShortUserProfilesResponse extends SuccessfulResponse{
     data: ShortUserProfile[],
 }
 
-export const userShortProfilesMapper = (data: ShortUsersDTOResponse): ShortUserProfilesResponse => {
+export const shortUserProfilesMapper = (data: ShortUsersDTOResponse): ShortUserProfilesResponse => {
     const mapped = data.map((shortUserDTO) =>
         ({
             userId: shortUserDTO.user_id,

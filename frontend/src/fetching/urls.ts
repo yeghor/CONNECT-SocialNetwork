@@ -35,6 +35,8 @@ export const myProfileURL = `${BASEURL}${usersConstructor}${myProfileConstructor
 
 export const recentActivityURL = `${BASEURL}/recent-activity`;
 
+export const myFriendsURL = `${BASEURL}/friends`;
+
 //Social
 
 export const basePostURL = `${BASEURL}${postsConstructor}`;

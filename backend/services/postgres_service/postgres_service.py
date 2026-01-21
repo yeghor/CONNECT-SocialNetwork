@@ -162,6 +162,7 @@ class PostgresService:
 
         stmt = (
             select(User)
+            .options(selectinload(User.followers))
             .join(F1, F1.followed_id == User.user_id)
             .join(F2, F2.follower_id == User.user_id)
             .where(
@@ -171,7 +172,7 @@ class PostgresService:
         )
 
         result = await self.__session.execute(stmt)
-        return result.scalars().all
+        return result.scalars().all()
 
     @postgres_exception_handler(action="Change field and flush")
     async def change_field_and_flush(self, model: Base, **kwargs) -> None:

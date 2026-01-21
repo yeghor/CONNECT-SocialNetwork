@@ -27,6 +27,8 @@ export const ChatPage = (props: ChatPageProps) => {
 
     const { chatId } = useParams();
 
+    const [ createGroupPopUp, setCreateGroupPopUp ] = useState(false);
+
     // For chat creation
     const { otherUserId } = useParams();
 
