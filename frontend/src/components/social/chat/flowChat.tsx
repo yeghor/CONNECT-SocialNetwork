@@ -1,14 +1,12 @@
 import React from "react";
 import { Chat } from "../../../fetching/responseDTOs.ts";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { specificChatURI } from "../../../consts.ts";
 
 
 const FlowChat = (chatData: Chat) => {
-    const navigate = useNavigate()
-
     return (
-        <Link to=   {specificChatURI(chatData.chatId)}>
+        <Link to={specificChatURI(chatData.chatId)}>
             <div className="bg-white/10 rounded-lg p-4 flex justify-start items-center gap-4">
                 <img 
                     src={chatData.chatImageURL ? chatData.chatImageURL : "/uknown-user-image.jpg"} 

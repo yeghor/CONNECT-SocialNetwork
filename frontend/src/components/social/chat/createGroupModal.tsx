@@ -1,30 +1,79 @@
 import React, { useState, useEffect } from "react";
+import { fetchMyFriends } from "../../../fetching/fetchSocial";
+import { safeAPICall } from "../../../fetching/fetchUtils";
+import { ShortUserProfile, ShortUserProfilesResponse } from "../../../fetching/responseDTOs";
+import { useNavigate } from "react-router";
+import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler";
+import FlowUser from "../post/flowUser";
 
-const CreateGroupChatModal = () => {
-    return(
-        <div aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-            <div className="relative p-4 w-full max-w-2xl max-h-full">
-                <div className="relative bg-neutral-primary-soft border border-default rounded-base shadow-sm p-4 md:p-6">
-                    <div className="flex items-center justify-between border-b border-default pb-4 md:pb-5">
-                        <h3 className="text-lg font-medium text-heading">
-                            Terms of Service
-                        </h3>
-                        <button type="button" className="text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-base text-sm w-9 h-9 ms-auto inline-flex justify-center items-center" data-modal-hide="default-modal">
-                            <span className="sr-only">Close modal</span>
-                        </button>
-                    </div>
-                    <div className="space-y-4 md:space-y-6 py-4 md:py-6">
-                        <p className="leading-relaxed text-body">
-                            With less than a month to go before the European Union enacts new consumer privacy laws for its citizens, companies around the world are updating their terms of service agreements to comply.
-                        </p>
-                        <p className="leading-relaxed text-body">
-                            The European Union’s General Data Protection Regulation (G.D.P.R.) goes into effect on May 25 and is meant to ensure a common set of data rights in the European Union. It requires organizations to notify users as soon as possible of high-risk data breaches that could personally affect them.
-                        </p>
-                    </div>
-                    <div className="flex items-center border-t border-default space-x-4 pt-4 md:pt-5">
-                        <button data-modal-hide="default-modal" type="button" className="text-white bg-brand box-border border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">I accept</button>
-                        <button data-modal-hide="default-modal" type="button" className="text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">Decline</button>
-                    </div>
+
+const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Dispatch<React.SetStateAction<boolean>> }) => {
+    const navigate = useNavigate();
+    const tokens = getCookiesOrRedirect(navigate);
+
+    const [ friendsData, setFriendsData ] = useState<ShortUserProfile[]>([]);
+    const [ participantsIds, setParticipantsIds ] = useState<string[]>([]);
+    const [ warningMessage, setWarningMessage ] = useState<string | null>(null);
+
+    const [ searchString, setSearchString ] = useState("");
+
+    const searchFriends = () => {
+
+    };
+
+    const createGroup = async () => {
+
+    };
+
+    useEffect(() => {
+        const friendsFetcher = async()  => {
+            const response = await safeAPICall<ShortUserProfilesResponse>(tokens, fetchMyFriends, navigate, undefined);
+
+            if (response.success) {
+                setFriendsData(response.data);
+            }
+        };
+        friendsFetcher();
+    }, [])
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4 text-white">
+            <div className="relative bg-white/10 w-full max-w-2xl rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden">
+                <div className="flex items-center justify-between p-6">
+                    <h3 className="text-xl font-semibold">Create Group</h3>
+                    <button 
+                        onClick={() => props.showGroupCreationModelToggler(false)}
+                        className="text-gray-400 hover:text-gray-600 text-2xl"
+                    >
+                        &times;
+                    </button>
+                </div>
+
+                <p className="text-red-600 px-6">{warningMessage}</p>
+
+                <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                    { friendsData.map((friend) => {
+                        return (
+                            <div className="flex justify-between items-center">
+                                <FlowUser userData={friend} />
+                                <input type="checkbox" className="w-8 h-8"></input>
+                            </div>
+                        )
+                    }) }
+                </div>
+
+                <div className="flex items-center gap-3 p-6">
+                    <button 
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                        Create Group
+                    </button>
+                    <button 
+                        onClick={() => { props.showGroupCreationModelToggler(false) }}
+                        className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300"
+                    >
+                        Cancel
+                    </button>
                 </div>
             </div>
         </div>

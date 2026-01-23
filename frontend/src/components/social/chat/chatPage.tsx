@@ -10,6 +10,7 @@ import { safeAPICall } from "../../../fetching/fetchUtils.ts";
 import { fetchChatConnect, fetchIsChatPending, fetchPendingChatConnect } from "../../../fetching/fetchChatWS.ts";
 import MakeNewChat from "./active_chats/makeNewChat.tsx";
 import PendingChat from "./active_chats/pendingChat.tsx";
+import CreateGroupChatModal from "./createGroupModal.tsx";
 
 interface ChatPageProps {
     createNew: boolean,
@@ -27,7 +28,7 @@ export const ChatPage = (props: ChatPageProps) => {
 
     const { chatId } = useParams();
 
-    const [ createGroupPopUp, setCreateGroupPopUp ] = useState(false);
+    const [ createGroupModal, setCreateGroupModal ] = useState(false);
 
     // For chat creation
     const { otherUserId } = useParams();
@@ -74,7 +75,10 @@ export const ChatPage = (props: ChatPageProps) => {
     return(
         <div className="flex w-full gap-16">
             <div className="w-1/3">
-                <ChatsFlow />
+                { createGroupModal ? <div>
+                    <CreateGroupChatModal showGroupCreationModelToggler={setCreateGroupModal} />
+                </div> : null }
+                <ChatsFlow showGroupCreationModelToggler={setCreateGroupModal} />
             </div>
             <div className="w-2/3">
                 {ActiveChatComponent ?? null}

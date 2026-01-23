@@ -26,7 +26,7 @@ const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunctio
     return [];
 }
 
-const ChatsFlow = () => {
+const ChatsFlow = (props: { showGroupCreationModelToggler: React.Dispatch<React.SetStateAction<boolean>> }) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
 
@@ -71,9 +71,9 @@ const ChatsFlow = () => {
 
     return(
         <div className="w-full rounded-xl border border-white/20 border-2 p-4 mx-8">
-            <div className="flex justify-center gap-2 text-white m-4">
+            <div className="flex justify-start gap-2 text-white m-4">
                 <button
-                    className={`px-4 py-2 rounded-3xl ${
+                    className={`px-4 py-1 w-48 rounded-3xl ${
                         !showApprovedChats ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30"
                     }`}
                     onClick={() => {
@@ -85,7 +85,7 @@ const ChatsFlow = () => {
                     Your Chats
                 </button>
                 <button
-                    className={`px-4 py-2 rounded-3xl ${
+                    className={`px-4 py-1 w-48 rounded-3xl ${
                         notApprovedChatsAmount > 0 ? (showApprovedChats  ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30") : "bg-white/10 text-gray-300"
                     }`}
                     onClick={() => {
@@ -96,6 +96,11 @@ const ChatsFlow = () => {
                 >
                     Pending: {notApprovedChatsAmount}
                 </button>
+                <div className="w-full flex justify-end">
+                    <button onClick={() => props.showGroupCreationModelToggler(true)} className="px-4 py-2 rounded-3xl bg-white/10 hover:bg-white/20 hover:scale-105 transition-all flex gap-2">
+                        <span className="font-bold">+</span><span>Create Group</span>
+                    </button>
+                </div>
             </div>
 
             <div ref={scrollRef} className="h-[calc(100vh-400px)] overflow-auto relative mx-auto border-gray-300 rounded-xl">

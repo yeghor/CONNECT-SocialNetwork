@@ -8,18 +8,32 @@ interface UserProps {
     userData: ShortUserProfile;
 }
 
-const FlowUser = (props: UserProps) => {
-    console.log("got user");
-    return(
-        <div className="bg-white/10 border-white/30 rounded-lg p-4 shadow-sm overflow-hidden flex flex-col hover:scale-105 transition-all m-6">
-            <Link to={specificUserProfileURI(props.userData.userId)}>
-                {props.userData.avatarURL ?
-                    <img src={props.userData.avatarURL} alt="avatar" className={`h-16 rounded-full`}/>
-                    :
-                    <img src="/uknown-user-image.jpg" alt="avatar" className={`h-16 w-16 rounded-full`} />
-                }
-            </Link>
-        </div>
+const FlowUser = ({ userData }: UserProps) => {
+    return (
+        <Link 
+            to={specificUserProfileURI(userData.userId)} 
+            className="w-full  group flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-3 hover:bg-white/10 transition-all m-2"
+        >
+            <div className="flex-none w-12">
+                <img 
+                    src={userData.avatarURL || "/uknown-user-image.jpg"} 
+                    alt="avatar" 
+                    className="h-10 w-auto rounded-full object-cover border border-white/20 group-hover:scale-110 transition-transform"
+                />
+            </div>
+
+            <div className="flex-1 text-center">
+                <span className="text-white font-medium truncate transition-colors">
+                    {userData.username}
+                </span>
+            </div>                
+
+            <div className="flex-none w-24 text-right">
+                <span className="text-xs text-white/40">
+                    {userData.joined.toLocaleDateString()}
+                </span>
+            </div>
+        </Link>
     );
 };
 

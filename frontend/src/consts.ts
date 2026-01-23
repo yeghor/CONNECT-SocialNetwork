@@ -25,6 +25,8 @@ export const chatMessageMaxLength = 3000;
 export const chatMessageSizePX = 72;
 export const maxRequestsQueueLength = 30;
 
+export const maxGroupParticipants = 9;
+
 export const internalServerErrorURI = "/internal-server-error"
 export const appHomeURI = "/";
 export const appLoginURI = "/login";
@@ -64,3 +66,4 @@ export const postTitleIsTooLargeMessage = "Easy there, Shakespeare. That title i
 export const postTextIsTooLargeMessage = "Your post is overflowing. Trim it down a little.";
 export const tooMuchActivityMessage = "Whoa! You’re smashing that button way too fast. Chill for a sec so we don’t confuse the server.";
 export const chatMessageIsTooBigMessage = "That message is a bit long for chat. Maybe trim it down a little?";
+export const toManyGroupParticipants = "This group is getting a bit too crowded! We’ve hit the limit for participants for now.";

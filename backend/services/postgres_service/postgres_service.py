@@ -170,7 +170,7 @@ class PostgresService:
                 F2.followed_id == user.user_id,
             )
         )
-
+        
         result = await self.__session.execute(stmt)
         return result.scalars().all()
 
