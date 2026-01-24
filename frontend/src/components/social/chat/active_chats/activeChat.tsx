@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, forwardRef, RefObject } from "react";
+import React, { useState, useEffect, useRef, forwardRef, RefObject, useLayoutEffect } from "react";
 import ChatMessagesHandler from "../chatComponents/chatMessagesHandler.tsx";
 
 import { connectWSChat,
@@ -84,6 +84,10 @@ const ActiveChat = (props: ActiveChatProps) => {
     }
 
     useEffect(() => {
+        if (props.chatId !== props.activeChatData.chatId) {
+            return;
+        }
+
         socket.current = connectWSChat(props.activeChatData.token);
 
         socket.current.addEventListener("open", websocketOpenEventListener);
@@ -105,6 +109,38 @@ const ActiveChat = (props: ActiveChatProps) => {
         }
 
     }, [])
+
+    useEffect(() => {
+        setToRender(false);
+
+        if (props.chatId !== props.activeChatData.chatId) {
+            return;
+        }
+
+        if (socket.current) {
+            socket.current = null;
+        }
+
+        socket.current = connectWSChat(props.activeChatData.token);
+
+        socket.current.addEventListener("open", websocketOpenEventListener);
+        socket.current.addEventListener("close", websocketCloseEventListener);
+
+        return () => {
+            if (!socket.current) {
+                return;
+            }
+
+            console.log("CLOSING CONNECTION");
+
+            socket.current.removeEventListener("open", websocketOpenEventListener);
+            socket.current.removeEventListener("close", websocketCloseEventListener);
+            
+            if (socket.current.readyState !== socket.current.CLOSED) {
+                socket.current.close();
+            }
+        }
+    }, [props])
 
     if (!toRender) {
         return (

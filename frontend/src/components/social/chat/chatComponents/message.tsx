@@ -10,8 +10,6 @@ export interface ChatMessageProps {
 }
 
 const FlowMessage = (props: ChatMessageProps) => {
-    console.log(props)
-
     const [messageAction, setMessageAction] = useState<"change" | "delete" | null>(null);
     const [currentMessage, setCurrentMessage] = useState(props.messageData.text ?? "");
 

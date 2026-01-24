@@ -150,8 +150,6 @@ async def wsconnect(token: str, websocket: WebSocket) -> ChatJWTPayload:
     
     return connection_data
 
-import asyncio
-
 @chat.websocket("/{token}")
 @ws_endpoint_exception_handler
 async def connect_to_websocket_chat_room(

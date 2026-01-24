@@ -568,12 +568,14 @@ export interface ChatParticipant extends User {
 // Chat access
 interface ChatConnectDTO {
     token: string,
+    chat_id: string
     participants_data: ChatParticipantDTO[]
 }
 
 export interface ChatConnectData {
     token: string,
-    participantsData: ChatParticipant[]
+    participantsData: ChatParticipant[],
+    chatId: string
 }
 
 export interface ChatConnectResponse extends SuccessfulResponse {
@@ -597,6 +599,7 @@ export const chatConnectMapper = (data: ChatConnectDTO): ChatConnectResponse => 
     return {
         data: {
             token: data.token,
+            chatId: data.chat_id,
             participantsData: mappedParticipantsData
         },
         success: true

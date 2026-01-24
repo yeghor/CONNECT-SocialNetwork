@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts";
 
@@ -25,7 +25,7 @@ export const ChatPage = (props: ChatPageProps) => {
 
     // This toggler allows to update current chat component on approving pending chat, prop drilled to PendingChatComponent
     const [ reRenderChats, setReRenderChats ] = useState(false);
-
+    
     const { chatId } = useParams();
 
     const [ createGroupModal, setCreateGroupModal ] = useState(false);

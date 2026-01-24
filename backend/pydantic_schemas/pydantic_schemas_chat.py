@@ -53,6 +53,7 @@ class MessageSchemaShortActionIncluded(MessageSchemaShort, ActionIncluded):
 
 class ChatConnect(BaseModel):
     token: str
+    chat_id: str
 
     # Include the user, the user schema with boolean field me setted to True
     participants_data: List[ChatUserShortSchemaAvatarURL]

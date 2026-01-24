@@ -1,4 +1,4 @@
-import React, {RefObject, useEffect, useRef, useState} from "react";
+import React, {RefObject, useEffect, useRef, useState, useMemo} from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useNavigate } from "react-router";
@@ -74,7 +74,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 [ tokens, navigate, props.chatId ],
                 currentChatQueryKeys
             )
-        );
+        )
 
     const messages: ChatMessage[] = data?.pages.flatMap(page => page ?? []) ?? [];
 
@@ -165,7 +165,6 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
             // TODO: add user's owner data
             const newMessage = mapSingleMessage(tempId, message, new Date(), { userId: meAsParticipantData.userId, username: meAsParticipantData.username,  avatarURL: meAsParticipantData.avatarURL }, true,  tempId);
-            console.log("new message ", newMessage)
             const newFirstPage: any = [ newMessage, ...oldData.pages[0] ]; 
             
             return {

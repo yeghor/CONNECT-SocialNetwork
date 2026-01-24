@@ -96,7 +96,7 @@ class MainChatService(MainServiceBase):
             for user_participant in chat_room.participants   
         ]
 
-        return ChatConnect(token=chat_token, participants_data=mapped_participants)
+        return ChatConnect(token=chat_token, chat_id=room_id, participants_data=mapped_participants)
 
     @web_exceptions_raiser
     async def check_chat_not_approved(self, room_id: str, user: User) -> bool:

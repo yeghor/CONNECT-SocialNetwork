@@ -25,6 +25,10 @@ const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Disp
 
     };
 
+    const addOrDeleteParticipant = async (action: "add" | "delete") => {
+
+    };
+
     useEffect(() => {
         const friendsFetcher = async()  => {
             const response = await safeAPICall<ShortUserProfilesResponse>(tokens, fetchMyFriends, navigate, undefined);
@@ -53,10 +57,11 @@ const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Disp
 
                 <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                     { friendsData.map((friend) => {
+                        const idIncluded = participantsIds.includes(friend.userId);
                         return (
-                            <div className="flex justify-between items-center">
+                            <div key={friend.userId} className="flex justify-between items-center">
                                 <FlowUser userData={friend} />
-                                <input type="checkbox" className="w-8 h-8"></input>
+                                <button onClick={() => addOrDeleteParticipant(idIncluded ? "delete" : "add" )} className={`p-2 w-16 rounded-full ${ idIncluded ? "bg-white/20" : "bg-white/10 hover:scale-105 hover:bg-white/20" } transition-all`}>{idIncluded ? "Remove" : "Add"}</button>
                             </div>
                         )
                     }) }
