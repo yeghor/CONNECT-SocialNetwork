@@ -13,7 +13,8 @@ import {
     getDialoqueId,
     notApprovedChatsAmountURL,
     pendingChatConnectURL,
-    isChatPendingURL
+    isChatPendingURL,
+    groupChatURL
 } from "./urls.ts"
 
 import {
@@ -203,14 +204,14 @@ export const fetchCreateDialogueChat = async (accessJWT: string, participantId: 
     return await fetchHelper(dialogueChatURL, requestInit, successfulResponseMapper);
 };
 
-export const fetchCreateGroupChat = async (accessJWT: string, participantsIds: string[]): APIResponse<SuccessfulResponse> => {
+export const fetchCreateGroupChat = async (accessJWT: string, participantsIds: string[]): APIResponse<CustomSimpleResponse<string>> => {
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestTokenHeaders(accessJWT),
         body: JSON.stringify(createGroupBody(participantsIds))
     };
 
-    return await fetchHelper(dialogueChatURL, requestInit, successfulResponseMapper);
+    return await fetchHelper(groupChatURL, requestInit, customSimpleResponseMapper<string>);
 };
 
 export const fetchDialoqueId = async (accessJWT: string, otherUserId: string): APIResponse<CustomSimpleResponse<string | null>> => {

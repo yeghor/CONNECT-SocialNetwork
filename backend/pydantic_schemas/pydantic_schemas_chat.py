@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from json import load
 from pydantic import BaseModel, Field, model_validator, field_validator
 from typing import List, Literal, Any
@@ -20,8 +22,8 @@ class ChatSchema(BaseModel):
     chat_id: str
     chat_name: str
     participants_count: int
-    chat_image_url: str | None
-    last_message: "MessageSchema"
+    chat_image_url: str | None = Field(default=None)
+    last_message: MessageSchema | None = Field(default=None)
 
 class ActionIncluded(BaseModel):
     action: Literal["send", "change", "delete"]

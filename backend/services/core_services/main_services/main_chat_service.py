@@ -177,7 +177,7 @@ class MainChatService(MainServiceBase):
                     sent=last_messages[chat.room_id].sent,
                     owner=UserShortSchema.model_validate(last_messages[chat.room_id].owner, from_attributes=True),
                     me=last_messages[chat.room_id].owner_id == user.user_id
-                ),
+                ) if not chat.is_group else None, # Groups could be created without initial message
                 # TODO: Group chat display image
                 chat_image_url=await self._ImageStorage.get_user_avatar_url(image_name=self._define_chat_image_name(chat=chat, my_id=user.user_id)) if not chat.is_group else None
         ) for i, chat in enumerate(chat_batch)]
@@ -309,7 +309,7 @@ class MainChatService(MainServiceBase):
 
 
     @web_exceptions_raiser
-    async def create_group_chat(self, data: CreateGroupRoomBody, user: User) -> None:
+    async def create_group_chat(self, data: CreateGroupRoomBody, user: User) -> str:
         # Adding one to include creator
         if not MIN_CHAT_GROUP_PARTICIPANTS <= len(data.other_participants_ids) + 1 <= MAX_CHAT_GROUP_PARTICIPANTS:
             raise InvalidResourceProvided(detail=f"ChatService: User: {user.user_id} tried to create chat with {len(data.other_participants_ids)} participants, which isn't allowed.", client_safe_detail=f"You can't create group with more than {MAX_CHAT_GROUP_PARTICIPANTS} or fewer than {MIN_CHAT_GROUP_PARTICIPANTS} members")
@@ -332,6 +332,8 @@ class MainChatService(MainServiceBase):
         chat_room = ChatRoom(room_id=chat_room_id, created=datetime.utcnow(), is_group=True, approved=True, participants=participants, creator_id=user.user_id)
 
         await self._PostgresService.insert_models_and_flush(chat_room)
+
+        return chat_room.room_id
 
     @web_exceptions_raiser
     async def add_participant_to_group(self, room_id: str, participant_id: str, user: User) -> None:

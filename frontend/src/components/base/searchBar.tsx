@@ -23,7 +23,6 @@ const SearchBar = () => {
                 <img  src="/search-icon.png" alt="search-icon" className="h-8 pl-2 hover:scale-110 transition-all"/>
             </button>
         </div>
-
     );
 };
 

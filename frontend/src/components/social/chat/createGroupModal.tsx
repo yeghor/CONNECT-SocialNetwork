@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { fetchMyFriends } from "../../../fetching/fetchSocial";
 import { safeAPICall } from "../../../fetching/fetchUtils";
-import { ShortUserProfile, ShortUserProfilesResponse } from "../../../fetching/responseDTOs";
+import { CustomSimpleResponse, ShortUserProfile, ShortUserProfilesResponse, SuccessfulResponse } from "../../../fetching/responseDTOs";
 import { useNavigate } from "react-router";
 import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler";
 import FlowUser from "../post/flowUser";
+import { fetchCreateGroupChat } from "../../../fetching/fetchChatWS";
+import { specificChatURI } from "../../../consts";
 
 
 const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Dispatch<React.SetStateAction<boolean>> }) => {
@@ -16,17 +18,30 @@ const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Disp
     const [ warningMessage, setWarningMessage ] = useState<string | null>(null);
 
     const [ searchString, setSearchString ] = useState("");
+    const toFilter = Boolean(searchString);
 
-    const searchFriends = () => {
-
-    };
 
     const createGroup = async () => {
+        const response = await safeAPICall<CustomSimpleResponse<string>>(tokens, fetchCreateGroupChat, navigate, setWarningMessage, participantsIds);
 
+        if (response.success) {
+            props.showGroupCreationModelToggler(false);
+            navigate(specificChatURI(response.content))
+        }
     };
 
-    const addOrDeleteParticipant = async (action: "add" | "delete") => {
-
+    const addOrDeleteParticipant = async (userId: string, action: "add" | "delete") => {
+        switch (action) {
+            case "add":
+                setParticipantsIds((prevState) => [ userId, ...prevState ])
+                break;
+            case "delete":
+                setParticipantsIds((prevState) => {
+                    return prevState.filter((id) => {
+                        return !(id === userId);
+                    });
+                });
+        }
     };
 
     useEffect(() => {
@@ -40,42 +55,62 @@ const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Disp
         friendsFetcher();
     }, [])
 
+    const friendsToShow = toFilter ? friendsData.filter((friend) => {
+        return friend.username.toLocaleLowerCase().match(new RegExp(searchString.toLowerCase()));
+    }) : friendsData
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4 text-white">
-            <div className="relative bg-white/10 w-full max-w-2xl rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden">
-                <div className="flex items-center justify-between p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4 text-white transition-all">
+            <div className="relative bg-white/10 w-full max-w-2xl rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden h-[600px] flex flex-col">
+                <div className="flex justify-between p-6">
                     <h3 className="text-xl font-semibold">Create Group</h3>
                     <button 
                         onClick={() => props.showGroupCreationModelToggler(false)}
-                        className="text-gray-400 hover:text-gray-600 text-2xl"
+                        className="text-gray-200 hover:text-white text-3xl"
                     >
                         &times;
                     </button>
                 </div>
 
-                <p className="text-red-600 px-6">{warningMessage}</p>
 
-                <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-                    { friendsData.map((friend) => {
+                <div className="mx-6 mb-4">
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        onChange={(e) => setSearchString(e.target.value)}
+                        className="w-full p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30 bg-white/10 transition-all text-white"
+                    />
+                </div>
+
+                {warningMessage && <p className="text-red-400 px-6 mb-2 text-sm">{warningMessage}</p>}
+
+                <div className="p-6 space-y-4 overflow-y-auto flex-1 border-t border-b border-white/10">
+                    {friendsToShow.map((friend) => {
                         const idIncluded = participantsIds.includes(friend.userId);
                         return (
                             <div key={friend.userId} className="flex justify-between items-center">
                                 <FlowUser userData={friend} />
-                                <button onClick={() => addOrDeleteParticipant(idIncluded ? "delete" : "add" )} className={`p-2 w-16 rounded-full ${ idIncluded ? "bg-white/20" : "bg-white/10 hover:scale-105 hover:bg-white/20" } transition-all`}>{idIncluded ? "Remove" : "Add"}</button>
+                                <button 
+                                    onClick={() => addOrDeleteParticipant(friend.userId, idIncluded ? "delete" : "add")} 
+                                    className={`p-2 w-32 rounded-full ${idIncluded ? "bg-white/20" : "bg-white/10 hover:scale-105 hover:bg-white/20"} transition-all`}
+                                >
+                                    {idIncluded ? "Remove" : "Add"}
+                                </button>
                             </div>
                         )
-                    }) }
+                    })}
                 </div>
 
-                <div className="flex items-center gap-3 p-6">
+                <div className="flex justify-end gap-3 p-6">
                     <button 
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                        onClick={() => createGroup()}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         Create Group
                     </button>
                     <button 
-                        onClick={() => { props.showGroupCreationModelToggler(false) }}
-                        className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300"
+                        onClick={() => props.showGroupCreationModelToggler(false)}
+                        className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
                     >
                         Cancel
                     </button>

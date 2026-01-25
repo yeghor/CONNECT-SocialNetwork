@@ -20,7 +20,7 @@ const FlowChat = (chatData: Chat) => {
                 { chatData.participantsCount > 2 ? <p className="text-sm text-gray-200">
                     {chatData.participantsCount} Participants
                 </p> : null }
-                <p className="flex justify-start gap-4 text-white"><span>{chatData.lastMessage.text.slice(0, 20)}...</span>{chatData.lastMessage.sent.toDateString()}<span></span></p>
+                { chatData.lastMessage ? <p className="flex justify-start gap-4 text-white"><span>{chatData.lastMessage.text.slice(0, 20)}...</span>{chatData.lastMessage.sent.toDateString()}<span></span></p> : null }
             </div>
         </Link>
     );

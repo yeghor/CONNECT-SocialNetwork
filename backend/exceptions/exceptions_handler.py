@@ -1,4 +1,5 @@
 from fastapi import HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.exceptions import ResponseValidationError
 from starlette.websockets import WebSocketState
 from dotenv import load_dotenv
 from os import getenv
@@ -33,7 +34,8 @@ def endpoint_exception_handler(func):
                 logging.log(level=e.logging_type, msg=str(e), exc_info=True)
                 raise HTTPException(status_code=e.status_code, detail=e.client_safe_detail)
             
-            except Exception as e:
+            # In case endpoint returned unexpected data we're handling fastapi's `ResponseValidationError`
+            except (Exception, ResponseValidationError) as e:
                 logging.critical(msg=f"Unexpected exception: {e}", exc_info=True)
                 raise HTTPException(status_code=500, detail="It's not you, it's us. Something went wrong, please, contact us or try again later")
         elif Debug == "True":

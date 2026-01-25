@@ -83,10 +83,10 @@ async def create_group_chat(
     data: CreateGroupRoomBody,
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
-) -> None:
+) -> str:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
-        await chat_service.create_group_chat(data=data, user=user)
+        return await chat_service.create_group_chat(data=data, user=user)
 
 @chat.get("/chat/approved/{page}")
 @endpoint_exception_handler

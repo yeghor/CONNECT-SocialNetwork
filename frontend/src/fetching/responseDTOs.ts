@@ -402,7 +402,7 @@ export interface ChatDTO {
     chat_name: string,
     participants_count: number,
     chat_image_url: string | null
-    last_message: ChatMessageDTO
+    last_message: ChatMessageDTO | null
 }
 
 type ChatsDTO = ChatDTO[];
@@ -412,7 +412,7 @@ export interface Chat {
     chatName: string,
     participantsCount: number,
     chatImageURL: string | null 
-    lastMessage: ChatMessage
+    lastMessage: ChatMessage | null
 }
 
 export interface ChatsResponse extends SuccessfulResponse{
@@ -426,14 +426,14 @@ export const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
             chatName: chatDTO.chat_name,
             participantsCount: chatDTO.participants_count,
             chatImageURL: chatDTO.chat_image_url,
-            lastMessage: mapSingleMessage(
+            lastMessage: chatDTO.last_message ? mapSingleMessage(
                 chatDTO.last_message.message_id,
                 chatDTO.last_message.text,
                 new Date(chatDTO.last_message.sent),
                 userMapper(chatDTO.last_message.owner),
                 chatDTO.last_message.me,
                 chatDTO.last_message.temp_id
-            )
+            ) : null
         }
     ));
 

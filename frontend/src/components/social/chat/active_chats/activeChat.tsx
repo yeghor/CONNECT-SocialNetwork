@@ -144,8 +144,8 @@ const ActiveChat = (props: ActiveChatProps) => {
 
     if (!toRender) {
         return (
-            <div className="text-white">
-                Loading
+            <div className="text-white text-xl flex justify-center items-center font-bold h-full w-full animate-pulse">
+                Loading...
             </div>
         );
     }
