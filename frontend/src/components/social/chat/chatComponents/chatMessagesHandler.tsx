@@ -49,6 +49,7 @@ const messagesFetcher = async (
 interface ChatMessageListProps {
     websocketRef: RefObject<WebSocket>;
     chatId: string;
+    isGroup: boolean;
     participantsData: ChatParticipant[];
     sendMessageCallable: (message: string, tempId: string) => void;
     changeMessageCallable: (message: string, messageId: string) => void;
@@ -237,6 +238,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId) ?? { userId: fallbackUserID, username: "Loading", avatarURL: null, me: false }) as ChatParticipant,
             // Only pending messags have tempId value
             isSending: msg.tempId !== null,
+            isGroup: props.isGroup,
             changeMessageCallable: (message, messageId) => changeMessageOptimistically(message, messageId, false),
             deleteMessageCallable: (messageId) => deleteMessageOptimistically(messageId, false)
         }

@@ -5,6 +5,7 @@ export interface ChatMessageProps {
     messageData: ChatMessage;
     ownerData: ChatParticipant;
     isSending: boolean;
+    isGroup: boolean;
     changeMessageCallable: ((message: string, messageId: string) => void);
     deleteMessageCallable: ((messageId: string) => void);
 }
@@ -49,8 +50,12 @@ const FlowMessage = (props: ChatMessageProps) => {
                     : "bg-black/20 border-white/5 text-gray-200 rounded-tl-none"
                 }`}
             >
-                <div className={`text-[10px] mb-1 uppercase font-bold tracking-widest ${isMe ? "text-gray-400" : "text-gray-500"}`}>
-                    {isSending ? "Sending..." : `Sent: ${props.messageData.sent}`}
+                <div className="text-[12px] mb-1 font-bold tracking-widest text-gray-100">
+                    {props.isGroup && !props.messageData.me ? props.messageData.owner.username : null }
+                </div>
+
+                <div className={`text-[12px] mb-1 font-bold tracking-widest ${isMe ? "text-gray-200" : "text-gray-400"}`}>
+                    {isSending ? "Sending..." : props.messageData.sent.toLocaleString(undefined, {   weekday: "long", year: "numeric", month: "long", day: "numeric", hour12: true, hour: "2-digit", minute: "2-digit" })}
                 </div>
 
                 {messageAction === "change" ? (

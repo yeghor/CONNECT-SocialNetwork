@@ -28,9 +28,9 @@ const FlowUser = ({ userData }: UserProps) => {
                 </span>
             </div>                
 
-            <div className="flex-none w-24 text-right">
-                <span className="text-xs text-white/40">
-                    {userData.joined.toLocaleDateString()}
+            <div className="flex-none w-24 text-center">
+                <span className="text-xs text-white/40 break-normal">
+                    Joined: {userData.joined.toLocaleDateString(undefined, { day: "2-digit", month: "2-digit", year:"numeric" })}
                 </span>
             </div>
         </Link>

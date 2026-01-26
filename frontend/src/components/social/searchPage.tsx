@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {infiniteQueryOptions, useInfiniteQuery} from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { fetchSearchPosts, fetchSearchUsers } from "../../fetching/fetchSocial"
 import { safeAPICall } from "../../fetching/fetchUtils"
@@ -178,8 +178,8 @@ const SearchPage = () => {
                             <div
                                 key={vItem.key + uniqueIdentifier}
                                 style={{
-                                    transform: `translateY(${vItem.start})px`,
-                                    height: `${vItem.size}px`}}
+                                    transform: `translateY(${vItem.start})px`
+                                }}
                                 className="top-0 left-0 w-full"
                             >
                                 <div className="m-4">

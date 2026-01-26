@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import MessageBar from "../chatComponents/messageBar";
 import { fetchCreateDialogueChat, fetchDialoqueId  } from "../../../../fetching/fetchChatWS";
-import { useNavigate } from "react-router";
+import { resolvePath, useNavigate } from "react-router";
 import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler";
 import { safeAPICall } from "../../../../fetching/fetchUtils";
 import { CustomSimpleResponse, SuccessfulResponse, ChatMessage } from "../../../../fetching/responseDTOs";
 import { specificChatURI } from "../../../../consts";
 import FlowMessage from "../chatComponents/message";
+import LoadingIndicator from "../../../base/centeredLoadingIndicator";
 
 interface MakeNewChatProps {
     otherUserId: string
@@ -29,26 +30,24 @@ const MakeNewChat = (props: MakeNewChatProps) => {
         await safeAPICall<SuccessfulResponse>(tokens, fetchCreateDialogueChat, navigate, undefined, props.otherUserId, message);
         setChatCreated(true);
     }
-
+    console.log("make chat rendered")
     useEffect(() => {
-        const effectFetcher = async () => {
-            setLoading(true);
-
+        const asyncfetcher = async () => {
+            setLoading(true)
             const response = await safeAPICall<CustomSimpleResponse<string | null>>(tokens, fetchDialoqueId, navigate, undefined, props.otherUserId)
-
+            console.log("response ", response);
             if (response.success && response.content) {
+                console.log("navigating")
                 navigate(specificChatURI(response.content));
                 return;
             }
             setLoading(false);
         }
-        effectFetcher()
+        asyncfetcher()
     }, []);
 
     if (loading) {
-        return (
-            <p>Loading</p>
-        );
+        return ( <LoadingIndicator customMessage={undefined} /> );
     }
 
     return (

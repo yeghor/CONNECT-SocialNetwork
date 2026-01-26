@@ -11,6 +11,7 @@ import { ChatConnectData } from "../../../../fetching/responseDTOs.ts";
 
 import { useNavigate } from "react-router";
 import { chatsURI } from "../../../../consts.ts";
+import LoadingIndicator from "../../../base/centeredLoadingIndicator.tsx";
 
 interface ActiveChatProps {
     activeChatData: ChatConnectData,
@@ -143,11 +144,7 @@ const ActiveChat = (props: ActiveChatProps) => {
     }, [props])
 
     if (!toRender) {
-        return (
-            <div className="text-white text-xl flex justify-center items-center font-bold h-full w-full animate-pulse">
-                Loading...
-            </div>
-        );
+        return ( <LoadingIndicator customMessage={undefined} /> );
     }
 
     // Passing socket as RefObject<WebSocket> because code above guarantees that it isn't null
@@ -157,6 +154,7 @@ const ActiveChat = (props: ActiveChatProps) => {
                 websocketRef={socket as RefObject<WebSocket>}
                 participantsData={props.activeChatData.participantsData}
                 chatId={props.chatId} sendMessageCallable={sendMessageProps}
+                isGroup={props.activeChatData.isGroup}
                 changeMessageCallable={changeMessageProps}
                 deleteMessageCallable={deleteMessageProps}
             />

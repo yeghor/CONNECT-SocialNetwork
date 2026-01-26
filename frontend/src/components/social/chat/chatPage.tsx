@@ -5,12 +5,13 @@ import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts
 import ActiveChat from "./active_chats/activeChat.tsx";
 
 import ChatsFlow from "./chatsFlow.tsx";
-import { ChatConnectData, ChatConnectResponse, Chat, CustomSimpleResponse, PendingChatConnect, PendingChatConnectResponse } from "../../../fetching/responseDTOs.ts";
+import { ChatConnectData, ChatConnectResponse, CustomSimpleResponse, PendingChatConnect, PendingChatConnectResponse } from "../../../fetching/responseDTOs.ts";
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
 import { fetchChatConnect, fetchIsChatPending, fetchPendingChatConnect } from "../../../fetching/fetchChatWS.ts";
 import MakeNewChat from "./active_chats/makeNewChat.tsx";
 import PendingChat from "./active_chats/pendingChat.tsx";
 import CreateGroupChatModal from "./createGroupModal.tsx";
+import LoadingIndicator from "../../base/centeredLoadingIndicator.tsx";
 
 interface ChatPageProps {
     createNew: boolean,
@@ -71,7 +72,7 @@ export const ChatPage = (props: ChatPageProps) => {
 
     //@ts-ignore WILL BE FIXED IN THE NEST COMMIT
     const ActiveChatComponent = (props.createNew && otherUserId ? (<MakeNewChat otherUserId={otherUserId} />) : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : (pendingChatData ? (<PendingChat chatData={pendingChatData} setReRenderOnApprove={setReRenderChats} chatId={chatId} changeMessageCallable={() => {}} />) : null)) : null));
-
+    console.log(ActiveChatComponent)
     return(
         <div className="flex w-full gap-16">
             <div className="w-1/3">
@@ -81,7 +82,7 @@ export const ChatPage = (props: ChatPageProps) => {
                 <ChatsFlow showGroupCreationModelToggler={setCreateGroupModal} />
             </div>
             <div className="w-2/3">
-                {ActiveChatComponent ?? null}
+                {ActiveChatComponent ??  (chatId ? <LoadingIndicator customMessage={undefined} /> : null)  }
             </div>
         </div>
     );

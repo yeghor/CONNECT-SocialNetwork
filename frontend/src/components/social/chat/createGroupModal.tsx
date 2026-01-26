@@ -104,13 +104,13 @@ const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Disp
                 <div className="flex justify-end gap-3 p-6">
                     <button 
                         onClick={() => createGroup()}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        className="bg-white/20 border border-white/30 text-white px-4 py-2 rounded-lg hover:bg-white/30 transition-colors"
                     >
                         Create Group
                     </button>
                     <button 
                         onClick={() => props.showGroupCreationModelToggler(false)}
-                        className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                        className="bg-white/10 text-white px-4 py-2 rounded-lg hover:bg-white/30 transition-colors"
                     >
                         Cancel
                     </button>

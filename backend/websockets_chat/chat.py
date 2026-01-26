@@ -19,7 +19,7 @@ connection = WebsocketConnectionManager()
 
 @chat.get("/chat/connect/{chat_id}")
 @endpoint_exception_handler
-async def get_chat_token_including_participants_data(
+async def get_chat_connect_data(
     chat_id: str,
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
@@ -31,7 +31,7 @@ async def get_chat_token_including_participants_data(
 
 @chat.get("/chat/not-approved/connect/{chat_id}")
 @endpoint_exception_handler
-async def get_not_approved_chat_token_including_participants_data(
+async def get_not_approved_chat_connect_data(
     chat_id: str,
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
@@ -43,7 +43,7 @@ async def get_not_approved_chat_token_including_participants_data(
 
 @chat.get("/chat/is-approved/{chat_id}")
 @endpoint_exception_handler
-async def get_not_approved_chat_token_including_participants_data(
+async def get_chat_pending_state(
     chat_id: str,
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
