@@ -178,17 +178,20 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         }
 
     const updateOrApplySentMessage = (incomingMessage: ChatMessage): void => {
+        // cancelQueries is required, because without it first chat message will act unpredictable
+        queryClient.cancelQueries()
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             let messageApplied = false;
 
             console.log(incomingMessage.tempId)
 
             const newFirstPage: ChatMessage[] = oldData.pages[0].map((msg: ChatMessage) => {
+                console.log("incoming message tempid, ", incomingMessage.tempId)
+                console.log("local message tempid, ", msg.tempId)
                 if (incomingMessage.tempId && (msg.tempId === incomingMessage.tempId || msg.messageId === incomingMessage.tempId)) {
                     // Message that is recorded to the DB doesn't need tempId
-                    incomingMessage.tempId = null;
                     messageApplied = true;
-                    return incomingMessage;
+                    return { ...incomingMessage, tempId: null };
                 } 
                 return msg;                
             })
@@ -198,9 +201,12 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             // Nulling tempId in case the message isn't applied yet
             incomingMessage.tempId = null;
 
+            console.log("isapplied, ", messageApplied)
+            console.log("if isaplpied new pages, ", [ newFirstPage, ...oldData.pages.slice(1) ])
+
             return {
                 ...oldData,
-                pages: messageApplied ? [ newFirstPage, ...oldData.pages.slice(1) ] : [ [ incomingMessage, ...oldData.pages[0]  ], ...oldData.pages.slice(1) ]
+                pages: messageApplied ? [ newFirstPage, ...oldData.pages.slice(1) ] : [ [ { ...incomingMessage, tempId: null }, ...oldData.pages[0]  ], ...oldData.pages.slice(1) ]
             };
         });
     };
@@ -222,7 +228,6 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 changeMessageOptimistically(mappedMessage.text, mappedMessage.messageId, true);
                 break;
             case "delete":
-                console.log("at least mapped")
                 deleteMessageOptimistically(mappedMessage.messageId, true);
         }
     };
@@ -230,6 +235,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
     const fallbackUserID = crypto.randomUUID();
     const componentsProps: ChatMessageProps[] = messages.map(msg => {
+        console.log("props message tempid creation", msg.tempId)
         return {
             messageData: msg,
             // Passing temporary fake user data as a fallback, in case we didn't find owner data

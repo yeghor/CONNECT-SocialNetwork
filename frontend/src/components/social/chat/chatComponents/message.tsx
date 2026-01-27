@@ -11,8 +11,8 @@ export interface ChatMessageProps {
 }
 
 const FlowMessage = (props: ChatMessageProps) => {
-    const [messageAction, setMessageAction] = useState<"change" | "delete" | null>(null);
-    const [currentMessage, setCurrentMessage] = useState(props.messageData.text ?? "");
+    const [ messageAction, setMessageAction ] = useState<"change" | "delete" | null>(null);
+    const [ currentMessage, setCurrentMessage ] = useState(props.messageData.text ?? "");
 
     const messageActionHandler = () => {
         switch (messageAction) {
@@ -27,6 +27,8 @@ const FlowMessage = (props: ChatMessageProps) => {
 
     const isMe = props.ownerData.me;
     const isSending = props.isSending;
+
+    console.log("rendering message props, ", props)
 
     return (
         <div className={`flex w-full mb-4 items-end ${isMe ? "justify-end" : "justify-start"}`}>

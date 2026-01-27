@@ -30,14 +30,11 @@ const MakeNewChat = (props: MakeNewChatProps) => {
         await safeAPICall<SuccessfulResponse>(tokens, fetchCreateDialogueChat, navigate, undefined, props.otherUserId, message);
         setChatCreated(true);
     }
-    console.log("make chat rendered")
     useEffect(() => {
         const asyncfetcher = async () => {
             setLoading(true)
             const response = await safeAPICall<CustomSimpleResponse<string | null>>(tokens, fetchDialoqueId, navigate, undefined, props.otherUserId)
-            console.log("response ", response);
             if (response.success && response.content) {
-                console.log("navigating")
                 navigate(specificChatURI(response.content));
                 return;
             }

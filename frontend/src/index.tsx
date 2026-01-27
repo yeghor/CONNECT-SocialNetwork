@@ -6,7 +6,7 @@ import "./index.css"
 
 import SocialHomePage from "./components/social/socialHomePage.tsx";
 import ChatPage from "./components/social/chat/chatPage.tsx"
-import ProfilePageWrapper from "./components/social/profilePageWrapper.tsx";
+import ProfilePageWrapper from "./components/social/profile/profilePageWrapper.tsx";
 import PostPage from './components/social/postPage.tsx';
 import LoginForm from './components/auth/loginForm.tsx';
 import RegisterForm from "./components/auth/registerForm.tsx"
