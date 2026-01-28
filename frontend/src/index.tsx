@@ -13,8 +13,6 @@ import RegisterForm from "./components/auth/registerForm.tsx"
 import NavigationBar from "./components/base/navBar.tsx";
 import Footer from "./components/base/footer.tsx";
 import SearchPage from "./components/social/searchPage.tsx";
-import PendingChat from './components/social/chat/active_chats/pendingChat.tsx';
-import MakeNewChat from './components/social/chat/active_chats/makeNewChat.tsx';
 
 const container = document.getElementById('root')
 
@@ -24,7 +22,7 @@ if(container) {
     const root = ReactDOM.createRoot(container);
 
     root.render(
-        <StrictMode>
+        // <StrictMode>
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
                     <div
@@ -73,7 +71,7 @@ if(container) {
                     </div>
                 </BrowserRouter>
             </QueryClientProvider>
-        </StrictMode>
+        // </StrictMode>
     );
 
 } else {

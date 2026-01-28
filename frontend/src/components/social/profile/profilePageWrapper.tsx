@@ -16,8 +16,6 @@ const ProfilePageWrapper = () => {
     const [ userProfileData, setUserProfileData ] = useState<UserProfile | null>(null);
     const [ loading, setLoading ] = useState(true);
 
-
-
     useEffect(() => {
         const profileFetcher = async () => {
             setLoading(true);

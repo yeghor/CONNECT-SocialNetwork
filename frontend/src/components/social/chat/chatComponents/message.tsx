@@ -28,8 +28,6 @@ const FlowMessage = (props: ChatMessageProps) => {
     const isMe = props.ownerData.me;
     const isSending = props.isSending;
 
-    console.log("rendering message props, ", props)
-
     return (
         <div className={`flex w-full mb-4 items-end ${isMe ? "justify-end" : "justify-start"}`}>
             
@@ -57,7 +55,7 @@ const FlowMessage = (props: ChatMessageProps) => {
                 </div>
 
                 <div className={`text-[12px] mb-1 font-bold tracking-widest ${isMe ? "text-gray-200" : "text-gray-400"}`}>
-                    {isSending ? "Sending..." : props.messageData.sent.toLocaleString(undefined, {   weekday: "long", year: "numeric", month: "long", day: "numeric", hour12: true, hour: "2-digit", minute: "2-digit" })}
+                    {isSending ? "Sending..." : props.messageData.sent.toLocaleString("en-GB", {   weekday: "long", year: "numeric", month: "long", day: "numeric", hour12: true, hour: "2-digit", minute: "2-digit" })}
                 </div>
 
                 {messageAction === "change" ? (

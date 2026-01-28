@@ -72,7 +72,7 @@ export const ChatPage = (props: ChatPageProps) => {
 
     //@ts-ignore WILL BE FIXED IN THE NEST COMMIT
     const ActiveChatComponent = (props.createNew && otherUserId ? (<MakeNewChat otherUserId={otherUserId} />) : (chatId ? (activeChatData ? (<ActiveChat activeChatData={activeChatData} chatId={chatId} />) : (pendingChatData ? (<PendingChat chatData={pendingChatData} setReRenderOnApprove={setReRenderChats} chatId={chatId} changeMessageCallable={() => {}} />) : null)) : null));
-    console.log(ActiveChatComponent)
+    console.log("active chat component", ActiveChatComponent)
     return(
         <div className="flex w-full gap-16">
             <div className="w-1/3">

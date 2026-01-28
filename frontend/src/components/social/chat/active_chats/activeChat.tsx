@@ -88,6 +88,7 @@ const ActiveChat = (props: ActiveChatProps) => {
         if (props.chatId !== props.activeChatData.chatId) {
             return;
         }
+        console.log("reconnecting")
 
         socket.current = connectWSChat(props.activeChatData.token);
 
@@ -127,12 +128,14 @@ const ActiveChat = (props: ActiveChatProps) => {
         socket.current.addEventListener("open", websocketOpenEventListener);
         socket.current.addEventListener("close", websocketCloseEventListener);
 
+        setToRender(true);
+
         return () => {
             if (!socket.current) {
                 return;
             }
 
-            console.log("CLOSING CONNECTION");
+            console.log("CLOSING CONNECT11ION");
 
             socket.current.removeEventListener("open", websocketOpenEventListener);
             socket.current.removeEventListener("close", websocketCloseEventListener);

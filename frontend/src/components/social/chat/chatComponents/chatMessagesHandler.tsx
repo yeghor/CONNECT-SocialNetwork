@@ -183,11 +183,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             let messageApplied = false;
 
-            console.log(incomingMessage.tempId)
-
             const newFirstPage: ChatMessage[] = oldData.pages[0].map((msg: ChatMessage) => {
-                console.log("incoming message tempid, ", incomingMessage.tempId)
-                console.log("local message tempid, ", msg.tempId)
                 if (incomingMessage.tempId && (msg.tempId === incomingMessage.tempId || msg.messageId === incomingMessage.tempId)) {
                     // Message that is recorded to the DB doesn't need tempId
                     messageApplied = true;
@@ -196,13 +192,8 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
                 return msg;                
             })
 
-            console.log(messageApplied)
-
             // Nulling tempId in case the message isn't applied yet
             incomingMessage.tempId = null;
-
-            console.log("isapplied, ", messageApplied)
-            console.log("if isaplpied new pages, ", [ newFirstPage, ...oldData.pages.slice(1) ])
 
             return {
                 ...oldData,
@@ -212,10 +203,9 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     };
 
     const applyUpcomingWSMessage = (event: MessageEvent): void => {
-        const incomingMessage = JSON.parse(event.data);
-        console.log(incomingMessage)    
+        const incomingMessage = JSON.parse(event.data);  
         let mappedMessage = mapWebsocketReceivedMessage(incomingMessage);
-        console.log("INCOMING WS MESSAGE: ", mappedMessage)
+        console.log("incoming ws message, ", incomingMessage)
         switch (incomingMessage.action) {
             case "send":
                 if (!mappedMessage.text) return;
@@ -235,7 +225,6 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
 
     const fallbackUserID = crypto.randomUUID();
     const componentsProps: ChatMessageProps[] = messages.map(msg => {
-        console.log("props message tempid creation", msg.tempId)
         return {
             messageData: msg,
             // Passing temporary fake user data as a fallback, in case we didn't find owner data
@@ -281,14 +270,14 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     }, [scrollRef.current]);
 
     return (
-        <div>
+        <div className="pb-6">
             <div>
                 <button className="bg-white/10 hover:bg-white/20 text-white text-[11px] uppercase font-bold tracking-wider px-5 py-2.5 rounded-xl border border-white/10 transition-all active:scale-95" onClick={() => virtualizer.scrollToIndex(0, { align: "start" })}>Scroll bottom</button>
             </div>
 
             <div
                 ref={scrollRef}
-                className="h-[calc(100vh-510px)] overflow-auto scroll-smooth my-16 mx-4"
+                className="h-[calc(100vh-580px)] overflow-auto scroll-smooth my-16 mx-4"
                 style={{
                     // https://github.com/TanStack/virtual/discussions/195 Thank You
                     transform: "scaleY(-1)"
