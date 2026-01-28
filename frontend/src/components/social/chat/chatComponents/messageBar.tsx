@@ -39,7 +39,7 @@ const MessageBar = (props: MessageBarProps) => {
                 </div>
             )}
 
-            <form onSubmit={(e) => sendMessage(e)} className="group flex items-center gap-2 bg-white/5 backdrop-blur-md border-2 border-white/10 p-1.5 rounded-2xl shadow-2xl transition-all focus-within:border-white/20 focus-within:bg-white/10">
+            <form onSubmit={(e) => sendMessage(e)} className="group flex items-center gap-2 bg-white/5 backdrop-blur-md border-2 border-white/10 p-1.5 rounded-2xl transition-all focus-within:border-white/20 focus-within:bg-white/10">
                 
                 <input 
                     type="text"

@@ -100,7 +100,7 @@ const ActiveChat = (props: ActiveChatProps) => {
                 return;
             }
 
-            console.log("CLOSING CONNECTION");
+            console.log("CLOSING CONNECTION FIRST EFFECT");
 
             socket.current.removeEventListener("open", websocketOpenEventListener);
             socket.current.removeEventListener("close", websocketCloseEventListener);
@@ -135,7 +135,7 @@ const ActiveChat = (props: ActiveChatProps) => {
                 return;
             }
 
-            console.log("CLOSING CONNECT11ION");
+            console.log("CLOSING CONNECTION SECOND EFFECT");
 
             socket.current.removeEventListener("open", websocketOpenEventListener);
             socket.current.removeEventListener("close", websocketCloseEventListener);
@@ -144,7 +144,7 @@ const ActiveChat = (props: ActiveChatProps) => {
                 socket.current.close();
             }
         }
-    }, [props])
+    }, [props.chatId, props.activeChatData.chatId])
 
     if (!toRender) {
         return ( <LoadingIndicator customMessage={undefined} /> );

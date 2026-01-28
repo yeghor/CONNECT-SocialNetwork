@@ -26,6 +26,7 @@ import {
 import FlowMessage, { ChatMessageProps } from "./message.tsx";
 import MessageBar from "./messageBar.tsx";
 
+const tempId = crypto.randomUUID();
 
 const messagesFetcher = async (
     tokens: CookieTokenObject,
@@ -159,7 +160,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     };
 
     const sendMessageOptimistically = (message: string,): void => {
-        const tempId = crypto.randomUUID();
+        // const tempId = crypto.randomUUID();
 
         queryClient.setQueryData(currentChatQueryKeys, (oldData: any) => {
             if (!oldData) return oldData;
