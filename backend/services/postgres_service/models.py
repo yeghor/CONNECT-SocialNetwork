@@ -26,6 +26,8 @@ class User(Base):
     password_hash: Mapped[str]
     joined: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
+    email_confirmed: Mapped[bool] = mapped_column(default=False)
+
     avatar_image_name: Mapped[str] = mapped_column(nullable=True)
 
     posts: Mapped[List["Post"]] = relationship(

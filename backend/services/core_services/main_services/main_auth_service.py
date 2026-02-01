@@ -3,15 +3,7 @@ from authorization import password_utils
 from authorization import authorization_utils
 from services.core_services import MainServiceBase
 from services.postgres_service import Post, User
-from pydantic_schemas.pydantic_schemas_auth import (
-    RegisterSchema,
-    RefreshTokenSchema,
-    AccessTokenSchema,
-    LoginSchema,
-    RefreshAccessTokens,
-    OldNewPassword,
-    NewUsername
-)
+from pydantic_schemas.pydantic_schemas_auth import *
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import UploadFile
@@ -51,7 +43,7 @@ class MainServiceAuth(MainServiceBase):
         return token
 
     @web_exceptions_raiser
-    async def register(self, credentials: RegisterSchema) -> RefreshAccessTokens:
+    async def register(self, credentials: RegisterBody) -> RefreshAccessTokens:
         authorization_utils.validate_email(credentials.email)
         authorization_utils.validate_password(credentials.password)
 
@@ -62,7 +54,8 @@ class MainServiceAuth(MainServiceBase):
             user_id=str(uuid4()),
             username=credentials.username, 
             email=credentials.email,
-            password_hash=password_utils.hash_password(credentials.password)
+            password_hash=password_utils.hash_password(credentials.password),
+            email_confirmed=False
         )
 
         await self._PostgresService.insert_models_and_flush(new_user)
@@ -70,14 +63,17 @@ class MainServiceAuth(MainServiceBase):
         return await self._JWT.generate_save_refresh_access_token(user_id=new_user.user_id, redis=self._RedisService)
 
     @web_exceptions_raiser
-    async def login(self, credentials: LoginSchema) -> RefreshAccessTokens:
+    async def login(self, credentials: LoginBody) -> RefreshAccessTokens:
         potential_user = await self._PostgresService.get_user_by_username_or_email(username=credentials.username, email=None)
         if not potential_user:
             raise InvalidResourceProvided(detail=f"AuthService: User tried to login to not existing account with credentials: {credentials.username}", client_safe_detail="Account with these credentials does not exist. You may need to sign up first")
-        
+
         if not password_utils.check_password(credentials.password, potential_user.password_hash):
             raise Unauthorized(detail=f"AuthService: User with credentials: {credentials.username} tried to login with wrong password.", client_safe_detail="Password didn't match")
         
+        if not potential_user.email_confirmed:
+            return RefreshAccessTokens(email_confirmation_required=True)        
+
         user_id = potential_user.user_id
         potential_refresh_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="refresh")
         potential_access_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="acces")
@@ -88,6 +84,14 @@ class MainServiceAuth(MainServiceBase):
             await self._RedisService.delete_jwt(jwt_token=potential_refresh_token, token_type="refresh")
         
         return await self._JWT.generate_save_refresh_access_token(user_id=user_id, redis=self._RedisService)
+
+    @web_exceptions_raiser
+    async def confirm_email(self, confirmation_credentials: EmailConfirmationBody) -> RefreshAccessTokens:
+        pass
+
+    @web_exceptions_raiser
+    async def issue_new_confirmation_code(self, email: str) -> None:
+        pass
 
     @web_exceptions_raiser
     async def logout(self, tokens: RefreshAccessTokens) -> None:

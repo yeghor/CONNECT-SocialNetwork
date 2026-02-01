@@ -62,6 +62,7 @@ async def create():
 from services.redis_service import RedisService
 from services.chromaDB_service import ChromaService
 from services.postgres_service import PostgresService
+from services.email_service import EmailService
 
 class MainServiceBase(MainServiceABC):
 
@@ -74,28 +75,30 @@ class MainServiceBase(MainServiceABC):
     Take into account that SQLalchemy AsyncSession requires outer close handling - THIS CLASS DOESN'T CLOSE SQLalhemy AsyncSession.
     """
 
-    def __init__(self, Chroma: ChromaService, Redis: RedisService, Postgres: PostgresService, ImageStorage: ImageStorageABC):
-        self._PostgresService = Postgres
-        self._RedisService = Redis
-        self._ChromaService = Chroma
-        self._ImageStorage = ImageStorage
+    def __init__(self, ChromaInstance: ChromaService, RedisInstance: RedisService, PostgresInstance: PostgresService, ImageStorageInstance: ImageStorageABC, EmailInstance: EmailService | None = None):
+        self._PostgresService: PostgresService = PostgresInstance
+        self._RedisService: RedisService = RedisInstance
+        self._ChromaService: ChromaService = ChromaInstance
+        self._ImageStorage: ImageStorageABC = ImageStorageInstance
+        self._EmailService: EmailService | None = EmailInstance
 
         self._JWT = jwt_service.JWTService
 
     @classmethod
-    async def create(cls, postgres_session: AsyncSession, mode: Literal["prod", "test"] = "prod") -> "MainServiceABC":
+    async def create(cls, postgres_session: AsyncSession, include_email: bool = False, mode: Literal["prod", "test"] = "prod") -> "MainServiceABC":
         """Postgres AsyncSession needs to be closed manualy!"""
         Postgres = PostgresService(postgres_session=postgres_session)
         Redis = RedisService(db_pool=mode)
         ChromaDB = await ChromaService.connect(mode=mode)
+        Email = EmailService() if include_email else None
     
         prepared_env_use_s3 = USE_S3_BOOL_STRING.lower().strip()
 
         if prepared_env_use_s3 == "true": Storage = S3Storage(mode=mode)
         elif prepared_env_use_s3 == "false": Storage = LocalStorage(mode=mode, Redis=Redis)
-        else: raise ValueError("Invalid USE_S3 dotenv variable value. Read comment #")
+        else: raise ValueError("Invalid USE_S3 dotenv variable strin boolean value.")
         
-        return cls(Chroma=ChromaDB, Redis=Redis, Postgres=Postgres, ImageStorage=Storage)
+        return cls(ChromaInstance=ChromaDB, RedisInstance=Redis, PostgresInstance=Postgres, ImageStorageInstance=Storage, EmailInstance=Email)
     
     async def finish(self, commit_postgres: bool = True) -> None:
         # If i'm not mistaken, chromaDB doesn't require connection close
@@ -107,7 +110,6 @@ class MainServiceBase(MainServiceABC):
     
 class MainServiceContextManager(Generic[ServiceType], MainServiceContextManagerABS):
     """
-
     To use this context manager - call async crete function
     Example: `async with await MainServiceContextManager[YourServiceType].create(...) as main_service:`
     """
@@ -116,8 +118,8 @@ class MainServiceContextManager(Generic[ServiceType], MainServiceContextManagerA
         self.main_service = main_service
 
     @classmethod
-    async def create(cls, MainServiceType: Type[ServiceType], postgres_session: AsyncSession, mode: str = "prod") -> "MainServiceContextManager[ServiceType]":
-        main_service = await MainServiceType.create(postgres_session=postgres_session, mode=mode)
+    async def create(cls, MainServiceType: Type[ServiceType], postgres_session: AsyncSession, include_email: bool = False, mode: str = "prod") -> "MainServiceContextManager[ServiceType]":
+        main_service = await MainServiceType.create(postgres_session=postgres_session, include_email=include_email, mode=mode)
         return cls(main_service=main_service)
     
     async def __aenter__(self) -> ServiceType:

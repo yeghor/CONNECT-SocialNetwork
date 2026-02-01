@@ -23,6 +23,8 @@ EXCLUDE_VIEWED_POSTS_TIMEOUT = int(getenv("EXCLUDE_VIEWED_POSTS_TIMEOUT"))
 
 CHAT_TOKEN_EXPIRY_SECONDS = int(getenv("CHAT_TOKEN_EXPIRY_SECONDS"))
 
+EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS = int(getenv("EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS"))
+
 REDIS_HOST = getenv("REDIS_HOST")
 REDIS_PORT = int(getenv("REDIS_PORT"))
 
@@ -75,7 +77,7 @@ class RedisService:
             decode_responses=True,
         )
 
-        # Jwt
+        # Jwt key prefixes
         self.__jwt_acces_prefix = "acces-jwt-token:"
         self.__jwt_refresh_prefix = "refresh-jwt-token:"
 
@@ -86,19 +88,19 @@ class RedisService:
         self.__post_view_timeout_prefix_2 = "post:"
 
 
-        # Chat
+        # Chat key prefixes
         self.__chat_token_prefix = "chat-jwt-token:"
         self.__user_chat_pagination_prefix = "chat-pagination-user-"
 
         self.__chat_connection_prefix = "chat-connections-room:"
  
 
-        # Image acces tokens prefix
+        # Image acces tokens key prefixes
         self.__post_image_acces_prefix = "post-image-acces:"
         self.__user_image_acces_prefix = "user-image-acces:"
 
-        #
-
+        # Email confirmaion key prefixes
+        self.__email_confirmation_prefix = "email-to-confirm:"
 
     # ===============
     # JWT tokens logic
@@ -316,3 +318,34 @@ class RedisService:
 
             if not int(value) <= 0:
                 await self.__client.decr(pattern)
+
+    # Email confirmation
+
+    @redis_error_handler
+    async def assign_email_confirmation(self, email: str, code: str) -> bool:
+        """Returns True if email assigned succesfuly \n\n False if email confirmation already exists, in that case old code is still valide"""
+
+        pattern = f"{self.__email_confirmation_prefix}{email}"
+
+        if not self.__client.get(pattern):
+            await self.__client.setex(pattern, EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS, code)
+            return True
+        else:
+            return False
+
+    @redis_error_handler
+    async def reassign_email_confirmation(self, email: str, code: str):
+        pattern = f"{self.__email_confirmation_prefix}{email}"
+        await self.__client.setex(pattern, EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS, code)
+    
+    @redis_error_handler
+    async def deactivate_email_confirmation(self, email: str, code: str):
+        pattern = f"{self.__email_confirmation_prefix}{email}"
+        await self.__client.delete(pattern)
+
+    @redis_error_handler
+    async def check_email_confirmation_code(self, email: str, code: str) -> bool:
+        pattern = f"{self.__email_confirmation_prefix}{email}"
+        issued_code = await self.__client.get(pattern)
+
+        return issued_code == str(code)
