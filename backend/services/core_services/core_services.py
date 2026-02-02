@@ -1,5 +1,3 @@
-
-
 from services.postgres_service.models import *
 from services.image_storage_service import *
 from authorization import jwt_service
@@ -101,11 +99,11 @@ class MainServiceBase(MainServiceABC):
         return cls(ChromaInstance=ChromaDB, RedisInstance=Redis, PostgresInstance=Postgres, ImageStorageInstance=Storage, EmailInstance=Email)
     
     async def finish(self, commit_postgres: bool = True) -> None:
-        # If i'm not mistaken, chromaDB doesn't require connection close
+        # ChromaDB doesn't require connection close
         await self._RedisService.finish()
         if commit_postgres: await self._PostgresService.commit_changes()
         else: await self._PostgresService.rollback()
-        await self._PostgresService.close()
+        # await self._PostgresService.close()
 
     
 class MainServiceContextManager(Generic[ServiceType], MainServiceContextManagerABS):
@@ -127,4 +125,3 @@ class MainServiceContextManager(Generic[ServiceType], MainServiceContextManagerA
     
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.main_service.finish(commit_postgres=not exc_type)
-        pass

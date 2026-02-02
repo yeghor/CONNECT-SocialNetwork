@@ -1,1 +1,1 @@
-from .emai_service import EmailService
+from .email_service import EmailService

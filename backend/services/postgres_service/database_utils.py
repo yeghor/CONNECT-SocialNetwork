@@ -23,7 +23,7 @@ async def get_session_depends():
         async with SessionLocal() as conn:
             yield conn
     finally:
-        await engine.dispose()
+        await conn.aclose() # await engine.dispose()
 
 def postgres_exception_handler(action: str = "Unknown action with the database"):
     def decorator(func):

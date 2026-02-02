@@ -188,14 +188,16 @@ class PostgresService:
         )
 
     @postgres_exception_handler(action="Get user by username and email")
-    async def get_user_by_username_or_email(self, username: str | None = None, email: str | None = None) -> User:
+    async def get_user_by_username_or_email(self, username: str | None = None, email: str | None = None) -> User | None:
         if not username and not email:
             raise ValueError("Username AND email are None!")
 
         result = await self.__session.execute(
             select(User)
             .where(or_(User.username == username, User.email == email))
+            .limit(1)
         )
+
         return result.scalar()
     
     @postgres_exception_handler(action="Get followed users posts")

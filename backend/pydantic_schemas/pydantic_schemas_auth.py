@@ -63,10 +63,10 @@ class OldNewPassword(BaseModel):
 class NewUsername(BaseModel):
     new_username: str = Field(..., min_length=USERNAME_MIN_L, max_length=USERNAME_MAX_L)
 
-class EmailToConfirmBody(BaseModel):
+class EmailToConfirm(BaseModel):
     email_to_confirm: str  
 
-class EmailConfirmationBody(EmailToConfirmBody):
+class EmailConfirmationBody(EmailToConfirm):
     confirmation_code: str
 
 # JWT Token models
@@ -103,6 +103,10 @@ class AccessTokenSchema(BaseModel):
 
 
 class RefreshAccessTokens(RefreshTokenSchema, AccessTokenSchema):
+    """
+    Access and refresh tokens could be None if the account email isn't confirmed yet.\n\n
+    If email isn't confirmed yet: email_confirmation_required=True
+    """
     access_token: str | None = Field(default=None)
     expires_at_access: str | None = Field(default=None)
 

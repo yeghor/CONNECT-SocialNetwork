@@ -9,7 +9,7 @@ class EmailService:
     __instance = None
 
     @staticmethod
-    def get_email_service():
+    def __get_email_service():
         if EmailService.__instance == None:
             EmailService()
         return EmailService.__instance
@@ -36,7 +36,7 @@ class EmailService:
     def generate_confirmation_code(self) -> str:
         return str.join([random.randint(0, 9) for _ in range(6)])
 
-    async def send_email(self, recipient_email: str, recipient_username: str, confirmation_code: str) -> None:
+    async def send_second_factor_email(self, recipient_email: str, recipient_username: str, confirmation_code: str) -> None:
         if not self.__authorized:
             await self.__authorize_client()
         

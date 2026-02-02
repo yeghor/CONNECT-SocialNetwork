@@ -16,38 +16,39 @@ auth = APIRouter()
 async def login(
     credentials: LoginBody = Body(...),
     session: AsyncSession = Depends(get_session_depends)
-    ) -> RefreshAccessTokens:
+) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session, include_email=True) as auth:
         return await auth.login(credentials=credentials)
 
+# ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
 @auth.post("/register")
 @endpoint_exception_handler
 async def register(
     credentials: RegisterBody = Body(...),
     session: AsyncSession = Depends(get_session_depends)
-    ) -> None:
+) -> EmailToConfirm:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session, include_email=True) as auth:
         return await auth.register(credentials=credentials)
         
-@auth.post("/auth/confirm")
+@auth.post("/auth/second-factor")
 @endpoint_exception_handler
 async def confirm_authorization(
     confirmation_credentials: EmailConfirmationBody,
     session: AsyncSession = Depends(get_session_depends)
 ) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
-        return await auth.confirm_email(confirmation_credentials=confirmation_credentials)
+        return await auth.confirm_second_factor(confirmation_credentials=confirmation_credentials)
         
-@auth.post("/auth/confirm/sendCode")
+# ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
+@auth.post("/auth/new/second-factor")
 @endpoint_exception_handler
 async def send_confirmation_code(
-    email: EmailToConfirmBody,
+    email: EmailToConfirm,
     session: AsyncSession = Depends(get_session_depends)
-) -> None:
-    async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
-        return await auth.issue_new_confirmation_code(email=email.email_to_confirm)
+) -> EmailToConfirm:
+    async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
+        return await auth.issue_new_second_factor(email=email.email_to_confirm)
        
-
 @auth.post("/logout")
 @endpoint_exception_handler
 async def logout(

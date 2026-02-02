@@ -23,7 +23,7 @@ EXCLUDE_VIEWED_POSTS_TIMEOUT = int(getenv("EXCLUDE_VIEWED_POSTS_TIMEOUT"))
 
 CHAT_TOKEN_EXPIRY_SECONDS = int(getenv("CHAT_TOKEN_EXPIRY_SECONDS"))
 
-EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS = int(getenv("EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS"))
+SECOND_FACTOR_CODE_EXPIRY_SECONDS = int(getenv("EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS"))
 
 REDIS_HOST = getenv("REDIS_HOST")
 REDIS_PORT = int(getenv("REDIS_PORT"))
@@ -100,7 +100,8 @@ class RedisService:
         self.__user_image_acces_prefix = "user-image-acces:"
 
         # Email confirmaion key prefixes
-        self.__email_confirmation_prefix = "email-to-confirm:"
+        self.__second_factor_email_prefix = "second-factor-email:"
+        self.__second_factor_username_prefix = "second-factor-username:"
 
     # ===============
     # JWT tokens logic
@@ -322,30 +323,23 @@ class RedisService:
     # Email confirmation
 
     @redis_error_handler
-    async def assign_email_confirmation(self, email: str, code: str) -> bool:
-        """Returns True if email assigned succesfuly \n\n False if email confirmation already exists, in that case old code is still valide"""
+    async def assign_second_factor(self, email: str, code: str):
+        """Replaces old second factor with new, in case it's already exist"""
 
-        pattern = f"{self.__email_confirmation_prefix}{email}"
+        pattern = f"{self.__second_factor_email_prefix}{email}"
+        await self.__client.setex(pattern, SECOND_FACTOR_CODE_EXPIRY_SECONDS, code)
 
-        if not self.__client.get(pattern):
-            await self.__client.setex(pattern, EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS, code)
-            return True
-        else:
-            return False
 
     @redis_error_handler
-    async def reassign_email_confirmation(self, email: str, code: str):
-        pattern = f"{self.__email_confirmation_prefix}{email}"
-        await self.__client.setex(pattern, EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS, code)
-    
-    @redis_error_handler
-    async def deactivate_email_confirmation(self, email: str, code: str):
-        pattern = f"{self.__email_confirmation_prefix}{email}"
+    async def deactivate_second_factor(self, email: str):
+        pattern = f"{self.__second_factor_email_prefix}{email}"
         await self.__client.delete(pattern)
 
     @redis_error_handler
-    async def check_email_confirmation_code(self, email: str, code: str) -> bool:
-        pattern = f"{self.__email_confirmation_prefix}{email}"
+    async def check_second_factor(self, email: str, code: str) -> bool:
+        """Returns False even if email: code pair doesn't exist"""
+
+        pattern = f"{self.__second_factor_email_prefix}{email}"
         issued_code = await self.__client.get(pattern)
 
         return issued_code == str(code)
