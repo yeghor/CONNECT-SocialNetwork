@@ -15,7 +15,7 @@ from exceptions.exceptions_handler import web_exceptions_raiser, endpoint_except
 from exceptions.custom_exceptions import *
 
 class MainServiceAuth(MainServiceBase):
-    async def generate_set_of_tokens(self, user_id: str) -> RefreshAccessTokens:
+    async def generate_set_of_tokens(self, user_id: str, email_confirmation_required: bool = False) -> RefreshAccessTokens:
         potential_refresh_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="refresh")
         potential_access_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="acces")
 
@@ -24,7 +24,11 @@ class MainServiceAuth(MainServiceBase):
         if potential_refresh_token:
             await self._RedisService.delete_jwt(jwt_token=potential_refresh_token, token_type="refresh")
         
-        return await self._JWT.generate_save_refresh_access_token(user_id=user_id, redis=self._RedisService)
+        return await self._JWT.generate_save_refresh_access_token(
+            user_id=user_id,
+            email_confirmation_required=email_confirmation_required,
+            redis=self._RedisService
+        )
 
     async def _create_second_factor(self, email: str, username: str) -> None:
             confirmation_code = self._EmailService.generate_confirmation_code()
@@ -81,7 +85,7 @@ class MainServiceAuth(MainServiceBase):
 
         await self._PostgresService.insert_models_and_flush(new_user)
 
-        await self._create_second_factor(email=credentials.email, username=credentials.email)
+        await self._create_second_factor(email=credentials.email, username=credentials.username)
 
         return EmailToConfirm(email_to_confirm=credentials.email)
 
@@ -103,8 +107,8 @@ class MainServiceAuth(MainServiceBase):
     
 
     @web_exceptions_raiser
-    async def confirm_second_factor(self, confirmation_credentials: EmailConfirmationBody) -> RefreshAccessTokens:
-        if not await self._RedisService.check_second_factor(email=confirmation_credentials.email_to_confirm, code=confirmation_credentials.confirmation_code1):
+    async def authenticate_second_factor(self, confirmation_credentials: EmailConfirmationBody) -> RefreshAccessTokens:
+        if not await self._RedisService.check_second_factor(email=confirmation_credentials.email_to_confirm, code=confirmation_credentials.confirmation_code):
             raise Unauthorized(detail=f"AuthService: User with email: {confirmation_credentials.email_to_confirm} tried to perform second factor authentication using wrong code.", client_safe_detail="Second factor authentication failed")
 
         confirmed_user = await self._PostgresService.get_user_by_username_or_email(email=confirmation_credentials.email_to_confirm)

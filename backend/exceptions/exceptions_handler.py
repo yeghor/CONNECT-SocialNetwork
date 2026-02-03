@@ -31,7 +31,7 @@ def endpoint_exception_handler(func):
                 raise HTTPException(status_code=e.status_code, detail=e.client_safe_detail)
             
             except InternalServerErrorExc as e:
-                logging.log(level=e.logging_type, msg=str(e), exc_info=True)
+                logging.log(level=e.logging_level, msg=str(e), exc_info=True)
                 raise HTTPException(status_code=e.status_code, detail=e.client_safe_detail)
             
             # In case endpoint returned unexpected data we're handling fastapi's `ResponseValidationError`
@@ -73,12 +73,14 @@ def web_exceptions_raiser(func):
             if isinstance(e, MediaError):
                 logging_level = 50 # Be aware of cases when postgres database and s3 or local data NOT synced
 
-            raise InternalServerErrorExc(
+            InternalExcToRaise = InternalServerErrorExc(
                 client_safe_detail=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE,
                 dev_log_detail=str(e),
-                logging_level=logging_level,
                 exc_type=e
-            ) from e
+            )
+            InternalExcToRaise.logging_level = logging_level
+            
+            raise InternalExcToRaise
         
         # We must handle these exceptions becasue: in this project, decorated with `web_exception_raiser` functions call functions that also decorated with the decorator.
         # By handling exceptions that being raised in this decorator too we can keep correct exception chaining.

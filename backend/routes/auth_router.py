@@ -37,7 +37,7 @@ async def confirm_authorization(
     session: AsyncSession = Depends(get_session_depends)
 ) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
-        return await auth.confirm_second_factor(confirmation_credentials=confirmation_credentials)
+        return await auth.authenticate_second_factor(confirmation_credentials=confirmation_credentials)
         
 # ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
 @auth.post("/auth/new/second-factor")
