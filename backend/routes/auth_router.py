@@ -42,7 +42,7 @@ async def confirm_authorization(
 # ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
 @auth.post("/auth/new/second-factor")
 @endpoint_exception_handler
-async def send_confirmation_code(
+async def issue_new_second_factor(
     email: EmailToConfirm,
     session: AsyncSession = Depends(get_session_depends)
 ) -> EmailToConfirm:
