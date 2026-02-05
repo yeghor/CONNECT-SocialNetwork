@@ -101,13 +101,13 @@ class MainServiceAuth(MainServiceBase):
         if not potential_user.email_confirmed:
             # Returning null tokens with email confirmation required flag set to True
             await self._create_second_factor(email=potential_user.email, username=potential_user.username)
-            return RefreshAccessTokens(email_confirmation_required=True)        
+            return RefreshAccessTokens(email_to_confirm=True)        
 
         return await self.generate_set_of_tokens(user_id=potential_user.user_id)
     
 
     @web_exceptions_raiser
-    async def authenticate_second_factor(self, confirmation_credentials: EmailConfirmationBody) -> RefreshAccessTokens:
+    async def authenticate_second_factor(self, confirmation_credentials: SecondFactorConfirmationBody) -> RefreshAccessTokens:
         if not await self._RedisService.check_second_factor(email=confirmation_credentials.email_to_confirm, code=confirmation_credentials.confirmation_code):
             raise Unauthorized(detail=f"AuthService: User with email: {confirmation_credentials.email_to_confirm} tried to perform second factor authentication using wrong code.", client_safe_detail="Second factor authentication failed")
 

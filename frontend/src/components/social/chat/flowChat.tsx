@@ -1,5 +1,5 @@
 import React from "react";
-import { Chat } from "../../../fetching/responseDTOs.ts";
+import { Chat } from "../../../fetching/DTOs.ts";
 import { Link, useParams } from "react-router-dom";
 import { specificChatURI } from "../../../consts.ts";
 

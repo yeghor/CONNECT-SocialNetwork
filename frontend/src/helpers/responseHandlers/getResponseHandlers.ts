@@ -1,4 +1,4 @@
-import {AccessTokenResponse, BadResponse, SuccessfulResponse} from "../../fetching/responseDTOs.ts"
+import {AccessTokenResponse, BadResponse, SuccessfulResponse} from "../../fetching/DTOs.ts"
 import {
     AccessTokenCookieKey,
     unauthorizedRedirectURI,

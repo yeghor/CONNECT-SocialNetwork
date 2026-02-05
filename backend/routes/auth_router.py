@@ -33,7 +33,7 @@ async def register(
 @auth.post("/auth/second-factor")
 @endpoint_exception_handler
 async def confirm_authorization(
-    confirmation_credentials: EmailConfirmationBody,
+    confirmation_credentials: SecondFactorConfirmationBody,
     session: AsyncSession = Depends(get_session_depends)
 ) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:

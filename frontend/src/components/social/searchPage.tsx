@@ -9,7 +9,7 @@ import {
     FeedPostsResponse,
     ShortUserProfile,
     ShortUserProfilesResponse
-} from "../../fetching/responseDTOs"
+} from "../../fetching/DTOs.ts"
 import {useNavigate, useSearchParams} from "react-router";
 
 import FlowPost from "./post/flowPost.tsx"

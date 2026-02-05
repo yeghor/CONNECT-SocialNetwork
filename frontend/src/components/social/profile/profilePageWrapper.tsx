@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 
-import { UserProfileResponse, UserProfile } from "../../../fetching/responseDTOs.ts";
+import { UserProfileResponse, UserProfile } from "../../../fetching/DTOs.ts";
 import { MyProfilePage, ProfilePage } from ".././profilePage.tsx";
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
 import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts";

@@ -4,7 +4,7 @@ import { fetchCreateDialogueChat, fetchDialoqueId  } from "../../../../fetching/
 import { resolvePath, useNavigate } from "react-router";
 import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler";
 import { safeAPICall } from "../../../../fetching/fetchUtils";
-import { CustomSimpleResponse, SuccessfulResponse, ChatMessage } from "../../../../fetching/responseDTOs";
+import { CustomSimpleResponse, SuccessfulResponse, ChatMessage } from "../../../../fetching/DTOs/";
 import { specificChatURI } from "../../../../consts";
 import FlowMessage from "../chatComponents/message";
 import LoadingIndicator from "../../../base/centeredLoadingIndicator";

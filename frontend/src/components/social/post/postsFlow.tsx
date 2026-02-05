@@ -10,7 +10,7 @@ import {
     CookieTokenObject
 } from "../../../helpers/cookies/cookiesHandler.ts";
 
-import { FeedPost, FeedPostsResponse } from "../../../fetching/responseDTOs.ts";
+import { FeedPost, FeedPostsResponse } from "../../../fetching/DTOs.ts";
 import { useNavigate } from "react-router";
 import { NavigateFunction } from "react-router-dom";
 import FlowPost from "./flowPost.tsx";

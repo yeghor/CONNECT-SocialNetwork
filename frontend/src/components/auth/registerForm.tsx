@@ -23,6 +23,9 @@ const RegisterForm = () => {
     const [ email, setEmail ] = useState("");
     const [ password, setPassword ] = useState("");
 
+    const [ emailToConfirm, setEmailToConfirm ] = useState<string | null>(null);
+    const [ showSecondFactor, setShowSecondFactor ] = useState(false);
+
     const formHandler = async (event: React.FormEvent): Promise<void> => {
         event.preventDefault();
 
@@ -47,10 +50,9 @@ const RegisterForm = () => {
             }
 
             if(response.success) {
-                setUpdateCookie(AccessTokenCookieKey, response.accessToken);
-                setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
-                navigate(appHomeURI);
-                return;
+                setEmailToConfirm(response.emailToConfirm);
+                setShowSecondFactor(true);
+                return
             }
         } catch(err) {
             console.error(err);
@@ -58,6 +60,10 @@ const RegisterForm = () => {
             return;
         }
     }
+
+    const secondFactorHandler = () => {
+
+    };1
 
     return (
         <section>

@@ -1,6 +1,6 @@
 import { CookieTokenObject } from "../../../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
-import {PostCommentsResponse, ShortPostInterface} from "../../../../fetching/responseDTOs.ts";
+import {PostCommentsResponse, ShortPostInterface} from "../../../../fetching/DTOs.ts";
 import { fetchLoadPost, fetchPostComments } from "../../../../fetching/fetchSocial.ts";
 import {validateGETResponse} from "../../../../helpers/responseHandlers/getResponseHandlers.ts";
 import { checkUnauthorizedResponse, retryUnauthorizedResponse } from "../../../../fetching/fetchUtils.ts";

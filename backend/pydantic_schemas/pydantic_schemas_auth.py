@@ -66,7 +66,7 @@ class NewUsername(BaseModel):
 class EmailToConfirm(BaseModel):
     email_to_confirm: str  
 
-class EmailConfirmationBody(EmailToConfirm):
+class SecondFactorConfirmationBody(EmailToConfirm):
     confirmation_code: str
 
 # JWT Token models
@@ -105,7 +105,8 @@ class AccessTokenSchema(BaseModel):
 class RefreshAccessTokens(RefreshTokenSchema, AccessTokenSchema):
     """
     Access and refresh tokens could be None if the account email isn't confirmed yet.\n\n
-    If email isn't confirmed yet: email_confirmation_required=True
+    If email isn't confirmed yet: email_confirmation_required=True \n\n
+    If second factor authentication required, `email_to_confirm` contains email string while tokens data have None values
     """
     access_token: str | None = Field(default=None)
     expires_at_access: str | None = Field(default=None)
@@ -113,4 +114,5 @@ class RefreshAccessTokens(RefreshTokenSchema, AccessTokenSchema):
     refresh_token: str | None = Field(default=None)
     expires_at_refresh: str | None = Field(default=None)
 
-    email_confirmation_required: bool
+
+    email_to_confirm: str| None = Field(default=None)

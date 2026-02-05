@@ -47,7 +47,7 @@ import {
     UserProfileResponse,
     shortUserProfilesMapper,
     userProfileMapper as userProfileResponseMapper, PostBaseResponse, postBaseMapper
-} from "./responseDTOs.ts";
+} from "./DTOs.ts";
 import { OrderPostsByFlag, ProfilePostsSectionFlag } from "../components/social/profilePage.tsx";
 
 // Get Posts

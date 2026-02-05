@@ -3,7 +3,7 @@ import {
     isBadResponse,
     badResponseMapper, AccessTokenResponse, SuccessfulResponse, createBadResponseManually,
     successfulResponseMapper
-} from "./responseDTOs.ts"
+} from "./DTOs.ts"
 import { NavigateFunction}  from "react-router-dom";
 import { fetchRefresh } from "./fetchAuth.ts";
 import { CookieTokenObject, setUpdateCookie } from "../helpers/cookies/cookiesHandler.ts";

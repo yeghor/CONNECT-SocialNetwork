@@ -36,7 +36,7 @@ import {
     customSimpleResponseMapper, CustomSimpleResponse,
     pendingChatConnectResponseMapper,
     PendingChatConnectResponse,
-} from "./responseDTOs.ts"
+} from "./DTOs.ts"
 
 export class WebsocketNotReady extends Error {
     constructor (msg: string){

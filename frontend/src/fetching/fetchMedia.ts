@@ -9,7 +9,7 @@ import {
     SuccessfulResponse,
     successfulResponseMapper,
 
-} from "./responseDTOs.ts"
+} from "./DTOs.ts"
 
 import {
     requestTokenMultipartHeaders

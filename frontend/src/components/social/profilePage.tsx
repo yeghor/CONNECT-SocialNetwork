@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from "react";
 import VirtualizedList from "../butterySmoothScroll/virtualizedList.tsx";
 import FlowPost from "./post/flowPost.tsx";
 
-import { SuccessfulResponse, UserProfile, FeedPostsResponse, FeedPost } from "../../fetching/responseDTOs.ts";
+import { SuccessfulResponse, UserProfile, FeedPostsResponse, FeedPost } from "../../fetching/DTOs.ts";
 import { useNavigate, Link } from "react-router";
 import { CookieTokenObject, getCookiesOrRedirect } from "../../helpers/cookies/cookiesHandler.ts";
 import { safeAPICall } from "../../fetching/fetchUtils.ts";

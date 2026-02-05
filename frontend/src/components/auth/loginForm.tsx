@@ -22,6 +22,10 @@ const LoginForm = () => {
     const [ username, setUsername ] = useState("");
     const [ password, setPassword ] = useState("");
 
+    const [ emailToConfirm, setEmailToConfirm ] = useState<string | null>(null);
+    const [ showSecondFactor, setShowSecondFactor ] = useState(false);
+
+    // Manually calling fetchLogin, because safeApiCall doesn't provide interface to working without tokens object. In our case, on login we can't have it.
     const formHandler = async (event: React.FormEvent) => {
         event.preventDefault();
 
@@ -32,14 +36,18 @@ const LoginForm = () => {
                 return;
             }
             
-            if(response.success) {
-                setUpdateCookie(AccessTokenCookieKey, response.accessToken);
-                setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
-                navigate(appHomeURI);
+            if (response.success) {
+                if (response.emailToConfirm) {
+                    setEmailToConfirm(response.emailToConfirm);
+                    setShowSecondFactor(true);
+                } else {
+                    setUpdateCookie(AccessTokenCookieKey, response.accessToken);
+                    setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
+                    navigate(appHomeURI);                    
+                }
+
                 return;
             }
-
-            setErrorMessage(response.detail)
 
         } catch (err) {
             console.error(err);
@@ -48,8 +56,12 @@ const LoginForm = () => {
         }
     }
 
+    const secondFactorHandler = () => {
+
+    };
+
     return (
-        <section>
+        <div>
             <div className="flex flex-col items-center justify-top mt-16 px-6 py-8 mx-auto md:h-screen lg:py-0">
                 <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
                     <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
@@ -82,7 +94,7 @@ const LoginForm = () => {
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     );
 }
 

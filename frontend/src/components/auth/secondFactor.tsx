@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 
-const SecondFactor = () => {
+interface SecondFactorProps {
+    emailToConfirm: string
+}
+
+const SecondFactor = (props: SecondFactorProps) => {
+    const [ confirmationCode, setConfirmationCode ] = useState("");
+    const [ activeInput, setActiveInput ] = useState(0);
+
+    
+
     return(
         <div>
             Hello World!

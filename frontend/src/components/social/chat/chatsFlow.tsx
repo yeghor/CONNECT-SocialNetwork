@@ -8,7 +8,7 @@ import {
 } from "../../butterySmoothScroll/scrollVirtualizationUtils.ts";
 import { fetchChats, fetchNotApprovedChats, fetchNotApprovedChatsAmount } from "../../../fetching/fetchChatWS.ts";
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
-import { Chat, ChatsResponse, CustomSimpleResponse } from "../../../fetching/responseDTOs.ts";
+import { Chat, ChatsResponse, CustomSimpleResponse } from "../../../fetching/DTOs.ts";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 

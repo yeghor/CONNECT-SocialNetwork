@@ -37,7 +37,7 @@ export const recentActivityURL = `${BASEURL}/recent-activity`;
 
 export const myFriendsURL = `${BASEURL}/friends`;
 
-export const secondFactorConfirm = `${BASEURL}/auth/second-factor`
+export const confirmSecondFactorURL = `${BASEURL}/auth/second-factor`
 export const issueNewSecondFactor = `${BASEURL}/auth/new/second-factor`
 
 //Social

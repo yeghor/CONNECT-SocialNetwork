@@ -1,5 +1,5 @@
 import React from "react";
-import { FeedPost } from "../../../fetching/responseDTOs.ts";
+import { FeedPost } from "../../../fetching/DTOs.ts";
 import OwnerComponent from "./owner.tsx";
 import {Link} from "react-router-dom";
 

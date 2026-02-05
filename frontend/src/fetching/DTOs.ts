@@ -70,16 +70,21 @@ const userMapper = (data: UserDTO): User => {
     };
 };
 
-// Login/Register/Refresh
+// Login/Register/Refresh/Second Factor
 
 export interface AccessTokenDTO {
     access_token: string,
     expires_at_access: string
 }
 
-export interface AuthResponseDTO extends AccessTokenDTO {
-    refresh_token: string,
-    expires_at_refresh: string
+export interface AuthTokensResponseDTO {
+    refresh_token: string | null,
+    expires_at_refresh: string | null,
+
+    access_token: string | null,
+    expires_at_access: string | null,
+
+    email_to_confirm: string | null
 }
 
 export interface AccessTokenResponse extends SuccessfulResponse {
@@ -87,17 +92,39 @@ export interface AccessTokenResponse extends SuccessfulResponse {
     expiresAtAccessToken: Date
 }
 
-export interface AuthTokensResponse extends AccessTokenResponse {
-    refreshToken: string,
-    expiresAtRefreshToken: Date
+export interface AuthTokensResponse extends SuccessfulResponse {
+    emailToConfirm: string | null,
+
+    refreshToken: string | null,
+    expiresAtRefreshToken: Date | null,
+
+    accessToken: string | null,
+    expiresAtAccessToken: Date | null
 }
 
-export const authTokensResponseMapper = (data: AuthResponseDTO): AuthTokensResponse => {
+interface EmailToConfirmDTO {
+    email_to_confirm: string
+};
+
+export interface EmailToConfirmResponse extends SuccessfulResponse {
+    emailToConfirm: string
+}  
+
+export const authTokensResponseMapper = (data: AuthTokensResponseDTO): AuthTokensResponse => {
     return {
         accessToken: data.access_token,
-        expiresAtAccessToken: new Date(data.expires_at_access),
+        expiresAtAccessToken: data.expires_at_access ? new Date(data.expires_at_access) : null,
         refreshToken: data.refresh_token,
-        expiresAtRefreshToken: new Date(data.expires_at_refresh),
+        expiresAtRefreshToken: data.expires_at_refresh ? new Date(data.expires_at_refresh) : null,
+        emailToConfirm: data.email_to_confirm,
+
+        success: true
+    };
+};
+
+export const emailToConfirmResponseMapper = (data: EmailToConfirmDTO): EmailToConfirmResponse => {
+    return {
+        emailToConfirm: data.email_to_confirm,
         success: true
     };
 };

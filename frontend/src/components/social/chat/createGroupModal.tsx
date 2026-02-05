@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchMyFriends } from "../../../fetching/fetchSocial";
 import { safeAPICall } from "../../../fetching/fetchUtils";
-import { CustomSimpleResponse, ShortUserProfile, ShortUserProfilesResponse, SuccessfulResponse } from "../../../fetching/responseDTOs";
+import { CustomSimpleResponse, ShortUserProfile, ShortUserProfilesResponse, SuccessfulResponse } from "../../../fetching/DTOs/";
 import { useNavigate } from "react-router";
 import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler";
 import FlowUser from "../post/flowUser";
