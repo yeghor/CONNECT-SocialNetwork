@@ -101,7 +101,7 @@ class MainServiceAuth(MainServiceBase):
         if not potential_user.email_confirmed:
             # Returning null tokens with email confirmation required flag set to True
             await self._create_second_factor(email=potential_user.email, username=potential_user.username)
-            return RefreshAccessTokens(email_to_confirm=True)        
+            return RefreshAccessTokens(email_to_confirm=potential_user.email)        
 
         return await self.generate_set_of_tokens(user_id=potential_user.user_id)
     

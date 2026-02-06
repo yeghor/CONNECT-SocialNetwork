@@ -14,6 +14,7 @@ import { validateGETResponse } from "../../helpers/responseHandlers/getResponseH
 
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
 import {Link} from "react-router-dom";
+import SecondFactor from "./secondFactor.tsx";
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -37,6 +38,7 @@ const LoginForm = () => {
             }
             
             if (response.success) {
+                console.log("succesfull response, ", response)
                 if (response.emailToConfirm) {
                     setEmailToConfirm(response.emailToConfirm);
                     setShowSecondFactor(true);
@@ -48,6 +50,13 @@ const LoginForm = () => {
 
                 return;
             }
+
+            if (response.statusCode === 401 || response.statusCode === 400) {
+                setErrorMessage(response.detail);
+                return;
+            }
+            
+            navigate(internalServerErrorURI);
 
         } catch (err) {
             console.error(err);
@@ -61,8 +70,8 @@ const LoginForm = () => {
     };
 
     return (
-        <div>
-            <div className="flex flex-col items-center justify-top mt-16 px-6 py-8 mx-auto md:h-screen lg:py-0">
+        <div className="flex flex-col items-center justify-top mt-16 px-6 py-8 mx-auto md:h-screen lg:py-0">
+            { showSecondFactor && emailToConfirm ? <SecondFactor emailToConfirm={emailToConfirm} /> :
                 <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
                     <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-white md:text-2xl">
@@ -92,8 +101,7 @@ const LoginForm = () => {
                             </p>
                         </form>
                     </div>
-                </div>
-            </div>
+                </div> }
         </div>
     );
 }
