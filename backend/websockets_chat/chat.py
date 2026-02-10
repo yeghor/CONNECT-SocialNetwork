@@ -142,6 +142,16 @@ async def get_number_of_not_approved_chats(
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
         return await chat_service.get_number_of_not_approved_chats(user=user) 
 
+@chat.post("/chat/leave/{chat_id}")
+@endpoint_exception_handler
+async def leave_from_chat(
+    user_: User = Depends(authorize_request_depends),
+    session: AsyncSession = Depends(get_session_depends)
+) -> None:
+    user = await merge_model(postgres_session=session,model_obj=user)
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.leave_from_chat(user=user) 
+
 async def wsconnect(token: str, websocket: WebSocket) -> ChatJWTPayload:
     connection_data = JWTService.extract_chat_jwt_payload(jwt_token=token)
     await connection.connect(room_id=connection_data.room_id, user_id=connection_data.user_id, websocket=websocket)

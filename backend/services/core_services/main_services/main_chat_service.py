@@ -370,3 +370,8 @@ class MainChatService(MainServiceBase):
     async def get_number_of_not_approved_chats(self, user: User) -> int:
         chat_rooms = await self._PostgresService.get_user_chats(user=user, approved=False)
         return len(chat_rooms)
+    
+    @web_exceptions_raiser
+    async def leave_from_chat(self, user: User, room_id: str) -> None:
+        chat_room = await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=True)
+        chat_room.participants.remove(user)

@@ -10,11 +10,12 @@ import {
     chatsURL,
     notApprovedChatsURL,
     dialogueChatURL, chatMessages,
-    getDialoqueId,
+    getDialoqueIdURL,
     notApprovedChatsAmountURL,
     pendingChatConnectURL,
     isChatPendingURL,
-    groupChatURL
+    groupChatURL,
+    leaveFromChatURL
 } from "./urls.ts"
 
 import {
@@ -220,7 +221,7 @@ export const fetchDialoqueId = async (accessJWT: string, otherUserId: string): A
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper(getDialoqueId(otherUserId), requestInit, customSimpleResponseMapper<string | null>);
+    return await fetchHelper(getDialoqueIdURL(otherUserId), requestInit, customSimpleResponseMapper<string | null>);
 };
 
 export const fetchNotApprovedChatsAmount = async (accessJWT: string): APIResponse<CustomSimpleResponse<number>> => {
@@ -231,3 +232,12 @@ export const fetchNotApprovedChatsAmount = async (accessJWT: string): APIRespons
 
     return await fetchHelper(notApprovedChatsAmountURL, requestInit, customSimpleResponseMapper<number>);
 }
+
+export const fetchLeaveChat = async (accessJWT: string, chatId: string): APIResponse<SuccessfulResponse> => {
+    const requestInit: RequestInit = {
+        method: "POST",
+        headers: requestTokenHeaders(accessJWT),
+    };
+
+    return await fetchHelper<SuccessfulResponse>(leaveFromChatURL(chatId), requestInit, successfulResponseMapper);
+};

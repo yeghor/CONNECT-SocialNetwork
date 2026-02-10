@@ -129,8 +129,12 @@ export const approveChatURL = (chatId: string) => {
     return `${BASEURL}${chatConstructor}/approve/${chatId}`;
 };
 
-export const getDialoqueId = (otherUserId: string) => {
+export const getDialoqueIdURL = (otherUserId: string) => {
     return `${BASEURL}${chatConstructor}/id/${otherUserId}`;
-}
+};
+
+export const leaveFromChatURL = (chatId: string) => {
+    return `${BASEURL}${chatConstructor}/leave/${chatId}`;
+};
 
 export const notApprovedChatsAmountURL = `${BASEURL}${chatConstructor}/not-approved`
