@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { Link } from "react-router";
 import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler";
 import { useNavigate } from "react-router";
-import { PendingChatConnect, SuccessfulResponse } from "../../../../fetching/responseDTOs";
+import { PendingChatConnect, SuccessfulResponse } from "../../../../fetching/DTOs/";
 import FlowMessage from "../chatComponents/message";
 import { safeAPICall } from "../../../../fetching/fetchUtils";
 import { fetchApproveChat, fetchDisapproveChat } from "../../../../fetching/fetchChatWS";

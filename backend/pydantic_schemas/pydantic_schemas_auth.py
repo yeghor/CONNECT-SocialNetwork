@@ -42,11 +42,11 @@ class PayloadJWT(BaseModel):
 
 # Body forms
 # ==============
-class LoginSchema(BaseModel):
+class LoginBody(BaseModel):
     username: str = Field(..., min_length=USERNAME_MIN_L, max_length=USERNAME_MAX_L)
     password: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
 
-class RegisterSchema(LoginSchema):
+class RegisterBody(LoginBody):
     email: str
     
 class OldNewPassword(BaseModel):
@@ -63,11 +63,13 @@ class OldNewPassword(BaseModel):
 class NewUsername(BaseModel):
     new_username: str = Field(..., min_length=USERNAME_MIN_L, max_length=USERNAME_MAX_L)
 
-# =============
+class EmailToConfirm(BaseModel):
+    email_to_confirm: str  
 
+class SecondFactorConfirmationBody(EmailToConfirm):
+    confirmation_code: str
 
 # JWT Token models
-# ================
 
 class RefreshAccesTokensProvided(BaseModel):
     refresh_token: str
@@ -101,4 +103,16 @@ class AccessTokenSchema(BaseModel):
 
 
 class RefreshAccessTokens(RefreshTokenSchema, AccessTokenSchema):
-    pass
+    """
+    Access and refresh tokens could be None if the account email isn't confirmed yet.\n\n
+    If email isn't confirmed yet: email_confirmation_required=True \n\n
+    If second factor authentication required, `email_to_confirm` contains email string while tokens data have None values
+    """
+    access_token: str | None = Field(default=None)
+    expires_at_access: str | None = Field(default=None)
+
+    refresh_token: str | None = Field(default=None)
+    expires_at_refresh: str | None = Field(default=None)
+
+
+    email_to_confirm: str| None = Field(default=None)

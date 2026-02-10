@@ -44,7 +44,7 @@ class InternalServerErrorExc(EndpointExcConstructor):
     """Code - 500 \n `logging type` - 30 = warning, 40 - error, 50 - critical"""
 
     status_code: int = 500
-    logging_type: Literal[40, 50] = 50
+    logging_level: Literal[40, 50] = 50
 
 
 class NotFoundExc(EndpointExcConstructor):

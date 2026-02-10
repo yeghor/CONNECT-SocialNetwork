@@ -10,6 +10,8 @@ import {
     refreshTokenURL,
     changePasswordURL,
     changeUsernameURL,
+    confirmSecondFactorURL,
+    issueNewSecondFactor as issueNewSecondFactorURL,
 } from "./urls.ts";
 
 import { 
@@ -19,7 +21,9 @@ import {
     registerBody,
     logoutBody,
     changePasswordBody, 
-    changeUsernameBody
+    changeUsernameBody,
+    confirmSecondFactorBody,
+    issueNewSecondFactorBody
 } from "./requestConstructors.ts"
 
 import {
@@ -28,7 +32,9 @@ import {
     AuthTokensResponse,
     authTokensResponseMapper,
     AccessTokenResponse,
-} from "./responseDTOs.ts"
+    EmailToConfirmResponse,
+    emailToConfirmResponseMapper,
+} from "./DTOs.ts"
 
 
 export const fetchLogin = async (username: string, password: string): APIResponse<AuthTokensResponse> => {
@@ -41,14 +47,14 @@ export const fetchLogin = async (username: string, password: string): APIRespons
     return await fetchHelper<AuthTokensResponse>(loginURL, requestInit, authTokensResponseMapper);
 }
 
-export const fetchRegister = async (username: string, email: string, password: string): APIResponse<AuthTokensResponse> => {
+export const fetchRegister = async (username: string, email: string, password: string): APIResponse<EmailToConfirmResponse> => {
     const requestInit: RequestInit  = {
         method: "POST",
         headers: requestHeaders(),
         body: JSON.stringify(registerBody(username, email, password))
     };
 
-    return await fetchHelper<AuthTokensResponse>(registerURL, requestInit, authTokensResponseMapper);
+    return await fetchHelper<EmailToConfirmResponse>(registerURL, requestInit, emailToConfirmResponseMapper);
 }
 
 export const fetchRefresh = async (refreshJWT: string): APIResponse<AccessTokenResponse> => {
@@ -57,7 +63,7 @@ export const fetchRefresh = async (refreshJWT: string): APIResponse<AccessTokenR
         headers: requestTokenHeaders(refreshJWT),
     };
 
-    return await fetchHelper<AuthTokensResponse>(refreshTokenURL, requestInit, authTokensResponseMapper);
+    return await fetchHelper<AccessTokenResponse>(refreshTokenURL, requestInit, authTokensResponseMapper);
 }
 
 export const fetchChangePassword = async (accessJWT: string, oldPassword: string, newPassword: string): APIResponse<SuccessfulResponse> => {
@@ -87,5 +93,25 @@ export const fetchLogout = async (accessJWT: string, rerfreshJWT: string): APIRe
         body: JSON.stringify(logoutBody(accessJWT, rerfreshJWT))
     }
 
-    return await fetchHelper(logoutURL, requestInit, successfulResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(logoutURL, requestInit, successfulResponseMapper);
+}
+
+export const fetchConfirmSecondFactor = async (confirmationCode: string, email: string): APIResponse<AuthTokensResponse> => {
+    const requestInit: RequestInit = {
+        method: "POST",
+        headers: requestHeaders(),
+        body: JSON.stringify(confirmSecondFactorBody(confirmationCode, email))
+    };
+
+    return await fetchHelper<AuthTokensResponse>(confirmSecondFactorURL, requestInit, authTokensResponseMapper);
+}
+
+export const fetchIssueNewSecondFactor = async (email: string): APIResponse<EmailToConfirmResponse> => {
+    const requestInit: RequestInit = {
+        method: "POST",
+        headers: requestHeaders(),
+        body: JSON.stringify(issueNewSecondFactorBody(email))
+    };
+
+    return await fetchHelper<EmailToConfirmResponse>(issueNewSecondFactorURL, requestInit, emailToConfirmResponseMapper);
 }

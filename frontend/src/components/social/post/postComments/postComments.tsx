@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from "react";
 import PostComment from "./postComment.tsx";
 
 import commentFetchHelper, { CommentProps } from "./commentFetchHelper.ts";
-import { PostCommentsResponse, ShortPostInterface } from "../../../../fetching/responseDTOs.ts";
+import { PostCommentsResponse, ShortPostInterface } from "../../../../fetching/DTOs.ts";
 import {useNavigate} from "react-router";
 import {getCookiesOrRedirect} from "../../../../helpers/cookies/cookiesHandler.ts";
 import {useParams} from "react-router-dom";

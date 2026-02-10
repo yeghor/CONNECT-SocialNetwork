@@ -6,7 +6,7 @@ import {
     RecentActivity,
     RecentActivityArray,
     RecentActivityResponse, RecentActivityType
-} from "../../../fetching/responseDTOs.ts";
+} from "../../../fetching/DTOs.ts";
 import {validateGETResponse} from "../../../helpers/responseHandlers/getResponseHandlers.ts";
 import { checkUnauthorizedResponse, retryUnauthorizedResponse } from "../../../fetching/fetchUtils.ts";
 import {internalServerErrorURI, specificPostURI} from "../../../consts.ts";

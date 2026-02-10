@@ -7,7 +7,7 @@ import { connectWSChat,
     WebsocketNotReady,
     WebsocketConnectionError
  } from "../../../../fetching/fetchChatWS.ts";
-import { ChatConnectData } from "../../../../fetching/responseDTOs.ts";
+import { ChatConnectData } from "../../../../fetching/DTOs.ts";
 
 import { useNavigate } from "react-router";
 import { chatsURI } from "../../../../consts.ts";

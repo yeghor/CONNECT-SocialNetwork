@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {ShortPostInterface} from "../../../../fetching/responseDTOs.ts";
+import {ShortPostInterface} from "../../../../fetching/DTOs.ts";
 import {specificPostURI} from "../../../../consts.ts";
 import {Link} from "react-router-dom";
 

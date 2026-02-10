@@ -61,7 +61,7 @@ if(container) {
                                         <Route path='/register' element={
                                             <RegisterForm />
                                         } />
-                                        <Route path="/search" element={
+                                        <Route path='/search' element={
                                             <SearchPage />
                                         } />
                                     </Routes>

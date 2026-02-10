@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import PostComments from "./post/postComments/postComments.tsx"
 
 import { getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
-import { LoadPostResponseInterface, LoadPostResponse, SuccessfulResponse } from "../../fetching/responseDTOs.ts";
+import { LoadPostResponseInterface, LoadPostResponse, SuccessfulResponse } from "../../fetching/DTOs.ts";
 import { fetchLikePost, fetchLoadPost, fetchUnlikePost } from "../../fetching/fetchSocial.ts";
 
 import { safeAPICall } from "../../fetching/fetchUtils.ts";

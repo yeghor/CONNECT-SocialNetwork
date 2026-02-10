@@ -4,15 +4,7 @@ from services.core_services import MainServiceContextManager, MainServiceAuth
 from sqlalchemy.ext.asyncio import AsyncSession
 from authorization.authorization_utils import authorize_request_depends
 
-from pydantic_schemas.pydantic_schemas_auth import (
-    LoginSchema,
-    RegisterSchema,
-    RefreshAccessTokens,
-    AccessTokenSchema,
-    RefreshAccesTokensProvided,
-    OldNewPassword,
-    NewUsername
-)
+from pydantic_schemas.pydantic_schemas_auth import *
 from pydantic_schemas.pydantic_schemas_social import UserSchema
 
 from exceptions.exceptions_handler import endpoint_exception_handler
@@ -22,23 +14,41 @@ auth = APIRouter()
 @auth.post("/login")
 @endpoint_exception_handler
 async def login(
-    credentials: LoginSchema = Body(...),
+    credentials: LoginBody = Body(...),
     session: AsyncSession = Depends(get_session_depends)
-    ) -> RefreshAccessTokens:
-    async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
-        response = await auth.login(credentials=credentials)
-        return response
+) -> RefreshAccessTokens:
+    async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session, include_email=True) as auth:
+        return await auth.login(credentials=credentials)
 
+# ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
 @auth.post("/register")
 @endpoint_exception_handler
 async def register(
-    credentials: RegisterSchema = Body(...),
+    credentials: RegisterBody = Body(...),
     session: AsyncSession = Depends(get_session_depends)
-    ) -> RefreshAccessTokens:
+) -> EmailToConfirm:
+    async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session, include_email=True) as auth:
+        return await auth.register(credentials=credentials)
+        
+@auth.post("/auth/second-factor")
+@endpoint_exception_handler
+async def confirm_authorization(
+    confirmation_credentials: SecondFactorConfirmationBody,
+    session: AsyncSession = Depends(get_session_depends)
+) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
-        response = await auth.register(credentials=credentials)
-        return response
-
+        return await auth.authenticate_second_factor(confirmation_credentials=confirmation_credentials)
+        
+# ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
+@auth.post("/auth/new/second-factor")
+@endpoint_exception_handler
+async def issue_new_second_factor(
+    email: EmailToConfirm,
+    session: AsyncSession = Depends(get_session_depends)
+) -> EmailToConfirm:
+    async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
+        return await auth.issue_new_second_factor(email=email.email_to_confirm)
+       
 @auth.post("/logout")
 @endpoint_exception_handler
 async def logout(
@@ -46,8 +56,7 @@ async def logout(
     tokens:RefreshAccesTokensProvided = Body(...)
 ) -> None:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
-        response = await auth.logout(tokens=tokens)
-        return response
+        return await auth.logout(tokens=tokens)
 
 @auth.post("/refresh")
 @endpoint_exception_handler
@@ -56,8 +65,7 @@ async def refresh_token(
     session: AsyncSession = Depends(get_session_depends)
 ) -> AccessTokenSchema:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
-        response = await auth.refresh_token(refresh_token=token)
-        return response
+        return await auth.refresh_token(refresh_token=token)
 
 @auth.patch("/users/my-profile/password")
 @endpoint_exception_handler

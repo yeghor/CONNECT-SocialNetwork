@@ -64,6 +64,14 @@ interface ChangeUsernameInterface {
     new_username: string
 };
 
+interface EmailToConfirmInterface {
+    email_to_confirm: string
+}
+
+interface ConfirmSecondFactorInterface extends EmailToConfirmInterface {
+    confirmation_code: string
+}
+
 interface CreateChatInterface { 
     message: string,
 };
@@ -138,3 +146,16 @@ export const createGroupBody = (otherParticipantsIds: string[]): CreateGroupInte
         other_participants_ids: otherParticipantsIds
     };
 }
+
+export const confirmSecondFactorBody = (confirmationCode: string, email: string): ConfirmSecondFactorInterface => {
+    return {
+        email_to_confirm: email,
+        confirmation_code: confirmationCode
+    };
+};
+
+export const issueNewSecondFactorBody = (emailToConfirm: string) => {
+    return {
+        emailToConfirm: emailToConfirm
+    };
+};

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChatMessage, ChatParticipant } from "../../../../fetching/responseDTOs.ts";
+import { ChatMessage, ChatParticipant } from "../../../../fetching/DTOs.ts";
 
 export interface ChatMessageProps {
     messageData: ChatMessage;
