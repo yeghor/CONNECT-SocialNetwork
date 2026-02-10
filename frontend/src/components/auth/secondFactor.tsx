@@ -13,7 +13,6 @@ const SecondFactor = (props: SecondFactorProps) => {
     const navigate = useNavigate();
 
     const [ errorMessage, setErrorMesage ] = useState<string | null>(null);
-    const [ confirmationCodeArr, setConfirmationCode ] = useState<string[]>([]);
 
     const handleFocusKeyPress = (event: ChangeEvent<HTMLInputElement>, elementIndex: number) => {
         const currElement = document.getElementById(String(elementIndex)) as HTMLInputElement;
@@ -23,44 +22,47 @@ const SecondFactor = (props: SecondFactorProps) => {
         if (event.target.value) {
             currElement.value = event.target.value[event.target.value.length - 1];
             nextElement?.focus();
-            return;
         }
         
         if (currElement.value) {
             nextElement?.focus();
         }
-        
-        setConfirmationCode((prevState) => [...prevState, event.target.value]);            
+          
     };
 
     const handleBackspace = (event: KeyboardEvent) => {
         if (event.key === "Backspace") {
             console.log(event.key)
             const currElement = document.activeElement as HTMLInputElement;
-            if (currElement && currElement.value === "") {
+            // setConfirmationCode((prevState) => {
+            //     const prevStateCopy = [...prevState];
+            //     prevStateCopy[Number(currElement.id)] = "";
+            //     return prevStateCopy;
+            // });
+            if (currElement) {
                 if (currElement.id !== "0") {
                     setTimeout(() => document.getElementById(String(Number(currElement.id) - 1))?.focus(), 25);
                 }
             }
         }
-
-        setConfirmationCode((prevState) => [...prevState.slice(0, elementIndex), event.target.value, ...prevState.slice(elementIndex + 1, prevState.length)]);
     }
 
     const handlePast = (event: ClipboardEvent) => {
         let pasteString = event.clipboardData?.getData("text");
         const currElement = document.activeElement as HTMLInputElement;
+        currElement.blur();
         let activeElemIdx = Number(currElement?.id ?? 0);
         let pasteIdx = 0;
+        let lastPasteIdx = 0;
+
         if (pasteString) {
             for (let i = activeElemIdx; i < 6; i++) {
                 let activeElementLoop = document.getElementById(String(i)) as HTMLInputElement;
                 if (activeElementLoop && pasteIdx < pasteString.length) {
+                    console.log("setting chat, ", pasteString[pasteIdx]);;
                     activeElementLoop.value = pasteString[pasteIdx];
                 }
-                if (pasteIdx < pasteString.length) {
-                    activeElementLoop.focus()
-                }
+                lastPasteIdx = pasteIdx;
                 pasteIdx++;
             }     
         }
@@ -77,6 +79,15 @@ const SecondFactor = (props: SecondFactorProps) => {
     }, []);
 
     const sendCode = async () => {
+        const confirmationCodeArr = new Array();
+
+        for (let i = 0; i < 6; i++) {
+            const inputElement = document.getElementById(String(i)) as HTMLInputElement;
+            if (inputElement.value !== "") {
+                confirmationCodeArr.push(inputElement.value);
+            }
+        }
+
         if (confirmationCodeArr.length < 6) {
             setErrorMesage("Uhhhhmmmm... BIMBIM BAMBAM");
             return;
@@ -104,7 +115,7 @@ const SecondFactor = (props: SecondFactorProps) => {
         }
 
     return(
-        <div className="flex flex-col items-center justify-center min-h-screen text-white p-4">
+        <div className="text-white">
             <div className="max-w-md w-full space-y-8 text-center">
                 <header>
                 <h2 className="text-2xl font-bold">Please, confirm your email</h2>
