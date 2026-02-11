@@ -1,5 +1,5 @@
 import React from "react";
-import { Chat } from "../../../fetching/responseDTOs.ts";
+import { Chat } from "../../../fetching/DTOs.ts";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { specificChatURI } from "../../../consts.ts";
 import { safeAPICall } from "../../../fetching/fetchUtils.ts";
@@ -35,7 +35,7 @@ const FlowChat = (chatData: Chat) => {
 
     const handleLeaveChat = async (e: React.MouseEvent) => {
         e.preventDefault();
-        const confirmLeave = confirm(`Are you sure that you want to leave chat: ${chatData.chatName}?`);
+        const confirmLeave = window.confirm(`Are you sure that you want to leave chat: ${chatData.chatName}?`);
         if (confirmLeave) {
             await safeAPICall(tokens, fetchLeaveChat, navigate, undefined);
         }

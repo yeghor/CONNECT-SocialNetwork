@@ -53,6 +53,7 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
     for (let fetcherFunction of fetchFunctions) {
         const response = await safeAPICall<FeedPostsResponse | ShortUserProfilesResponse>(tokens, fetcherFunction, navigate, undefined, query, page)
         if (response.success) {
+            console.log("search response", response)
             fetchedResults = fetchedResults.concat(response.data);
         } else {
             return undefined;
@@ -82,7 +83,6 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
 }
 
 
-// Initial page - 1
 const SearchPage = () => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);

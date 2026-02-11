@@ -61,13 +61,15 @@ export const createBadResponseManually = (detail: string, statusCode: number): B
 
 // ====================
 
-const userMapper = (data: UserDTO): User => {
-
-    return {
-        userId: data.user_id,
-        username: data.username,
-        avatarURL: data.avatar_url ?? null
-    };
+const userMapper = (data: UserDTO | null): User | null => {
+    if (data) {
+        return {
+            userId: data.user_id,
+            username: data.username,
+            avatarURL: data.avatar_url ?? null
+        };        
+    }
+    return null;
 };
 
 // Login/Register/Refresh/Second Factor
@@ -180,7 +182,7 @@ interface PostBase {
 }
 
 export interface ShortPostInterface extends PostBase {
-    owner: User;
+    owner: User | null;
     likes: number,
     views: number,
     isLiked: boolean,
@@ -513,7 +515,7 @@ interface ChatMessageBaseDTO {
 interface ChatMessageBase {
     messageId: string,
     sent: Date,
-    owner: User,
+    owner: User | null,
     me: boolean,
 
     // See explanation in ChatMessageDTO
@@ -585,7 +587,7 @@ export const singleMessageResponseMapper = (data: ChatMessageDTO): ChatMessage =
     };
 };
 
-export const mapSingleMessage = (messageId: string, text: string, sent: Date, owner: User, me: boolean, tempId: string | null): ChatMessage => {
+export const mapSingleMessage = (messageId: string, text: string, sent: Date, owner: User | null, me: boolean, tempId: string | null): ChatMessage => {
     return { messageId, text, sent, owner, me, tempId }
 }
 

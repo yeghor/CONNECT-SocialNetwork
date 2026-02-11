@@ -13,7 +13,7 @@ import { fetchLogin } from "../../fetching/fetchAuth.ts"
 import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers.ts"
 
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import SecondFactor from "./secondFactor.tsx";
 
 const LoginForm = () => {

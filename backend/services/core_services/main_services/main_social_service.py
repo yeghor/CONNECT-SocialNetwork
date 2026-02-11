@@ -261,22 +261,22 @@ class MainServiceSocial(MainServiceBase):
                 views=post.views_count,
                 replies=post.replies_count,
                 is_my_post=user.user_id == post.post_id,          
-                owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
+                owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)) if post.owner else None,
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
                 parent_post=PostBase(
                     post_id=post.parent_post.post_id,
                     title=post.parent_post.title,
                     published=post.parent_post.published,
                     is_reply=post.parent_post.is_reply ,
-                    owner=UserShortSchemaAvatarURL(user_id=post.parent_post.owner_id, username=post.parent_post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.parent_post.owner_id)),
+                    owner=UserShortSchemaAvatarURL(user_id=post.parent_post.owner.owner_id, username=post.parent_post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.parent_post.owner_id)) if post.parent_post.owner else None,
                     likes=post.parent_post.likes_count,
                     views=post.parent_post.views_count,
                     replies=post.parent_post.replies_count,
                     is_my_post=user.user_id == post.parent_post.post_id,
-                    pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.parent_post.images])
+                    pictures_urls=await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.parent_post.images])
                 ) if post.parent_post else None
             ) for post in posts
-            ]
+        ]
 
     @web_exceptions_raiser
     async def search_users(self, prompt: str,  request_user: User, page: int) -> List[UserLiteSchema]:
@@ -486,7 +486,7 @@ class MainServiceSocial(MainServiceBase):
             title=post.title,
             text=post.text,
             published=post.published,
-            owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)),
+            owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)) if post.owner else None,
             likes=post.likes_count,
             is_liked=True if liked else False,
             views=post.views_count,
@@ -497,7 +497,7 @@ class MainServiceSocial(MainServiceBase):
                 title=post.parent_post.title,
                 published=post.parent_post.published,
                 is_reply=post.parent_post.is_reply,
-                owner=UserShortSchemaAvatarURL(user_id=post.parent_post.owner_id, username=post.parent_post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.parent_post.owner_id)),
+                owner=UserShortSchemaAvatarURL(user_id=post.parent_post.owner_id, username=post.parent_post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.parent_post.owner_id)) if post.parent_post.owner else None,
                 likes=post.parent_post.likes_count,
                 views=post.parent_post.views_count,
                 replies=post.parent_post.replies_count,

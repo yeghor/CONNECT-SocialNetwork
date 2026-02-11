@@ -114,7 +114,7 @@ export const safeAPICall = async <ResponseType>(
         }
         return response;
 
-    } catch (err) {
+    } catch (err) { 
         console.error(err);
         navigate(internalServerErrorURI);
         return createBadResponseManually(internalServerErrorDefaultMessage, 500);
