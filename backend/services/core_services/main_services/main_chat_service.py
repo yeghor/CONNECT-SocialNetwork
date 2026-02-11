@@ -170,12 +170,13 @@ class MainChatService(MainServiceBase):
             for chat in chat_batch
         ]
         last_messages = await self._PostgresService.get_chats_last_message(room_ids=[chat.room_id for chat in chat_batch])
-        print(last_messages)
+
         return [
             ChatSchema(
                 chat_id=chat.room_id,
                 chat_name=f"{chat_display_names[i]}",
                 participants_count=len(chat.participants),
+                is_group=chat.is_group,
                 last_message=MessageSchema(
                     message_id=last_messages[chat.room_id].message_id,
                     text=last_messages[chat.room_id].text,
@@ -372,6 +373,10 @@ class MainChatService(MainServiceBase):
         return len(chat_rooms)
     
     @web_exceptions_raiser
-    async def leave_from_chat(self, user: User, room_id: str) -> None:
+    async def leave_from_group(self, user: User, room_id: str) -> None:
         chat_room = await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=True)
+
+        if not chat_room.is_group:
+            raise InvalidAction(detail=f"ChatService: User: {user.user_id} tried to leave from dialogue chat.", client_safe_detail=f"You can't leave from dialogue chat")
+
         chat_room.participants.remove(user)

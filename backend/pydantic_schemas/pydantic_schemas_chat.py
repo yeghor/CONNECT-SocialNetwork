@@ -21,6 +21,7 @@ MESSAGE_MAX_LEN = int(getenv("MESSAGE_MAX_LEN", "5000"))
 class ChatSchema(BaseModel):
     chat_id: str
     chat_name: str
+    is_group: bool
     participants_count: int
     chat_image_url: str | None = Field(default=None)
     last_message: MessageSchema | None = Field(default=None)

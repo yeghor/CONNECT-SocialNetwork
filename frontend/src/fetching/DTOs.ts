@@ -433,6 +433,7 @@ export const recentActivityMapper = (data: RecentActivityDTO): RecentActivityRes
 export interface ChatDTO {
     chat_id: string,
     chat_name: string,
+    is_group: boolean,
     participants_count: number,
     chat_image_url: string | null
     last_message: ChatMessageDTO | null
@@ -443,6 +444,7 @@ type ChatsDTO = ChatDTO[];
 export interface Chat {
     chatId: string,
     chatName: string,
+    isGroup: boolean,
     participantsCount: number,
     chatImageURL: string | null 
     lastMessage: ChatMessage | null
@@ -457,6 +459,7 @@ export const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
         {
             chatId: chatDTO.chat_id,
             chatName: chatDTO.chat_name,
+            isGroup: chatDTO.is_group,
             participantsCount: chatDTO.participants_count,
             chatImageURL: chatDTO.chat_image_url,
             lastMessage: chatDTO.last_message ? mapSingleMessage(

@@ -15,7 +15,7 @@ import {
     pendingChatConnectURL,
     isChatPendingURL,
     groupChatURL,
-    leaveFromChatURL
+    leaveFromChatURL as leaveFromGroupURL
 } from "./urls.ts"
 
 import {
@@ -239,5 +239,5 @@ export const fetchLeaveChat = async (accessJWT: string, chatId: string): APIResp
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<SuccessfulResponse>(leaveFromChatURL(chatId), requestInit, successfulResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(leaveFromGroupURL(chatId), requestInit, successfulResponseMapper);
 };
