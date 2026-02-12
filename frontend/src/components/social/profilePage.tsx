@@ -17,6 +17,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import estimatePostSize from "../../helpers/postSizeEstimator.ts";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { createInfiniteQueryOptionsUtil, infiniteQieryingFetchGuard } from "../butterySmoothScroll/scrollVirtualizationUtils.ts";
+import ManageProfileModal from "./profile/manageProfileModal.tsx";
 
 interface ProfilePageProps {
     userData: UserProfile;
@@ -56,6 +57,8 @@ export const ProfilePage = (props: ProfilePageProps) => {
     const [ orderBy, setOrderBy ] = useState<OrderPostsByFlag>("fresh");
     const [ isFollowing, setFollowing ] = useState<boolean>(props.userData.isFollowing);
     const [ followTimeout, setFollowTimeout ] = useState<boolean>(false);
+
+    const [ showManageProfileModal, setshowManageProfileModal ] = useState(false);
 
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(getProfileData, [tokens, navigate, props.userData.userId, orderBy, profilePostsSection], ["profile", orderBy, profilePostsSection]))
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -115,72 +118,75 @@ export const ProfilePage = (props: ProfilePageProps) => {
     const virtualizedComponentsProps = profilePostsData.map((post) => { return { postData: post.postData, isMyPost: false} } )
 
     return(
-        <div className="w-2/3 mx-auto m-8 bg-white/10 rounded-xl p-6 backdrop-blur">
-            <div className="flex justify-center items-center gap-4 text-white">
-                <div>
-                    { props.userData.avatarURL ? <img
-                        src={props.userData.avatarURL}
-                        alt={`${props.userData.username} avatar`}
-                        className="w-8 h-8 rounded-full"
-                    /> : <img src="/uknown-user-image.jpg" alt={`${props.userData.username} avatar`} className="w-32 h-32 hover:scale-105 transition-all rounded-full" /> }
-                </div>
-                <div>
-                    <h2 className="text-xl font-semibold ">{props.userData.username}</h2>
-                    <p className="text-gray-300">Joined {props.userData.joined.toLocaleDateString()}</p>
-                </div>
-                <div className="text-center">
-                    <p className="font-bold">{props.userData.followers}</p>
-                    <p>Followers</p>
-                </div>
-                <div className="text-center">
-                    <p className="font-bold">{props.userData.followed}</p>
-                    <p>Following</p>
-                </div>
-                <div className="flex justify-center items-center">
-                    {
-                        props.userData.me ?
-                            <button className="px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all">
-                                Manage Profile
-                            </button>
-                        :
-                            <div className="flex justify-start gap-4">
-                                <button onClick={() => followAction()} className={`w-32 px-6 py-2 ${isFollowing ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
-                                    {isFollowing ? "Following" : "Follow"}
+        <div>
+            { showManageProfileModal ? <ManageProfileModal setShowManageProfileModal={setshowManageProfileModal} /> : null }
+            <div className="w-2/3 mx-auto m-8 bg-white/10 rounded-xl p-6 backdrop-blur">
+                <div className="flex justify-center items-center gap-4 text-white">
+                    <div>
+                        { props.userData.avatarURL ? <img
+                            src={props.userData.avatarURL}
+                            alt={`${props.userData.username} avatar`}
+                            className="w-8 h-8 rounded-full"
+                        /> : <img src="/uknown-user-image.jpg" alt={`${props.userData.username} avatar`} className="w-32 h-32 hover:scale-105 transition-all rounded-full" /> }
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-semibold ">{props.userData.username}</h2>
+                        <p className="text-gray-300">Joined {props.userData.joined.toLocaleDateString()}</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="font-bold">{props.userData.followers}</p>
+                        <p>Followers</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="font-bold">{props.userData.followed}</p>
+                        <p>Following</p>
+                    </div>
+                    <div className="flex justify-center items-center">
+                        {
+                            props.userData.me ?
+                                <button onClick={() => setshowManageProfileModal(true)} className="px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all">
+                                    Manage Profile
                                 </button>
-                                <Link to={`/make-chat/${props.userData.userId}`}>
-                                    <button className={`w-32 px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
-                                        Message
-                                    </button>                                
-                                </Link>
-                            </div>
-                    }
+                            :
+                                <div className="flex justify-start gap-4">
+                                    <button onClick={() => followAction()} className={`w-32 px-6 py-2 ${isFollowing ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
+                                        {isFollowing ? "Following" : "Follow"}
+                                    </button>
+                                    <Link to={`/make-chat/${props.userData.userId}`}>
+                                        <button className={`w-32 px-6 py-2 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>
+                                            Message
+                                        </button>                                
+                                    </Link>
+                                </div>
+                        }
+                    </div>
                 </div>
-            </div>
 
-            <div className="flex justify-center items-center gap-4 mt-6 text-white">
-                <button onClick={() => changeSection("posts")} className={`px-6 py-2 ${profilePostsSection == "posts" ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Posts</button>
-                <button onClick={() => changeSection("replies")} className={`px-6 py-2 ${profilePostsSection == "replies" ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Replies</button>
-                <button onClick={() => changeSection("likes")} className={`px-6 py-2 ${profilePostsSection == "likes" ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Liked Posts</button>
-            </div>
+                <div className="flex justify-center items-center gap-4 mt-6 text-white">
+                    <button onClick={() => changeSection("posts")} className={`px-6 py-2 ${profilePostsSection == "posts" ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Posts</button>
+                    <button onClick={() => changeSection("replies")} className={`px-6 py-2 ${profilePostsSection == "replies" ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Replies</button>
+                    <button onClick={() => changeSection("likes")} className={`px-6 py-2 ${profilePostsSection == "likes" ? "bg-white/20 scale-105" : "bg-white/10"} hover:bg-white/20 hover:scale-105 rounded-full text-white font-semibold transition-all`}>Liked Posts</button>
+                </div>
 
-            <div className="w-2/3 mx-auto flex justify-between items-center mt-8 px-4 py-2 rounded-full bg-white/10 text-white">
-                <button onClick={() => changeOrder("fresh")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "fresh" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
-                    Fresh
-                </button>
-                <button onClick={() => changeOrder("old")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "old" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
-                    Old
-                </button>
-                <button onClick={() => changeOrder("popularNow")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "popularNow" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
-                    Popular
-                </button>
-                <button onClick={() => changeOrder("mostLiked")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "mostLiked" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
-                    Most Liked
-                </button>
-            </div>
+                <div className="w-2/3 mx-auto flex justify-between items-center mt-8 px-4 py-2 rounded-full bg-white/10 text-white">
+                    <button onClick={() => changeOrder("fresh")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "fresh" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
+                        Fresh
+                    </button>
+                    <button onClick={() => changeOrder("old")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "old" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
+                        Old
+                    </button>
+                    <button onClick={() => changeOrder("popularNow")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "popularNow" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
+                        Popular
+                    </button>
+                    <button onClick={() => changeOrder("mostLiked")} className={`px-4 py-1 rounded-full font-semibold transition-all duration-200 ${ orderBy === "mostLiked" ? "bg-white/20 scale-105" : "bg-white/10" } hover:bg-white/20 hover:scale-105`}>
+                        Most Liked
+                    </button>
+                </div>
 
-            <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4 my-8">
-                <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
-                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={virtualizedComponentsProps} />
+                <div ref={scrollRef} className="mx-auto w-2/3 mb-16 h-[800px] overflow-y-auto flex flex-col gap-4 my-8">
+                    <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
+                        <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={virtualizedComponentsProps} />
+                    </div>
                 </div>
             </div>
         </div>

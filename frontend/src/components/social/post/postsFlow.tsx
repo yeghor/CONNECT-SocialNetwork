@@ -129,7 +129,7 @@ const PostsFlow = () => {
                     </div>
                 </div>
                 <div ref={scrollRef} className="h-[calc(100vh-400px)] overflow-auto mb-16 relative mx-auto border-gray-300">
-                    <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={virtualizedComponentsProps} />
+                    { virtualItems.length !== 0 ? <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={virtualizedComponentsProps} /> : <p className="text-center text-white my-8">{"No posts yet :("}</p> }
                 </div>
             </div>
         </div>

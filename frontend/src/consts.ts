@@ -67,3 +67,5 @@ export const postTextIsTooLargeMessage = "Your post is overflowing. Trim it down
 export const tooMuchActivityMessage = "Whoa! You’re smashing that button way too fast. Chill for a sec so we don’t confuse the server.";
 export const chatMessageIsTooBigMessage = "That message is a bit long for chat. Maybe trim it down a little?";
 export const toManyGroupParticipants = "This group is getting a bit too crowded! We’ve hit the limit for participants for now.";
+export const noAvatarImageMessage = "We can’t see you! Upload a photo to give your profile some personality.";
+export const tooManyAvatarFilesMessage = "One person, one face. Please pick just one image for your avatar.";
