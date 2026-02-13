@@ -41,14 +41,14 @@ const FlowPost = (props: FlowPostProps) => {
                                     <img
                                         src={images[1]}
                                         alt=""
-                                        className="w-full h-24 object-cover rounded"
+                                        className="w-full h-24 object-cover rounded text-white"
                                     />
                                 )}
                                 {images[2] && (
                                     <img
                                         src={images[2]}
                                         alt=""
-                                        className="w-full h-24 object-cover rounded"
+                                        className="w-full h-24 object-cover rounded text-white"
                                     />
                                 )}
                             </div>

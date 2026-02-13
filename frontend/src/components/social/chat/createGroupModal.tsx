@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { fetchMyFriends } from "../../../fetching/fetchSocial";
 import { safeAPICall } from "../../../fetching/fetchUtils";
-import { CustomSimpleResponse, ShortUserProfile, ShortUserProfilesResponse, SuccessfulResponse } from "../../../fetching/DTOs/";
+import { CustomSimpleResponse, ShortUserProfile, ShortUserProfilesResponse, SuccessfulResponse } from "../../../fetching/DTOs";
 import { useNavigate } from "react-router";
 import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler";
 import FlowUser from "../post/flowUser";
@@ -12,6 +12,8 @@ import { specificChatURI } from "../../../consts";
 const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Dispatch<React.SetStateAction<boolean>> }) => {
     const navigate = useNavigate();
     const tokens = getCookiesOrRedirect(navigate);
+
+    const modalRef = useRef<HTMLDivElement>(null);
 
     const [ friendsData, setFriendsData ] = useState<ShortUserProfile[]>([]);
     const [ participantsIds, setParticipantsIds ] = useState<string[]>([]);
@@ -55,13 +57,23 @@ const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Disp
         friendsFetcher();
     }, [])
 
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+                props.showGroupCreationModelToggler(false);
+            }
+        }; 
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     const friendsToShow = toFilter ? friendsData.filter((friend) => {
         return friend.username.toLocaleLowerCase().match(new RegExp(searchString.toLowerCase()));
     }) : friendsData
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4 text-white transition-all">
-            <div className="relative bg-white/10 w-full max-w-2xl rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden h-[600px] flex flex-col">
+            <div ref={modalRef} className="relative bg-white/10 w-full max-w-2xl rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden h-[600px] flex flex-col">
                 <div className="flex justify-between p-6">
                     <h3 className="text-xl font-semibold">Create Group</h3>
                     <button 
