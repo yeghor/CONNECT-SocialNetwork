@@ -23,7 +23,7 @@ EXCLUDE_VIEWED_POSTS_TIMEOUT = int(getenv("EXCLUDE_VIEWED_POSTS_TIMEOUT"))
 
 CHAT_TOKEN_EXPIRY_SECONDS = int(getenv("CHAT_TOKEN_EXPIRY_SECONDS"))
 
-SECOND_FACTOR_CODE_EXPIRY_SECONDS = int(getenv("EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS"))
+SECOND_FACTOR_EXPIRY_SECONDS = int(getenv("EMAIL_CONFIRMATION_CODE_EXPIRY_SECONDS"))
 
 REDIS_HOST = getenv("REDIS_HOST")
 REDIS_PORT = int(getenv("REDIS_PORT"))
@@ -85,7 +85,7 @@ class RedisService:
         self._viewed_post_prefix = "viewed-posts:"
 
         self.__post_view_timeout_prefix_1 = "post-view-user-"
-        self.__post_view_timeout_prefix_2 = "post:"
+        self.__post_view_timeout_prefix_2 = "-post:"
 
 
         # Chat key prefixes
@@ -100,8 +100,10 @@ class RedisService:
         self.__user_image_acces_prefix = "user-image-acces:"
 
         # Email confirmaion key prefixes
-        self.__second_factor_email_prefix = "second-factor-email:"
-        self.__second_factor_username_prefix = "second-factor-username:"
+        self.__2fa_email_prefix = "2fa-email:"
+
+        # 2FA Change password
+        self.__2fa_change_password_hash_prefix = "2fa"
 
     # ===============
     # JWT tokens logic
@@ -326,20 +328,30 @@ class RedisService:
     async def assign_second_factor(self, email: str, code: str):
         """Replaces old second factor with new, in case it's already exist"""
 
-        pattern = f"{self.__second_factor_email_prefix}{email}"
-        await self.__client.setex(pattern, SECOND_FACTOR_CODE_EXPIRY_SECONDS, code)
+        pattern = f"{self.__2fa_email_prefix}{email}"
+        await self.__client.setex(pattern, SECOND_FACTOR_EXPIRY_SECONDS, code)
 
 
     @redis_error_handler
-    async def deactivate_second_factor(self, email: str):
-        pattern = f"{self.__second_factor_email_prefix}{email}"
+    async def deactivate_second_factor(self, email: str) -> None:
+        pattern = f"{self.__2fa_email_prefix}{email}"
         await self.__client.delete(pattern)
 
     @redis_error_handler
     async def check_second_factor(self, email: str, code: str) -> bool:
         """Returns False even if email: code pair doesn't exist"""
 
-        pattern = f"{self.__second_factor_email_prefix}{email}"
+        pattern = f"{self.__2fa_email_prefix}{email}"
         issued_code = await self.__client.get(pattern)
 
         return issued_code == str(code)
+
+    @redis_error_handler
+    async def save_new_password_hash(self, email: str, password_hash: str | bytes) -> None:
+        pattern = f"{self.__2fa_change_password_hash_prefix}{email}"
+        await self.__client.setex(pattern, SECOND_FACTOR_EXPIRY_SECONDS, password_hash)
+    
+    @redis_error_handler
+    async def get_new_password_hash(self, email: str) -> str | bytes | None:
+        pattern = f"{self.__2fa_change_password_hash_prefix}{email}"
+        return await self.__client.get(pattern)

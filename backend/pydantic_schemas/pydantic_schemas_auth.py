@@ -49,15 +49,14 @@ class LoginBody(BaseModel):
 class RegisterBody(LoginBody):
     email: str
     
-class OldNewPassword(BaseModel):
-    old_password: str
+class ChangePasswordBody(BaseModel):
     new_password: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
-
+    new_password_confirm: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
 
     @model_validator(mode="after")
     def match_passwords(self) -> Self:
-        if self.old_password == self.new_password:
-            raise ValidationErrorExc(detail="OldNewPassword Pydantic schema: Old password metched new one.", client_safe_detail="Old password can not match the new one!")
+        if self.new_password_confirm != self.new_password:
+            raise ValidationErrorExc(detail="NewPassword Pydantic schema: new passwords didn't match .", client_safe_detail="Passwords didn't match")
         return self
 
 class NewUsername(BaseModel):

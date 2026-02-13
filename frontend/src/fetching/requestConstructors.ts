@@ -56,8 +56,8 @@ interface MakePostInterface extends ChangePostInterface {
 };
 
 interface ChangePasswordInterface {
-    old_password: string,
-    new_password: string
+    new_password: string,
+    new_password_confirm: string
 };
 
 interface ChangeUsernameInterface {
@@ -121,10 +121,10 @@ export const registerBody = (username: string, email: string, password: string):
     };
 }
 
-export const changePasswordBody = (oldPassword: string, newPassword: string): ChangePasswordInterface => {
+export const changePasswordBody = (newPassword: string, newPasswordConfirm: string): ChangePasswordInterface => {
     return {
-        old_password: oldPassword,
-        new_password: newPassword
+        new_password: newPassword,
+        new_password_confirm: newPasswordConfirm
     };
 }
 

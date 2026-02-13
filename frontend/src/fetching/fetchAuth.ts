@@ -66,14 +66,14 @@ export const fetchRefresh = async (refreshJWT: string): APIResponse<AccessTokenR
     return await fetchHelper<AccessTokenResponse>(refreshTokenURL, requestInit, authTokensResponseMapper);
 }
 
-export const fetchChangePassword = async (accessJWT: string, oldPassword: string, newPassword: string): APIResponse<SuccessfulResponse> => {
+export const fetchChangePassword = async (accessJWT: string, oldPassword: string, newPassword: string): APIResponse<EmailToConfirmResponse> => {
     const requestInit: RequestInit = {
         method: "PATCH",
         headers: requestTokenHeaders(accessJWT),
         body: JSON.stringify(changePasswordBody(oldPassword, newPassword))
     };
 
-    return await fetchHelper<SuccessfulResponse>(changePasswordURL, requestInit, successfulResponseMapper);
+    return await fetchHelper<EmailToConfirmResponse>(changePasswordURL, requestInit, successfulResponseMapper);
 }
 
 export const fetchChangeUsername = async (accessJWT: string, newUsername: string): APIResponse<SuccessfulResponse> => {

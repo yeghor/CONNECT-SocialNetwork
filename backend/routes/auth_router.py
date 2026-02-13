@@ -32,13 +32,13 @@ async def register(
         
 @auth.post("/auth/second-factor")
 @endpoint_exception_handler
-async def confirm_authorization(
+async def confirm_2fa(
     confirmation_credentials: SecondFactorConfirmationBody,
     session: AsyncSession = Depends(get_session_depends)
 ) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
-        return await auth.authenticate_second_factor(confirmation_credentials=confirmation_credentials)
-        
+        return await auth.authenticate_2fa(confirmation_credentials=confirmation_credentials)
+   
 # ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
 @auth.post("/auth/new/second-factor")
 @endpoint_exception_handler
@@ -69,14 +69,14 @@ async def refresh_token(
 
 @auth.patch("/users/my-profile/password")
 @endpoint_exception_handler
-async def change_password(
-    credentials: OldNewPassword = Body(...),
+async def request_change_password(
+    credentials: ChangePasswordBody = Body(...),
     user_: User = Depends(authorize_request_depends),
     session: AsyncSession = Depends(get_session_depends)
-) -> None:
+) -> EmailToConfirm:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, MainServiceType=MainServiceAuth) as auth:
-        await auth.change_password(user=user, credentials=credentials)
+    async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, include_email=True, MainServiceType=MainServiceAuth) as auth:
+        return await auth.request_change_password(user=user, credentials=credentials)
 
 @auth.patch("/users/my-profile/username")
 @endpoint_exception_handler
