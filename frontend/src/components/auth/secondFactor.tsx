@@ -119,7 +119,7 @@ const SecondFactor = (props: SecondFactorProps) => {
         }
 
     return(
-        <div className="text-white">
+        <div className="text-white flex justify-center items-center my-16">
             <div className="max-w-md w-full space-y-8 text-center">
                 <header>
                 <h2 className="text-2xl font-bold">Please, confirm your email</h2>

@@ -28,11 +28,11 @@ export const maxGroupParticipants = 9;
 
 export const internalServerErrorURI = "/internal-server-error"
 export const appHomeURI = "/";
-export const appLoginURI = "auth/login";
-export const appRegisterURI = "auth/register";
-export const myProfileURI = "my-profile";
-export const chatsURI = "chats";
-export const _2faURI = "auth/2fa"
+export const appLoginURI = "/auth/login";
+export const appRegisterURI = "/auth/register";
+export const myProfileURI = "/my-profile";
+export const chatsURI = "/chats";
+export const _2faURI = "/auth/2fa"
 
 export const makeChatURI = (userId: string): string => {
     return `/make-chat/${userId}`;

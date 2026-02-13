@@ -35,12 +35,16 @@ const ManageProfileModal = (props: { avatarURL: string | null, setShowManageProf
     };
 
     const handleChangePassword = async () => {
+        if (newPassword !== newPasswordConfirm) {
+            setWarningMessage("Passwords didn't match!");
+            return;
+        }
+
         const response = await safeAPICall<EmailToConfirmResponse>(tokens, fetchChangePassword, navigate, undefined, newPassword, newPasswordConfirm);
         
         if (response.success) {
-            navigate(_2faURI, { state: { emailToConfirm: response.emailToConfirm } });           
+            navigate(`../${_2faURI}`, { state: { emailToConfirm: response.emailToConfirm } });           
         }
-
     };
 
     const handleLocalAvatarUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -84,7 +88,7 @@ return (
                         <input 
                             type="text" 
                             placeholder="New username"
-                            className="flex-1 px-4 py-2 rounded-lg border border-gray-30 text-white focus:ring-2 outline-none transition-all"
+                            className="flex-1 px-4 py-2 rounded-lg border border-gray-30 text-white bg-white/30 focus:ring-2 focus:ring-white outline-none transition-all"
                         />
                         <button className="px-4 py-2  text-white rounded-lg text-sm font-medium transition-colors">
                             Update username
@@ -94,20 +98,21 @@ return (
 
                 <hr className="border-gray-10" />
 
-                {/* Секция Пароля */}
                 <div className="space-y-3">
                     <label className="block text-sm font-medium text-white">Password</label>
                     <input 
+                        onChange={(e) => setNewPassword(e.target.value)}
                         type="password" 
                         placeholder="New password"
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white/30 text-white focus:ring-2 focus:ring-white outline-none transition-all"
                     />
                     <input 
+                        onChange={(e) => setNewPasswordConfirm(e.target.value)}
                         type="password" 
-                        placeholder="Confirm new password"
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        placeholder="Confirm password"
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white/30 text-white  focus:ring-2 focus:ring-white outline-none transition-all"
                     />
-                    <button className="w-full py-2-whit text-white rounded-lg text-sm font-bold hover:opacity-90 transition-opacity">
+                    <button onClick={() => handleChangePassword()} className="w-full py-2-whit text-white rounded-lg text-sm font-bold hover:opacity-90 transition-opacity">
                         Save new password
                     </button>
                 </div>
