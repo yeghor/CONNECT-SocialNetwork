@@ -1,6 +1,6 @@
 export const TokenCookieExpiryHours = 2;
-export const AccessTokenCookieKey = "access-token";
-export const RefreshTokenCookieKey = "refresh-token";
+export const AccessTokenCookieKey = "CONNECT-access-token";
+export const RefreshTokenCookieKey = "CONNECT-a-refresh-token";
 
 export const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -14,8 +14,7 @@ export const passwordRegexp = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]){8,}/;
 export const maxPostImagesUpload = 3;
 export const imageMaxSizeMB = 5;
 
-// Mime types
-export const allowedImageExtensions = ["image/jpeg", "image/png", "image/webp"];
+export const allowedImageMimeTypes = ["image/jpeg", "image/png", "image/webp"];
 
 export const postTitleMinLength = 3;
 export const postTitleMaxLength = 256;
@@ -29,10 +28,12 @@ export const maxGroupParticipants = 9;
 
 export const internalServerErrorURI = "/internal-server-error"
 export const appHomeURI = "/";
-export const appLoginURI = "/login";
-export const appRegisterURI = "/register";
+export const appLoginURI = "auth/login";
+export const appRegisterURI = "auth/register";
 export const myProfileURI = "my-profile";
 export const chatsURI = "chats";
+export const _2faURI = "auth/2fa"
+
 export const makeChatURI = (userId: string): string => {
     return `/make-chat/${userId}`;
 }

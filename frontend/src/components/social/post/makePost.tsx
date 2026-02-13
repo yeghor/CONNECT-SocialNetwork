@@ -1,7 +1,7 @@
 import React, {ChangeEvent, useState} from "react";
 
 import { fetchUploadPostPictures } from "../../../fetching/fetchMedia.ts";
-import {allowedImageExtensions, maxPostImagesUpload, fileIsTooBigMessage, specificPostURI} from "../../../consts.ts";
+import {allowedImageMimeTypes, maxPostImagesUpload, fileIsTooBigMessage, specificPostURI} from "../../../consts.ts";
 import {safeAPICall} from "../../../fetching/fetchUtils.ts";
 import {LoadPostResponse, PostBaseResponse, SuccessfulResponse} from "../../../fetching/DTOs.ts";
 import {getCookiesOrRedirect} from "../../../helpers/cookies/cookiesHandler.ts";

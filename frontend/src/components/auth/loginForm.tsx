@@ -68,7 +68,7 @@ const LoginForm = () => {
     const secondFactorHandler = () => {
 
     };
-
+    console.log(showSecondFactor, emailToConfirm)
     return (
         <div className="flex flex-col items-center justify-top mt-16 px-6 py-8 mx-auto md:h-screen lg:py-0">
             { showSecondFactor && emailToConfirm ? <SecondFactor emailToConfirm={emailToConfirm} /> :

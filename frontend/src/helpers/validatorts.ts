@@ -1,7 +1,7 @@
 import {
     usernameRegexp, emailRegexp, passwordRegexp,
     UsernameMinLength, UsernameMaxLength,
-    imageMaxSizeMB, allowedImageExtensions,
+    imageMaxSizeMB, allowedImageMimeTypes,
     postTextMaxLength, postTitleMaxLength, postTitleMinLength, postTitleIsTooLargeMessage, postTitleIsTooSmallMessage,
     postTextIsTooLargeMessage
 } from "../consts.ts"

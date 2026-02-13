@@ -1,18 +1,22 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { fetchConfirmSecondFactor } from "../../fetching/fetchAuth";
 import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers";
 import { AccessTokenCookieKey, appHomeURI, internalServerErrorURI, RefreshTokenCookieKey } from "../../consts";
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler";
 
+// emailToConfirm coulb be null, in case user got redirected to this page
 interface SecondFactorProps {
-    emailToConfirm: string
+    emailToConfirm: string | null
 }
 
 const SecondFactor = (props: SecondFactorProps) => {
     const navigate = useNavigate();
 
     const [ errorMessage, setErrorMesage ] = useState<string | null>(null);
+
+    const location = useLocation();
+    const [ emailToConfirm, setEmailToConfirm ] = useState<string>(props.emailToConfirm ? props.emailToConfirm : location.state.emailToConfirm)
 
     const handleFocusKeyPress = (event: ChangeEvent<HTMLInputElement>, elementIndex: number) => {
         const currElement = document.getElementById(String(elementIndex)) as HTMLInputElement;
@@ -96,7 +100,7 @@ const SecondFactor = (props: SecondFactorProps) => {
         const joinedConfirmationCode = confirmationCodeArr.join("");
 
         try {
-            const response = await fetchConfirmSecondFactor(joinedConfirmationCode, props.emailToConfirm);
+            const response = await fetchConfirmSecondFactor(joinedConfirmationCode, emailToConfirm);
 
             if(!validateGETResponse(response, setErrorMesage, navigate)) {
                 return;

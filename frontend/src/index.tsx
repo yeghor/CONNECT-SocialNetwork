@@ -63,7 +63,7 @@ if(container) {
                                             <RegisterForm />
                                         } />
                                         <Route path='/auth/2fa' element={
-                                            <SecondFactor emailToConfirm='' />
+                                            <SecondFactor emailToConfirm={null} />
                                         } />
                                         <Route path='/search' element={
                                             <SearchPage />
@@ -76,7 +76,7 @@ if(container) {
                 </BrowserRouter>
             </QueryClientProvider>
         </StrictMode>
-    );
+    );  
 
 } else {
     throw new Error("Root container null!");
