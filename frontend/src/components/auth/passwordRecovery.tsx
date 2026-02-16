@@ -22,7 +22,7 @@ import { validateFormString } from "../../helpers/validatorts.ts";
 import { safeAPICall, safeAPICallPublic } from "../../fetching/fetchUtils.ts";
 import { SuccessfulResponse } from "../../fetching/DTOs.ts";
 
-const ForgotPasswordForm = () => {
+const PasswordRecoveryForm = () => {
     const navigate = useNavigate();
 
     const [ warningMessage, setWarningMessage ] = useState("");
@@ -38,8 +38,10 @@ const ForgotPasswordForm = () => {
 
         if (!validateFormString(email, "email")) {
             setWarningMessage(invalidEmailMessage);
+            return
         } else if (!validateFormString(newPassword, "password")) {
             setWarningMessage(passwordNotSecureEnoughMessage);
+            return
         }
 
         const response = await safeAPICallPublic<SuccessfulResponse>(null, fetchRecoverPassword, navigate, setErrorMessage, email, newPassword);
@@ -113,4 +115,4 @@ const ForgotPasswordForm = () => {
     );
 }
 
-export default ForgotPasswordForm;
+export default PasswordRecoveryForm;
