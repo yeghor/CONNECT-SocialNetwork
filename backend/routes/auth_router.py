@@ -49,6 +49,15 @@ async def issue_new_second_factor(
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
         return await auth.issue_new_second_factor(email=email.email_to_confirm)
        
+@auth.patch("/auth/second-factor/recover-password")
+@endpoint_exception_handler
+async def recover_password(
+    recover_credentials: RecoverPasswordBody,
+    session: AsyncSession = Depends(get_session_depends)
+) -> None:
+    async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
+        return await auth.recover_password(recover_credentials=recover_credentials)
+   
 @auth.post("/logout")
 @endpoint_exception_handler
 async def logout(

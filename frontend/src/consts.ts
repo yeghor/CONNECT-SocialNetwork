@@ -26,18 +26,20 @@ export const maxRequestsQueueLength = 30;
 
 export const maxGroupParticipants = 9;
 
-export const internalServerErrorURI = "/internal-server-error"
-export const appHomeURI = "/";
-export const appLoginURI = "/auth/login";
-export const appRegisterURI = "/auth/register";
+export const internalServerErrorURI = "/internal-server-error";
+export const notFoundURI = "/not-found"
+export const homeURI = "/";
+export const loginURI = "/auth/login";
+export const registerURI = "/auth/register";
 export const myProfileURI = "/my-profile";
 export const chatsURI = "/chats";
 export const _2faURI = "/auth/2fa"
+export const passwordRecoveryURI = "/auth/password-recovery";
 
 export const makeChatURI = (userId: string): string => {
     return `/make-chat/${userId}`;
 }
-export const unauthorizedRedirectURI = appLoginURI;
+export const unauthorizedRedirectURI = loginURI;
 export const specificPostURI = (postId: string) => {
     return `/post/${postId}`;
 };

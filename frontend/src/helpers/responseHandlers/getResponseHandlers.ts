@@ -2,7 +2,8 @@ import {AccessTokenResponse, BadResponse, SuccessfulResponse} from "../../fetchi
 import {
     AccessTokenCookieKey,
     unauthorizedRedirectURI,
-    internalServerErrorURI, RefreshTokenCookieKey
+    internalServerErrorURI, RefreshTokenCookieKey,
+    notFoundURI
 } from "../../consts.ts";
 import {getCookies, getCookiesOrRedirect, setUpdateCookie} from "../cookies/cookiesHandler.ts";
 import  { fetchRefresh } from "../../fetching/fetchAuth.ts";
@@ -20,6 +21,12 @@ export const validateGETResponse = (response: BadResponse | SuccessfulResponse, 
             if (navigate) {
                 navigate(internalServerErrorURI);                
             }
+        } else if (response.statusCode === 404) {
+            if (navigate) {
+                navigate(notFoundURI);
+            }
+        
+            return false;
         }
         if (setErrorMessage) {
             setErrorMessage(response.detail);

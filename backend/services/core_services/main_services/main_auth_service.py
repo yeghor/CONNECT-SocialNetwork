@@ -184,3 +184,16 @@ class MainServiceAuth(MainServiceBase):
         await self._PostgresService.delete_models_and_flush(user)
         await self._RedisService.deactivate_tokens_by_id(user_id=user.user_id)
         await self._ImageStorage.delete_avatar_user(user_id=user.user_id)
+
+    @web_exceptions_raiser
+    async def recover_password(self, recover_credentials: RecoverPasswordBody) -> None:
+        potential_user = await self._PostgresService.get_user_by_username_or_email(email=recover_credentials.email)
+        
+        # Returning code 200, to not explicit registered emails
+        if not potential_user:
+            return
+        
+        new_password_hash = authorization_utils.hash_password(recover_credentials.new_password)
+
+        await self.__create_2fa(email=potential_user.email, username=potential_user.username)
+        await self._RedisService.save_new_password_hash(email=potential_user.email, password_hash=new_password_hash)

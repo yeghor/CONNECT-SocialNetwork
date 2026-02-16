@@ -68,6 +68,10 @@ class EmailToConfirm(BaseModel):
 class SecondFactorConfirmationBody(EmailToConfirm):
     confirmation_code: str
 
+class RecoverPasswordBody(BaseModel):
+    email: str
+    new_password: str
+
 # JWT Token models
 
 class RefreshAccesTokensProvided(BaseModel):

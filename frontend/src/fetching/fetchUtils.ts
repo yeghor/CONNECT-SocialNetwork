@@ -13,7 +13,7 @@ import {
     manualUnauthorizedMessage,
     unauthorizedRedirectURI
 } from "../consts.ts";
-import { validateGETResponse } from "../helpers/responseHandlers/getResponseHandlers.ts";
+import { validateGETResponse as validateResponse } from "../helpers/responseHandlers/getResponseHandlers.ts";
 
 // & Types Intersection
 // If object type {success: false} intersects with BadResponse *(which has that exactly field)* - function return type will be BadResponse
@@ -44,7 +44,7 @@ export const fetchHelper = async <ResponseType>(requestURL: string, requestInit:
 const refreshTokens = async (navigate: NavigateFunction, refreshToken: string): APIResponse<AccessTokenResponse> => {
     const response = await fetchRefresh(refreshToken);
 
-    validateGETResponse(response, undefined, navigate);
+    validateResponse(response, undefined, navigate);
 
     return response;
 }
@@ -74,7 +74,7 @@ export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, 
         const retryResponse: BadResponse | SuccessfulResponse = await fetchFunc(tokensResponse.accessToken, ...fetchArgs);
 
         // Extra !retryResponse.success check to tell ts that response type is BadResponse, and it has statusCode field
-        if(!validateGETResponse(retryResponse, setErrorMessage,  navigate) && !retryResponse.success) {
+        if(!validateResponse(retryResponse, setErrorMessage,  navigate) && !retryResponse.success) {
             if (checkUnauthorizedResponse(retryResponse)) {
                 navigate(unauthorizedRedirectURI);
             }
@@ -82,7 +82,7 @@ export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, 
 
         return retryResponse;
     } else {
-        validateGETResponse(tokensResponse, undefined, navigate);
+        validateResponse(tokensResponse, undefined, navigate);
         navigate(unauthorizedRedirectURI);
         return tokensResponse;
     }
@@ -90,7 +90,7 @@ export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, 
 
 
 /*
-* Makes safe API call, validating errors, retrying if 401
+* Makes safe API call with access token, validating errors, retrying if 401
 * Do **NOT** pass auth tokens to function in fetchArgs[]
 * */
 export const safeAPICall = async <ResponseType>(
@@ -106,7 +106,7 @@ export const safeAPICall = async <ResponseType>(
 
     try {
         let response = await fetchFunc(tokens.access, ...funcArgs);
-        if (!validateGETResponse(response, setErrorMessage, navigate)) {
+        if (!validateResponse(response, setErrorMessage, navigate)) {
             return response;
         }
         if(checkUnauthorizedResponse(response)) {
@@ -121,4 +121,32 @@ export const safeAPICall = async <ResponseType>(
     }
 };
 
+/*
+* Makes safe API call to public endpoints, validating errors, retrying if 401
+* Do **NOT** pass auth tokens to function in fetchArgs[]
+* */
+export const safeAPICallPublic = async <ResponseType>(
+    refreshToken: string | null,
+    fetchFunc: CallableFunction,
+    navigate: NavigateFunction,
+    setErrorMessage?: CallableFunction,
+    ...funcArgs: any[]
+): Promise<ResponseType | BadResponse> => {
+    try {
+        let response = await fetchFunc(...funcArgs);
+        if (!validateResponse(response, setErrorMessage, navigate)) {
+            return response;
+        }
+        if(checkUnauthorizedResponse(response)) {
+            if (refreshToken) {
+                response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, refreshToken, navigate, setErrorMessage, ...funcArgs);
+            }
+        }
+        return response;
 
+    } catch (err) { 
+        console.error(err);
+        navigate(internalServerErrorURI);
+        return createBadResponseManually(internalServerErrorDefaultMessage, 500);
+    }
+};

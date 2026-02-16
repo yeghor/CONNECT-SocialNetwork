@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 
 import {
-    appHomeURI,
+    homeURI,
     AccessTokenCookieKey, RefreshTokenCookieKey,
     internalServerErrorURI,
-    appRegisterURI
+    registerURI,
+    passwordRecoveryURI
 } from "../../consts.ts"
 
 import { fetchLogin } from "../../fetching/fetchAuth.ts"
@@ -45,7 +46,7 @@ const LoginForm = () => {
                 } else {
                     setUpdateCookie(AccessTokenCookieKey, response.accessToken);
                     setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
-                    navigate(appHomeURI);                    
+                    navigate(homeURI);                    
                 }
 
                 return;
@@ -65,14 +66,10 @@ const LoginForm = () => {
         }
     }
 
-    const secondFactorHandler = () => {
-
-    };
-    console.log(showSecondFactor, emailToConfirm)
     return (
-        <div className="flex flex-col items-center justify-top mt-16 px-6 py-8 mx-auto md:h-screen lg:py-0">
+        <div className="flex flex-col items-center justify-top mt-16 px-6 py-8 mx-auto lg:py-0">
             { showSecondFactor && emailToConfirm ? <SecondFactor emailToConfirm={emailToConfirm} /> :
-                <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
+                    <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
                     <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-white md:text-2xl">
                             Sign in to your account
@@ -97,7 +94,10 @@ const LoginForm = () => {
                                 <p className="text-white">Sign in</p>
                             </button>
                             <p className="text-sm font-light text-gray-200 dark:text-gray-400">
-                                Don’t have an account yet? <Link to={appRegisterURI} className="font-medium text-primary-600 text-white hover:underline dark:text-primary-500">Sign up</Link>
+                                Don’t have an account yet? <Link to={registerURI} className="font-medium text-primary-600 text-white hover:underline dark:text-primary-500 underline">Sign up</Link>
+                            </p>
+                            <p className="text-sm font-light text-gray-200 dark:text-gray-400">
+                                Forgot password? <Link to={passwordRecoveryURI} className="font-medium text-primary-600 text-white hover:underline dark:text-primary-500 underline">Password Recovery</Link>
                             </p>
                         </form>
                     </div>

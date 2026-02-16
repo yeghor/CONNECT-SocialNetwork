@@ -8,7 +8,7 @@ import {
 
 type stringType = "username" | "email" | "password";
 
-export const validateFromString = (formString: string, stringType: stringType): boolean => {
+export const validateFormString = (formString: string, stringType: stringType): boolean => {
     switch (stringType) {
         case "username": 
             if (usernameRegexp.test(formString)) {

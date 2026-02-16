@@ -2,7 +2,7 @@ import React, { useState, useEffect, ChangeEvent } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { fetchConfirmSecondFactor } from "../../fetching/fetchAuth";
 import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers";
-import { AccessTokenCookieKey, appHomeURI, internalServerErrorURI, RefreshTokenCookieKey } from "../../consts";
+import { AccessTokenCookieKey, homeURI, internalServerErrorURI, RefreshTokenCookieKey } from "../../consts";
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler";
 
 // emailToConfirm coulb be null, in case user got redirected to this page
@@ -109,7 +109,7 @@ const SecondFactor = (props: SecondFactorProps) => {
             if(response.success) {
                 setUpdateCookie(AccessTokenCookieKey, response.accessToken);
                 setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
-                navigate(appHomeURI);
+                navigate(homeURI);
             }
         } catch(err) {
             console.error(err);

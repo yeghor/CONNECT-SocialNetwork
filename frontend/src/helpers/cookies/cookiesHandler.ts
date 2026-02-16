@@ -6,7 +6,7 @@ import { NavigateFunction } from "react-router-dom";
 import {
     AccessTokenCookieKey,
     RefreshTokenCookieKey,
-    appLoginURI
+    loginURI
 } from "../../consts.ts"
 
 const cookies = new Cookies();
@@ -44,7 +44,7 @@ export const getCookiesOrRedirect = (navigate: NavigateFunction): CookieTokenObj
     const possibleCookies = getCookies();
 
     if(!possibleCookies.access || !possibleCookies.refresh) {
-        navigate(appLoginURI);
+        navigate(loginURI);
     }
 
     // Anyway returning tokens to prevent unnecessary the function response type check

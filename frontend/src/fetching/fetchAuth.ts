@@ -8,10 +8,11 @@ import {
     registerURL,
     logoutURL,
     refreshTokenURL,
-    changePasswordURL,
+    requestChangePasswordURL,
     changeUsernameURL,
     confirmSecondFactorURL,
-    issueNewSecondFactor as issueNewSecondFactorURL,
+    issueNewSecondFactorURL,
+    recoverPasswordURL,
 } from "./urls.ts";
 
 import { 
@@ -23,7 +24,8 @@ import {
     changePasswordBody, 
     changeUsernameBody,
     confirmSecondFactorBody,
-    issueNewSecondFactorBody
+    issueNewSecondFactorBody,
+    recoverPasswordBody
 } from "./requestConstructors.ts"
 
 import {
@@ -45,7 +47,7 @@ export const fetchLogin = async (username: string, password: string): APIRespons
     };
 
     return await fetchHelper<AuthTokensResponse>(loginURL, requestInit, authTokensResponseMapper);
-}
+};
 
 export const fetchRegister = async (username: string, email: string, password: string): APIResponse<EmailToConfirmResponse> => {
     const requestInit: RequestInit  = {
@@ -55,7 +57,7 @@ export const fetchRegister = async (username: string, email: string, password: s
     };
 
     return await fetchHelper<EmailToConfirmResponse>(registerURL, requestInit, emailToConfirmResponseMapper);
-}
+};
 
 export const fetchRefresh = async (refreshJWT: string): APIResponse<AccessTokenResponse> => {
     const requestInit: RequestInit  = {
@@ -64,7 +66,7 @@ export const fetchRefresh = async (refreshJWT: string): APIResponse<AccessTokenR
     };
 
     return await fetchHelper<AccessTokenResponse>(refreshTokenURL, requestInit, authTokensResponseMapper);
-}
+};
 
 export const fetchChangePassword = async (accessJWT: string, oldPassword: string, newPassword: string): APIResponse<EmailToConfirmResponse> => {
     const requestInit: RequestInit = {
@@ -73,8 +75,18 @@ export const fetchChangePassword = async (accessJWT: string, oldPassword: string
         body: JSON.stringify(changePasswordBody(oldPassword, newPassword))
     };
 
-    return await fetchHelper<EmailToConfirmResponse>(changePasswordURL, requestInit, successfulResponseMapper);
-}
+    return await fetchHelper<EmailToConfirmResponse>(requestChangePasswordURL, requestInit, successfulResponseMapper);
+};
+
+export const fetchRecoverPassword = async (email: string, newPassword: string): APIResponse<SuccessfulResponse> => {
+    const requestInit: RequestInit = {
+        method: "PATCH",
+        headers: requestHeaders(),
+        body: JSON.stringify(recoverPasswordBody(email, newPassword))
+    }
+
+    return await fetchHelper<SuccessfulResponse>(recoverPasswordURL, requestInit, successfulResponseMapper);
+};
 
 export const fetchChangeUsername = async (accessJWT: string, newUsername: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit  = {
@@ -84,7 +96,7 @@ export const fetchChangeUsername = async (accessJWT: string, newUsername: string
     };
 
     return await fetchHelper<SuccessfulResponse>(changeUsernameURL, requestInit, successfulResponseMapper);
-}
+};
 
 export const fetchLogout = async (accessJWT: string, rerfreshJWT: string): APIResponse<SuccessfulResponse> => {
     const requestInit: RequestInit = {
@@ -94,7 +106,7 @@ export const fetchLogout = async (accessJWT: string, rerfreshJWT: string): APIRe
     }
 
     return await fetchHelper<SuccessfulResponse>(logoutURL, requestInit, successfulResponseMapper);
-}
+};
 
 export const fetchConfirmSecondFactor = async (confirmationCode: string, email: string): APIResponse<AuthTokensResponse> => {
     const requestInit: RequestInit = {
@@ -104,7 +116,7 @@ export const fetchConfirmSecondFactor = async (confirmationCode: string, email: 
     };
 
     return await fetchHelper<AuthTokensResponse>(confirmSecondFactorURL, requestInit, authTokensResponseMapper);
-}
+};
 
 export const fetchIssueNewSecondFactor = async (email: string): APIResponse<EmailToConfirmResponse> => {
     const requestInit: RequestInit = {
@@ -114,4 +126,4 @@ export const fetchIssueNewSecondFactor = async (email: string): APIResponse<Emai
     };
 
     return await fetchHelper<EmailToConfirmResponse>(issueNewSecondFactorURL, requestInit, emailToConfirmResponseMapper);
-}
+};

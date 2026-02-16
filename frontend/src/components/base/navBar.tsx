@@ -2,7 +2,7 @@ import React from "react";
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
-import  { appHomeURI, myProfileURI } from "../../consts.ts";
+import  { homeURI, myProfileURI } from "../../consts.ts";
 import SearchBar from "./searchBar.tsx";
 
 const NavigationBar = (): ReactNode => {
@@ -10,7 +10,7 @@ const NavigationBar = (): ReactNode => {
         <nav className="w-full">
             <div className="flex items-center justify-between w-full p-4">
                 <div className="flex items-center w-1/3">
-                    <Link to={appHomeURI} className="flex items-center">
+                    <Link to={homeURI} className="flex items-center">
                         <img
                             src="/connect-logo-full.png"
                             className="h-15 w-auto hover:scale-110 transition-all"

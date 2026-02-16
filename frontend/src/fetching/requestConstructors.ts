@@ -37,7 +37,7 @@ interface LoginInterface {
     username: string
 };
 
-interface RegisterInterface extends LoginInterface {
+interface RegisterBody extends LoginInterface {
     email: string
 };
 
@@ -46,108 +46,120 @@ interface LogoutInterface {
     refresh_token: string
 };
 
-interface ChangePostInterface {
+interface ChangePostBody {
     title: string
     text: string
 };
 
-interface MakePostInterface extends ChangePostInterface {
+interface MakePostBody extends ChangePostBody {
     parent_post_id: string | null
 };
 
-interface ChangePasswordInterface {
+interface ChangePasswordBody {
     new_password: string,
     new_password_confirm: string
 };
 
-interface ChangeUsernameInterface {
+interface RecoverPasswordBody {
+    email: string,
+    new_password: string
+};
+
+interface ChangeUsernameBody {
     new_username: string
 };
 
-interface EmailToConfirmInterface {
+interface EmailToConfirmBody {
     email_to_confirm: string
 }
 
-interface ConfirmSecondFactorInterface extends EmailToConfirmInterface {
+interface ConfirmSecondFactorBody extends EmailToConfirmBody {
     confirmation_code: string
 }
 
-interface CreateChatInterface { 
+interface CreateChatBody { 
     message: string,
 };
 
-interface CreateDialogueInterface extends CreateChatInterface {
+interface CreateDialogueBody extends CreateChatBody {
     other_participant_id: string
 };
 
-interface CreateGroupInterface {
+interface CreateGroupBody {
     other_participants_ids: string[]
 };
 
-export const makePostBody = (title: string, text: string, parentPostId: string | null): MakePostInterface => {
+export const makePostBody = (title: string, text: string, parentPostId: string | null): MakePostBody => {
     return {
         title,
         text,
         parent_post_id: parentPostId
     };
-}
+};
 
-export const changePostBody = (title: string, text: string): ChangePostInterface => {
+export const changePostBody = (title: string, text: string): ChangePostBody => {
     return {
         title,
         text
     };
-}
+};
 
 export const loginBody = (username: string, password: string): LoginInterface => {
     return {
         username,
         password
     };
-}
+};
 
 export const logoutBody = (accessToken: string, refreshToken: string): LogoutInterface => {
     return {
         access_token: accessToken,
         refresh_token: refreshToken
     };
-}
+};
 
-export const registerBody = (username: string, email: string, password: string): RegisterInterface => {
+export const registerBody = (username: string, email: string, password: string): RegisterBody => {
     return {
         username: username,
         email: email,
         password: password
     };
-}
+};
 
-export const changePasswordBody = (newPassword: string, newPasswordConfirm: string): ChangePasswordInterface => {
+export const changePasswordBody = (newPassword: string, newPasswordConfirm: string): ChangePasswordBody => {
     return {
         new_password: newPassword,
         new_password_confirm: newPasswordConfirm
     };
-}
+};
 
-export const changeUsernameBody = (newUsername: string): ChangeUsernameInterface => {
+export const recoverPasswordBody = (email: string, newPassword: string): RecoverPasswordBody => {
+    return {
+        email: email,
+        new_password: newPassword
+    };
+};
+
+export const changeUsernameBody = (newUsername: string): ChangeUsernameBody => {
     return {
         new_username: newUsername
     };
-}
+};
 
-export const createDialogueBody = (message: string, otherParticipantId: string): CreateDialogueInterface => {
+export const createDialogueBody = (message: string, otherParticipantId: string): CreateDialogueBody => {
     return {
         message,
         other_participant_id: otherParticipantId
     };
-}
+};
 
-export const createGroupBody = (otherParticipantsIds: string[]): CreateGroupInterface => {
+export const createGroupBody = (otherParticipantsIds: string[]): CreateGroupBody => {
     return {
         other_participants_ids: otherParticipantsIds
     };
-}
+};
 
-export const confirmSecondFactorBody = (confirmationCode: string, email: string): ConfirmSecondFactorInterface => {
+export const confirmSecondFactorBody = (confirmationCode: string, email: string): ConfirmSecondFactorBody => {
     return {
         email_to_confirm: email,
         confirmation_code: confirmationCode

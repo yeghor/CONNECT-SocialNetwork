@@ -19,6 +19,8 @@ const commentsConstructor = "/comments"
 const chatConstructor = "/chat";
 const mediaConstructor = "/media";
 const repliesConstructor = "/replies";
+const authConstructor = "/auth"
+const _2FAConstructor = "/second-factor"
 
 // Auth
 
@@ -29,7 +31,8 @@ export const logoutURL = `${BASEURL}/logout`;
 export const refreshTokenURL = `${BASEURL}/refresh`;
 
 export const changeUsernameURL = `${BASEURL}${usersConstructor}${myProfileConstructor}/username`;
-export const changePasswordURL = `${BASEURL}${usersConstructor}${myProfileConstructor}/password`;
+export const requestChangePasswordURL = `${BASEURL}${usersConstructor}${myProfileConstructor}/password`;
+export const recoverPasswordURL = `${BASEURL}${authConstructor}${_2FAConstructor}/recover-password`
 
 export const myProfileURL = `${BASEURL}${usersConstructor}${myProfileConstructor}`;
 
@@ -37,8 +40,8 @@ export const recentActivityURL = `${BASEURL}/recent-activity`;
 
 export const myFriendsURL = `${BASEURL}/friends`;
 
-export const confirmSecondFactorURL = `${BASEURL}/auth/second-factor`
-export const issueNewSecondFactor = `${BASEURL}/auth/new/second-factor`
+export const confirmSecondFactorURL = `${BASEURL}${authConstructor}${_2FAConstructor}`
+export const issueNewSecondFactorURL = `${BASEURL}${authConstructor}/new${_2FAConstructor}`
 
 //Social
 
