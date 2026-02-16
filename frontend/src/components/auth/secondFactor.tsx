@@ -2,7 +2,7 @@ import React, { useState, useEffect, ChangeEvent } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { fetchConfirmSecondFactor } from "../../fetching/fetchAuth";
 import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers";
-import { AccessTokenCookieKey, homeURI, internalServerErrorURI, RefreshTokenCookieKey } from "../../consts";
+import { AccessTokenCookieKey, homeURI as homePageURI, internalServerErrorURI, RefreshTokenCookieKey } from "../../consts";
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler";
 
 // emailToConfirm coulb be null, in case user got redirected to this page
@@ -16,7 +16,7 @@ const SecondFactor = (props: SecondFactorProps) => {
     const [ errorMessage, setErrorMesage ] = useState<string | null>(null);
 
     const location = useLocation();
-    const [ emailToConfirm, setEmailToConfirm ] = useState<string>(props.emailToConfirm ? props.emailToConfirm : location.state.emailToConfirm)
+    const [ emailToConfirm, setEmailToConfirm ] = useState<string | null>(props.emailToConfirm ? props.emailToConfirm : location.state ? location.state.emailToConfirm : null)
 
     const handleFocusKeyPress = (event: ChangeEvent<HTMLInputElement>, elementIndex: number) => {
         const currElement = document.getElementById(String(elementIndex)) as HTMLInputElement;
@@ -83,6 +83,10 @@ const SecondFactor = (props: SecondFactorProps) => {
     }, []);
 
     const sendCode = async () => {
+        if (!emailToConfirm) {
+            return;
+        }
+
         const confirmationCodeArr = new Array();
 
         for (let i = 0; i < 6; i++) {
@@ -109,7 +113,7 @@ const SecondFactor = (props: SecondFactorProps) => {
             if(response.success) {
                 setUpdateCookie(AccessTokenCookieKey, response.accessToken);
                 setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
-                navigate(homeURI);
+                navigate(homePageURI);
             }
         } catch(err) {
             console.error(err);
@@ -117,6 +121,13 @@ const SecondFactor = (props: SecondFactorProps) => {
             return;
         }
         }
+
+    useEffect(() => {
+        if (!emailToConfirm) {
+            navigate(homePageURI);
+            return;
+        }
+    }, []);
 
     return(
         <div className="text-white flex justify-center items-center my-16">
