@@ -59,7 +59,7 @@ class ChangePasswordBody(BaseModel):
             raise ValidationErrorExc(detail="NewPassword Pydantic schema: new passwords didn't match .", client_safe_detail="Passwords didn't match")
         return self
 
-class NewUsername(BaseModel):
+class NewUsernameBody(BaseModel):
     new_username: str = Field(..., min_length=USERNAME_MIN_L, max_length=USERNAME_MAX_L)
 
 class EmailToConfirm(BaseModel):
@@ -68,15 +68,25 @@ class EmailToConfirm(BaseModel):
 class SecondFactorConfirmationBody(EmailToConfirm):
     confirmation_code: str
 
-class RecoverPasswordBody(BaseModel):
-    email: str
-    new_password: str
 
 # JWT Token models
 
 class RefreshAccesTokensProvided(BaseModel):
     refresh_token: str
     access_token: str
+
+class PasswordRecoveryToken(BaseModel):
+    recovery_token: str
+    expires_at_recovery: str
+
+    @field_validator("expires_at_recovery", mode="before")
+    @classmethod
+    def normalize_datetime(cls, value: Any) -> str:
+        if isinstance(value, int):
+            value = datetime.fromtimestamp(value).strftime(DATE_FORMAT)
+        elif isinstance(value, datetime):
+            value = value.strftime(DATE_FORMAT)
+        return value
 
 class RefreshTokenSchema(BaseModel):
     refresh_token: str
@@ -103,7 +113,6 @@ class AccessTokenSchema(BaseModel):
         elif isinstance(value, datetime):
             value = value.strftime(DATE_FORMAT)
         return value
-
 
 class RefreshAccessTokens(RefreshTokenSchema, AccessTokenSchema):
     """

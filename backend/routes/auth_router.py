@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Body, Header, File, UploadFile, Form
 from services.postgres_service import *
 from services.core_services import MainServiceContextManager, MainServiceAuth
 from sqlalchemy.ext.asyncio import AsyncSession
-from authorization.authorization_utils import authorize_request_depends
+from authorization.authorization_utils import authorize_access_token_depends, authorize_password_recovery_token_depends
 
 from pydantic_schemas.pydantic_schemas_auth import *
 from pydantic_schemas.pydantic_schemas_social import UserSchema
@@ -37,27 +37,48 @@ async def confirm_2fa(
     session: AsyncSession = Depends(get_session_depends)
 ) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
-        return await auth.authenticate_2fa(confirmation_credentials=confirmation_credentials)
+        return await auth.confirm_email_2fa(credentials=confirmation_credentials)
    
 # ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
-@auth.post("/auth/new/second-factor")
+@auth.post("/auth/new/2fa/confirm-email")
 @endpoint_exception_handler
 async def issue_new_second_factor(
     email: EmailToConfirm,
     session: AsyncSession = Depends(get_session_depends)
-) -> EmailToConfirm:
+) -> None:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
         return await auth.issue_new_second_factor(email=email.email_to_confirm)
        
-@auth.patch("/auth/second-factor/recover-password")
+@auth.patch("/auth/2fa/change-password")
 @endpoint_exception_handler
 async def recover_password(
-    recover_credentials: RecoverPasswordBody,
+    credentials: SecondFactorConfirmationBody,
     session: AsyncSession = Depends(get_session_depends)
-) -> None:
+) -> PasswordRecoveryToken:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
-        return await auth.recover_password(recover_credentials=recover_credentials)
+        await auth.recover_password_2fa(credentials=credentials)
    
+@auth.post("/users/my-profile/password")
+@endpoint_exception_handler
+async def request_change_password(
+    user_: User = Depends(authorize_access_token_depends),
+    session: AsyncSession = Depends(get_session_depends)
+) -> EmailToConfirm:
+    user = await merge_model(postgres_session=session, model_obj=user_)
+    async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, include_email=True, MainServiceType=MainServiceAuth) as auth:
+        return await auth.request_password_recovery(user=user)
+
+@auth.patch("/users/my-profile/password")
+@endpoint_exception_handler
+async def change_password(
+    credentials: ChangePasswordBody,
+    user_: User = Depends(authorize_password_recovery_token_depends),
+    session: AsyncSession = Depends(get_session_depends)
+) -> EmailToConfirm:
+    user = await merge_model(postgres_session=session, model_obj=user_)
+    async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, include_email=True, MainServiceType=MainServiceAuth) as auth:
+        return await auth.change_password(user=user, credentials=credentials)
+
 @auth.post("/logout")
 @endpoint_exception_handler
 async def logout(
@@ -76,22 +97,11 @@ async def refresh_token(
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
         return await auth.refresh_token(refresh_token=token)
 
-@auth.patch("/users/my-profile/password")
-@endpoint_exception_handler
-async def request_change_password(
-    credentials: ChangePasswordBody = Body(...),
-    user_: User = Depends(authorize_request_depends),
-    session: AsyncSession = Depends(get_session_depends)
-) -> EmailToConfirm:
-    user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, include_email=True, MainServiceType=MainServiceAuth) as auth:
-        return await auth.request_change_password(user=user, credentials=credentials)
-
 @auth.patch("/users/my-profile/username")
 @endpoint_exception_handler
 async def change_username(
-    credentials: NewUsername = Body(...),
-    user_: User = Depends(authorize_request_depends),
+    credentials: NewUsernameBody = Body(...),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -102,7 +112,7 @@ async def change_username(
 @endpoint_exception_handler
 async def delete_profile(
     password: str = Header(...),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)

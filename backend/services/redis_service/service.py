@@ -2,6 +2,7 @@ import redis.asyncio as async_redis
 import redis.exceptions as redis_exceptions
 
 from exceptions.custom_exceptions import RedisError
+from services_types import JWTTypes
 
 from dotenv import load_dotenv
 from os import getenv
@@ -11,7 +12,7 @@ from datetime import datetime
 from uuid import UUID
 
 load_dotenv()
-ACCES_JWT_EXPIRY_SECONDS = int(getenv("ACCES_JWT_EXPIRY_SECONDS"))
+ACCESS_JWT_EXPIRY_SECONDS = int(getenv("ACCES_JWT_EXPIRY_SECONDS"))
 REFRESH_JWT_EXPIRY_SECONDS = int(getenv("REFRESH_JWT_EXPIRY_SECONDS"))
 DATETIME_BASE_FORMAT = getenv("DATETIME_BASE_FORMAT")
 
@@ -78,9 +79,10 @@ class RedisService:
         )
 
         # Jwt key prefixes
-        self.__jwt_acces_prefix = "acces-jwt-token:"
-        self.__jwt_refresh_prefix = "refresh-jwt-token:"
-
+        self.__jwt_acces_prefix = "acces-jwt:"
+        self.__jwt_refresh_prefix = "refresh-jwt:"
+        self.__jwt_password_recovery_prefix = "password-recovery-jwt:"
+        self.__chat_token_prefix = "chat-jwt:"
 
         self._viewed_post_prefix = "viewed-posts:"
 
@@ -89,9 +91,7 @@ class RedisService:
 
 
         # Chat key prefixes
-        self.__chat_token_prefix = "chat-jwt-token:"
         self.__user_chat_pagination_prefix = "chat-pagination-user-"
-
         self.__chat_connection_prefix = "chat-connections-room:"
  
 
@@ -102,8 +102,6 @@ class RedisService:
         # Email confirmaion key prefixes
         self.__2fa_email_prefix = "2fa-email:"
 
-        # 2FA Change password
-        self.__2fa_change_password_hash_prefix = "2fa"
 
     # ===============
     # JWT tokens logic
@@ -113,10 +111,10 @@ class RedisService:
     async def save_acces_jwt(self, jwt_token: str, user_id: str) -> str:
         await self.__client.setex(
             name=f"{self.__jwt_acces_prefix}{str(jwt_token)}",
-            time=ACCES_JWT_EXPIRY_SECONDS,
+            time=ACCESS_JWT_EXPIRY_SECONDS,
             value=user_id
         )
-        return self._get_expiry(ACCES_JWT_EXPIRY_SECONDS)
+        return self._get_expiry(ACCESS_JWT_EXPIRY_SECONDS)
     
     @redis_error_handler
     async def save_refresh_jwt(self, jwt_token: str, user_id: str) -> str:
@@ -128,11 +126,20 @@ class RedisService:
         return self._get_expiry(REFRESH_JWT_EXPIRY_SECONDS)
 
     @redis_error_handler
+    async def save_password_recovery_jwt(self, jwt_token: str, user_id: str) -> None:
+        await self.__client.setex(
+            name=f"{(self.__jwt_refresh_prefix)}{jwt_token}",
+            time=SECOND_FACTOR_EXPIRY_SECONDS,
+            value=user_id
+        )
+        return self._get_expiry(SECOND_FACTOR_EXPIRY_SECONDS)
+
+    @redis_error_handler
     async def refresh_access_token(self, old_token, new_token: str, user_id: str) -> str:
         await self.delete_jwt(jwt_token=old_token, token_type="acces")
         await self.__client.setex(
             name=f"{self.__jwt_acces_prefix}{new_token}",
-            time=ACCES_JWT_EXPIRY_SECONDS,
+            time=ACCESS_JWT_EXPIRY_SECONDS,
             value=user_id
         )
         return new_token
@@ -155,16 +162,18 @@ class RedisService:
         await self.__client.delete(f"{prefix}{jwt_token}")
 
     @redis_error_handler
-    async def check_jwt_existence(self, jwt_token: str, token_type: str) -> bool:
+    async def check_jwt_existence(self, jwt_token: str, token_type: JWTTypes) -> bool:
         if not jwt_token or not token_type:
             raise ValueError("No jwt_token or token_type provided")
 
-        if token_type == "acces": prefix = self.__jwt_acces_prefix
+        if token_type == "access": prefix = self.__jwt_acces_prefix
         elif token_type == "refresh": prefix = self.__jwt_refresh_prefix
+        elif token_type == "password-recovery": prefix = self.__jwt_password_recovery_prefix
 
-        potential_token = await self.__client.get(f"{prefix}{str(jwt_token)}")
+        potential_token = await self.__client.get(f"{prefix}{jwt_token}")
+
         return bool(potential_token)
-    
+
     @redis_error_handler
     async def get_token_by_user_id(self, user_id: str, token_type: str) -> str | None:
         if not user_id or not token_type:
@@ -338,7 +347,7 @@ class RedisService:
         await self.__client.delete(pattern)
 
     @redis_error_handler
-    async def check_second_factor(self, email: str, code: str) -> bool:
+    async def check_2fa(self, email: str, code: str) -> bool:
         """Returns False even if email: code pair doesn't exist"""
 
         pattern = f"{self.__2fa_email_prefix}{email}"
@@ -346,12 +355,12 @@ class RedisService:
 
         return issued_code == str(code)
 
-    @redis_error_handler
-    async def save_new_password_hash(self, email: str, password_hash: str | bytes) -> None:
-        pattern = f"{self.__2fa_change_password_hash_prefix}{email}"
-        await self.__client.setex(pattern, SECOND_FACTOR_EXPIRY_SECONDS, password_hash)
+    # @redis_error_handler
+    # async def save_password_recovery_token(self, token: str) -> None:
+    #     pattern = f"{self.__2fa_change_password_hash_prefix}{email}"
+    #     await self.__client.setex(pattern, SECOND_FACTOR_EXPIRY_SECONDS, password_hash)
     
-    @redis_error_handler
-    async def get_new_password_hash(self, email: str) -> str | bytes | None:
-        pattern = f"{self.__2fa_change_password_hash_prefix}{email}"
-        return await self.__client.get(pattern)
+    # @redis_error_handler
+    # async def get_password_recovery_token(self, token: str) -> str | bytes | None:
+    #     pattern = f"{self.__2fa_change_password_hash_prefix}{email}"
+    #     return await self.__client.get(pattern)

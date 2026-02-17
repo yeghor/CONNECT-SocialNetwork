@@ -22,7 +22,7 @@ import { validateFormString } from "../../helpers/validatorts.ts";
 import { safeAPICall, safeAPICallPublic } from "../../fetching/fetchUtils.ts";
 import { SuccessfulResponse } from "../../fetching/DTOs.ts";
 
-const PasswordRecoveryForm = () => {
+export const PasswordRecoveryForm = () => {
     const navigate = useNavigate();
 
     const [ warningMessage, setWarningMessage ] = useState("");
@@ -113,6 +113,12 @@ const PasswordRecoveryForm = () => {
             }
         </div>
     );
-}
+};
 
-export default PasswordRecoveryForm;
+export const NewPasswordRecoveryForm = () => {
+    return (
+        <div>
+
+        </div>
+    );
+};

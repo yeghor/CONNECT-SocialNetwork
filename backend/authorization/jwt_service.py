@@ -3,22 +3,20 @@ from dotenv import load_dotenv
 from os import getenv
 from datetime import datetime
 from services.redis_service import RedisService
-from typing import Literal
-from pydantic_schemas.pydantic_schemas_auth import (PayloadJWT,
-    RefreshTokenSchema,
-    AccessTokenSchema,
-    RefreshAccessTokens
-)
+from typing import Dict, TypeVar, Type
+from services_types import JWTTypes
+from pydantic_schemas.pydantic_schemas_auth import *
 import jwt.exceptions as jwt_exceptions
 from functools import wraps
-from fastapi import HTTPException
-import random
 from pydantic_schemas.pydantic_schemas_chat import ChatJWTPayload
 from exceptions.custom_exceptions import *
+from pydantic import BaseModel
 
 load_dotenv()
 
 DATETIME_BASE_FORMAT = getenv("DATETIME_BASE_FORMAT")
+
+M = TypeVar("M", bound=BaseModel)
 
 # TODO: Fix exception raising
 def jwt_error_handler(func):
@@ -32,10 +30,14 @@ def jwt_error_handler(func):
             elif isinstance(e, jwt_exceptions.PyJWTError):
                 raise JWTError(f"JWTService: Invalid or malformed JWT token. Func - {func.__name__}")
             else:
-                raise JWTError(f"JWTService: Uknown exception occured. Func - {func.__name__}. Exception - {e}")
+                raise JWTError(f"JWTService: Unknown exception occured. Func - {func.__name__}. Exception - {e}")
     return wrapper
 
 class JWTService:
+    # @classmethod
+    # def map_payload_to_pydantic(pydantic_model: Type[M], payload: Dict) -> M:
+    #     return pydantic_model.model_validate(payload)
+
     @classmethod
     def prepare_token(cls, jwt_token: str) -> str:
         """
@@ -60,8 +62,9 @@ class JWTService:
 
     # Doesn't require error handle
     @classmethod
-    async def generate_save_token(cls, user_id: str, redis: RedisService, token_type: str) -> RefreshTokenSchema | AccessTokenSchema:
+    async def generate_save_token(cls, user_id: str, redis: RedisService, token_type: JWTTypes) -> RefreshTokenSchema | AccessTokenSchema | PasswordRecoveryToken:
         """Choose token type you want to generate - acces/refresh"""
+
         encoded_jwt = cls.generate_token(user_id)
 
         if token_type == "acces":
@@ -70,6 +73,9 @@ class JWTService:
         elif token_type == "refresh":
             expires_at = await redis.save_refresh_jwt(jwt_token=encoded_jwt, user_id=user_id)
             return RefreshTokenSchema.model_validate({"refresh_token": encoded_jwt, "expires_at_refresh": expires_at})
+        elif token_type == "password-recovery":
+            expires_at = await redis.save_password_recovery_jwt(encoded_jwt, user_id)
+            return PasswordRecoveryToken(recovery_token=encoded_jwt, expires_at_recovery=expires_at)
         else:
             raise ValueError("Unsuported token type")
 
@@ -77,10 +83,8 @@ class JWTService:
     @classmethod
     @jwt_error_handler
     async def generate_save_refresh_access_token(cls, redis: RedisService, user_id: str, email_confirmation_required: bool = False) -> RefreshAccessTokens:
-
         acces_token = await cls.generate_save_token(user_id=user_id, redis=redis, token_type="acces")
         refresh_token = await cls.generate_save_token(user_id=user_id, redis=redis, token_type="refresh")
-
 
         return RefreshAccessTokens.model_validate(
             {
@@ -100,15 +104,14 @@ class JWTService:
             key=getenv("SECRET_KEY"),
             algorithms=["HS256",]
         )
-        return PayloadJWT.model_validate(payload)
 
+        return PayloadJWT.model_validate(payload)
 
     @classmethod
     @jwt_error_handler
     async def generate_save_chat_token(cls, room_id: str, user_id: str, redis: RedisService) -> str:
         chat_token = cls.generate_chat_token(room_id=room_id, user_id=user_id)
         await redis.save_chat_token(chat_token=chat_token, user_id=user_id)
-        print(chat_token)
         return chat_token
 
     @classmethod
@@ -135,3 +138,25 @@ class JWTService:
             algorithms=["HS256",]
         )
         return ChatJWTPayload.model_validate(payload)
+    
+    # @classmethod
+    # @jwt_error_handler
+    # def generate_recovery_token(cls, payload: Dict) -> str:
+    #     encoded_jwt = jwt.encode(
+    #         payload=payload,
+    #         key=getenv("SECRET_KEY"),
+    #         algorithm="HS256"
+    #     )
+
+    #     return encoded_jwt
+    
+    # @classmethod
+    # @jwt_error_handler
+    # def extract_recovery_jwt_payload(cls, jwt_token: str) -> Dict:
+    #     payload = jwt.decode(
+    #         jwt=jwt_token,
+    #         key=getenv("SECRET_KEY"),
+    #         algorithms=["HS256"]
+    #     )
+
+    #     return payload

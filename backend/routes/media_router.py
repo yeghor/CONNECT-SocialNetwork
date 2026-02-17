@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from fastapi.responses import Response
 
-from authorization.authorization_utils import authorize_request_depends
+from authorization.authorization_utils import authorize_password_recovery_token_depends
 from services.postgres_service.models import User
 from services.postgres_service.database_utils import *
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.core_services import MainServiceContextManager
 from services.core_services.main_services.main_media_service import MainMediaService
 
-from exceptions.exceptions_handler import endpoint_exception_handler
+from exceptions.exceptions_handler import authorize_access_token_depends
 
 media_router = APIRouter()
 
@@ -18,7 +18,7 @@ This router is only for case when the application use Local image storage.
 
 # https://stackoverflow.com/questions/55873174/how-do-i-return-an-image-in-fastapi
 @media_router.get("/media/users/{token}", response_class=Response)
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def get_image_user(
     token: str,
     session: AsyncSession = Depends(get_session_depends)
@@ -28,7 +28,7 @@ async def get_image_user(
         return Response(content=file_contents, media_type=mime_type)
 
 @media_router.get("/media/posts/{token}", response_class=Response)
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def get_image_post(
     token: str,
     session: AsyncSession = Depends(get_session_depends)
@@ -39,11 +39,11 @@ async def get_image_post(
 
 # TODO: Implement file passing
 @media_router.post("/media/posts/{post_id}")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def upload_post_picture(
     post_id: str,
     file_: UploadFile = File(...),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     print("Received upload post picture")
@@ -55,10 +55,10 @@ async def upload_post_picture(
         await media.upload_post_image(post_id=post_id, user=user, image_contents=file_contents, specified_mime=file_.content_type)
 
 @media_router.post("/media/users")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def upload_user_avatar(
     file: UploadFile = File(...),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)

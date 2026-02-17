@@ -2,6 +2,7 @@ import authorization as authorization_utils
 from services.core_services import MainServiceBase
 from services.postgres_service import Post, User
 from pydantic_schemas.pydantic_schemas_auth import *
+from services_types import JWTTypes
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import UploadFile
@@ -39,19 +40,19 @@ class MainServiceAuth(MainServiceBase):
             await self._RedisService.assign_second_factor(email=email, code=confirmation_code)
 
     @web_exceptions_raiser
-    async def authorize_request(self, token: str, return_user: bool = True) -> User | None:
+    async def authorize_request(self, token: str, token_type: JWTTypes, return_user: bool = True) -> User | None:
         """Can be used in fastAPI Depends() \n Prepares and authorizes token"""
         
-        valid_token = self._JWT.prepare_token(jwt_token=token)
+        prepared_token = self._JWT.prepare_token(jwt_token=token)
 
-        if not await self._RedisService.check_jwt_existence(jwt_token=valid_token, token_type="acces"):
-            raise Unauthorized(detail=f"AuthService: User tried to authrorize request by expired token: {token}", client_safe_detail="Invalid or expired token")
+        if not await self._RedisService.check_jwt_existence(jwt_token=prepared_token, token_type=token_type):
+            raise Unauthorized(detail=f"AuthService: User tried to authorize request by expired token: {token} token type: {token_type}", client_safe_detail="Invalid or expired token")
         
         if return_user:
-            payload = self._JWT.extract_jwt_payload(jwt_token=valid_token)
+            payload = self._JWT.extract_jwt_payload(jwt_token=prepared_token)
             user = await self._PostgresService.get_user_by_id(payload.user_id)
             if not user:
-                raise Unauthorized(detail=f"AuthService: User tried to authorize request by token: {token}, but specified user id does not exist.", client_safe_detail="Invalid or expired token")
+                raise Unauthorized(detail=f"AuthService: User tried to authorize request by token: {token} token type: {token_type}, but specified user id does not exist.", client_safe_detail="Invalid or expired token")
             return user
 
         return None
@@ -105,34 +106,56 @@ class MainServiceAuth(MainServiceBase):
     
 
     @web_exceptions_raiser
-    async def authenticate_2fa(self, confirmation_credentials: SecondFactorConfirmationBody) -> RefreshAccessTokens:
-        if not await self._RedisService.check_second_factor(email=confirmation_credentials.email_to_confirm, code=confirmation_credentials.confirmation_code):
-            raise Unauthorized(detail=f"AuthService: User with email: {confirmation_credentials.email_to_confirm} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
+    async def confirm_email_2fa(self, credentials: SecondFactorConfirmationBody) -> RefreshAccessTokens:
+        if not await self._RedisService.check_2fa(email=credentials.email_to_confirm, code=credentials.confirmation_code):
+            raise Unauthorized(detail=f"AuthService: User with email: {credentials.email_to_confirm} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
         
-        confirmed_user = await self._PostgresService.get_user_by_username_or_email(email=confirmation_credentials.email_to_confirm)
+        confirmed_user = await self._PostgresService.get_user_by_username_or_email(email=credentials.email_to_confirm)
 
-        # If email is already confirmed, it means, that user tries to perform some actions that requires 2fa
-        # Currently, the application supports only password changing
-        if confirmed_user.email_confirmed:
-            password_hash_to_change = await self._RedisService.get_new_password_hash(confirmation_credentials.email_to_confirm)
-            if password_hash_to_change:
-                await self._PostgresService.change_field_and_flush(model=confirmed_user, password_hash=password_hash_to_change)
-            await self._RedisService.deactivate_tokens_by_id(confirmed_user.user_id)
-        else:
-            confirmed_user.email_confirmed = True
+        if not confirmed_user:
+            raise InvalidResourceProvided(detail=f"AuthService: user with email: {credentials.email_to_confirm} tried to confirm email, but such user doesn't exist yet", client_safe_detail=f"Email that you provided doesn't exist in our system")
+
+        confirmed_user.email_confirmed = True
 
         return await self.generate_set_of_tokens(user_id=confirmed_user.user_id)
 
     @web_exceptions_raiser
-    async def issue_new_second_factor(self, email: str) -> EmailToConfirm:
+    async def recover_password_2fa(self, credentials: SecondFactorConfirmationBody) -> PasswordRecoveryToken:
+        """Returns change password token"""
+
+        if not self._RedisService.check_2fa(email=credentials.email_to_confirm, code=credentials.confirmation_code):
+            raise Unauthorized(detail=f"AuthService: User with email: {credentials.confirmation_credentials.email_to_confirm} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
+    
+        user = await self._PostgresService.get_user_by_username_or_email(email=credentials.email_to_confirm)
+
+        if not user:
+            raise InvalidResourceProvided(detail=f"AuthService: user with email: {credentials.email_to_confirm} tried to get password recovery token, but such user doesn't exist yet", client_safe_detail=f"Email that you provided doesn't exist in our system")
+
+        return await self._JWT.generate_save_token(user_id=user.user_id, redis=self._RedisService, token_type="password-recovery")
+
+    @web_exceptions_raiser
+    async def change_password(self, user: User, credentials: ChangePasswordBody) -> None:
+        """Actually changes password via token"""
+        
+        authorization_utils.validate_password(credentials.new_password)
+
+        new_password_hash = authorization_utils.hash_password(credentials.new_password)
+        user.password_hash = new_password_hash
+
+    @web_exceptions_raiser
+    async def request_password_recovery(self, user: User, credentials: ChangePasswordBody) -> EmailToConfirm:
+        """Requests password change, issues change password 2fa"""
+        await self.__create_2fa(email=user.email, username=user.username)
+        return EmailToConfirm(email_to_confirm=user.email)
+
+    @web_exceptions_raiser
+    async def issue_new_second_factor(self, email: str):
         user = await self._PostgresService.get_user_by_username_or_email(email=email)
 
         if not user:
             raise InvalidResourceProvided(detail=f"AuthService: User with email: {email} tried to issue new second factor authentication with email that does not exists in the database.", client_safe_detail="User with this email doesn't exist")
 
         await self.__create_2fa(email=email, username=user.username)
-
-        return EmailToConfirm(email_to_confirm=email)
 
     @web_exceptions_raiser
     async def logout(self, tokens: RefreshAccessTokens) -> None:
@@ -156,19 +179,7 @@ class MainServiceAuth(MainServiceBase):
         return new_access_token
     
     @web_exceptions_raiser
-    async def request_change_password(self, user: User, credentials: ChangePasswordBody) -> EmailToConfirm:
-        if authorization_utils.check_password(entered_pass=credentials.new_password, hashed_pass=user.password_hash):
-            raise InvalidResourceProvided(detail=f"AuthService: User: {user.user_id} tried to change password using old password.", client_safe_detail="You recently used similar password, try another one")
-
-        new_password_hash = authorization_utils.hash_password(raw_pass=credentials.new_password_confirm)
-
-        await self.__create_2fa(email=user.email, username=user.username)
-        await self._RedisService.save_new_password_hash(email=user.email, password_hash=new_password_hash)
-
-        return EmailToConfirm(email_to_confirm=user.email)
-
-    @web_exceptions_raiser
-    async def change_username(self, user: User, credentials: NewUsername) -> EmailToConfirm:
+    async def change_username(self, user: User, credentials: NewUsernameBody) -> EmailToConfirm:
         new_username = credentials.new_username
 
         if user.username == credentials.new_username:
@@ -184,16 +195,4 @@ class MainServiceAuth(MainServiceBase):
         await self._PostgresService.delete_models_and_flush(user)
         await self._RedisService.deactivate_tokens_by_id(user_id=user.user_id)
         await self._ImageStorage.delete_avatar_user(user_id=user.user_id)
-
-    @web_exceptions_raiser
-    async def recover_password(self, recover_credentials: RecoverPasswordBody) -> None:
-        potential_user = await self._PostgresService.get_user_by_username_or_email(email=recover_credentials.email)
-        
-        # Returning code 200, to not explicit registered emails
-        if not potential_user:
-            return
-        
-        new_password_hash = authorization_utils.hash_password(recover_credentials.new_password)
-
-        await self.__create_2fa(email=potential_user.email, username=potential_user.username)
-        await self._RedisService.save_new_password_hash(email=potential_user.email, password_hash=new_password_hash)
+    

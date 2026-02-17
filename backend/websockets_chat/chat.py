@@ -1,11 +1,11 @@
 from fastapi import WebSocket, APIRouter, Depends, Body
-from authorization import authorize_request_depends, authorize_chat_token, JWTService
+from authorization import authorize_password_recovery_token_depends, authorize_chat_token, JWTService
 from services.postgres_service import User, get_session_depends, merge_model
 from services.core_services.main_services import MainChatService
 from services.core_services.core_services import MainServiceContextManager
 from websockets_chat.connection_manager import WebsocketConnectionManager
 
-from exceptions.exceptions_handler import endpoint_exception_handler, ws_endpoint_exception_handler
+from exceptions.exceptions_handler import authorize_access_token_depends, ws_authorize_access_token_depends
 
 from pydantic_schemas.pydantic_schemas_chat import *
 from typing import List
@@ -18,10 +18,10 @@ chat = APIRouter()
 connection = WebsocketConnectionManager()
 
 @chat.get("/chat/connect/{chat_id}")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def get_chat_connect_data(
     chat_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> ChatConnect:
     """Can be used only with approved chats or groups"""
@@ -30,10 +30,10 @@ async def get_chat_connect_data(
         return await chat_service.get_chat_token_including_participants_data(room_id=chat_id, user=user)
 
 @chat.get("/chat/not-approved/connect/{chat_id}")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def get_not_approved_chat_connect_data(
     chat_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> NotApprovedChatData:
     """Can be used only with not approved dialogue chats"""
@@ -42,10 +42,10 @@ async def get_not_approved_chat_connect_data(
         return await chat_service.get_not_approved_chat_data(room_id=chat_id, user=user)
 
 @chat.get("/chat/is-approved/{chat_id}")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def get_chat_pending_state(
     chat_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> bool:
     """Can be used only with not approved dialogue chats"""
@@ -55,11 +55,11 @@ async def get_chat_pending_state(
 
 
 @chat.get("/chat/{chat_id}/messages/{page}")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def get_batch_of_chat_messages(
     chat_id: str,
     page: int = Depends(page_validator),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> List[MessageSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -67,10 +67,10 @@ async def get_batch_of_chat_messages(
         return await chat_service.get_chat_messages_batch(room_id=chat_id, user=user, page=page)
 
 @chat.post("/chat/dialogue")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def create_dialogue_chat(
     data: CreateDialogueRoomBody = Body(...),  
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -78,10 +78,10 @@ async def create_dialogue_chat(
         return await chat_service.create_dialogue_chat(data=data, user=user)
 
 @chat.post("/chat/group")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def create_group_chat(
     data: CreateGroupRoomBody,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> str:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -89,10 +89,10 @@ async def create_group_chat(
         return await chat_service.create_group_chat(data=data, user=user)
 
 @chat.get("/chat/approved/{page}")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def get_my_chats(
     page: int = Depends(page_validator),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)  
 ) -> List[ChatSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -100,10 +100,10 @@ async def get_my_chats(
         return await chat_service.get_chat_batch(user=user, page=page, approved=True)
 
 @chat.get("/chat/not-approved/{page}")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def get_not_approved_chats(
     page: int = Depends(page_validator),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)  
 ) -> List[ChatSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -111,10 +111,10 @@ async def get_not_approved_chats(
         return await chat_service.get_chat_batch(user=user, page=page, approved=False)
 
 @chat.post("/chat/approve/{chat_id}")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def approve_chat(
     chat_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -122,10 +122,10 @@ async def approve_chat(
         return await chat_service.approve_chat(room_id=chat_id, user=user)
 
 @chat.get("/chat/id/{other_user_id}")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def get_dialoque_id_by_other_user_id(
     other_user_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> str | None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -133,9 +133,9 @@ async def get_dialoque_id_by_other_user_id(
         return await chat_service.get_dialoque_id_by_other_user_id(other_user_id=other_user_id, user=user)
 
 @chat.get("/chat/not-approved")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def get_number_of_not_approved_chats(
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> int:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -143,10 +143,10 @@ async def get_number_of_not_approved_chats(
         return await chat_service.get_number_of_not_approved_chats(user=user) 
 
 @chat.post("/chat/leave/{chat_id}")
-@endpoint_exception_handler
+@authorize_access_token_depends
 async def leave_from_group(
     chat_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session,model_obj=user_)
@@ -162,7 +162,7 @@ async def wsconnect(token: str, websocket: WebSocket) -> ChatJWTPayload:
     return connection_data
 
 @chat.websocket("/{token}")
-@ws_endpoint_exception_handler
+@ws_authorize_access_token_depends
 async def connect_to_websocket_chat_room(
     websocket: WebSocket,
     token: str = Depends(authorize_chat_token),

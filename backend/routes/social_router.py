@@ -1,33 +1,22 @@
 import re
-from fastapi import APIRouter, Depends, Body, Query, HTTPException
+from fastapi import APIRouter, Depends, Body
 from services.postgres_service.database_utils import *
 from services.postgres_service.models import User
 from services.core_services import MainServiceContextManager
 from services.core_services.main_services.main_social_service import MainServiceSocial
-from authorization.authorization_utils import authorize_request_depends
-from pydantic_schemas.pydantic_schemas_social import (
-    UserLiteSchema,
-    PostBase,
-    PostLiteSchema,
-    PostSchema,
-    MakePostDataSchema,
-    PostDataSchemaBase,
-    UserSchema,
-    RecentActivitySchema,
-    PostBaseShort,
-    UserShortSchemaAvatarURL
-)
+from authorization.authorization_utils import authorize_access_token_depends
+from pydantic_schemas.pydantic_schemas_social import *
 from project_types import PostsOrderType, PostsType
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Annotated, List, Literal
+from typing import List
 from dotenv import load_dotenv
 from os import getenv
 
 from exceptions.exceptions_handler import endpoint_exception_handler
 
 from .query_utils import page_validator, query_prompt_required
-from authorization import authorize_request_depends
+from authorization import authorize_access_token_depends
 from services.postgres_service import get_session_depends, merge_model
 
 social = APIRouter()
@@ -40,7 +29,7 @@ QUERY_PARAM_MAX_L = int(getenv("QUERY_PARAM_MAX_L"))
 @endpoint_exception_handler
 async def get_feed(
     page: int = Depends(page_validator),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends),
     ) -> List[PostLiteSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -51,7 +40,7 @@ async def get_feed(
 @endpoint_exception_handler
 async def get_followed_posts(
     page: int = Depends(page_validator),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
     ) -> List[PostLiteSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -63,7 +52,7 @@ async def get_followed_posts(
 async def search_posts(
     page: int = Depends(page_validator),
     prompt: str = Depends(query_prompt_required),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(),
     session: AsyncSession = Depends(get_session_depends)
     ) -> List[PostLiteSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -75,7 +64,7 @@ async def search_posts(
 async def search_users(
     prompt: str = Depends(query_prompt_required),
     page: str = Depends(page_validator),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session = Depends(get_session_depends)
     ) -> List[UserLiteSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -85,7 +74,7 @@ async def search_users(
 @social.post("/posts")
 @endpoint_exception_handler
 async def make_post(
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends),
     post_data: MakePostDataSchema = Body(...)
     ) -> PostBaseShort:
@@ -97,7 +86,7 @@ async def make_post(
 @endpoint_exception_handler
 async def load_post(
     post_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> PostSchema:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -109,7 +98,7 @@ async def load_post(
 async def load_comments(
     post_id: str,
     page: int = Depends(page_validator),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
     ) -> List[PostBase]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -120,7 +109,7 @@ async def load_comments(
 @endpoint_exception_handler
 async def change_post(
     post_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends),
     post_data: PostDataSchemaBase = Body(...),
 ) -> PostSchema:
@@ -132,7 +121,7 @@ async def change_post(
 @endpoint_exception_handler
 async def delete_post(
     post_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends),
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -144,7 +133,7 @@ async def delete_post(
 @endpoint_exception_handler
 async def like_post(
     post_id: str | None,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ):
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -155,7 +144,7 @@ async def like_post(
 @endpoint_exception_handler
 async def unlike_post(
     post_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -166,7 +155,7 @@ async def unlike_post(
 @endpoint_exception_handler
 async def follow(
     follow_to_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends),
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -177,7 +166,7 @@ async def follow(
 @endpoint_exception_handler
 async def unfollow(
     unfollow_from_id: str,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends),
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -187,7 +176,7 @@ async def unfollow(
 @social.get("/users/my-profile")
 @endpoint_exception_handler
 async def get_my_profile(
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends),
     ) -> UserSchema:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -198,7 +187,7 @@ async def get_my_profile(
 @endpoint_exception_handler
 async def get_user_profile(
     user_id: str | None,
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends),
     )-> UserSchema:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -210,7 +199,7 @@ async def get_user_profile(
 async def get_users_posts(
     user_id: str,
     page: int = Depends(page_validator),
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends),
     order: PostsOrderType = "fresh",
     posts_type: PostsType = "posts"
@@ -222,7 +211,7 @@ async def get_users_posts(
 @social.get("/recent-activity")
 @endpoint_exception_handler
 async def get_recent_activity(
-        user_: User = Depends(authorize_request_depends),
+        user_: User = Depends(authorize_access_token_depends),
         session: AsyncSession = Depends(get_session_depends)
     ) -> List[RecentActivitySchema]:
     user = await merge_model(user_, User)
@@ -231,7 +220,7 @@ async def get_recent_activity(
     
 @social.get("/friends")
 async def get_my_friends(
-    user_: User = Depends(authorize_request_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> List[UserLiteSchema]:
     user = await merge_model(session, user_)
