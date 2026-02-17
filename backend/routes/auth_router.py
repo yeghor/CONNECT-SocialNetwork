@@ -58,9 +58,9 @@ async def recover_password(
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
         await auth.recover_password_2fa(credentials=credentials)
    
-@auth.post("/users/my-profile/password")
+@auth.post("/users/my-profile/password/recovery")
 @endpoint_exception_handler
-async def request_change_password(
+async def request_password_recovery(
     user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> EmailToConfirm:
@@ -68,13 +68,24 @@ async def request_change_password(
     async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, include_email=True, MainServiceType=MainServiceAuth) as auth:
         return await auth.request_password_recovery(user=user)
 
+@auth.patch("/users/my-profile/password/recovery")
+@endpoint_exception_handler
+async def recover_password(
+    credentials: PasswordRecoveryBody,
+    user_: User = Depends(authorize_password_recovery_token_depends),
+    session: AsyncSession = Depends(get_session_depends)
+) -> EmailToConfirm:
+    user = await merge_model(postgres_session=session, model_obj=user_)
+    async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, include_email=True, MainServiceType=MainServiceAuth) as auth:
+        return await auth.recover_password(user=user, credentials=credentials)
+
 @auth.patch("/users/my-profile/password")
 @endpoint_exception_handler
 async def change_password(
     credentials: ChangePasswordBody,
     user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
-) -> EmailToConfirm:
+) -> RefreshAccessTokens:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, include_email=True, MainServiceType=MainServiceAuth) as auth:
         return await auth.change_password(user=user, credentials=credentials)
@@ -86,7 +97,17 @@ async def logout(
     tokens:RefreshAccesTokensProvided = Body(...)
 ) -> None:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
-        return await auth.logout(tokens=tokens)
+        return await auth.logout_on_this_device(tokens=tokens)
+
+@auth.post("/logout/full")
+@endpoint_exception_handler
+async def logout(
+    user_: User = Depends(authorize_access_token_depends),
+    session: AsyncSession = Depends(get_session_depends)
+) -> None:
+    user = await merge_model(postgres_session=session, model_obj=user_)
+    async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
+        return await auth.logout_on_every_device(user=user)
 
 @auth.post("/refresh")
 @endpoint_exception_handler

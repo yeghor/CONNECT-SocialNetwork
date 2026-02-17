@@ -190,11 +190,12 @@ class RedisService:
                 return key.removeprefix(prefix)
 
     @redis_error_handler
-    async def deactivate_tokens_by_id(self, user_id: str) -> None:
+    async def deactivate_tokens_by_user_id(self, user_id: str) -> None:
         access_pattern = f"{self.__jwt_acces_prefix}{user_id}"
         refresh_pattern = f"{self.__jwt_refresh_prefix}{user_id}"
+        recovery_pattern = f"{self.__jwt_password_recovery_prefix}{user_id}"
 
-        await self.__client.delete(access_pattern, refresh_pattern)
+        await self.__client.delete(access_pattern, refresh_pattern, recovery_pattern)
 
     # # ===============
     # # Post excluding logic

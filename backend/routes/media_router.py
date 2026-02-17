@@ -37,7 +37,6 @@ async def get_image_post(
         file_contents, mime_type = await media.get_post_image_by_token(token=token)
         return Response(content=file_contents, media_type=mime_type)
 
-# TODO: Implement file passing
 @media_router.post("/media/posts/{post_id}")
 @authorize_access_token_depends
 async def upload_post_picture(

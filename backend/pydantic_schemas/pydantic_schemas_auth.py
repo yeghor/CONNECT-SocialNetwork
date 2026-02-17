@@ -49,7 +49,7 @@ class LoginBody(BaseModel):
 class RegisterBody(LoginBody):
     email: str
     
-class ChangePasswordBody(BaseModel):
+class PasswordRecoveryBody(BaseModel):
     new_password: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
     new_password_confirm: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
 
@@ -58,6 +58,10 @@ class ChangePasswordBody(BaseModel):
         if self.new_password_confirm != self.new_password:
             raise ValidationErrorExc(detail="NewPassword Pydantic schema: new passwords didn't match .", client_safe_detail="Passwords didn't match")
         return self
+
+class ChangePasswordBody(BaseModel):
+    old_password: str
+    new_password: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
 
 class NewUsernameBody(BaseModel):
     new_username: str = Field(..., min_length=USERNAME_MIN_L, max_length=USERNAME_MAX_L)
