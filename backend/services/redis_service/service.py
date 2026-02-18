@@ -354,8 +354,6 @@ class RedisService:
         pattern = f"{self.__2fa_email_prefix}{email}"
         issued_code = await self.__client.get(pattern)
 
-        print(issued_code, code)
-
         return issued_code == str(code)
 
     # @redis_error_handler

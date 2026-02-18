@@ -100,7 +100,7 @@ async def logout(
 
 @auth.post("/logout/full")
 @endpoint_exception_handler
-async def logout(
+async def fully_logout(
     user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:

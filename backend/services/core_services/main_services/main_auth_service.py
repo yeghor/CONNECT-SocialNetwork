@@ -107,6 +107,8 @@ class MainServiceAuth(MainServiceBase):
         if not await self._RedisService.check_2fa(email=credentials.email, code=credentials.confirmation_code):
             raise Unauthorized(detail=f"AuthService: User with email: {credentials.email} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
         
+        await self._RedisService.deactivate_second_factor(email=credentials.email)
+
         confirmed_user = await self._PostgresService.get_user_by_username_or_email(email=credentials.email)
 
         if not confirmed_user:
@@ -122,6 +124,8 @@ class MainServiceAuth(MainServiceBase):
 
         if not await self._RedisService.check_2fa(email=credentials.email, code=credentials.confirmation_code):
             raise Unauthorized(detail=f"AuthService: User with email: {credentials.email} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
+
+        await self._RedisService.deactivate_second_factor(email=credentials.email)
 
         user = await self._PostgresService.get_user_by_username_or_email(email=credentials.email)
 
@@ -198,6 +202,11 @@ class MainServiceAuth(MainServiceBase):
         
         payload = self._JWT.extract_jwt_payload(jwt_token=prepared_token)
         user_id = payload.user_id
+
+        # Raising Unauthorized to not reveal server data
+        if not await self._PostgresService.get_user_by_id(user_id=user_id):
+            await self._RedisService.deactivate_tokens_by_user_id(user_id=user_id)
+            raise Unauthorized(detail=f"AuthService: user: {user_id} tried to refresh access token, while his profile instance was deleted.", client_safe_detail="Invalid or expired token")
 
         old_access_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="acces")
         new_access_token = await self._JWT.generate_save_token(user_id=user_id, redis=self._RedisService, token_type="acces")
