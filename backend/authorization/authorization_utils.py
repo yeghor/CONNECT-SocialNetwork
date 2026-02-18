@@ -38,7 +38,7 @@ async def authorize_password_recovery_token_depends(
     token: str = Header(..., title="Authorization access token", examples="Bearer {token}"),
 ) -> User:
     """Use with fastAPI Depends()"""
-    return await _authorize_token(token=token, token_type="password-recovery")
+    return await _authorize_token(token=token, token_type="password-recovery", return_user=True)
 
 
 @ws_endpoint_exception_handler

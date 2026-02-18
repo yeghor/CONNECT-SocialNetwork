@@ -10,7 +10,7 @@ from exceptions.exceptions_handler import web_exceptions_raiser, endpoint_except
 from exceptions.custom_exceptions import *
 
 class MainServiceAuth(MainServiceBase):
-    async def generate_set_of_tokens(self, user_id: str, email_confirmation_required: bool = False, check_tokens_exist: bool = True) -> RefreshAccessTokens:
+    async def __generate_set_of_tokens(self, user_id: str, email_confirmation_required: bool = False, check_tokens_exist: bool = True) -> RefreshAccessTokens:
         potential_refresh_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="refresh")
         potential_access_token = await self._RedisService.get_token_by_user_id(user_id=user_id, token_type="acces")
 
@@ -64,7 +64,7 @@ class MainServiceAuth(MainServiceBase):
         return token
 
     @web_exceptions_raiser
-    async def register(self, credentials: RegisterBody) -> EmailToConfirm:
+    async def register(self, credentials: RegisterBody) -> EmailProvided:
         authorization_utils.validate_email(credentials.email)
         authorization_utils.validate_password(credentials.password)
 
@@ -83,7 +83,7 @@ class MainServiceAuth(MainServiceBase):
 
         await self.__create_2fa(email=credentials.email, username=credentials.username)
 
-        return EmailToConfirm(email_to_confirm=credentials.email)
+        return EmailProvided(email=credentials.email)
 
     @web_exceptions_raiser
     async def login(self, credentials: LoginBody) -> RefreshAccessTokens:
@@ -99,39 +99,41 @@ class MainServiceAuth(MainServiceBase):
             await self.__create_2fa(email=potential_user.email, username=potential_user.username)
             return RefreshAccessTokens(email_to_confirm=potential_user.email)        
 
-        return await self.generate_set_of_tokens(user_id=potential_user.user_id)
+        return await self.__generate_set_of_tokens(user_id=potential_user.user_id)
     
 
     @web_exceptions_raiser
     async def confirm_email_2fa(self, credentials: SecondFactorConfirmationBody) -> RefreshAccessTokens:
-        if not await self._RedisService.check_2fa(email=credentials.email_to_confirm, code=credentials.confirmation_code):
-            raise Unauthorized(detail=f"AuthService: User with email: {credentials.email_to_confirm} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
+        if not await self._RedisService.check_2fa(email=credentials.email, code=credentials.confirmation_code):
+            raise Unauthorized(detail=f"AuthService: User with email: {credentials.email} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
         
-        confirmed_user = await self._PostgresService.get_user_by_username_or_email(email=credentials.email_to_confirm)
+        confirmed_user = await self._PostgresService.get_user_by_username_or_email(email=credentials.email)
 
         if not confirmed_user:
-            raise InvalidResourceProvided(detail=f"AuthService: user with email: {credentials.email_to_confirm} tried to confirm email, but such user doesn't exist yet", client_safe_detail=f"Email that you provided doesn't exist in our system")
+            raise InvalidResourceProvided(detail=f"AuthService: user with email: {credentials.email} tried to confirm email, but such user doesn't exist yet", client_safe_detail=f"Email that you provided doesn't exist in our system")
 
         confirmed_user.email_confirmed = True
 
-        return await self.generate_set_of_tokens(user_id=confirmed_user.user_id)
+        return await self.__generate_set_of_tokens(user_id=confirmed_user.user_id)
 
     @web_exceptions_raiser
     async def recover_password_2fa(self, credentials: SecondFactorConfirmationBody) -> PasswordRecoveryToken:
         """Returns change password token"""
 
-        if not self._RedisService.check_2fa(email=credentials.email_to_confirm, code=credentials.confirmation_code):
-            raise Unauthorized(detail=f"AuthService: User with email: {credentials.confirmation_credentials.email_to_confirm} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
-    
-        user = await self._PostgresService.get_user_by_username_or_email(email=credentials.email_to_confirm)
+        if not await self._RedisService.check_2fa(email=credentials.email, code=credentials.confirmation_code):
+            raise Unauthorized(detail=f"AuthService: User with email: {credentials.email} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
+
+        user = await self._PostgresService.get_user_by_username_or_email(email=credentials.email)
 
         if not user:
-            raise InvalidResourceProvided(detail=f"AuthService: user with email: {credentials.email_to_confirm} tried to get password recovery token, but such user doesn't exist yet", client_safe_detail=f"Email that you provided doesn't exist in our system")
+            raise InvalidResourceProvided(detail=f"AuthService: user with email: {credentials.email} tried to get password recovery token, but such user doesn't exist yet", client_safe_detail=f"Email that you provided doesn't exist in our system")
+        elif not user.email_confirmed:
+            raise InvalidAction(detail=f"AuthService: User: {user.user_id} with email: {user.email} tried to confir 2fa password recovery, while his email wasn't confirmed", client_safe_detail="You must confirm your email first!")
 
         return await self._JWT.generate_save_token(user_id=user.user_id, redis=self._RedisService, token_type="password-recovery")
 
     @web_exceptions_raiser
-    async def recover_password(self, user: User, credentials: PasswordRecoveryBody) -> None:
+    async def recover_password(self, user: User, credentials: PasswordRecoveryBody) -> RefreshAccessTokens:
         """Actually changes password via token"""
         
         authorization_utils.validate_password(credentials.new_password)
@@ -139,11 +141,22 @@ class MainServiceAuth(MainServiceBase):
         new_password_hash = authorization_utils.hash_password(credentials.new_password)
         user.password_hash = new_password_hash
 
+        await self._RedisService.deactivate_tokens_by_user_id(user_id=user.user_id)
+
+        return await self.__generate_set_of_tokens(user_id=user.user_id, email_confirmation_required=False)
+
     @web_exceptions_raiser
-    async def request_password_recovery(self, user: User, credentials: PasswordRecoveryBody) -> EmailToConfirm:
+    async def request_password_recovery(self, email: str) -> EmailProvided:
         """Requests password change, issues change password 2fa"""
-        await self.__create_2fa(email=user.email, username=user.username)
-        return EmailToConfirm(email_to_confirm=user.email)
+        potential_user = await self._PostgresService.get_user_by_username_or_email(email=email)
+
+        # We won't tell user whether such email exists or not in our system
+        if not potential_user:
+            return EmailProvided(email=email)
+
+        await self.__create_2fa(email=potential_user.email, username=potential_user.username)
+
+        return EmailProvided(email=potential_user.email)
 
     @web_exceptions_raiser
     async def change_password(self, user: User, credentials: ChangePasswordBody) -> RefreshAccessTokens:
@@ -155,16 +168,18 @@ class MainServiceAuth(MainServiceBase):
         user.password_hash = authorization_utils.hash_password(credentials.new_password)
 
         await self._RedisService.deactivate_tokens_by_user_id(user.user_id)
-        return await self.generate_set_of_tokens(user.user_id, email_confirmation_required=False, check_tokens_exist=False)
-
+        return await self.__generate_set_of_tokens(user.user_id, email_confirmation_required=False, check_tokens_exist=False)
+    
     @web_exceptions_raiser
-    async def issue_new_second_factor(self, email: str):
+    async def issue_new_second_factor(self, email: str) -> EmailProvided:
         user = await self._PostgresService.get_user_by_username_or_email(email=email)
 
         if not user:
             raise InvalidResourceProvided(detail=f"AuthService: User with email: {email} tried to issue new second factor authentication with email that does not exists in the database.", client_safe_detail="User with this email doesn't exist")
 
         await self.__create_2fa(email=email, username=user.username)
+
+        return EmailProvided(email=email)
 
     @web_exceptions_raiser
     async def logout_on_this_device(self, tokens: RefreshAccessTokens) -> None:
@@ -191,7 +206,7 @@ class MainServiceAuth(MainServiceBase):
         return new_access_token
     
     @web_exceptions_raiser
-    async def change_username(self, user: User, credentials: NewUsernameBody) -> EmailToConfirm:
+    async def change_username(self, user: User, credentials: NewUsernameBody) -> EmailProvided:
         new_username = credentials.new_username
 
         if user.username == credentials.new_username:

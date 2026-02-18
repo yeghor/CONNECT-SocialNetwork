@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from services.core_services import MainServiceContextManager
 from services.core_services.main_services.main_media_service import MainMediaService
 
-from exceptions.exceptions_handler import authorize_access_token_depends
+from exceptions.exceptions_handler import endpoint_exception_handler
 
 media_router = APIRouter()
 
@@ -18,7 +18,7 @@ This router is only for case when the application use Local image storage.
 
 # https://stackoverflow.com/questions/55873174/how-do-i-return-an-image-in-fastapi
 @media_router.get("/media/users/{token}", response_class=Response)
-@authorize_access_token_depends
+@endpoint_exception_handler
 async def get_image_user(
     token: str,
     session: AsyncSession = Depends(get_session_depends)
@@ -28,7 +28,7 @@ async def get_image_user(
         return Response(content=file_contents, media_type=mime_type)
 
 @media_router.get("/media/posts/{token}", response_class=Response)
-@authorize_access_token_depends
+@endpoint_exception_handler
 async def get_image_post(
     token: str,
     session: AsyncSession = Depends(get_session_depends)
@@ -38,7 +38,7 @@ async def get_image_post(
         return Response(content=file_contents, media_type=mime_type)
 
 @media_router.post("/media/posts/{post_id}")
-@authorize_access_token_depends
+@endpoint_exception_handler
 async def upload_post_picture(
     post_id: str,
     file_: UploadFile = File(...),
@@ -54,7 +54,7 @@ async def upload_post_picture(
         await media.upload_post_image(post_id=post_id, user=user, image_contents=file_contents, specified_mime=file_.content_type)
 
 @media_router.post("/media/users")
-@authorize_access_token_depends
+@endpoint_exception_handler
 async def upload_user_avatar(
     file: UploadFile = File(...),
     user_: User = Depends(authorize_password_recovery_token_depends),

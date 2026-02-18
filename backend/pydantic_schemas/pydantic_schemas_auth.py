@@ -66,10 +66,10 @@ class ChangePasswordBody(BaseModel):
 class NewUsernameBody(BaseModel):
     new_username: str = Field(..., min_length=USERNAME_MIN_L, max_length=USERNAME_MAX_L)
 
-class EmailToConfirm(BaseModel):
-    email_to_confirm: str  
+class EmailProvided(BaseModel):
+    email: str  
 
-class SecondFactorConfirmationBody(EmailToConfirm):
+class SecondFactorConfirmationBody(EmailProvided):
     confirmation_code: str
 
 

@@ -128,7 +128,7 @@ class RedisService:
     @redis_error_handler
     async def save_password_recovery_jwt(self, jwt_token: str, user_id: str) -> None:
         await self.__client.setex(
-            name=f"{(self.__jwt_refresh_prefix)}{jwt_token}",
+            name=f"{(self.__jwt_password_recovery_prefix)}{jwt_token}",
             time=SECOND_FACTOR_EXPIRY_SECONDS,
             value=user_id
         )
@@ -353,6 +353,8 @@ class RedisService:
 
         pattern = f"{self.__2fa_email_prefix}{email}"
         issued_code = await self.__client.get(pattern)
+
+        print(issued_code, code)
 
         return issued_code == str(code)
 

@@ -74,7 +74,7 @@ class JWTService:
             expires_at = await redis.save_refresh_jwt(jwt_token=encoded_jwt, user_id=user_id)
             return RefreshTokenSchema.model_validate({"refresh_token": encoded_jwt, "expires_at_refresh": expires_at})
         elif token_type == "password-recovery":
-            expires_at = await redis.save_password_recovery_jwt(encoded_jwt, user_id)
+            expires_at = await redis.save_password_recovery_jwt(jwt_token=encoded_jwt, user_id=user_id)
             return PasswordRecoveryToken(recovery_token=encoded_jwt, expires_at_recovery=expires_at)
         else:
             raise ValueError("Unsuported token type")

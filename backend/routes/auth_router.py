@@ -26,55 +26,54 @@ async def login(
 async def register(
     credentials: RegisterBody = Body(...),
     session: AsyncSession = Depends(get_session_depends)
-) -> EmailToConfirm:
+) -> EmailProvided:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session, include_email=True) as auth:
         return await auth.register(credentials=credentials)
         
-@auth.post("/auth/second-factor")
+@auth.post("/auth/2fa/confirm-email")
 @endpoint_exception_handler
-async def confirm_2fa(
+async def confirm_2fa_email(
     confirmation_credentials: SecondFactorConfirmationBody,
     session: AsyncSession = Depends(get_session_depends)
 ) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
         return await auth.confirm_email_2fa(credentials=confirmation_credentials)
    
-# ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
-@auth.post("/auth/new/2fa/confirm-email")
+@auth.post("/auth/2fa/password-recovery")
 @endpoint_exception_handler
-async def issue_new_second_factor(
-    email: EmailToConfirm,
-    session: AsyncSession = Depends(get_session_depends)
-) -> None:
-    async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
-        return await auth.issue_new_second_factor(email=email.email_to_confirm)
-       
-@auth.patch("/auth/2fa/change-password")
-@endpoint_exception_handler
-async def recover_password(
+async def confirm_2fa_password_recovery(
     credentials: SecondFactorConfirmationBody,
     session: AsyncSession = Depends(get_session_depends)
 ) -> PasswordRecoveryToken:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
-        await auth.recover_password_2fa(credentials=credentials)
-   
+        return await auth.recover_password_2fa(credentials=credentials)
+
+# ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
+@auth.post("/auth/new/2fa")
+@endpoint_exception_handler
+async def issue_new_second_factor(
+    email: EmailProvided,
+    session: AsyncSession = Depends(get_session_depends)
+) -> EmailProvided:
+    async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
+        return await auth.issue_new_second_factor(email=email.email)
+
 @auth.post("/users/my-profile/password/recovery")
 @endpoint_exception_handler
 async def request_password_recovery(
-    user_: User = Depends(authorize_access_token_depends),
+    credentials: EmailProvided,
     session: AsyncSession = Depends(get_session_depends)
-) -> EmailToConfirm:
-    user = await merge_model(postgres_session=session, model_obj=user_)
+) -> EmailProvided:
     async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, include_email=True, MainServiceType=MainServiceAuth) as auth:
-        return await auth.request_password_recovery(user=user)
+        return await auth.request_password_recovery(email=credentials.email)
 
 @auth.patch("/users/my-profile/password/recovery")
 @endpoint_exception_handler
-async def recover_password(
+async def password_recovery(
     credentials: PasswordRecoveryBody,
     user_: User = Depends(authorize_password_recovery_token_depends),
     session: AsyncSession = Depends(get_session_depends)
-) -> EmailToConfirm:
+) -> RefreshAccessTokens:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, include_email=True, MainServiceType=MainServiceAuth) as auth:
         return await auth.recover_password(user=user, credentials=credentials)
@@ -83,7 +82,7 @@ async def recover_password(
 @endpoint_exception_handler
 async def change_password(
     credentials: ChangePasswordBody,
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> RefreshAccessTokens:
     user = await merge_model(postgres_session=session, model_obj=user_)
