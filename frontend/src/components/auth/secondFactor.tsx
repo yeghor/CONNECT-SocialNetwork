@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { fetchConfirmSecondFactor } from "../../fetching/fetchAuth";
+import { fetchConfirmEmail2FA } from "../../fetching/fetchAuth";
 import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers";
 import { AccessTokenCookieKey, homeURI as homePageURI, internalServerErrorURI, RefreshTokenCookieKey } from "../../consts";
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler";
@@ -104,7 +104,7 @@ const SecondFactor = (props: SecondFactorProps) => {
         const joinedConfirmationCode = confirmationCodeArr.join("");
 
         try {
-            const response = await fetchConfirmSecondFactor(joinedConfirmationCode, emailToConfirm);
+            const response = await fetchConfirmEmail2FA(joinedConfirmationCode, emailToConfirm);
 
             if(!validateGETResponse(response, setErrorMesage, navigate)) {
                 return;

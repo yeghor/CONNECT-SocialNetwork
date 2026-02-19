@@ -105,12 +105,32 @@ export interface AuthTokensResponse extends SuccessfulResponse {
 }
 
 interface EmailToConfirmDTO {
-    email_to_confirm: string
+    email: string
 };
 
 export interface EmailToConfirmResponse extends SuccessfulResponse {
-    emailToConfirm: string
+    email: string
 }  
+
+export interface PasswordRecoveryTokenResponseDTO {
+    recovery_token: string
+    expires_at_recovery: string
+}
+
+export interface PasswordRecoveryTokenResponse extends SuccessfulResponse {
+    recoveryToken: string
+    expiresAtRecovery: string
+}
+
+
+export const passwordRecoveryTokenResponseMapper = (data: PasswordRecoveryTokenResponseDTO): PasswordRecoveryTokenResponse => {
+    return {
+        success: true,
+        recoveryToken: data.recovery_token,
+        expiresAtRecovery: data.expires_at_recovery
+    };
+};
+
 
 export const authTokensResponseMapper = (data: AuthTokensResponseDTO): AuthTokensResponse => {
     return {
@@ -126,7 +146,7 @@ export const authTokensResponseMapper = (data: AuthTokensResponseDTO): AuthToken
 
 export const emailToConfirmResponseMapper = (data: EmailToConfirmDTO): EmailToConfirmResponse => {
     return {
-        emailToConfirm: data.email_to_confirm,
+        email: data.email,
         success: true
     };
 };

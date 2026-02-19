@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, Body, Header, File, UploadFile, Form
+from fastapi import APIRouter, Depends, Body, Header
 from services.postgres_service import *
 from services.core_services import MainServiceContextManager, MainServiceAuth
 from sqlalchemy.ext.asyncio import AsyncSession
 from authorization.authorization_utils import authorize_access_token_depends, authorize_password_recovery_token_depends
 
 from pydantic_schemas.pydantic_schemas_auth import *
-from pydantic_schemas.pydantic_schemas_social import UserSchema
+from pydantic_schemas.pydantic_schemas_auth import _2FAConfirmationBody # Somehow, * import doesn't work if object name begins with underscore
 
 from exceptions.exceptions_handler import endpoint_exception_handler
 
@@ -33,7 +33,7 @@ async def register(
 @auth.post("/auth/2fa/confirm-email")
 @endpoint_exception_handler
 async def confirm_2fa_email(
-    confirmation_credentials: SecondFactorConfirmationBody,
+    confirmation_credentials: _2FAConfirmationBody,
     session: AsyncSession = Depends(get_session_depends)
 ) -> RefreshAccessTokens:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
@@ -42,7 +42,7 @@ async def confirm_2fa_email(
 @auth.post("/auth/2fa/password-recovery")
 @endpoint_exception_handler
 async def confirm_2fa_password_recovery(
-    credentials: SecondFactorConfirmationBody,
+    credentials: _2FAConfirmationBody,
     session: AsyncSession = Depends(get_session_depends)
 ) -> PasswordRecoveryToken:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
@@ -58,7 +58,7 @@ async def issue_new_second_factor(
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, include_email=True, postgres_session=session) as auth:
         return await auth.issue_new_second_factor(email=email.email)
 
-@auth.post("/users/my-profile/password/recovery")
+@auth.post("/auth/password-recovery")
 @endpoint_exception_handler
 async def request_password_recovery(
     credentials: EmailProvided,
@@ -67,7 +67,7 @@ async def request_password_recovery(
     async with await MainServiceContextManager[MainServiceAuth].create(postgres_session=session, include_email=True, MainServiceType=MainServiceAuth) as auth:
         return await auth.request_password_recovery(email=credentials.email)
 
-@auth.patch("/users/my-profile/password/recovery")
+@auth.patch("/auth/password-recovery")
 @endpoint_exception_handler
 async def password_recovery(
     credentials: PasswordRecoveryBody,

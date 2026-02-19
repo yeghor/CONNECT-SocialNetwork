@@ -56,13 +56,13 @@ interface MakePostBody extends ChangePostBody {
 };
 
 interface ChangePasswordBody {
-    new_password: string,
-    new_password_confirm: string
+    old_password: string,
+    new_password: string
 };
 
 interface RecoverPasswordBody {
-    email: string,
     new_password: string
+    new_password_confirm: string
 };
 
 interface ChangeUsernameBody {
@@ -88,6 +88,15 @@ interface CreateDialogueBody extends CreateChatBody {
 interface CreateGroupBody {
     other_participants_ids: string[]
 };
+
+interface PasswordRecoveryBody {
+    new_password: string
+    new_password_confirm: string
+}
+
+interface EmailProvidedBody {
+    email: string
+}
 
 export const makePostBody = (title: string, text: string, parentPostId: string | null): MakePostBody => {
     return {
@@ -126,17 +135,24 @@ export const registerBody = (username: string, email: string, password: string):
     };
 };
 
-export const changePasswordBody = (newPassword: string, newPasswordConfirm: string): ChangePasswordBody => {
+export const changePasswordBody = (oldPassword: string, newPassword: string): ChangePasswordBody => {
+    return {
+        old_password: oldPassword,
+        new_password: newPassword
+    };
+};
+
+export const  passwordRecoveryBody = (newPassword: string, newPasswordConfirm: string): PasswordRecoveryBody => {
     return {
         new_password: newPassword,
         new_password_confirm: newPasswordConfirm
     };
 };
 
-export const recoverPasswordBody = (email: string, newPassword: string): RecoverPasswordBody => {
+export const recoverPasswordBody = (newPassword: string, newPasswordConfirm: string): RecoverPasswordBody => {
     return {
-        email: email,
-        new_password: newPassword
+        new_password: newPassword,
+        new_password_confirm: newPasswordConfirm
     };
 };
 
@@ -166,8 +182,8 @@ export const confirmSecondFactorBody = (confirmationCode: string, email: string)
     };
 };
 
-export const issueNewSecondFactorBody = (emailToConfirm: string) => {
+export const emailProvidedBody = (email: string): EmailProvidedBody => {
     return {
-        emailToConfirm: emailToConfirm
+        email: email
     };
 };

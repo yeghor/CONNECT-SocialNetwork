@@ -69,7 +69,7 @@ class NewUsernameBody(BaseModel):
 class EmailProvided(BaseModel):
     email: str  
 
-class SecondFactorConfirmationBody(EmailProvided):
+class _2FAConfirmationBody(EmailProvided):
     confirmation_code: str
 
 

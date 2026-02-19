@@ -19,6 +19,7 @@ DATETIME_BASE_FORMAT = getenv("DATETIME_BASE_FORMAT")
 M = TypeVar("M", bound=BaseModel)
 
 # TODO: Fix exception raising
+# TODO: Add to payload type of jwt
 def jwt_error_handler(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

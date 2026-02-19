@@ -55,7 +55,7 @@ const ManageProfileModal = (props: { avatarURL: string | null, setShowManageProf
         const response = await safeAPICall<EmailToConfirmResponse>(tokens, fetchChangePassword, navigate, undefined, newPassword, newPasswordConfirm);
         
         if (response.success) {
-            navigate(`../${_2faURI}`, { state: { emailToConfirm: response.emailToConfirm } });           
+            navigate(`../${_2faURI}`, { state: { emailToConfirm: response.email } });           
         }
     };
 
