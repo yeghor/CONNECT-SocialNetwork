@@ -1,19 +1,23 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { fetchConfirmEmail2FA } from "../../fetching/fetchAuth";
+import { fetchConfirmEmail2FA, fetchConfirmPasswordRecovery2FA, fetchIssueNewSecondFactor as fetchIssueNew2FA } from "../../fetching/fetchAuth";
 import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers";
-import { AccessTokenCookieKey, homeURI as homePageURI, internalServerErrorURI, RefreshTokenCookieKey } from "../../consts";
+import { AccessTokenCookieKey, createPasswordRecoveryLocationState, homeURI as homePageURI, internalServerErrorURI, newPasswordRecoveryURI, RefreshTokenCookieKey } from "../../consts";
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler";
+import { safeAPICall, safeAPICallPublic } from "../../fetching/fetchUtils";
+import { AuthTokensResponse, PasswordRecoveryTokenResponse } from "../../fetching/DTOs";
 
 // emailToConfirm coulb be null, in case user got redirected to this page
 interface SecondFactorProps {
     emailToConfirm: string | null
+    _2FACase: "email-confirmation" | "password-recovery"
 }
 
 const SecondFactor = (props: SecondFactorProps) => {
     const navigate = useNavigate();
 
     const [ errorMessage, setErrorMesage ] = useState<string | null>(null);
+    const [ allowSendNewCode, setAllowSendNewCode ] = useState(false)
 
     const location = useLocation();
     const [ emailToConfirm, setEmailToConfirm ] = useState<string | null>(props.emailToConfirm ? props.emailToConfirm : location.state ? location.state.emailToConfirm : null)
@@ -38,11 +42,7 @@ const SecondFactor = (props: SecondFactorProps) => {
         if (event.key === "Backspace") {
             console.log(event.key)
             const currElement = document.activeElement as HTMLInputElement;
-            // setConfirmationCode((prevState) => {
-            //     const prevStateCopy = [...prevState];
-            //     prevStateCopy[Number(currElement.id)] = "";
-            //     return prevStateCopy;
-            // });
+
             if (currElement) {
                 if (currElement.id !== "0") {
                     setTimeout(() => document.getElementById(String(Number(currElement.id) - 1))?.focus(), 25);
@@ -76,13 +76,14 @@ const SecondFactor = (props: SecondFactorProps) => {
         document.getElementById("0")?.focus();
         window.addEventListener("keydown", handleBackspace);
         window.addEventListener("paste", handlePast);
+        setTimeout(() => setAllowSendNewCode(false), 60 * 1000); // 60 * 1000 - 60 seconds in milliseconds
         return () => {
             window.removeEventListener("keydown", handleBackspace);
             window.removeEventListener("paste", handlePast);
         }
     }, []);
 
-    const sendCode = async () => {
+    const submitHandler = async () => {
         if (!emailToConfirm) {
             return;
         }
@@ -104,16 +105,31 @@ const SecondFactor = (props: SecondFactorProps) => {
         const joinedConfirmationCode = confirmationCodeArr.join("");
 
         try {
-            const response = await fetchConfirmEmail2FA(joinedConfirmationCode, emailToConfirm);
+            let response
+            switch (props._2FACase) {
+                case "email-confirmation":
+                    response = await safeAPICallPublic<AuthTokensResponse>(null, fetchConfirmEmail2FA, navigate, setErrorMesage, joinedConfirmationCode, emailToConfirm);
 
-            if(!validateGETResponse(response, setErrorMesage, navigate)) {
-                return;
-            }
+                    if(!validateGETResponse(response, setErrorMesage, navigate)) {
+                        return;
+                    }
 
-            if(response.success) {
-                setUpdateCookie(AccessTokenCookieKey, response.accessToken);
-                setUpdateCookie(RefreshTokenCookieKey, response.refreshToken);
-                navigate(homePageURI);
+                    if(response.success) {
+                        setUpdateCookie(AccessTokenCookieKey, response.accessToken, response.expiresAtAccessToken);
+                        setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, response.expiresAtRefreshToken);
+                        navigate(homePageURI);
+                    }
+                    break
+                case "password-recovery":
+                    response = await safeAPICallPublic<PasswordRecoveryTokenResponse>(null, fetchConfirmPasswordRecovery2FA, navigate, setErrorMesage, joinedConfirmationCode, emailToConfirm);
+
+                    if(!validateGETResponse(response, setErrorMesage, navigate)) {
+                        return;
+                    }
+
+                    if(response.success) {
+                        navigate(newPasswordRecoveryURI, { state: createPasswordRecoveryLocationState(response.recoveryToken, response.expiresAtRecovery) });
+                    }
             }
         } catch(err) {
             console.error(err);
@@ -121,6 +137,14 @@ const SecondFactor = (props: SecondFactorProps) => {
             return;
         }
         }
+
+    const sendNewCode = async () => {
+        setAllowSendNewCode(false)
+
+        await safeAPICallPublic(null, fetchIssueNew2FA, navigate, setErrorMesage, emailToConfirm);
+
+        setTimeout(() => setAllowSendNewCode(true), 60 * 1000); // 60 * 1000 - 60 seconds in milliseconds
+    };
 
     useEffect(() => {
         if (!emailToConfirm) {
@@ -153,9 +177,14 @@ const SecondFactor = (props: SecondFactorProps) => {
                     ))}
                 </div>
 
-                <button onClick={async () => await sendCode()} className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-lg font-medium transition-all">
+                <button onClick={async () => await submitHandler()} className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 hover:scale-105 rounded-lg font-medium transition-all">
                     Confirm
                 </button>
+
+                <p onClick={() => sendNewCode()} className={`text-sm font-light ${allowSendNewCode ? "text-gray-200 hover:underline" : "text-gray-400"}`}>
+                    Send new code {allowSendNewCode ? null : "(available in 30 seconds)"}
+                </p>
+    
             </div>
             </div>
     );

@@ -14,7 +14,7 @@ import NavigationBar from "./components/base/navBar.tsx";
 import Footer from "./components/base/footer.tsx";
 import SearchPage from "./components/social/searchPage.tsx";
 import SecondFactor from './components/auth/secondFactor.tsx';
-import { PasswordRecoveryForm, NewPasswordRecoveryForm } from './components/auth/passwordRecovery.tsx';
+import { PasswordRecoveryForm, NewPasswordCreationRecovery } from './components/auth/passwordRecovery.tsx';
 
 const container = document.getElementById('root')
 
@@ -63,14 +63,14 @@ if(container) {
                                         <Route path='/auth/register' element={
                                             <RegisterForm />
                                         } />
-                                        <Route path='/auth/password-recovery/email' element={
+                                        <Route path='/auth/password-recovery' element={
                                             <PasswordRecoveryForm />
                                         } />
                                         <Route path='/auth/password-recovery/password' element={
-                                            <NewPasswordRecoveryForm />
+                                            <NewPasswordCreationRecovery />
                                         } />
                                         <Route path='/auth/2fa' element={
-                                            <SecondFactor emailToConfirm={null} />
+                                            <SecondFactor emailToConfirm={null} _2FACase={"email-confirmation"} />
                                         } />
                                         <Route path='/search' element={
                                             <SearchPage />

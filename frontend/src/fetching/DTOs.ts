@@ -119,7 +119,7 @@ export interface PasswordRecoveryTokenResponseDTO {
 
 export interface PasswordRecoveryTokenResponse extends SuccessfulResponse {
     recoveryToken: string
-    expiresAtRecovery: string
+    expiresAtRecovery: Date
 }
 
 
@@ -127,11 +127,12 @@ export const passwordRecoveryTokenResponseMapper = (data: PasswordRecoveryTokenR
     return {
         success: true,
         recoveryToken: data.recovery_token,
-        expiresAtRecovery: data.expires_at_recovery
+        expiresAtRecovery: new Date(data.expires_at_recovery)
     };
 };
 
 
+// TODO: Fix invalid date
 export const authTokensResponseMapper = (data: AuthTokensResponseDTO): AuthTokensResponse => {
     return {
         accessToken: data.access_token,

@@ -84,13 +84,13 @@ class JWTService:
     @classmethod
     @jwt_error_handler
     async def generate_save_set_of_refresh_access_tokens(cls, redis: RedisService, user_id: str, email_confirmation_required: bool = False) -> RefreshAccessTokens:
-        acces_token = await cls.generate_save_token(user_id=user_id, redis=redis, token_type="acces")
+        access_token = await cls.generate_save_token(user_id=user_id, redis=redis, token_type="acces")
         refresh_token = await cls.generate_save_token(user_id=user_id, redis=redis, token_type="refresh")
 
         return RefreshAccessTokens.model_validate(
             {
-                "access_token": acces_token.access_token,
-                "expires_at_access": acces_token.expires_at_access,
+                "access_token": access_token.access_token,
+                "expires_at_access": access_token.expires_at_access,
                 "refresh_token": refresh_token.refresh_token,
                 "expires_at_refresh": refresh_token.expires_at_refresh,
                 "email_confirmation_required": email_confirmation_required

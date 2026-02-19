@@ -2,6 +2,10 @@ import authorization as authorization_utils
 from services.core_services import MainServiceBase
 from services.postgres_service import User
 from pydantic_schemas.pydantic_schemas_auth import *
+
+# Somehow, * import doesn't work if object name begins with underscore
+from pydantic_schemas.pydantic_schemas_auth import _2FAConfirmationBody
+
 from services_types import JWTTypes
 
 from uuid import uuid4

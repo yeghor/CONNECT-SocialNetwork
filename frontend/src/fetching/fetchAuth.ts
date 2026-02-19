@@ -13,6 +13,7 @@ import {
     confirmEmail2FA_URL,
     issueNewSecondFactorURL,
     recoverPasswordURL,
+    confirmPasswordRecovery2FA_URL,
 } from "./urls.ts";
 
 import { 
@@ -107,7 +108,7 @@ export const fetchConfirmPasswordRecovery2FA = async (confirmationCode: string, 
         body: JSON.stringify(confirm2FABody(confirmationCode, email))
     };
 
-    return await fetchHelper<PasswordRecoveryTokenResponse>(confirmEmail2FA_URL, requestInit, passwordRecoveryTokenResponseMapper);
+    return await fetchHelper<PasswordRecoveryTokenResponse>(confirmPasswordRecovery2FA_URL, requestInit, passwordRecoveryTokenResponseMapper);
 };
 
 export const fetchIssueNewSecondFactor = async (email: string): APIResponse<EmailToConfirmResponse> => {
@@ -140,12 +141,12 @@ export const fetchRequestPasswordRecovery = async (email: string): APIResponse<E
     return await fetchHelper<EmailToConfirmResponse>(recoverPasswordURL, requestInit, emailToConfirmResponseMapper);
 };
 
-export const fetchRecoverPassword = async (passwordRecoveryToken: string, newPassword: string, newPasswordConfirm: string): APIResponse<SuccessfulResponse> => {
+export const fetchRecoverPassword = async (passwordRecoveryToken: string, newPassword: string, newPasswordConfirm: string): APIResponse<AuthTokensResponse> => {
     const requestInit: RequestInit = {
         method: "PATCH",
         headers: requestTokenHeaders(passwordRecoveryToken),
         body: JSON.stringify(recoverPasswordBody(newPassword, newPasswordConfirm))
     };
 
-    return await fetchHelper<SuccessfulResponse>(recoverPasswordURL, requestInit, successfulResponseMapper);
+    return await fetchHelper<AuthTokensResponse>(recoverPasswordURL, requestInit, authTokensResponseMapper);
 };

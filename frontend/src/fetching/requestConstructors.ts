@@ -70,7 +70,7 @@ interface ChangeUsernameBody {
 };
 
 interface EmailToConfirmBody {
-    email_to_confirm: string
+    email: string
 }
 
 interface ConfirmSecondFactorBody extends EmailToConfirmBody {
@@ -177,7 +177,7 @@ export const createGroupBody = (otherParticipantsIds: string[]): CreateGroupBody
 
 export const confirmSecondFactorBody = (confirmationCode: string, email: string): ConfirmSecondFactorBody => {
     return {
-        email_to_confirm: email,
+        email: email,
         confirmation_code: confirmationCode
     };
 };

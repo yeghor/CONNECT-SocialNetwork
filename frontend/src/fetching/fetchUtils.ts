@@ -69,7 +69,7 @@ export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, 
     const tokensResponse = await refreshTokens(navigate, refreshToken);
 
     if(tokensResponse.success) {
-        setUpdateCookie(AccessTokenCookieKey, tokensResponse.accessToken);
+        setUpdateCookie(AccessTokenCookieKey, tokensResponse.accessToken, tokensResponse.expiresAtAccessToken);
 
         const retryResponse: BadResponse | SuccessfulResponse = await fetchFunc(tokensResponse.accessToken, ...fetchArgs);
 
@@ -122,26 +122,21 @@ export const safeAPICall = async <ResponseType>(
 };
 
 /*
-* Makes safe API call to public endpoints, validating errors, retrying if 401
+* Makes safe API call to public endpoints, validating errors, doesn't try to refresh tokens on 401
 * Do **NOT** pass auth tokens to function in fetchArgs[]
 * */
 export const safeAPICallPublic = async <ResponseType>(
-    refreshToken: string | null,
+    authToken: string | null, // Could be refresh token or password recovery token
     fetchFunc: CallableFunction,
     navigate: NavigateFunction,
     setErrorMessage?: CallableFunction,
     ...funcArgs: any[]
 ): Promise<ResponseType | BadResponse> => {
     try {
-        let response = await fetchFunc(...funcArgs);
-        if (!validateResponse(response, setErrorMessage, navigate)) {
-            return response;
-        }
-        if(checkUnauthorizedResponse(response)) {
-            if (refreshToken) {
-                response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, refreshToken, navigate, setErrorMessage, ...funcArgs);
-            }
-        }
+        const fetchArgs = authToken ? [authToken, ...funcArgs] : [...funcArgs]
+        let response = await fetchFunc(...fetchArgs);
+        validateResponse(response, setErrorMessage, navigate)
+
         return response;
 
     } catch (err) { 

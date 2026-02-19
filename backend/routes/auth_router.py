@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from authorization.authorization_utils import authorize_access_token_depends, authorize_password_recovery_token_depends
 
 from pydantic_schemas.pydantic_schemas_auth import *
-from pydantic_schemas.pydantic_schemas_auth import _2FAConfirmationBody # Somehow, * import doesn't work if object name begins with underscore
+
+# Somehow, * import doesn't work if object name begins with underscore
+from pydantic_schemas.pydantic_schemas_auth import _2FAConfirmationBody 
 
 from exceptions.exceptions_handler import endpoint_exception_handler
 
