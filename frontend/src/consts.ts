@@ -15,6 +15,7 @@ export const maxPostImagesUpload = 3;
 export const imageMaxSizeMB = 5;
 
 export const allowedImageMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+export const fileMimeTypeNotAllowed = "We can't accept this image";
 
 export const postTitleMinLength = 3;
 export const postTitleMaxLength = 256;
@@ -35,6 +36,7 @@ export const myProfileURI = "/my-profile";
 export const chatsURI = "/chats";
 export const _2faURI = "/auth/2fa"
 export const passwordRecoveryURI = "/auth/password-recovery";
+export const newPasswordRecoveryURI = "/auth/password-recovery/password";
 
 export const makeChatURI = (userId: string): string => {
     return `/make-chat/${userId}`;
@@ -72,3 +74,17 @@ export const chatMessageIsTooBigMessage = "That message is a bit long for chat. 
 export const toManyGroupParticipants = "This group is getting a bit too crowded! We’ve hit the limit for participants for now.";
 export const noAvatarImageMessage = "We can’t see you! Upload a photo to give your profile some personality.";
 export const tooManyAvatarFilesMessage = "One person, one face. Please pick just one image for your avatar.";
+
+
+// On navigating to new password form on recovery
+export interface PasswordRecoveryLocationState {
+    passwordRecoveryToken: string,
+    passwordRecoveryTokenExpiry: Date
+}
+
+export const createPasswordRecoveryLocationState = (passwordRecoveryToken: string, passwordRecoveryTokenExpiry: Date) => {
+    return {
+        passwordRecoveryToken,
+        passwordRecoveryTokenExpiry
+    }
+}

@@ -119,14 +119,14 @@ export const ProfilePage = (props: ProfilePageProps) => {
 
     return(
         <div>
-            { showManageProfileModal ? <ManageProfileModal setShowManageProfileModal={setshowManageProfileModal} /> : null }
+            { showManageProfileModal ? <ManageProfileModal avatarURL={props.userData.avatarURL} setShowManageProfileModal={setshowManageProfileModal} /> : null }
             <div className="w-2/3 mx-auto m-8 bg-white/10 rounded-xl p-6 backdrop-blur">
                 <div className="flex justify-center items-center gap-4 text-white">
                     <div>
                         { props.userData.avatarURL ? <img
                             src={props.userData.avatarURL}
                             alt={`${props.userData.username} avatar`}
-                            className="w-8 h-8 rounded-full"
+                            className="w-32 h-32 hover:scale-105 transition-all rounded-full"
                         /> : <img src="/uknown-user-image.jpg" alt={`${props.userData.username} avatar`} className="w-32 h-32 hover:scale-105 transition-all rounded-full" /> }
                     </div>
                     <div>

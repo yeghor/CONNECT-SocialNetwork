@@ -143,10 +143,10 @@ class PostgresService:
 
     # https://stackoverflow.com/questions/3325467/sqlalchemy-equivalent-to-sql-like-statement
     @postgres_exception_handler(action="Get users by LIKE statement")
-    async def get_users_by_username(self, prompt: str, page: int, n: int) -> List[User]:
+    async def get_users_by_username(self, query: str, page: int, n: int) -> List[User]:
         result = await self.__session.execute(
             select(User)
-            .where(User.username.ilike(f"%{prompt.strip()}%"))
+            .where(User.username.ilike(f"%{query.strip()}%"))
             .options(selectinload(User.followers))
             .offset((page*n))
             .limit(n)

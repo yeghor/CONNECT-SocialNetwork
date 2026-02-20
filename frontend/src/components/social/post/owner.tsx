@@ -12,7 +12,7 @@ const OwnerComponent = (props: ownerProps) => {
     return (
         <div>
             <div className="flex items-center gap-2">
-                <img src={props.ownerData?.avatarURL ?? "/uknown-user-image.jpg"} alt="avatar" className={`h-${props.avatarHeight} rounded-full`}/>
+                <img src={props.ownerData?.avatarURL ?? "/uknown-user-image.jpg"} alt="avatar" className={`h-8 w-8 rounded-full`}/>
                 <div className="font-semibold text-white">{props.ownerData?.username ?? "Deleted User"}</div>
             </div>
             <div className="text-white flex gap-2 items-center">

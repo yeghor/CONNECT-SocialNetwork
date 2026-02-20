@@ -20,7 +20,7 @@ const chatConstructor = "/chat";
 const mediaConstructor = "/media";
 const repliesConstructor = "/replies";
 const authConstructor = "/auth"
-const _2FAConstructor = "/second-factor"
+const _2FAConstructor = "/2fa"
 
 // Auth
 
@@ -31,8 +31,10 @@ export const logoutURL = `${BASEURL}/logout`;
 export const refreshTokenURL = `${BASEURL}/refresh`;
 
 export const changeUsernameURL = `${BASEURL}${usersConstructor}${myProfileConstructor}/username`;
-export const requestChangePasswordURL = `${BASEURL}${usersConstructor}${myProfileConstructor}/password`;
-export const recoverPasswordURL = `${BASEURL}${authConstructor}${_2FAConstructor}/recover-password`
+export const changePasswordURL = `${BASEURL}${usersConstructor}${myProfileConstructor}/password`;
+
+export const requestPasswordRecoveryURL = `${BASEURL}${authConstructor}/password-recovery`;
+export const recoverPasswordURL = `${BASEURL}${authConstructor}/password-recovery`;
 
 export const myProfileURL = `${BASEURL}${usersConstructor}${myProfileConstructor}`;
 
@@ -40,8 +42,10 @@ export const recentActivityURL = `${BASEURL}/recent-activity`;
 
 export const myFriendsURL = `${BASEURL}/friends`;
 
-export const confirmSecondFactorURL = `${BASEURL}${authConstructor}${_2FAConstructor}`
-export const issueNewSecondFactorURL = `${BASEURL}${authConstructor}/new${_2FAConstructor}`
+export const confirmEmail2FA_URL = `${BASEURL}${authConstructor}${_2FAConstructor}/confirm-email`;
+export const confirmPasswordRecovery2FA_URL = `${BASEURL}${authConstructor}${_2FAConstructor}/password-recovery`;
+
+export const issueNewSecondFactorURL = `${BASEURL}${authConstructor}/new${_2FAConstructor}`;
 
 //Social
 
@@ -64,12 +68,12 @@ export const followedPostsFeedURL = (page: number | string) => {
     return `${BASEURL}${postsConstructor}/following/${page}`;
 };
 
-export const searchPostsURL = (prompt: string, page: number | string) => {
-    return `${BASEURL}${searchConstructor}${postsConstructor}/${page}?prompt=${prompt}`;
+export const searchPostsURL = (query: string, page: number | string) => {
+    return `${BASEURL}${searchConstructor}${postsConstructor}/${page}?query=${query}`;
 };
 
-export const searchUsersURL = (prompt: string, page: number | string) => {
-    return `${BASEURL}${searchConstructor}${usersConstructor}/${page}?prompt=${prompt}`;
+export const searchUsersURL = (query: string, page: number | string) => {
+    return `${BASEURL}${searchConstructor}${usersConstructor}/${page}?query=${query}`;
 };
 
 export const postCommentsURL = (postId: string, page: number | string) => {
@@ -94,7 +98,7 @@ export const uploadPostImageURL = (postId: string) => {
     return `${BASEURL}${mediaConstructor}${postsConstructor}/${postId}`;
 };
 
-export const uploadUserImageURL = `${BASEURL}${mediaConstructor}${usersConstructor}`;
+export const uploadAvatarURL = `${BASEURL}${mediaConstructor}${myProfileConstructor}/avatar`;
 
 
 // Chat

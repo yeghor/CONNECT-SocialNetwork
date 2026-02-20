@@ -243,12 +243,12 @@ class MainServiceSocial(MainServiceBase):
             ]
     
     @web_exceptions_raiser
-    async def search_posts(self, prompt: str, user: User, page: int) -> List[PostLiteSchema]:
+    async def search_posts(self, query: str, user: User, page: int) -> List[PostLiteSchema]:
         """
         Search posts that similar with meaning to prompt
         """
 
-        post_ids = await self._ChromaService.search_posts_by_prompt(prompt=prompt, page=page, n=BASE_PAGINATION)
+        post_ids = await self._ChromaService.search_posts_by_prompt(query=query, page=page, n=BASE_PAGINATION)
         posts = await self._PostgresService.get_entries_by_ids(ids=post_ids, ModelType=Post)
 
         return [
@@ -279,8 +279,8 @@ class MainServiceSocial(MainServiceBase):
         ]
 
     @web_exceptions_raiser
-    async def search_users(self, prompt: str,  request_user: User, page: int) -> List[UserLiteSchema]:
-        users = await self._PostgresService.get_users_by_username(prompt=prompt, page=page, n=BASE_PAGINATION)
+    async def search_users(self, query: str,  request_user: User, page: int) -> List[UserLiteSchema]:
+        users = await self._PostgresService.get_users_by_username(query=query, page=page, n=BASE_PAGINATION)
         return [UserLiteSchema(user_id=user.user_id, username=user.username, followers=len(user.followers), joined=user.joined, avatar_url=await self._ImageStorage.get_user_avatar_url(user.user_id)) for user in users]
 
     @web_exceptions_raiser  

@@ -120,9 +120,9 @@ class ChromaService:
         )
 
     # @chromaDB_error_handler
-    async def search_posts_by_prompt(self, prompt: str, page: int, n: int) -> List[str]:
+    async def search_posts_by_prompt(self, query: str, page: int, n: int) -> List[str]:
         search_result = await self.__collection.query(
-            query_texts=[prompt.strip()],
+            query_texts=[query.strip()],
             n_results=((n * page) + n + GET_EXTRA_CHROMADB_RELATED_RESULTS)
         )
         return self.extract_ids_from_metadata(metadatas=search_result, page=page, pagination=n)

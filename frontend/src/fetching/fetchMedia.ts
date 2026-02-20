@@ -2,7 +2,7 @@ import { fetchHelper, APIResponse } from "./fetchUtils.ts"
 
 import {
     uploadPostImageURL,
-    uploadUserImageURL,
+    uploadAvatarURL,
  } from "./urls.ts"
 
 import {
@@ -17,7 +17,7 @@ import {
 
 export const fetchUploadAvatar = async (accessJWT: string, imageData: Blob): APIResponse<SuccessfulResponse> => {
     const formData = new FormData();
-    formData.append("file_", imageData);
+    formData.append("file", imageData);
 
     const requestInit: RequestInit = {
         method: "POST",
@@ -25,13 +25,13 @@ export const fetchUploadAvatar = async (accessJWT: string, imageData: Blob): API
         body: formData
     };
 
-    return await fetchHelper<SuccessfulResponse>(uploadUserImageURL, requestInit, successfulResponseMapper);
+    return await fetchHelper<SuccessfulResponse>(uploadAvatarURL, requestInit, successfulResponseMapper);
 }
 
-export const fetchUploadPostPictures = async (accessJWT: string, postId: string, imageData: File): APIResponse<SuccessfulResponse> => {
+export const fetchUploadPostPictures = async (accessJWT: string, postId: string, imageData: Blob): APIResponse<SuccessfulResponse> => {
     const formData = new FormData();
-    console.log(accessJWT)
-    formData.append("file_", imageData);
+    formData.append("file", imageData);
+
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestTokenMultipartHeaders(accessJWT),

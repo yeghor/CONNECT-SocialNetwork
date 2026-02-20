@@ -105,13 +105,34 @@ export interface AuthTokensResponse extends SuccessfulResponse {
 }
 
 interface EmailToConfirmDTO {
-    email_to_confirm: string
+    email: string
 };
 
 export interface EmailToConfirmResponse extends SuccessfulResponse {
-    emailToConfirm: string
+    email: string
 }  
 
+export interface PasswordRecoveryTokenResponseDTO {
+    recovery_token: string
+    expires_at_recovery: string
+}
+
+export interface PasswordRecoveryTokenResponse extends SuccessfulResponse {
+    recoveryToken: string
+    expiresAtRecovery: Date
+}
+
+
+export const passwordRecoveryTokenResponseMapper = (data: PasswordRecoveryTokenResponseDTO): PasswordRecoveryTokenResponse => {
+    return {
+        success: true,
+        recoveryToken: data.recovery_token,
+        expiresAtRecovery: new Date(data.expires_at_recovery)
+    };
+};
+
+
+// TODO: Fix invalid date
 export const authTokensResponseMapper = (data: AuthTokensResponseDTO): AuthTokensResponse => {
     return {
         accessToken: data.access_token,
@@ -126,7 +147,7 @@ export const authTokensResponseMapper = (data: AuthTokensResponseDTO): AuthToken
 
 export const emailToConfirmResponseMapper = (data: EmailToConfirmDTO): EmailToConfirmResponse => {
     return {
-        emailToConfirm: data.email_to_confirm,
+        email: data.email,
         success: true
     };
 };

@@ -53,7 +53,7 @@ const RegisterForm = () => {
             }
 
             if(response.success) {
-                setEmailToConfirm(response.emailToConfirm);
+                setEmailToConfirm(response.email);
                 setShowSecondFactor(true);
                 return
             }

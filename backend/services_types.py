@@ -3,10 +3,14 @@ import enum
 
 # ========
 
-ExcludeType = Literal["search", "feed", "viewed", "reply-list"] # TODO: Change "viewed" to "view"
+ExcludeType = Literal["search", "feed", "viewed", "reply-list"]
 
 # ========
 
 ImageType = Literal["post", "user"]
 
 # ========
+
+JWTTypes = Literal["access", "refresh", "password-recovery"]
+
+# =======

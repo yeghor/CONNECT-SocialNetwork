@@ -69,12 +69,11 @@ export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, 
     const tokensResponse = await refreshTokens(navigate, refreshToken);
 
     if(tokensResponse.success) {
-        setUpdateCookie(AccessTokenCookieKey, tokensResponse.accessToken);
-
+        setUpdateCookie(AccessTokenCookieKey, tokensResponse.accessToken, null);
         const retryResponse: BadResponse | SuccessfulResponse = await fetchFunc(tokensResponse.accessToken, ...fetchArgs);
 
         // Extra !retryResponse.success check to tell ts that response type is BadResponse, and it has statusCode field
-        if(!validateResponse(retryResponse, setErrorMessage,  navigate) && !retryResponse.success) {
+        if(validateResponse(retryResponse, setErrorMessage,  navigate)) {
             if (checkUnauthorizedResponse(retryResponse)) {
                 navigate(unauthorizedRedirectURI);
             }
@@ -105,47 +104,46 @@ export const safeAPICall = async <ResponseType>(
     }
 
     try {
-        let response = await fetchFunc(tokens.access, ...funcArgs);
-        if (!validateResponse(response, setErrorMessage, navigate)) {
-            return response;
+        let response = await fetchFunc(tokens.access, ...funcArgs);        
+
+        if (validateResponse(response, setErrorMessage, navigate)) {
+            if(checkUnauthorizedResponse(response)) {
+                response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, tokens.refresh, navigate, setErrorMessage, ...funcArgs);
+            }
         }
-        if(checkUnauthorizedResponse(response)) {
-            response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, tokens.refresh, navigate, setErrorMessage, ...funcArgs);
-        }
+
         return response;
 
     } catch (err) { 
         console.error(err);
+        console.log("catched error ")
+        
         navigate(internalServerErrorURI);
         return createBadResponseManually(internalServerErrorDefaultMessage, 500);
     }
 };
 
 /*
-* Makes safe API call to public endpoints, validating errors, retrying if 401
+* Makes safe API call to public endpoints, validating errors, doesn't try to refresh tokens on 401
 * Do **NOT** pass auth tokens to function in fetchArgs[]
 * */
 export const safeAPICallPublic = async <ResponseType>(
-    refreshToken: string | null,
+    authToken: string | null, // Could be refresh token or password recovery token
     fetchFunc: CallableFunction,
     navigate: NavigateFunction,
     setErrorMessage?: CallableFunction,
     ...funcArgs: any[]
 ): Promise<ResponseType | BadResponse> => {
     try {
-        let response = await fetchFunc(...funcArgs);
-        if (!validateResponse(response, setErrorMessage, navigate)) {
-            return response;
-        }
-        if(checkUnauthorizedResponse(response)) {
-            if (refreshToken) {
-                response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, refreshToken, navigate, setErrorMessage, ...funcArgs);
-            }
-        }
+        const fetchArgs = authToken ? [authToken, ...funcArgs] : [...funcArgs]
+        let response = await fetchFunc(...fetchArgs);
+        validateResponse(response, setErrorMessage, navigate)
+
         return response;
 
     } catch (err) { 
         console.error(err);
+        console.log("catched fetch errror")
         navigate(internalServerErrorURI);
         return createBadResponseManually(internalServerErrorDefaultMessage, 500);
     }

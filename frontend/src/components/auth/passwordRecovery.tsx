@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import React, { FormEvent, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 
 import {
     homeURI,
@@ -8,28 +8,27 @@ import {
     registerURI,
     loginURI,
     invalidEmailMessage,
-    passwordNotSecureEnoughMessage
+    passwordNotSecureEnoughMessage,
+    PasswordRecoveryLocationState
 } from "../../consts.ts"
 
-import { fetchLogin, fetchRecoverPassword } from "../../fetching/fetchAuth.ts"
+import { fetchRecoverPassword, fetchRequestPasswordRecovery } from "../../fetching/fetchAuth.ts"
 
-import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers.ts"
-
-import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
 import { Link } from "react-router-dom";
 import SecondFactor from "./secondFactor.tsx";
 import { validateFormString } from "../../helpers/validatorts.ts";
-import { safeAPICall, safeAPICallPublic } from "../../fetching/fetchUtils.ts";
-import { SuccessfulResponse } from "../../fetching/DTOs.ts";
+import { safeAPICallPublic } from "../../fetching/fetchUtils.ts";
+import { AuthTokensResponse, EmailToConfirmResponse, SuccessfulResponse } from "../../fetching/DTOs.ts";
+import { EmailInput, PasswordInput } from "../base/inputs.tsx";
+import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts";
 
-const PasswordRecoveryForm = () => {
+export const PasswordRecoveryForm = () => {
     const navigate = useNavigate();
 
     const [ warningMessage, setWarningMessage ] = useState("");
 
     const [ errorMessage, setErrorMessage ] = useState<string | null>(null);
     const [ email, setEmail ] = useState("");
-    const [ newPassword, setNewPassword ] = useState("");
 
     const [ showSecondFactor, setShowSecondFactor ] = useState(false);
 
@@ -39,12 +38,9 @@ const PasswordRecoveryForm = () => {
         if (!validateFormString(email, "email")) {
             setWarningMessage(invalidEmailMessage);
             return
-        } else if (!validateFormString(newPassword, "password")) {
-            setWarningMessage(passwordNotSecureEnoughMessage);
-            return
         }
 
-        const response = await safeAPICallPublic<SuccessfulResponse>(null, fetchRecoverPassword, navigate, setErrorMessage, email, newPassword);
+        const response = await safeAPICallPublic<EmailToConfirmResponse>(null, fetchRequestPasswordRecovery, navigate, setErrorMessage, email);
         
         if (response.success) {
             setShowSecondFactor(true);
@@ -53,11 +49,11 @@ const PasswordRecoveryForm = () => {
 
     return (
         <div className="flex flex-col items-center justify-top mt-16 px-6 py-8 mx-auto md:h-screen lg:py-0">
-            { showSecondFactor && email.length > 0 ? <SecondFactor emailToConfirm={email} /> :
+            { showSecondFactor && email.length > 0 ? <SecondFactor emailToConfirm={email} _2FACase={"password-recovery"} /> :
                 <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
                     <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-white md:text-2xl">
-                            Reset your password
+                            Recover your password
                         </h1>
                         
                         <p className="text-sm font-light text-gray-200">
@@ -71,37 +67,12 @@ const PasswordRecoveryForm = () => {
                         )}
                         
                         <form onSubmit={formHandler} className="space-y-4 md:space-y-6">
-                            <div>
-                                <label className="block mb-2 text-sm font-medium text-gray-100">
-                                    Your email
-                                </label>
-                                <input 
-                                    onChange={(event) => setEmail(event.target.value)} 
-                                    type="email" 
-                                    name="email"  
-                                    placeholder="example@gmail.com"
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" 
-                                    required={true} 
-                                />
-                            </div>
-                            <div>
-                                <label className="block mb-2 text-sm font-medium text-gray-100">
-                                    New password
-                                </label>
-                                <input 
-                                    onChange={(event) => setNewPassword(event.target.value)} 
-                                    type="password" 
-                                    name="password" 
-                                    placeholder="••••••••"
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" 
-                                    required={true} 
-                                />
-                            </div>
+                            <EmailInput setState={setEmail} />
 
                             <button
                                 type="submit"
                                 className="w-full bg-white/10 hover:bg-white/20 focus:ring-4 focus:outline-none focus:ring-zinc-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
-                                <p className="text-white">Recover password</p>
+                                <p className="text-white">Send code</p>
                             </button>
 
                             <p className="text-sm font-light text-gray-200">
@@ -113,6 +84,61 @@ const PasswordRecoveryForm = () => {
             }
         </div>
     );
-}
+};
 
-export default PasswordRecoveryForm;
+
+export const NewPasswordCreationRecovery = () => {
+    const navigate = useNavigate();
+    const locationState: PasswordRecoveryLocationState  = useLocation().state;
+
+    const [ errorMessage, setErrorMessage ] = useState("");
+
+    const [ newPassword, setNewPassword ] = useState("");
+    const [ newPasswordConfirm, setNewPasswordConfirm ] = useState("");
+
+    useEffect(() => {
+        if (!locationState) {
+            navigate(homeURI);
+        }
+    }, []);
+
+    const submitHandler = async (event: FormEvent) => {
+        event.preventDefault();
+
+        const response = await safeAPICallPublic<AuthTokensResponse>(locationState.passwordRecoveryToken, fetchRecoverPassword, navigate, setErrorMessage, newPassword, newPasswordConfirm);
+
+        if (response.success) {
+            setUpdateCookie(AccessTokenCookieKey, response.accessToken, null);
+            setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, null);
+            navigate(homeURI);
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center justify-top mt-16 px-6 py-8 mx-auto md:h-screen lg:py-0">
+            <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
+                <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+                    <h1 className="text-xl font-bold leading-tight tracking-tight text-white md:text-2xl">
+                        Recover your password
+                    </h1>
+                    
+                        <p className="text-sm font-light text-red">
+                            {errorMessage}
+                        </p>
+
+                    <form className="flex flex-col gap-8" onSubmit={(e) => submitHandler(e)}>
+                        
+                        <PasswordInput setState={setNewPassword} label={"New password"} placeHolder={null}/>
+                        <PasswordInput setState={setNewPasswordConfirm} label={"Confirm new password"} placeHolder={null} />
+                        <button
+                            type="submit"
+                            className="w-full bg-white/10 hover:bg-white/20 focus:ring-4 focus:outline-none focus:ring-zinc-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
+                            <p className="text-white">Change password</p>
+                        </button>                 
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    );
+};

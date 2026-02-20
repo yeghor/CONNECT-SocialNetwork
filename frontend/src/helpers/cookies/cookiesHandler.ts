@@ -12,7 +12,8 @@ import {
 const cookies = new Cookies();
 
 
-export const setUpdateCookie = (key: string, value: string | null, expiry?: Date): void => {
+export const setUpdateCookie = (key: string, value: string | null, expiry: Date | null): void => {
+    console.log(key, value, expiry)
     if(!expiry) {
         const now = new Date();
         expiry = new Date(now);

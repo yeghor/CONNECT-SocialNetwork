@@ -66,3 +66,5 @@ Traceback (most recent call last):
 exceptions.custom_exceptions.NotFoundExc: ChatService: Userda5dbfc8-4197-4bb9-9282-be59a1d238f9 tried to delete message: e3617555-6bbb-45a7-a3f7-529ba846a59c that doesn't exist. 
 
 2. Debug mode bug
+3. Multiple refreshes on many 401's
+4. 422 frontend handling

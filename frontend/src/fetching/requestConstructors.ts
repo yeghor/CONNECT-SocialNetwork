@@ -3,7 +3,8 @@ interface BaseHeaderType {
 }
 
 type TokenHeaderType = BaseHeaderType & {
-    [key: string]: string;
+    "token": string;
+    [key: string]: string
 }
 
 const createBearerToken = (token: string) => `Bearer ${token}`;
@@ -12,14 +13,14 @@ export const requestHeaders = (): BaseHeaderType => {
     return {
         "Content-Type": "application/json",
     };
-}
+};
 
 export const requestTokenHeaders = (JWT: string): TokenHeaderType => {
     return {
         "Content-Type": "application/json",
         "token": createBearerToken(JWT)
     };
-}
+};
 
 // For files
 export const requestTokenMultipartHeaders = (JWT: string): TokenHeaderType => {
@@ -29,7 +30,7 @@ export const requestTokenMultipartHeaders = (JWT: string): TokenHeaderType => {
         //@ts-ignore
         "token": createBearerToken(JWT)
     };
-}
+};
 
 
 interface LoginInterface {
@@ -56,13 +57,13 @@ interface MakePostBody extends ChangePostBody {
 };
 
 interface ChangePasswordBody {
-    new_password: string,
-    new_password_confirm: string
+    old_password: string,
+    new_password: string
 };
 
 interface RecoverPasswordBody {
-    email: string,
     new_password: string
+    new_password_confirm: string
 };
 
 interface ChangeUsernameBody {
@@ -70,7 +71,7 @@ interface ChangeUsernameBody {
 };
 
 interface EmailToConfirmBody {
-    email_to_confirm: string
+    email: string
 }
 
 interface ConfirmSecondFactorBody extends EmailToConfirmBody {
@@ -88,6 +89,15 @@ interface CreateDialogueBody extends CreateChatBody {
 interface CreateGroupBody {
     other_participants_ids: string[]
 };
+
+interface PasswordRecoveryBody {
+    new_password: string
+    new_password_confirm: string
+}
+
+interface EmailProvidedBody {
+    email: string
+}
 
 export const makePostBody = (title: string, text: string, parentPostId: string | null): MakePostBody => {
     return {
@@ -126,17 +136,24 @@ export const registerBody = (username: string, email: string, password: string):
     };
 };
 
-export const changePasswordBody = (newPassword: string, newPasswordConfirm: string): ChangePasswordBody => {
+export const changePasswordBody = (oldPassword: string, newPassword: string): ChangePasswordBody => {
+    return {
+        old_password: oldPassword,
+        new_password: newPassword
+    };
+};
+
+export const  passwordRecoveryBody = (newPassword: string, newPasswordConfirm: string): PasswordRecoveryBody => {
     return {
         new_password: newPassword,
         new_password_confirm: newPasswordConfirm
     };
 };
 
-export const recoverPasswordBody = (email: string, newPassword: string): RecoverPasswordBody => {
+export const recoverPasswordBody = (newPassword: string, newPasswordConfirm: string): RecoverPasswordBody => {
     return {
-        email: email,
-        new_password: newPassword
+        new_password: newPassword,
+        new_password_confirm: newPasswordConfirm
     };
 };
 
@@ -161,13 +178,13 @@ export const createGroupBody = (otherParticipantsIds: string[]): CreateGroupBody
 
 export const confirmSecondFactorBody = (confirmationCode: string, email: string): ConfirmSecondFactorBody => {
     return {
-        email_to_confirm: email,
+        email: email,
         confirmation_code: confirmationCode
     };
 };
 
-export const issueNewSecondFactorBody = (emailToConfirm: string) => {
+export const emailProvidedBody = (email: string): EmailProvidedBody => {
     return {
-        emailToConfirm: emailToConfirm
+        email: email
     };
 };
