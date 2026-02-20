@@ -1,14 +1,14 @@
-import {AccessTokenResponse, BadResponse, SuccessfulResponse} from "../../fetching/DTOs.ts"
+import { AccessTokenResponse, BadResponse, SuccessfulResponse } from "../../fetching/DTOs.ts"
 import {
     AccessTokenCookieKey,
     unauthorizedRedirectURI,
     internalServerErrorURI, RefreshTokenCookieKey,
     notFoundURI
 } from "../../consts.ts";
-import {getCookies, getCookiesOrRedirect, setUpdateCookie} from "../cookies/cookiesHandler.ts";
+import { getCookies, getCookiesOrRedirect, setUpdateCookie } from "../cookies/cookiesHandler.ts";
 import  { fetchRefresh } from "../../fetching/fetchAuth.ts";
 import { NavigateFunction } from "react-router-dom"
-import {APIResponse} from "../../fetching/fetchUtils.ts";
+import { APIResponse } from "../../fetching/fetchUtils.ts";
 
 /*
 This functions does NOT validate 401 code. Code 401 - returns true

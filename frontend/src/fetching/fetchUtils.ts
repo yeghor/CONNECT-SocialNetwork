@@ -69,12 +69,11 @@ export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, 
     const tokensResponse = await refreshTokens(navigate, refreshToken);
 
     if(tokensResponse.success) {
-        setUpdateCookie(AccessTokenCookieKey, tokensResponse.accessToken, tokensResponse.expiresAtAccessToken);
-
+        setUpdateCookie(AccessTokenCookieKey, tokensResponse.accessToken, null);
         const retryResponse: BadResponse | SuccessfulResponse = await fetchFunc(tokensResponse.accessToken, ...fetchArgs);
 
         // Extra !retryResponse.success check to tell ts that response type is BadResponse, and it has statusCode field
-        if(!validateResponse(retryResponse, setErrorMessage,  navigate) && !retryResponse.success) {
+        if(validateResponse(retryResponse, setErrorMessage,  navigate)) {
             if (checkUnauthorizedResponse(retryResponse)) {
                 navigate(unauthorizedRedirectURI);
             }
@@ -105,17 +104,20 @@ export const safeAPICall = async <ResponseType>(
     }
 
     try {
-        let response = await fetchFunc(tokens.access, ...funcArgs);
-        if (!validateResponse(response, setErrorMessage, navigate)) {
-            return response;
+        let response = await fetchFunc(tokens.access, ...funcArgs);        
+
+        if (validateResponse(response, setErrorMessage, navigate)) {
+            if(checkUnauthorizedResponse(response)) {
+                response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, tokens.refresh, navigate, setErrorMessage, ...funcArgs);
+            }
         }
-        if(checkUnauthorizedResponse(response)) {
-            response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, tokens.refresh, navigate, setErrorMessage, ...funcArgs);
-        }
+
         return response;
 
     } catch (err) { 
         console.error(err);
+        console.log("catched error ")
+        
         navigate(internalServerErrorURI);
         return createBadResponseManually(internalServerErrorDefaultMessage, 500);
     }
@@ -141,6 +143,7 @@ export const safeAPICallPublic = async <ResponseType>(
 
     } catch (err) { 
         console.error(err);
+        console.log("catched fetch errror")
         navigate(internalServerErrorURI);
         return createBadResponseManually(internalServerErrorDefaultMessage, 500);
     }

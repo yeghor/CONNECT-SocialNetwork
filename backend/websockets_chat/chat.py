@@ -1,5 +1,5 @@
 from fastapi import WebSocket, APIRouter, Depends, Body
-from authorization import authorize_password_recovery_token_depends, authorize_chat_token, JWTService
+from authorization import authorize_access_token_depends, authorize_chat_token, JWTService
 from services.postgres_service import User, get_session_depends, merge_model
 from services.core_services.main_services import MainChatService
 from services.core_services.core_services import MainServiceContextManager
@@ -21,7 +21,7 @@ connection = WebsocketConnectionManager()
 @endpoint_exception_handler
 async def get_chat_connect_data(
     chat_id: str,
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> ChatConnect:
     """Can be used only with approved chats or groups"""
@@ -33,7 +33,7 @@ async def get_chat_connect_data(
 @endpoint_exception_handler
 async def get_not_approved_chat_connect_data(
     chat_id: str,
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> NotApprovedChatData:
     """Can be used only with not approved dialogue chats"""
@@ -45,7 +45,7 @@ async def get_not_approved_chat_connect_data(
 @endpoint_exception_handler
 async def get_chat_pending_state(
     chat_id: str,
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> bool:
     """Can be used only with not approved dialogue chats"""
@@ -59,7 +59,7 @@ async def get_chat_pending_state(
 async def get_batch_of_chat_messages(
     chat_id: str,
     page: int = Depends(page_validator),
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> List[MessageSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -70,7 +70,7 @@ async def get_batch_of_chat_messages(
 @endpoint_exception_handler
 async def create_dialogue_chat(
     data: CreateDialogueRoomBody = Body(...),  
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -81,7 +81,7 @@ async def create_dialogue_chat(
 @endpoint_exception_handler
 async def create_group_chat(
     data: CreateGroupRoomBody,
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> str:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -92,7 +92,7 @@ async def create_group_chat(
 @endpoint_exception_handler
 async def get_my_chats(
     page: int = Depends(page_validator),
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)  
 ) -> List[ChatSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -103,7 +103,7 @@ async def get_my_chats(
 @endpoint_exception_handler
 async def get_not_approved_chats(
     page: int = Depends(page_validator),
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)  
 ) -> List[ChatSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -114,7 +114,7 @@ async def get_not_approved_chats(
 @endpoint_exception_handler
 async def approve_chat(
     chat_id: str,
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -125,7 +125,7 @@ async def approve_chat(
 @endpoint_exception_handler
 async def get_dialoque_id_by_other_user_id(
     other_user_id: str,
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> str | None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -135,7 +135,7 @@ async def get_dialoque_id_by_other_user_id(
 @chat.get("/chat/not-approved")
 @endpoint_exception_handler
 async def get_number_of_not_approved_chats(
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> int:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -146,7 +146,7 @@ async def get_number_of_not_approved_chats(
 @endpoint_exception_handler
 async def leave_from_group(
     chat_id: str,
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session,model_obj=user_)
