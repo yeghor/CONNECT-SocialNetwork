@@ -15,6 +15,7 @@ export const maxPostImagesUpload = 3;
 export const imageMaxSizeMB = 5;
 
 export const allowedImageMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+export const fileMimeTypeNotAllowed = "We can't accept this image";
 
 export const postTitleMinLength = 3;
 export const postTitleMaxLength = 256;

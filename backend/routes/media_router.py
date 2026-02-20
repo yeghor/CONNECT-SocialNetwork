@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from fastapi.responses import Response
 
-from authorization.authorization_utils import authorize_password_recovery_token_depends
+from authorization.authorization_utils import authorize_access_token_depends
 from services.postgres_service.models import User
 from services.postgres_service.database_utils import *
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,23 +41,21 @@ async def get_image_post(
 @endpoint_exception_handler
 async def upload_post_picture(
     post_id: str,
-    file_: UploadFile = File(...),
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    file: UploadFile = File(...),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     print("Received upload post picture")
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainMediaService].create(MainServiceType=MainMediaService, postgres_session=session) as media:
-        file_contents = await file_.read()
-        print(file_.content_type)
-        print(file_contents[:15])
+        file_contents = await file.read()
         await media.upload_post_image(post_id=post_id, user=user, image_contents=file_contents, specified_mime=file_.content_type)
 
-@media_router.post("/media/users")
+@media_router.post("/media/my-profile/avatar")
 @endpoint_exception_handler
 async def upload_user_avatar(
     file: UploadFile = File(...),
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_access_token_depends),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)

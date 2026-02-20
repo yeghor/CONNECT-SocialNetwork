@@ -3,7 +3,8 @@ interface BaseHeaderType {
 }
 
 type TokenHeaderType = BaseHeaderType & {
-    [key: string]: string;
+    "token": string;
+    [key: string]: string
 }
 
 const createBearerToken = (token: string) => `Bearer ${token}`;
@@ -12,14 +13,14 @@ export const requestHeaders = (): BaseHeaderType => {
     return {
         "Content-Type": "application/json",
     };
-}
+};
 
 export const requestTokenHeaders = (JWT: string): TokenHeaderType => {
     return {
         "Content-Type": "application/json",
         "token": createBearerToken(JWT)
     };
-}
+};
 
 // For files
 export const requestTokenMultipartHeaders = (JWT: string): TokenHeaderType => {
@@ -29,7 +30,7 @@ export const requestTokenMultipartHeaders = (JWT: string): TokenHeaderType => {
         //@ts-ignore
         "token": createBearerToken(JWT)
     };
-}
+};
 
 
 interface LoginInterface {

@@ -98,7 +98,7 @@ export const uploadPostImageURL = (postId: string) => {
     return `${BASEURL}${mediaConstructor}${postsConstructor}/${postId}`;
 };
 
-export const uploadUserImageURL = `${BASEURL}${mediaConstructor}${usersConstructor}`;
+export const uploadAvatarURL = `${BASEURL}${mediaConstructor}${myProfileConstructor}/avatar`;
 
 
 // Chat

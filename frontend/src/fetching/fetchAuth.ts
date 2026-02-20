@@ -14,6 +14,7 @@ import {
     issueNewSecondFactorURL,
     recoverPasswordURL,
     confirmPasswordRecovery2FA_URL,
+    changePasswordURL,
 } from "./urls.ts";
 
 import { 
@@ -121,14 +122,14 @@ export const fetchIssueNewSecondFactor = async (email: string): APIResponse<Emai
     return await fetchHelper<EmailToConfirmResponse>(issueNewSecondFactorURL, requestInit, emailToConfirmResponseMapper);
 };
 
-export const fetchChangePassword = async (accessJWT: string, oldPassword: string, newPassword: string): APIResponse<EmailToConfirmResponse> => {
+export const fetchChangePassword = async (accessJWT: string, oldPassword: string, newPassword: string): APIResponse<AuthTokensResponse> => {
     const requestInit: RequestInit = {
         method: "PATCH",
         headers: requestTokenHeaders(accessJWT),
         body: JSON.stringify(changePasswordBody(oldPassword, newPassword))
     };
 
-    return await fetchHelper<EmailToConfirmResponse>(requestPasswordRecoveryURL, requestInit, successfulResponseMapper);
+    return await fetchHelper<AuthTokensResponse>(changePasswordURL, requestInit, authTokensResponseMapper);
 };
 
 export const fetchRequestPasswordRecovery = async (email: string): APIResponse<EmailToConfirmResponse> => {

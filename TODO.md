@@ -67,3 +67,4 @@ exceptions.custom_exceptions.NotFoundExc: ChatService: Userda5dbfc8-4197-4bb9-92
 
 2. Debug mode bug
 3. Multiple refreshes on many 401's
+4. 422 frontend handling

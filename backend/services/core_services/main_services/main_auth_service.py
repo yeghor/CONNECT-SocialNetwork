@@ -171,7 +171,7 @@ class MainServiceAuth(MainServiceBase):
         authorization_utils.validate_password(credentials.new_password)
 
         if not authorization_utils.check_password(credentials.old_password, user.password_hash):
-            raise Unauthorized(detail=f"AuthService: User: {user.user_id} tried to change password using wrong old password.", client_safe_detail="Old password didn't match")
+            raise InvalidResourceProvided(detail=f"AuthService: User: {user.user_id} tried to change password using wrong old password.", client_safe_detail="Old password didn't match")
 
         user.password_hash = authorization_utils.hash_password(credentials.new_password)
 
