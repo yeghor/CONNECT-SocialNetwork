@@ -88,13 +88,13 @@ export const fetchLoadPost = async (accessJWT: string, postId: string): APIRespo
     return await fetchHelper<LoadPostResponse>(specificPostURL(postId), requestInit, loadPostResponseMapper);
 }
 
-export const fetchSearchPosts = async (accessJWT: string, prompt: string, page: number): APIResponse<PostsResponse> => {
+export const fetchSearchPosts = async (accessJWT: string, query: string, page: number): APIResponse<PostsResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT),
     };
 
-    return await fetchHelper<PostsResponse>(searchPostsURL(prompt, page), requestInit, postsResponseMapper);
+    return await fetchHelper<PostsResponse>(searchPostsURL(query, page), requestInit, postsResponseMapper);
 }
 
 export const fetchUsersPosts = async (accessJWT: string, userId: string, type: ProfilePostsSectionFlag, order: OrderPostsByFlag, page: number): APIResponse<PostsResponse> => {
@@ -157,13 +157,13 @@ export const fetchUnlikePost = async (accessJWT: string, postId: string): APIRes
 
 // User Interactions
 
-export const fetchSearchUsers = async (accessJWT: string, prompt: string, page: number): APIResponse<ShortUserProfilesResponse> => {
+export const fetchSearchUsers = async (accessJWT: string, query: string, page: number): APIResponse<ShortUserProfilesResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT)
     };
 
-    return await fetchHelper<ShortUserProfilesResponse>(searchUsersURL(prompt, page), requestInit, shortUserProfilesMapper);
+    return await fetchHelper<ShortUserProfilesResponse>(searchUsersURL(query, page), requestInit, shortUserProfilesMapper);
 }
 
 export const fetchSpecificUserProfile = async (accessJWT: string, userId: string): APIResponse<UserProfileResponse> => {

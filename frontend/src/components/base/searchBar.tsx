@@ -8,7 +8,9 @@ const SearchBar = () => {
     const [ query, setQuery ] = useState("");
 
     const search = () => {
-        navigate(searchURI(query));
+        if (query.length > 0) {
+            navigate(searchURI(query));
+        }
     };
 
     return (
