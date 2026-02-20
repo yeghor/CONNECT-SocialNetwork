@@ -49,7 +49,7 @@ async def upload_post_picture(
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainMediaService].create(MainServiceType=MainMediaService, postgres_session=session) as media:
         file_contents = await file.read()
-        await media.upload_post_image(post_id=post_id, user=user, image_contents=file_contents, specified_mime=file_.content_type)
+        await media.upload_post_image(post_id=post_id, user=user, image_contents=file_contents, specified_mime=file.content_type)
 
 @media_router.post("/media/my-profile/avatar")
 @endpoint_exception_handler
