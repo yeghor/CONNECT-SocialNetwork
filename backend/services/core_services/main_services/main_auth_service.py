@@ -6,7 +6,7 @@ from pydantic_schemas.pydantic_schemas_auth import *
 # Somehow, * import doesn't work if object name begins with underscore
 from pydantic_schemas.pydantic_schemas_auth import _2FAConfirmationBody
 
-from services_types import JWTTypes
+from services_types import EnpointAuthType
 
 from uuid import uuid4
 
@@ -41,13 +41,16 @@ class MainServiceAuth(MainServiceBase):
             await self._RedisService.assign_second_factor(email=email, code=confirmation_code)
 
     @web_exceptions_raiser
-    async def authorize_request(self, token: str, token_type: JWTTypes, return_user: bool = True) -> User | None:
-        """Can be used in fastAPI Depends() \n Prepares and authorizes token"""
+    async def authorize_token_and_optionally_return_user(self, token: str, token_type: EnpointAuthType, return_user: bool = True) -> User | None:
+        """Can be used in fastAPI Depends() \n\n Prepares and authorizes token"""
         
+        if token_type == "optional-access" and token == "":
+            return None
+
         prepared_token = self._JWT.prepare_token(jwt_token=token)
 
         if not await self._RedisService.check_jwt_existence(jwt_token=prepared_token, token_type=token_type):
-            raise Unauthorized(detail=f"AuthService: User tried to authorize request by expired token: {token} token type: {token_type}", client_safe_detail="Invalid or expired token")
+            raise Unauthorized(detail=f"AuthService: User tried to authorize request by expired token, token type: {token_type}", client_safe_detail="Invalid or expired token")
          
         if return_user:
             payload = self._JWT.extract_jwt_payload(jwt_token=prepared_token)

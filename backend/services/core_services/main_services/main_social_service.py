@@ -137,7 +137,7 @@ class MainServiceSocial(MainServiceBase):
         return await self._PostgresService.get_all_from_model(ModelType=ModelType)
 
     @web_exceptions_raiser
-    async def get_feed(self, user: User, page: int) -> List[PostLiteSchema]:
+    async def get_feed(self, user: User | None, page: int) -> List[PostLiteSchema]:
         """`
         Returns related posts to provided User table object view history \n
         It mixes history rated with most popular posts, and newest ones.
@@ -145,42 +145,45 @@ class MainServiceSocial(MainServiceBase):
 
         # TODO: KISS THIS MOTHERFUCKER
 
-        EACH_SOURCE_PAGINATION = int(BASE_PAGINATION / DIVIDE_BASE_PAG_BY)
-
-
-        views_history = await self._PostgresService.get_user_actions(user_id=user.user_id, action_type=ActionType.view, n_most_fresh=HISTORY_POSTS_TO_TAKE_INTO_RELATED, return_posts=True)
-        liked_history = await self._PostgresService.get_user_actions(user_id=user.user_id, action_type=ActionType.like, n_most_fresh=LIKED_POSTS_TO_TAKE_INTO_RELATED, return_posts=True)
-        history_posts_relation = views_history + liked_history
-
-        # History related mix
-        if len(views_history) > MINIMUM_USER_HISTORY_LENGTH and len(liked_history) > MINIMUM_USER_HISTORY_LENGTH:
-            related_ids = await self._ChromaService.get_n_related_posts_ids(user=user, page=page, post_relation=history_posts_relation, pagination=EACH_SOURCE_PAGINATION)
-
-            # Following mix
-            followed_ids =  await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="followed")
-            if not followed_ids:
-                followed_ids = await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
-
-            unrelevant_ids = await self._get_ids_by_query_type(exclude_ids=followed_ids + related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
-            
+        if not user:
+            posts = await self._PostgresService.get_fresh_posts(user=None, page=page, n=BASE_PAGINATION, exclude_ids=[])
         else:
-            related_ids = await self._get_ids_by_query_type(page=page, user=user, n=EACH_SOURCE_PAGINATION, id_type="fresh")
-
-            # Following mix
-            followed_ids =  await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="followed")
+            EACH_SOURCE_PAGINATION = int(BASE_PAGINATION / DIVIDE_BASE_PAG_BY)
 
 
-            if not followed_ids:
-                followed_ids = await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
+            views_history = await self._PostgresService.get_user_actions(user_id=user.user_id, action_type=ActionType.view, n_most_fresh=HISTORY_POSTS_TO_TAKE_INTO_RELATED, return_posts=True)
+            liked_history = await self._PostgresService.get_user_actions(user_id=user.user_id, action_type=ActionType.like, n_most_fresh=LIKED_POSTS_TO_TAKE_INTO_RELATED, return_posts=True)
+            history_posts_relation = views_history + liked_history
+
+            # History related mix
+            if len(views_history) > MINIMUM_USER_HISTORY_LENGTH and len(liked_history) > MINIMUM_USER_HISTORY_LENGTH:
+                related_ids = await self._ChromaService.get_n_related_posts_ids(user=user, page=page, post_relation=history_posts_relation, pagination=EACH_SOURCE_PAGINATION)
+
+                # Following mix
+                followed_ids =  await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="followed")
+                if not followed_ids:
+                    followed_ids = await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
+
                 unrelevant_ids = await self._get_ids_by_query_type(exclude_ids=followed_ids + related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
+                
             else:
-                unrelevant_ids = await self._get_ids_by_query_type(exclude_ids=followed_ids + related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
+                related_ids = await self._get_ids_by_query_type(page=page, user=user, n=EACH_SOURCE_PAGINATION, id_type="fresh")
+
+                # Following mix
+                followed_ids =  await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="followed")
 
 
-        all_ids = self.combine_lists(related_ids, followed_ids, unrelevant_ids)
+                if not followed_ids:
+                    followed_ids = await self._get_ids_by_query_type(exclude_ids=related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
+                    unrelevant_ids = await self._get_ids_by_query_type(exclude_ids=followed_ids + related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
+                else:
+                    unrelevant_ids = await self._get_ids_by_query_type(exclude_ids=followed_ids + related_ids, user=user, page=page, n=EACH_SOURCE_PAGINATION, id_type="fresh")
 
-        posts = await self._PostgresService.get_entries_by_ids(ids=all_ids, ModelType=Post)
-        posts = set(self._shuffle_posts(posts=posts))
+
+            all_ids = self.combine_lists(related_ids, followed_ids, unrelevant_ids)
+
+            posts = await self._PostgresService.get_entries_by_ids(ids=all_ids, ModelType=Post)
+            posts = set(self._shuffle_posts(posts=posts))
 
         return [
             PostLiteSchema(
@@ -243,7 +246,7 @@ class MainServiceSocial(MainServiceBase):
             ]
     
     @web_exceptions_raiser
-    async def search_posts(self, query: str, user: User, page: int) -> List[PostLiteSchema]:
+    async def search_posts(self, query: str, user: User | None, page: int) -> List[PostLiteSchema]:
         """
         Search posts that similar with meaning to prompt
         """
@@ -260,7 +263,7 @@ class MainServiceSocial(MainServiceBase):
                 likes=post.likes_count,
                 views=post.views_count,
                 replies=post.replies_count,
-                is_my_post=user.user_id == post.post_id,          
+                is_my_post=user.user_id == post.post_id if user else False,          
                 owner=UserShortSchemaAvatarURL(user_id=post.owner_id, username=post.owner.username, avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id)) if post.owner else None,
                 pictures_urls= await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.images]),
                 parent_post=PostBase(
@@ -272,14 +275,14 @@ class MainServiceSocial(MainServiceBase):
                     likes=post.parent_post.likes_count,
                     views=post.parent_post.views_count,
                     replies=post.parent_post.replies_count,
-                    is_my_post=user.user_id == post.parent_post.post_id,
+                    is_my_post=user.user_id == post.parent_post.post_id if user else False,
                     pictures_urls=await self._ImageStorage.get_post_image_urls(images_names=[post_image.image_name for post_image in post.parent_post.images])
                 ) if post.parent_post else None
             ) for post in posts
         ]
 
     @web_exceptions_raiser
-    async def search_users(self, query: str,  request_user: User, page: int) -> List[UserLiteSchema]:
+    async def search_users(self, query: str, page: int) -> List[UserLiteSchema]:
         users = await self._PostgresService.get_users_by_username(query=query, page=page, n=BASE_PAGINATION)
         return [UserLiteSchema(user_id=user.user_id, username=user.username, followers=len(user.followers), joined=user.joined, avatar_url=await self._ImageStorage.get_user_avatar_url(user.user_id)) for user in users]
 
@@ -384,7 +387,7 @@ class MainServiceSocial(MainServiceBase):
             fresh_user.followed.remove(other_user)
     
     @web_exceptions_raiser
-    async def get_user_profile(self, user: User, other_user_id: str) -> UserSchema:
+    async def get_user_profile(self, user: User | None, other_user_id: str) -> UserSchema:
         other_user = await self._PostgresService.get_entry_by_id(id_=other_user_id, ModelType=User)
 
         if not other_user: 
@@ -399,8 +402,8 @@ class MainServiceSocial(MainServiceBase):
             followed=len(other_user.followed),
             avatar_url=avatar_token,
             joined=other_user.joined,
-            me=True if user.user_id == other_user_id else False,
-            is_following=await self._PostgresService.check_follow(user=user, other_user_id=other_user_id)
+            me=user.user_id == other_user_id if user else False,
+            is_following=await self._PostgresService.check_follow(user=user, other_user_id=other_user_id) if user else False
         )
     
     @web_exceptions_raiser
@@ -466,15 +469,16 @@ class MainServiceSocial(MainServiceBase):
         )
 
     @web_exceptions_raiser
-    async def load_post(self, user: User, post_id: str) -> PostSchema:
+    async def load_post(self, user: User | None, post_id: str) -> PostSchema:
         post = await self._PostgresService.get_entry_by_id(id_=post_id, ModelType=Post)
 
         if not post:
             raise ResourceNotFound(detail=f"SocialService: User: {user.user_id} tried to load post: {post_id} that does not exist.", client_safe_detail="This post does not exist.")
 
-        registered_view = await self._construct_and_flush_action(action_type=ActionType.view, post=post, user=user)
+        if user:
+            registered_view = await self._construct_and_flush_action(action_type=ActionType.view, post=post, user=user)
 
-        if registered_view: post.views_count += 1
+            if registered_view: post.views_count += 1
 
         liked = await self._PostgresService.get_actions(user.user_id, post_id=post_id, action_type=ActionType.like)
 
@@ -491,7 +495,7 @@ class MainServiceSocial(MainServiceBase):
             is_liked=True if liked else False,
             views=post.views_count,
             replies=post.replies_count,
-            is_my_post=user.user_id == post.owner_id,
+            is_my_post=user.user_id == post.owner_id if user else False,
             parent_post=PostBase(
                 post_id=post.parent_post.post_id,
                 title=post.parent_post.title,
@@ -501,7 +505,7 @@ class MainServiceSocial(MainServiceBase):
                 likes=post.parent_post.likes_count,
                 views=post.parent_post.views_count,
                 replies=post.parent_post.replies_count,
-                is_my_post=user.user_id == post.parent_post.owner_id
+                is_my_post=user.user_id == post.parent_post.owner_id if user else False
             ) if post.parent_post else None,
             last_updated=post.last_updated,
             pictures_urls=images_temp_urls,
@@ -536,49 +540,51 @@ class MainServiceSocial(MainServiceBase):
 
         return await asyncio.gather(*replies_coroutines)
 
-    async def _get_recent_action_message(self, action: PostActions) -> Dict | None:
+    async def _get_recent_action_message(self, action: PostActions) -> RecentActivitySchema | None:
         """
-        Returns dict that compatible to Pydantic **RecentActivitySchema** model
+        Use with function that is wrapper with `@web_exceptions_raiser`
         """
 
         match action.action.value:
             case "like":
-                return {
-                    "avatar_url": await self._ImageStorage.get_user_avatar_url(action.owner.username),
-                    "message": f"{action.owner.username} liked your post",
-                    "date": action.date
-                }
+                RecentActivitySchema(
+                    avatar_url=await self._ImageStorage.get_user_avatar_url(action.owner.username),
+                    message=f"{action.owner.username} liked your post",
+                    date=action.date
+                )
             case "reply":
-                return  {
-                    "avatar_url": await self._ImageStorage.get_user_avatar_url(action.owner.username),
-                    "message": f"{action.owner.username} left a reply to your post: {action.post.title}",
-                    "date": action.date
-                }
+                RecentActivitySchema(
+                    avatar_url=await self._ImageStorage.get_user_avatar_url(action.owner.username),
+                    message=f"{action.owner.username} left a reply to your post: {action.post.title}",
+                    date=action.date
+                )
 
-    async def _get_recent_followed_post_message(self, followed_post: Post) -> Dict | None:
+    async def _get_recent_followed_post_message(self, post: Post) -> Dict | None:
         """
-        Returns dict that compatible to Pydantic RecentActivitySchema model
         Use with function that is wrapper with `@web_exceptions_raiser`
         """
 
-        return {
-            "avatar_url": await self._ImageStorage.get_user_avatar_url(followed_post.owner.username),
-            "message": f"{followed_post.owner.username} made a new post.",
-            "date": followed_post.published
-        }
+        return RecentActivitySchema(
+            avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner.username),
+            message=f"{post.owner.username} made a new post.",
+            date=post.published
+        )
 
     @web_exceptions_raiser
-    async def get_recent_activity(self, user: User) -> List[RecentActivitySchema]:
-        followed_posts = await self._PostgresService.get_fresh_followed_posts(user)
-        actions = await self._PostgresService.get_fresh_actions_for_user(user)
+    async def get_recent_activity(self, user: User | None) -> List[RecentActivitySchema]:
+        if not user:
+            return []
+
+        followed_posts = await self._PostgresService.get_fresh_followed_posts(user, RECENT_ACTIVITY_ENTRIES)
+        actions = await self._PostgresService.get_fresh_actions_for_user(user, RECENT_ACTIVITY_ENTRIES)
 
         followed_coroutines = [self._get_recent_followed_post_message(post) for post in followed_posts]
         action_coroutines = [self._get_recent_action_message(action) for action in actions]
 
-        activity = await asyncio.gather(*followed_coroutines, *action_coroutines)
+        activity: List[RecentActivitySchema] = await asyncio.gather(*followed_coroutines, *action_coroutines)
         activity = filter(lambda i: bool(i), activity)
 
-        return sorted(activity, key=lambda message: message.get("date"), reverse=True)[:RECENT_ACTIVITY_ENTRIES]
+        return sorted(activity, key=lambda message: message.date, reverse=True)[:RECENT_ACTIVITY_ENTRIES]
     
     @web_exceptions_raiser
     async def get_my_friends(self, user: User) -> List[UserLiteSchema]:

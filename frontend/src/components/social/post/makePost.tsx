@@ -2,7 +2,7 @@ import React, {ChangeEvent, useState} from "react";
 
 import { fetchUploadPostPictures } from "../../../fetching/fetchMedia.ts";
 import {allowedImageMimeTypes, maxPostImagesUpload, fileIsTooBigMessage, specificPostURI} from "../../../consts.ts";
-import {safeAPICall} from "../../../fetching/fetchUtils.ts";
+import {safeAPICallPrivate} from "../../../fetching/fetchUtils.ts";
 import {LoadPostResponse, PostBaseResponse, SuccessfulResponse} from "../../../fetching/DTOs.ts";
 import {getCookiesOrRedirect} from "../../../helpers/cookies/cookiesHandler.ts";
 import {useNavigate} from "react-router";
@@ -40,14 +40,14 @@ const MakePost = (props: MakePostProps) => {
             return;
         }
 
-        const createdPost = await safeAPICall<PostBaseResponse>(tokens, fetchMakePost, navigate, setErrorMessage, title, text, props.parentPostId);
+        const createdPost = await safeAPICallPrivate<PostBaseResponse>(tokens, fetchMakePost, navigate, setErrorMessage, title, text, props.parentPostId);
 
         if (!createdPost.success) {
             return;
         }
 
         for (let i = 0; i < images.length; i++) {
-            console.log(await safeAPICall<SuccessfulResponse>(tokens, fetchUploadPostPictures, navigate, setErrorMessage, createdPost.data.postId, images[i]));
+            console.log(await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchUploadPostPictures, navigate, setErrorMessage, createdPost.data.postId, images[i]));
         }
 
         navigate(specificPostURI(createdPost.data.postId));

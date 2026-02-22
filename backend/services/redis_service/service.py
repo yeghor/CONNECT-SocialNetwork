@@ -2,7 +2,7 @@ import redis.asyncio as async_redis
 import redis.exceptions as redis_exceptions
 
 from exceptions.custom_exceptions import RedisError
-from services_types import JWTTypes
+from services_types import EnpointAuthType
 
 from dotenv import load_dotenv
 from os import getenv
@@ -162,7 +162,7 @@ class RedisService:
         await self.__client.delete(f"{prefix}{jwt_token}")
 
     @redis_error_handler
-    async def check_jwt_existence(self, jwt_token: str, token_type: JWTTypes) -> bool:
+    async def check_jwt_existence(self, jwt_token: str, token_type: EnpointAuthType) -> bool:
         if not jwt_token or not token_type:
             raise ValueError("No jwt_token or token_type provided")
 

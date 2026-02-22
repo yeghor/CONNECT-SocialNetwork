@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import { safeAPICall } from "../../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate } from "../../../fetching/fetchUtils.ts";
 
 import {
     getCookiesOrRedirect,
@@ -44,7 +44,7 @@ const createPostFlowResponse = (data: FeedPost[]): PostsFlowComponents => {
 const postFetcher = async (tokens: CookieTokenObject, feed: boolean, navigate: NavigateFunction, page: number): Promise<PostsFlowComponents> => {
     const fetchFunction = feed ? fetchFeedPosts : fetchFollowedPosts;
 
-    const fetchedPosts = await safeAPICall<FeedPostsResponse>(tokens, fetchFunction, navigate, undefined, page)
+    const fetchedPosts = await safeAPICallPrivate<FeedPostsResponse>(tokens, fetchFunction, navigate, undefined, page)
 
     if (fetchedPosts.success) {
         return createPostFlowResponse(fetchedPosts.data);

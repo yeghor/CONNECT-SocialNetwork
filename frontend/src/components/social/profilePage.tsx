@@ -6,7 +6,7 @@ import FlowPost from "./post/flowPost.tsx";
 import { SuccessfulResponse, UserProfile, FeedPostsResponse, FeedPost } from "../../fetching/DTOs.ts";
 import { useNavigate, Link } from "react-router";
 import { CookieTokenObject, getCookiesOrRedirect } from "../../helpers/cookies/cookiesHandler.ts";
-import { safeAPICall } from "../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate } from "../../fetching/fetchUtils.ts";
 import {
     fetchFollow,
     fetchUnfollow,
@@ -34,7 +34,7 @@ export type ProfilePostsSectionFlag = "posts" | "replies" | "likes";
 export type OrderPostsByFlag = "fresh" | "old" | "mostLiked" | "popularNow"
 
 const getProfileData = async (tokens: CookieTokenObject, navigate: NavigateFunction, userId: string, orderBy: OrderPostsByFlag, section: ProfilePostsSectionFlag, page: number): Promise<ProfilePosts> => {
-    const fetchedResults = await safeAPICall<FeedPostsResponse>(tokens, fetchUsersPosts, navigate, undefined, userId, section, orderBy, page);
+    const fetchedResults = await safeAPICallPrivate<FeedPostsResponse>(tokens, fetchUsersPosts, navigate, undefined, userId, section, orderBy, page);
 
     if (fetchedResults.success) {
         return fetchedResults.data.map((post) => {
@@ -104,11 +104,11 @@ export const ProfilePage = (props: ProfilePageProps) => {
         if (!isFollowing) {
             setFollowing(true);
             props.userData.followers += 1;
-            await safeAPICall<SuccessfulResponse>(tokens, fetchFollow, navigate, undefined, props.userData.userId);
+            await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchFollow, navigate, undefined, props.userData.userId);
         } else {
             setFollowing(false);
             props.userData.followers -= 1;
-            await safeAPICall<SuccessfulResponse>(tokens, fetchUnfollow, navigate, undefined, props.userData.userId);
+            await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchUnfollow, navigate, undefined, props.userData.userId);
         }
 
         setTimeout(() => setFollowTimeout(false), 300)

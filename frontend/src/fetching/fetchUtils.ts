@@ -89,10 +89,10 @@ export const retryUnauthorizedResponse = async <R>(fetchFunc: CallableFunction, 
 
 
 /*
-* Makes safe API call with access token, validating errors, retrying if 401
+* Makes safe API call to private endpoints with access token, validating errors, retrying if 401
 * Do **NOT** pass auth tokens to function in fetchArgs[]
 * */
-export const safeAPICall = async <ResponseType>(
+export const safeAPICallPrivate = async <ResponseType>(
     tokens: CookieTokenObject,
     fetchFunc: CallableFunction,
     navigate: NavigateFunction,
@@ -116,8 +116,6 @@ export const safeAPICall = async <ResponseType>(
 
     } catch (err) { 
         console.error(err);
-        console.log("catched error ")
-        
         navigate(internalServerErrorURI);
         return createBadResponseManually(internalServerErrorDefaultMessage, 500);
     }
@@ -127,23 +125,45 @@ export const safeAPICall = async <ResponseType>(
 * Makes safe API call to public endpoints, validating errors, doesn't try to refresh tokens on 401
 * Do **NOT** pass auth tokens to function in fetchArgs[]
 * */
-export const safeAPICallPublic = async <ResponseType>(
-    authToken: string | null, // Could be refresh token or password recovery token
+export const safeAPICallRecovery = async <ResponseType>(
+    recoveryToken: string,
     fetchFunc: CallableFunction,
     navigate: NavigateFunction,
     setErrorMessage?: CallableFunction,
     ...funcArgs: any[]
 ): Promise<ResponseType | BadResponse> => {
     try {
-        const fetchArgs = authToken ? [authToken, ...funcArgs] : [...funcArgs]
-        let response = await fetchFunc(...fetchArgs);
+        let response = await fetchFunc(recoveryToken, ...funcArgs);
         validateResponse(response, setErrorMessage, navigate)
 
         return response;
 
     } catch (err) { 
         console.error(err);
-        console.log("catched fetch errror")
+        navigate(internalServerErrorURI);
+        return createBadResponseManually(internalServerErrorDefaultMessage, 500);
+    }
+};
+
+/*
+* Makes safe API call to public endpoints, validating errors, retrying if 401
+* Do **NOT** pass auth tokens to function in fetchArgs[]
+* */
+export const safeAPICallPublic = async <ResponseType>(
+    authToken: string | null,
+    fetchFunc: CallableFunction,
+    navigate: NavigateFunction,
+    setErrorMessage?: CallableFunction,
+    ...funcArgs: any[]
+): Promise<ResponseType | BadResponse> => {
+    try {
+        let response = await fetchFunc(authToken, ...funcArgs);
+        validateResponse(response, setErrorMessage, navigate)
+
+        return response;
+
+    } catch (err) { 
+        console.error(err);
         navigate(internalServerErrorURI);
         return createBadResponseManually(internalServerErrorDefaultMessage, 500);
     }

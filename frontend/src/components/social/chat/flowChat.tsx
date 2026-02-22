@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Chat } from "../../../fetching/DTOs.ts";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { specificChatURI } from "../../../consts.ts";
-import { safeAPICall } from "../../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate } from "../../../fetching/fetchUtils.ts";
 import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts";
 import { fetchLeaveChat as fetchLeaveGroup } from "../../../fetching/fetchChatWS.ts";
 
@@ -53,7 +53,7 @@ const FlowChat = (chatData: Chat) => {
         e.stopPropagation();
         const confirmLeave = window.confirm(`Are you sure that you want to leave chat: ${chatData.chatName}?`);
         if (confirmLeave) {
-            await safeAPICall(tokens, fetchLeaveGroup, navigate, undefined, chatData.chatId);
+            await safeAPICallPrivate(tokens, fetchLeaveGroup, navigate, undefined, chatData.chatId);
             setIsMenuOpen(false);
         }
     };

@@ -52,7 +52,7 @@ import { OrderPostsByFlag, ProfilePostsSectionFlag } from "../components/social/
 
 // Get Posts
 
-export const fetchFeedPosts = async (accessJWT: string, page: number): APIResponse<PostsResponse> => {
+export const fetchFeedPosts = async (accessJWT: string | null, page: number): APIResponse<PostsResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT),
@@ -70,7 +70,7 @@ export const fetchFollowedPosts = async (accessJWT: string, page: number): APIRe
     return await fetchHelper<PostsResponse>(followedPostsFeedURL(page), requestInit, postsResponseMapper);
 }
 
-export const fetchPostComments = async (accessJWT: string, postId: string, page: number): APIResponse<PostCommentsResponse> => {
+export const fetchPostComments = async (accessJWT: string | null, postId: string, page: number): APIResponse<PostCommentsResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT),
@@ -79,7 +79,7 @@ export const fetchPostComments = async (accessJWT: string, postId: string, page:
     return await fetchHelper<PostCommentsResponse>(postCommentsURL(postId, page), requestInit, postCommentsResponseMapper);
 }
 
-export const fetchLoadPost = async (accessJWT: string, postId: string): APIResponse<LoadPostResponse> => {
+export const fetchLoadPost = async (accessJWT: string | null, postId: string): APIResponse<LoadPostResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT),
@@ -88,7 +88,7 @@ export const fetchLoadPost = async (accessJWT: string, postId: string): APIRespo
     return await fetchHelper<LoadPostResponse>(specificPostURL(postId), requestInit, loadPostResponseMapper);
 }
 
-export const fetchSearchPosts = async (accessJWT: string, query: string, page: number): APIResponse<PostsResponse> => {
+export const fetchSearchPosts = async (accessJWT: string | null, query: string, page: number): APIResponse<PostsResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT),
@@ -97,7 +97,7 @@ export const fetchSearchPosts = async (accessJWT: string, query: string, page: n
     return await fetchHelper<PostsResponse>(searchPostsURL(query, page), requestInit, postsResponseMapper);
 }
 
-export const fetchUsersPosts = async (accessJWT: string, userId: string, type: ProfilePostsSectionFlag, order: OrderPostsByFlag, page: number): APIResponse<PostsResponse> => {
+export const fetchUsersPosts = async (accessJWT: string | null, userId: string, type: ProfilePostsSectionFlag, order: OrderPostsByFlag, page: number): APIResponse<PostsResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT),
@@ -202,7 +202,12 @@ export const fetchUnfollow = async (accessJWT: string, userId: string): APIRespo
     return await fetchHelper<SuccessfulResponse>(followURL(userId), requestInit, successfulResponseMapper);
 }
 
-export const fetchRecentActivity = async (accessJWT: string): APIResponse<RecentActivityResponse> => {
+export const fetchRecentActivity = async (accessJWT: string | null): APIResponse<RecentActivityResponse> => {
+    // In case user fetches recent activity with no toke, it always return empty list
+    if (!accessJWT) {
+        return recentActivityMapper([]);
+    }
+
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT)

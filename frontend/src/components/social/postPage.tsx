@@ -7,7 +7,7 @@ import { getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
 import { LoadPostResponseInterface, LoadPostResponse, SuccessfulResponse } from "../../fetching/DTOs.ts";
 import { fetchLikePost, fetchLoadPost, fetchUnlikePost } from "../../fetching/fetchSocial.ts";
 
-import { safeAPICall } from "../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate } from "../../fetching/fetchUtils.ts";
 import MakePost from "./post/makePost.tsx";
 import { maxRequestsQueueLength, specificPostURI, tooMuchActivityMessage } from "../../consts.ts";
 import OwnerComponent from "./post/owner.tsx";
@@ -31,12 +31,12 @@ const PostPage = () => {
                 postData.likes -= 1;
                 postData.isLiked = false;
                 toggleLikes(postData.isLiked);
-                await safeAPICall<SuccessfulResponse>(tokens, fetchUnlikePost, navigate, undefined, postId);
+                await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchUnlikePost, navigate, undefined, postId);
             } else {
                 postData.likes += 1;
                 postData.isLiked = true;
                 toggleLikes(postData.isLiked);
-                await safeAPICall<SuccessfulResponse>(tokens, fetchLikePost, navigate, undefined, postId);
+                await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchLikePost, navigate, undefined, postId);
             }
             setTimeout(() => setLikeTimeout(false), 200);
         }
@@ -47,7 +47,7 @@ const PostPage = () => {
             // If statement to prevent TS errors. Cause if no tokens - getCookiesOrRedirect will redirect user to auth page
             if(!(tokens.access && tokens.refresh && postId)) { return; }
 
-                const response = await safeAPICall<LoadPostResponse>(
+                const response = await safeAPICallPrivate<LoadPostResponse>(
                     tokens,
                     fetchLoadPost,
                     navigate,

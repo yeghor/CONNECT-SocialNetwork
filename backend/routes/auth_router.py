@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Body, Header
 from services.postgres_service import *
 from services.core_services import MainServiceContextManager, MainServiceAuth
 from sqlalchemy.ext.asyncio import AsyncSession
-from authorization.authorization_utils import authorize_access_token_depends, authorize_password_recovery_token_depends
+from authorization.authorization_utils import authorize_private_endpoint, authorize_password_recovery_endpoint
 
 from pydantic_schemas.pydantic_schemas_auth import *
 
@@ -73,7 +73,7 @@ async def request_password_recovery(
 @endpoint_exception_handler
 async def password_recovery(
     credentials: PasswordRecoveryBody,
-    user_: User = Depends(authorize_password_recovery_token_depends),
+    user_: User = Depends(authorize_password_recovery_endpoint),
     session: AsyncSession = Depends(get_session_depends)
 ) -> RefreshAccessTokens:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -84,7 +84,7 @@ async def password_recovery(
 @endpoint_exception_handler
 async def change_password(
     credentials: ChangePasswordBody,
-    user_: User = Depends(authorize_access_token_depends),
+    user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends)
 ) -> RefreshAccessTokens:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -103,7 +103,7 @@ async def logout(
 @auth.post("/logout/full")
 @endpoint_exception_handler
 async def fully_logout(
-    user_: User = Depends(authorize_access_token_depends),
+    user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -123,7 +123,7 @@ async def refresh_token(
 @endpoint_exception_handler
 async def change_username(
     credentials: NewUsernameBody = Body(...),
-    user_: User = Depends(authorize_access_token_depends),
+    user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
@@ -134,7 +134,7 @@ async def change_username(
 @endpoint_exception_handler
 async def delete_profile(
     password: str = Header(...),
-    user_: User = Depends(authorize_access_token_depends),
+    user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)

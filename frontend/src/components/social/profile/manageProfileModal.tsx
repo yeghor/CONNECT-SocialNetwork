@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import { _2faURI, AccessTokenCookieKey, allowedImageMimeTypes, fileMimeTypeNotAllowed, invalidUsernameMessage, noAvatarImageMessage, passwordNotSecureEnoughMessage, passwordRecoveryURI, RefreshTokenCookieKey, tooManyAvatarFilesMessage } from "../../../consts";
 import { useNavigate, Link } from "react-router";
 import { getCookiesOrRedirect, setUpdateCookie } from "../../../helpers/cookies/cookiesHandler";
-import { safeAPICall } from "../../../fetching/fetchUtils";
+import { safeAPICallPrivate } from "../../../fetching/fetchUtils";
 import { AuthTokensResponse, EmailToConfirmResponse, SuccessfulResponse } from "../../../fetching/DTOs";
 import { fetchChangePassword, fetchChangeUsername } from "../../../fetching/fetchAuth";
 import { validateFormString } from "../../../helpers/validatorts";
@@ -47,7 +47,7 @@ const ManageProfileModal = (props: { avatarURL: string | null, setShowManageProf
             return;
         }
 
-        const response = await safeAPICall<SuccessfulResponse>(tokens, fetchChangeUsername, navigate, setErrorMessage, newUsername);
+        const response = await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchChangeUsername, navigate, setErrorMessage, newUsername);
 
         if (response.success) {
             setUsernameStatusMessage("Username changed successfully!")
@@ -67,7 +67,7 @@ const ManageProfileModal = (props: { avatarURL: string | null, setShowManageProf
 
         setWarningMessage(null);
 
-        const response = await safeAPICall<AuthTokensResponse>(tokens, fetchChangePassword, navigate, setWarningMessage, oldPassword, newPassword);
+        const response = await safeAPICallPrivate<AuthTokensResponse>(tokens, fetchChangePassword, navigate, setWarningMessage, oldPassword, newPassword);
         
         if (response.success) {
             setUpdateCookie(AccessTokenCookieKey, response.accessToken, null);
@@ -109,7 +109,7 @@ const ManageProfileModal = (props: { avatarURL: string | null, setShowManageProf
         }
         console.log(newAvatarFile)
         // File inherits from Blob, we don't need to convert it
-        await safeAPICall<SuccessfulResponse>(tokens, fetchUploadAvatar, navigate, setWarningMessage, newAvatarFile)
+        await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchUploadAvatar, navigate, setWarningMessage, newAvatarFile)
     };
 
 return (

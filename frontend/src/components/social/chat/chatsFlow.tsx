@@ -7,7 +7,7 @@ import {
     infiniteQieryingFetchGuard
 } from "../../butterySmoothScroll/scrollVirtualizationUtils.ts";
 import { fetchChats, fetchNotApprovedChats, fetchNotApprovedChatsAmount } from "../../../fetching/fetchChatWS.ts";
-import { safeAPICall } from "../../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate } from "../../../fetching/fetchUtils.ts";
 import { Chat, ChatsResponse, CustomSimpleResponse } from "../../../fetching/DTOs.ts";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
@@ -17,7 +17,7 @@ import FlowChat from "./flowChat.tsx";
 const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, approved: boolean, page: number): Promise<Chat[]> => {
     const fetcher = approved ? fetchChats : fetchNotApprovedChats
 
-    const fetchedChats = await safeAPICall<ChatsResponse>(tokens, fetcher, navigate, undefined, page);
+    const fetchedChats = await safeAPICallPrivate<ChatsResponse>(tokens, fetcher, navigate, undefined, page);
 
     if (fetchedChats.success) {
         return fetchedChats.data;
@@ -61,7 +61,7 @@ const ChatsFlow = (props: { showGroupCreationModelToggler: React.Dispatch<React.
 
     useEffect(() => {
         const fetcher = async () => {
-            const response = await safeAPICall<CustomSimpleResponse<number>>(tokens, fetchNotApprovedChatsAmount, navigate, undefined)
+            const response = await safeAPICallPrivate<CustomSimpleResponse<number>>(tokens, fetchNotApprovedChatsAmount, navigate, undefined)
             if (response.success) {
                 setNotApprovedChatsAmount(response.content);
             }

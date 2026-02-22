@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { fetchMyFriends } from "../../../fetching/fetchSocial";
-import { safeAPICall } from "../../../fetching/fetchUtils";
+import { safeAPICallPrivate } from "../../../fetching/fetchUtils";
 import { CustomSimpleResponse, ShortUserProfile, ShortUserProfilesResponse, SuccessfulResponse } from "../../../fetching/DTOs";
 import { useNavigate } from "react-router";
 import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler";
@@ -24,7 +24,7 @@ const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Disp
 
 
     const createGroup = async () => {
-        const response = await safeAPICall<CustomSimpleResponse<string>>(tokens, fetchCreateGroupChat, navigate, setWarningMessage, participantsIds);
+        const response = await safeAPICallPrivate<CustomSimpleResponse<string>>(tokens, fetchCreateGroupChat, navigate, setWarningMessage, participantsIds);
 
         if (response.success) {
             props.showGroupCreationModelToggler(false);
@@ -48,7 +48,7 @@ const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Disp
 
     useEffect(() => {
         const friendsFetcher = async()  => {
-            const response = await safeAPICall<ShortUserProfilesResponse>(tokens, fetchMyFriends, navigate, undefined);
+            const response = await safeAPICallPrivate<ShortUserProfilesResponse>(tokens, fetchMyFriends, navigate, undefined);
 
             if (response.success) {
                 setFriendsData(response.data);

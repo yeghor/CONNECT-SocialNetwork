@@ -4,7 +4,7 @@ from os import getenv
 from datetime import datetime
 from services.redis_service import RedisService
 from typing import Dict, TypeVar, Type
-from services_types import JWTTypes
+from services_types import EnpointAuthType
 from pydantic_schemas.pydantic_schemas_auth import *
 import jwt.exceptions as jwt_exceptions
 from functools import wraps
@@ -63,7 +63,7 @@ class JWTService:
 
     # Doesn't require error handle
     @classmethod
-    async def generate_save_token(cls, user_id: str, redis: RedisService, token_type: JWTTypes) -> RefreshTokenSchema | AccessTokenSchema | PasswordRecoveryToken:
+    async def generate_save_token(cls, user_id: str, redis: RedisService, token_type: EnpointAuthType) -> RefreshTokenSchema | AccessTokenSchema | PasswordRecoveryToken:
         """Choose token type you want to generate - acces/refresh"""
 
         encoded_jwt = cls.generate_token(user_id)

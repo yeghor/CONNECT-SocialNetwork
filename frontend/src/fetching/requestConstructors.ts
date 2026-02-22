@@ -15,10 +15,10 @@ export const requestHeaders = (): BaseHeaderType => {
     };
 };
 
-export const requestTokenHeaders = (JWT: string): TokenHeaderType => {
+export const requestTokenHeaders = (JWT: string | null): TokenHeaderType => {
     return {
         "Content-Type": "application/json",
-        "token": createBearerToken(JWT)
+        "token": JWT ? createBearerToken(JWT) : ""
     };
 };
 

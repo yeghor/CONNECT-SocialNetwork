@@ -17,7 +17,7 @@ import { fetchRecoverPassword, fetchRequestPasswordRecovery } from "../../fetchi
 import { Link } from "react-router-dom";
 import SecondFactor from "./secondFactor.tsx";
 import { validateFormString } from "../../helpers/validatorts.ts";
-import { safeAPICallPublic } from "../../fetching/fetchUtils.ts";
+import { safeAPICallRecovery } from "../../fetching/fetchUtils.ts";
 import { AuthTokensResponse, EmailToConfirmResponse, SuccessfulResponse } from "../../fetching/DTOs.ts";
 import { EmailInput, PasswordInput } from "../base/inputs.tsx";
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts";
@@ -40,7 +40,7 @@ export const PasswordRecoveryForm = () => {
             return
         }
 
-        const response = await safeAPICallPublic<EmailToConfirmResponse>(null, fetchRequestPasswordRecovery, navigate, setErrorMessage, email);
+        const response = await safeAPICallRecovery<EmailToConfirmResponse>(null, fetchRequestPasswordRecovery, navigate, setErrorMessage, email);
         
         if (response.success) {
             setShowSecondFactor(true);
@@ -105,7 +105,7 @@ export const NewPasswordCreationRecovery = () => {
     const submitHandler = async (event: FormEvent) => {
         event.preventDefault();
 
-        const response = await safeAPICallPublic<AuthTokensResponse>(locationState.passwordRecoveryToken, fetchRecoverPassword, navigate, setErrorMessage, newPassword, newPasswordConfirm);
+        const response = await safeAPICallRecovery<AuthTokensResponse>(locationState.passwordRecoveryToken, fetchRecoverPassword, navigate, setErrorMessage, newPassword, newPasswordConfirm);
 
         if (response.success) {
             setUpdateCookie(AccessTokenCookieKey, response.accessToken, null);

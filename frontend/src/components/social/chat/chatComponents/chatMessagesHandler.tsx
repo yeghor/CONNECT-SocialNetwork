@@ -14,7 +14,7 @@ import {
 } from "../../../../fetching/DTOs.ts";
 import { CookieTokenObject, getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
-import { safeAPICall } from "../../../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate } from "../../../../fetching/fetchUtils.ts";
 import { fetchChatMessagesBatch } from "../../../../fetching/fetchChatWS.ts";
 
 import VirtualizedList from "../../../butterySmoothScroll/virtualizedList.tsx";
@@ -35,7 +35,7 @@ const messagesFetcher = async (
     page: number
 ): Promise<ChatMessage[]> => {
 
-    const fetched = await safeAPICall<MessagesResponse>(
+    const fetched = await safeAPICallPrivate<MessagesResponse>(
         tokens,
         fetchChatMessagesBatch,
         navigate,

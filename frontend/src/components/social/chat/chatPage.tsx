@@ -6,7 +6,7 @@ import ActiveChat from "./active_chats/activeChat.tsx";
 
 import ChatsFlow from "./chatsFlow.tsx";
 import { ChatConnectData, ChatConnectResponse, CustomSimpleResponse, PendingChatConnect, PendingChatConnectResponse } from "../../../fetching/DTOs.ts";
-import { safeAPICall } from "../../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate } from "../../../fetching/fetchUtils.ts";
 import { fetchChatConnect, fetchIsChatPending, fetchPendingChatConnect } from "../../../fetching/fetchChatWS.ts";
 import MakeNewChat from "./active_chats/makeNewChat.tsx";
 import PendingChat from "./active_chats/pendingChat.tsx";
@@ -42,11 +42,11 @@ export const ChatPage = (props: ChatPageProps) => {
         const chatConnectFetcher = async () => {
             console.log("toggled rerender chats", reRenderChats)
             if (chatId && chatId.trim() !== "") {
-                const chatPendingFlagResponse = await safeAPICall<CustomSimpleResponse<boolean>>(tokens, fetchIsChatPending, navigate, undefined, chatId);
+                const chatPendingFlagResponse = await safeAPICallPrivate<CustomSimpleResponse<boolean>>(tokens, fetchIsChatPending, navigate, undefined, chatId);
                 console.log("pending chat flag response: ", chatPendingFlagResponse)
                 if (chatPendingFlagResponse.success) {
                     if (chatPendingFlagResponse.content === true) {
-                        const pendingChatresponse = await safeAPICall<PendingChatConnectResponse>(tokens, fetchPendingChatConnect, navigate, undefined, chatId);
+                        const pendingChatresponse = await safeAPICallPrivate<PendingChatConnectResponse>(tokens, fetchPendingChatConnect, navigate, undefined, chatId);
                         console.log("pending chat response: ", pendingChatresponse)
                         if (pendingChatresponse.success) {
                             setpendingChatData(pendingChatresponse.data);
@@ -55,7 +55,7 @@ export const ChatPage = (props: ChatPageProps) => {
                         }
                         setActiveChatData(null);
                     } else {
-                        const approvedChatResponse = await safeAPICall<ChatConnectResponse>(tokens, fetchChatConnect, navigate, undefined, chatId);
+                        const approvedChatResponse = await safeAPICallPrivate<ChatConnectResponse>(tokens, fetchChatConnect, navigate, undefined, chatId);
                         if (approvedChatResponse.success) {
                             setActiveChatData(approvedChatResponse.data);
                             setpendingChatData(null);

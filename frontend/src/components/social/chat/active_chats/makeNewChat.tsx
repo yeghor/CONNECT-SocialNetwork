@@ -3,7 +3,7 @@ import MessageBar from "../chatComponents/messageBar";
 import { fetchCreateDialogueChat, fetchDialoqueId  } from "../../../../fetching/fetchChatWS";
 import { resolvePath, useNavigate } from "react-router";
 import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler";
-import { safeAPICall } from "../../../../fetching/fetchUtils";
+import { safeAPICallPrivate } from "../../../../fetching/fetchUtils";
 import { CustomSimpleResponse, SuccessfulResponse, ChatMessage } from "../../../../fetching/DTOs/";
 import { specificChatURI } from "../../../../consts";
 import FlowMessage from "../chatComponents/message";
@@ -27,13 +27,13 @@ const MakeNewChat = (props: MakeNewChatProps) => {
             return;
         }
 
-        await safeAPICall<SuccessfulResponse>(tokens, fetchCreateDialogueChat, navigate, undefined, props.otherUserId, message);
+        await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchCreateDialogueChat, navigate, undefined, props.otherUserId, message);
         setChatCreated(true);
     }
     useEffect(() => {
         const asyncfetcher = async () => {
             setLoading(true)
-            const response = await safeAPICall<CustomSimpleResponse<string | null>>(tokens, fetchDialoqueId, navigate, undefined, props.otherUserId)
+            const response = await safeAPICallPrivate<CustomSimpleResponse<string | null>>(tokens, fetchDialoqueId, navigate, undefined, props.otherUserId)
             if (response.success && response.content) {
                 navigate(specificChatURI(response.content));
                 return;

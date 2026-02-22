@@ -8,7 +8,7 @@ import {useNavigate} from "react-router";
 import {getCookiesOrRedirect} from "../../../../helpers/cookies/cookiesHandler.ts";
 import {useParams} from "react-router-dom";
 import {fetchPostComments} from "../../../../fetching/fetchSocial.ts";
-import { safeAPICall } from "../../../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate } from "../../../../fetching/fetchUtils.ts";
 
 const PostComments = (props: CommentProps) => {
     let isMounted = true;
@@ -35,7 +35,7 @@ const PostComments = (props: CommentProps) => {
     useEffect(() => {
         const fetchWrapper = async () => {
             setShowLoadMore(false)
-            const response = await safeAPICall<PostCommentsResponse>(tokens, fetchPostComments, navigate, undefined, props.originalPostData.postId, page);
+            const response = await safeAPICallPrivate<PostCommentsResponse>(tokens, fetchPostComments, navigate, undefined, props.originalPostData.postId, page);
             if (response.success && response.data.length > 0) {
                 setPostComments((prevState) => {
                     console.log("setting", hasMore)

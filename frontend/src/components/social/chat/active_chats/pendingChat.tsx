@@ -4,7 +4,7 @@ import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler
 import { useNavigate } from "react-router";
 import { PendingChatConnect, SuccessfulResponse } from "../../../../fetching/DTOs/";
 import FlowMessage from "../chatComponents/message";
-import { safeAPICall } from "../../../../fetching/fetchUtils";
+import { safeAPICallPrivate } from "../../../../fetching/fetchUtils";
 import { fetchApproveChat, fetchDisapproveChat } from "../../../../fetching/fetchChatWS";
 import { chatsURI, specificUserProfileURI } from "../../../../consts";
 
@@ -21,7 +21,7 @@ const PendingChat = (props: PendingChatProps) => {
     const tokens = getCookiesOrRedirect(navigate);
 
     const approveChat = async (): Promise<void> => {
-        const response = await safeAPICall<SuccessfulResponse>(tokens, fetchApproveChat, navigate, undefined, props.chatId);
+        const response = await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchApproveChat, navigate, undefined, props.chatId);
 
         if (response.success) {
             props.setReRenderOnApprove((prevState) => { console.log("oldstate, ", prevState, "newstate", !prevState); return !prevState; });
@@ -29,7 +29,7 @@ const PendingChat = (props: PendingChatProps) => {
     };
 
     const disapproveChat = async (): Promise<void> => {
-        const response = await safeAPICall<SuccessfulResponse>(tokens, fetchDisapproveChat, navigate, undefined, props.chatId);
+        const response = await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchDisapproveChat, navigate, undefined, props.chatId);
         
         if (response.success) {
             navigate(`/${chatsURI}`);

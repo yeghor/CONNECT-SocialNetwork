@@ -3,7 +3,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { fetchSearchPosts, fetchSearchUsers } from "../../fetching/fetchSocial"
-import { safeAPICall } from "../../fetching/fetchUtils"
+import { safeAPICallPrivate } from "../../fetching/fetchUtils"
 import {
     FeedPost,
     FeedPostsResponse,
@@ -51,7 +51,7 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
 
     let fetchedResults: (FeedPost | ShortUserProfile)[] = [];
     for (let fetcherFunction of fetchFunctions) {
-        const response = await safeAPICall<FeedPostsResponse | ShortUserProfilesResponse>(tokens, fetcherFunction, navigate, undefined, query, page)
+        const response = await safeAPICallPrivate<FeedPostsResponse | ShortUserProfilesResponse>(tokens, fetcherFunction, navigate, undefined, query, page)
         if (response.success) {
             console.log("search response", response)
             fetchedResults = fetchedResults.concat(response.data);

@@ -84,10 +84,15 @@ class PostgresService:
         return result.scalar()
 
     @postgres_exception_handler(action="Get fresh feed")
-    async def get_fresh_posts(self, user: User, page: int, n: int, exclude_ids: List[str]) -> List[Post]:
+    async def get_fresh_posts(self, user: User | None, page: int, n: int, exclude_ids: List[str]) -> List[Post]:
+        if user:
+            filtering_stmt = (and_(Post.owner_id != user.user_id, Post.post_id.not_in(exclude_ids)))
+        else:
+            filtering_stmt = (Post.post_id.not_in(exclude_ids))
+        
         result = await self.__session.execute(
             select(Post)
-            .where(and_(Post.owner_id != user.user_id, Post.post_id.not_in(exclude_ids)))
+            .where(filtering_stmt)
             .order_by(Post.popularity_rate.desc(), Post.published.desc())
             .options(selectinload(Post.parent_post))
             .offset((page*n))

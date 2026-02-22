@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from fastapi.responses import Response
 
-from authorization.authorization_utils import authorize_access_token_depends
+from authorization.authorization_utils import authorize_private_endpoint
 from services.postgres_service.models import User
 from services.postgres_service.database_utils import *
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -42,7 +42,7 @@ async def get_image_post(
 async def upload_post_picture(
     post_id: str,
     file: UploadFile = File(...),
-    user_: User = Depends(authorize_access_token_depends),
+    user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     print("Received upload post picture")
@@ -55,7 +55,7 @@ async def upload_post_picture(
 @endpoint_exception_handler
 async def upload_user_avatar(
     file: UploadFile = File(...),
-    user_: User = Depends(authorize_access_token_depends),
+    user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends)
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)

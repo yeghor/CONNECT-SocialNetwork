@@ -11,6 +11,6 @@ ImageType = Literal["post", "user"]
 
 # ========
 
-JWTTypes = Literal["access", "refresh", "password-recovery"]
+EnpointAuthType = Literal["access", "optional-access", "refresh", "password-recovery"]
 
 # =======
