@@ -20,7 +20,7 @@ const SecondFactor = (props: SecondFactorProps) => {
     const [ allowSendNewCode, setAllowSendNewCode ] = useState(false)
 
     const location = useLocation();
-    const [ emailToConfirm, setEmailToConfirm ] = useState<string | null>(props.emailToConfirm ? props.emailToConfirm : location.state ? location.state.emailToConfirm : null)
+    const emailToConfirm = props.emailToConfirm ? props.emailToConfirm : location.state ? location.state.emailToConfirm : null;
 
     const handleFocusKeyPress = (event: ChangeEvent<HTMLInputElement>, elementIndex: number) => {
         const currElement = document.getElementById(String(elementIndex)) as HTMLInputElement;
@@ -84,6 +84,7 @@ const SecondFactor = (props: SecondFactorProps) => {
     }, []);
 
     const submitHandler = async () => {
+        console.log(emailToConfirm)
         if (!emailToConfirm) {
             return;
         }
@@ -103,11 +104,12 @@ const SecondFactor = (props: SecondFactorProps) => {
         }
 
         const joinedConfirmationCode = confirmationCodeArr.join("");
-
+        console.log(props._2FACase)
         try {
             let response
             switch (props._2FACase) {
                 case "email-confirmation":
+                    console.log("sending respesne")
                     response = await safeAPICallPublic<AuthTokensResponse>(null, fetchConfirmEmail2FA, navigate, setErrorMesage, joinedConfirmationCode, emailToConfirm);
 
                     if(!validateGETResponse(response, setErrorMesage, navigate)) {
@@ -115,8 +117,8 @@ const SecondFactor = (props: SecondFactorProps) => {
                     }
 
                     if(response.success) {
-                        setUpdateCookie(AccessTokenCookieKey, response.accessToken, response.expiresAtAccessToken);
-                        setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, response.expiresAtRefreshToken);
+                        setUpdateCookie(AccessTokenCookieKey, response.accessToken, null);
+                        setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, null);
                         navigate(homePageURI);
                     }
                     break
@@ -161,6 +163,10 @@ const SecondFactor = (props: SecondFactorProps) => {
                 <p className="text-slate-400 mt-2">Enter 6-digit code, sent to your email: {props.emailToConfirm}</p>
                 </header>
 
+                {errorMessage ? <div className="p-3 bg-red-500/20 border border-red-500/30 text-red-200 text-xs rounded-lg animate-pulse">
+                    {errorMessage}
+                </div> : <div className="p-3"></div> } {/* To prevent layout jumping */}
+
                 <div className="flex justify-between gap-2">
                     {[0, 1, 2, 3, 4, 5].map((idx) => (
                         <input
@@ -186,7 +192,7 @@ const SecondFactor = (props: SecondFactorProps) => {
                 </p>
     
             </div>
-            </div>
+        </div>
     );
 }
 

@@ -109,7 +109,7 @@ class MainServiceAuth(MainServiceBase):
     @web_exceptions_raiser
     async def confirm_email_2fa(self, credentials: _2FAConfirmationBody) -> RefreshAccessTokens:
         if not await self._RedisService.check_2fa(email=credentials.email, code=credentials.confirmation_code):
-            raise Unauthorized(detail=f"AuthService: User with email: {credentials.email} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
+            raise InvalidResourceProvided(detail=f"AuthService: User with email: {credentials.email} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
         
         await self._RedisService.deactivate_second_factor(email=credentials.email)
 
@@ -127,7 +127,7 @@ class MainServiceAuth(MainServiceBase):
         """Returns change password token"""
 
         if not await self._RedisService.check_2fa(email=credentials.email, code=credentials.confirmation_code):
-            raise Unauthorized(detail=f"AuthService: User with email: {credentials.email} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
+            raise InvalidResourceProvided(detail=f"AuthService: User with email: {credentials.email} tried to perform 2fa using wrong code.", client_safe_detail="Second factor authentication failed")
 
         await self._RedisService.deactivate_second_factor(email=credentials.email)
 

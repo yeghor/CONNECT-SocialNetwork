@@ -203,11 +203,11 @@ return (
                     <Link to={passwordRecoveryURI} className="text-sm text-gray-200 underline">Forgot your old password?</Link>
                 </div>
 
-                {warningMessage && (
+                {warningMessage ? (
                     <div className="p-3 bg-red-500/20 border border-red-500/30 text-red-200 text-xs rounded-lg animate-pulse">
                         {warningMessage}
                     </div>
-                )}
+                ) : <div className="p-3"></div> } {/* To prevent layout jumping */}
             </div>
 
             <div className="px-6 py-4 text-center bg-white/5 border-t border-white/10">
