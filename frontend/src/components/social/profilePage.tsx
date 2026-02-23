@@ -5,8 +5,8 @@ import FlowPost from "./post/flowPost.tsx";
 
 import { SuccessfulResponse, UserProfile, FeedPostsResponse, FeedPost } from "../../fetching/DTOs.ts";
 import { useNavigate, Link } from "react-router";
-import { CookieTokenObject, getCookiesOrRedirect } from "../../helpers/cookies/cookiesHandler.ts";
-import { safeAPICallPrivate } from "../../fetching/fetchUtils.ts";
+import { CookieTokenObject, getCookieTokens } from "../../helpers/cookies/cookiesHandler.ts";
+import { safeAPICallPrivate, safeAPICallPublic } from "../../fetching/fetchUtils.ts";
 import {
     fetchFollow,
     fetchUnfollow,
@@ -18,6 +18,7 @@ import estimatePostSize from "../../helpers/postSizeEstimator.ts";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { createInfiniteQueryOptionsUtil, infiniteQieryingFetchGuard } from "../butterySmoothScroll/scrollVirtualizationUtils.ts";
 import ManageProfileModal from "./profile/manageProfileModal.tsx";
+import { loginURI } from "../../consts.ts";
 
 interface ProfilePageProps {
     userData: UserProfile;
@@ -34,7 +35,7 @@ export type ProfilePostsSectionFlag = "posts" | "replies" | "likes";
 export type OrderPostsByFlag = "fresh" | "old" | "mostLiked" | "popularNow"
 
 const getProfileData = async (tokens: CookieTokenObject, navigate: NavigateFunction, userId: string, orderBy: OrderPostsByFlag, section: ProfilePostsSectionFlag, page: number): Promise<ProfilePosts> => {
-    const fetchedResults = await safeAPICallPrivate<FeedPostsResponse>(tokens, fetchUsersPosts, navigate, undefined, userId, section, orderBy, page);
+    const fetchedResults = await safeAPICallPublic<FeedPostsResponse>(tokens, fetchUsersPosts, navigate, undefined, userId, section, orderBy, page);
 
     if (fetchedResults.success) {
         return fetchedResults.data.map((post) => {
@@ -51,7 +52,8 @@ const getProfileData = async (tokens: CookieTokenObject, navigate: NavigateFunct
 
 export const ProfilePage = (props: ProfilePageProps) => {
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(undefined);
+    
 
     const [ profilePostsSection, setProfilePostsSection ] = useState<ProfilePostsSectionFlag>("posts");
     const [ orderBy, setOrderBy ] = useState<OrderPostsByFlag>("fresh");
@@ -95,7 +97,10 @@ export const ProfilePage = (props: ProfilePageProps) => {
     }
 
     const followAction = async () => {
-        if (props.me || followTimeout) {
+        if (!tokens.refresh) {
+            navigate(loginURI);
+            return;
+        } else if (props.me || followTimeout) {
             return;
         }
         

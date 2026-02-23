@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts";
+import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 
 import ActiveChat from "./active_chats/activeChat.tsx";
 
@@ -19,7 +19,7 @@ interface ChatPageProps {
 
 export const ChatPage = (props: ChatPageProps) => {
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(navigate);
 
     const [ activeChatData, setActiveChatData ] = useState<ChatConnectData | null>(null);
     const [ pendingChatData, setpendingChatData ] = useState<PendingChatConnect | null>(null);

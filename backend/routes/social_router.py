@@ -16,7 +16,7 @@ from os import getenv
 from exceptions.exceptions_handler import endpoint_exception_handler
 
 from .query_utils import page_validator, query_prompt_required
-from authorization import authorize_private_endpoint, authrorize_public_endpoint
+from authorization import authorize_private_endpoint, authorize_public_endpoint
 from services.postgres_service import get_session_depends, merge_model
 
 social = APIRouter()
@@ -29,81 +29,101 @@ QUERY_PARAM_MAX_L = int(getenv("QUERY_PARAM_MAX_L"))
 @endpoint_exception_handler
 async def get_feed(
     page: int = Depends(page_validator),
-    user_: User | None = Depends(authrorize_public_endpoint),
+    user_: User | None = Depends(authorize_public_endpoint),
     session: AsyncSession = Depends(get_session_depends),
-    ) -> List[PostLiteSchema]:
+) -> List[PostLiteSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         return await social.get_feed(user=user, page=page)
+
 
 @social.get("/posts/following/{page}")
 @endpoint_exception_handler
 async def get_followed_posts(
     page: int = Depends(page_validator),
     user_: User = Depends(authorize_private_endpoint),
-    session: AsyncSession = Depends(get_session_depends)
-    ) -> List[PostLiteSchema]:
+    session: AsyncSession = Depends(get_session_depends),
+) -> List[PostLiteSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         return await social.get_followed_posts(user=user, page=page)
+
 
 @social.get("/search/posts/{page}")
 @endpoint_exception_handler
 async def search_posts(
     page: int = Depends(page_validator),
     query: str = Depends(query_prompt_required),
-    user_: User | None = Depends(authrorize_public_endpoint),
-    session: AsyncSession = Depends(get_session_depends)
-    ) -> List[PostLiteSchema]:
+    user_: User | None = Depends(authorize_public_endpoint),
+    session: AsyncSession = Depends(get_session_depends),
+) -> List[PostLiteSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         return await social.search_posts(query=query, user=user, page=page)
+
 
 @social.get("/search/users/{page}")
 @endpoint_exception_handler
 async def search_users(
     query: str = Depends(query_prompt_required),
     page: str = Depends(page_validator),
-    user_: User | None = Depends(authrorize_public_endpoint),
-    session = Depends(get_session_depends)
-    ) -> List[UserLiteSchema]:
-    user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
-        return await social.search_users(query=query, request_user=user, page=page)
+    user_: User | None = Depends(authorize_public_endpoint),
+    session=Depends(get_session_depends),
+) -> List[UserLiteSchema]:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
+        return await social.search_users(query=query, page=page)
+
 
 @social.post("/posts")
 @endpoint_exception_handler
 async def make_post(
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
-    post_data: MakePostDataSchema = Body(...)
-    ) -> PostBaseShort:
+    post_data: MakePostDataSchema = Body(...),
+) -> PostBaseShort:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         return await social.make_post(data=post_data, user=user)
+
 
 @social.get("/posts/{post_id}")
 @endpoint_exception_handler
 async def load_post(
     post_id: str,
-    user_: User | None = Depends(authrorize_public_endpoint),
-    session: AsyncSession = Depends(get_session_depends)
+    user_: User | None = Depends(authorize_public_endpoint),
+    session: AsyncSession = Depends(get_session_depends),
 ) -> PostSchema:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         return await social.load_post(user=user, post_id=post_id)
+
 
 @social.get("/posts/{post_id}/comments/{page}")
 @endpoint_exception_handler
 async def load_comments(
     post_id: str,
     page: int = Depends(page_validator),
-    user_: User | None = Depends(authrorize_public_endpoint),
-    session: AsyncSession = Depends(get_session_depends)
-    ) -> List[PostBase]:
+    user_: User | None = Depends(authorize_public_endpoint),
+    session: AsyncSession = Depends(get_session_depends),
+) -> List[PostBase]:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
-        return await social.load_replies(user_id=user.user_id, post_id=post_id, page=page)
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
+        return await social.load_replies(user=user, post_id=post_id, page=page)
+
 
 @social.patch("/posts/{post_id}")
 @endpoint_exception_handler
@@ -114,8 +134,11 @@ async def change_post(
     post_data: PostDataSchemaBase = Body(...),
 ) -> PostSchema:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         return await social.change_post(post_data=post_data, user=user, post_id=post_id)
+
 
 @social.delete("/posts/{post_id}")
 @endpoint_exception_handler
@@ -125,31 +148,40 @@ async def delete_post(
     session: AsyncSession = Depends(get_session_depends),
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         print(post_id)
         await social.delete_post(post_id=post_id, user=user)
+
 
 @social.post("/posts/{post_id}/like")
 @endpoint_exception_handler
 async def like_post(
     post_id: str | None,
     user_: User = Depends(authorize_private_endpoint),
-    session: AsyncSession = Depends(get_session_depends)
+    session: AsyncSession = Depends(get_session_depends),
 ):
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         await social.like_post_action(post_id=post_id, user=user, like=True)
+
 
 @social.delete("/posts/{post_id}/like")
 @endpoint_exception_handler
 async def unlike_post(
     post_id: str,
     user_: User = Depends(authorize_private_endpoint),
-    session: AsyncSession = Depends(get_session_depends)
+    session: AsyncSession = Depends(get_session_depends),
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         await social.like_post_action(post_id=post_id, user=user, like=False)
+
 
 @social.post("/users/{follow_to_id}/follow")
 @endpoint_exception_handler
@@ -159,8 +191,13 @@ async def follow(
     session: AsyncSession = Depends(get_session_depends),
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
-        await social.friendship_action(user=user, other_user_id=follow_to_id, follow=True)
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
+        await social.friendship_action(
+            user=user, other_user_id=follow_to_id, follow=True
+        )
+
 
 @social.delete("/users/{unfollow_from_id}/follow")
 @endpoint_exception_handler
@@ -170,60 +207,84 @@ async def unfollow(
     session: AsyncSession = Depends(get_session_depends),
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
-        await social.friendship_action(user=user, other_user_id=unfollow_from_id, follow=False)
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
+        await social.friendship_action(
+            user=user, other_user_id=unfollow_from_id, follow=False
+        )
+
 
 @social.get("/users/my-profile")
 @endpoint_exception_handler
 async def get_my_profile(
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
-    ) -> UserSchema:
+) -> UserSchema:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         return await social.get_my_profile(user=user)
+
 
 @social.get("/users/{user_id}")
 @endpoint_exception_handler
 async def get_user_profile(
     user_id: str | None,
-    user_: User = Depends(authorize_private_endpoint),
+    user_: User = Depends(authorize_public_endpoint),
     session: AsyncSession = Depends(get_session_depends),
-    )-> UserSchema:
+) -> UserSchema:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         return await social.get_user_profile(user=user, other_user_id=user_id)
+
 
 @social.get("/users/{user_id}/posts/{page}")
 @endpoint_exception_handler
 async def get_users_posts(
     user_id: str,
     page: int = Depends(page_validator),
-    user_: User | None = Depends(authrorize_public_endpoint),
+    user_: User | None = Depends(authorize_public_endpoint),
     session: AsyncSession = Depends(get_session_depends),
     order: PostsOrderType = "fresh",
-    posts_type: PostsType = "posts"
+    posts_type: PostsType = "posts",
 ) -> List[PostLiteSchema]:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
-        return await social.get_user_posts(sender_id=user.user_id, user_id=user_id, page=page, order=order, posts_type=posts_type)
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
+        return await social.get_user_posts(
+            initiator_user=user,
+            user_id=user_id,
+            page=page,
+            order=order,
+            posts_type=posts_type,
+        )
+
 
 @social.get("/recent-activity")
 @endpoint_exception_handler
 async def get_recent_activity(
-        user_: User | None = Depends(authrorize_public_endpoint),
-        session: AsyncSession = Depends(get_session_depends)
-    ) -> List[RecentActivitySchema]:
+    user_: User | None = Depends(authorize_public_endpoint),
+    session: AsyncSession = Depends(get_session_depends),
+) -> List[RecentActivitySchema]:
     user = await merge_model(user_, User)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         return await social.get_recent_activity(user)
-    
+
+
 @social.get("/friends")
 async def get_my_friends(
     user_: User = Depends(authorize_private_endpoint),
-    session: AsyncSession = Depends(get_session_depends)
+    session: AsyncSession = Depends(get_session_depends),
 ) -> List[UserLiteSchema]:
     user = await merge_model(session, user_)
-    async with await MainServiceContextManager[MainServiceSocial].create(postgres_session=session, MainServiceType=MainServiceSocial) as social:
+    async with await MainServiceContextManager[MainServiceSocial].create(
+        postgres_session=session, MainServiceType=MainServiceSocial
+    ) as social:
         return await social.get_my_friends(user)
-    

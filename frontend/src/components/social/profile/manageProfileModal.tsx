@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import { _2faURI, AccessTokenCookieKey, allowedImageMimeTypes, fileMimeTypeNotAllowed, invalidUsernameMessage, noAvatarImageMessage, passwordNotSecureEnoughMessage, passwordRecoveryURI, RefreshTokenCookieKey, tooManyAvatarFilesMessage } from "../../../consts";
 import { useNavigate, Link } from "react-router";
-import { getCookiesOrRedirect, setUpdateCookie } from "../../../helpers/cookies/cookiesHandler";
+import { getCookieTokens, setUpdateCookie } from "../../../helpers/cookies/cookiesHandler";
 import { safeAPICallPrivate } from "../../../fetching/fetchUtils";
 import { AuthTokensResponse, EmailToConfirmResponse, SuccessfulResponse } from "../../../fetching/DTOs";
 import { fetchChangePassword, fetchChangeUsername } from "../../../fetching/fetchAuth";
@@ -10,7 +10,7 @@ import { fetchUploadAvatar } from "../../../fetching/fetchMedia";
 
 const ManageProfileModal = (props: { avatarURL: string | null, setShowManageProfileModal: React.Dispatch<React.SetStateAction<boolean>> }) => {
     const navigate = useNavigate()
-    const tokens = getCookiesOrRedirect(navigate)
+    const tokens = getCookieTokens(navigate)
 
     const modalRef = useRef<HTMLDivElement>(null);
 

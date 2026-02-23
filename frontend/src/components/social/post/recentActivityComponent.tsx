@@ -8,44 +8,24 @@ import {
     RecentActivityResponse, RecentActivityType
 } from "../../../fetching/DTOs.ts";
 import {validateGETResponse} from "../../../helpers/responseHandlers/getResponseHandlers.ts";
-import { checkUnauthorizedResponse, retryUnauthorizedResponse } from "../../../fetching/fetchUtils.ts";
+import { checkUnauthorizedResponse, retryUnauthorizedResponse, safeAPICallPublic } from "../../../fetching/fetchUtils.ts";
 import {internalServerErrorURI, specificPostURI} from "../../../consts.ts";
-import {getCookiesOrRedirect} from "../../../helpers/cookies/cookiesHandler.ts";
+import {getCookieTokens} from "../../../helpers/cookies/cookiesHandler.ts";
 import {useNavigate} from "react-router";
 
 const RecentActivityComponent = () => {
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(undefined);
 
     const [ recentActivity, setRecentActivity ] = useState<RecentActivityArray>();
 
 
     useEffect(() => {
-        const effectFetcher = async () => {
-            // TS Guard
-            if(!tokens.access || !tokens.refresh) { return; }
-            try {
-                let response = await fetchRecentActivity(tokens.access);
+    const effectFetcher = async () => {
+            let response = await  safeAPICallPublic<RecentActivityResponse>(tokens, fetchRecentActivity, navigate, undefined );
 
-                if (!validateGETResponse(response, undefined, navigate)) {
-                    return;
-                }
-
-                if (checkUnauthorizedResponse(response)) {
-                    const retried = await retryUnauthorizedResponse<RecentActivityResponse>(fetchRecentActivity, tokens.refresh, navigate, undefined);
-                    if (!retried) {
-                        return;
-                    }
-                    response = retried;
-                }
-
-                if (response.success) {
-                    setRecentActivity(response.data);
-                }
-
-            } catch (err) {
-                console.error(err);
-                navigate(internalServerErrorURI);
+            if (response.success) {
+                setRecentActivity(response.data);
             }
         }
         // effectFetcher(); Currently backend recent activity feature is not working

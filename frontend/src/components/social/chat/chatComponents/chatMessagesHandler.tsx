@@ -12,7 +12,7 @@ import {
     mapWebsocketReceivedMessage,
     MessagesResponse,
 } from "../../../../fetching/DTOs.ts";
-import { CookieTokenObject, getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler.ts";
+import { CookieTokenObject, getCookieTokens } from "../../../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
 import { safeAPICallPrivate } from "../../../../fetching/fetchUtils.ts";
 import { fetchChatMessagesBatch } from "../../../../fetching/fetchChatWS.ts";
@@ -60,7 +60,7 @@ interface ChatMessageListProps {
 
 const ChatMessagesHandler = (props: ChatMessageListProps) => {
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(navigate);
 
     // There is no change, that user isn't on participants data, so passing as ChatParticipantData type
     const meAsParticipantData: ChatParticipant = props.participantsData.find((participant) => participant.me) as ChatParticipant

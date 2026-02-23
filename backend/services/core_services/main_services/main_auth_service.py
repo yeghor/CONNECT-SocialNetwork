@@ -44,7 +44,7 @@ class MainServiceAuth(MainServiceBase):
     async def authorize_token_and_optionally_return_user(self, token: str, token_type: EnpointAuthType, return_user: bool = True) -> User | None:
         """Can be used in fastAPI Depends() \n\n Prepares and authorizes token"""
         
-        if token_type == "optional-access" and token == "":
+        if token_type == "optional-access" and not token:
             return None
 
         prepared_token = self._JWT.prepare_token(jwt_token=token)

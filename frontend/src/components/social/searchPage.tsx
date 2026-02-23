@@ -3,7 +3,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { fetchSearchPosts, fetchSearchUsers } from "../../fetching/fetchSocial"
-import { safeAPICallPrivate } from "../../fetching/fetchUtils"
+import { safeAPICallPrivate, safeAPICallPublic } from "../../fetching/fetchUtils"
 import {
     FeedPost,
     FeedPostsResponse,
@@ -16,7 +16,7 @@ import FlowPost from "./post/flowPost.tsx"
 import FlowUser from "./post/flowUser.tsx"
 import estimatePostSize from "../../helpers/postSizeEstimator.ts";
 
-import { CookieTokenObject, getCookiesOrRedirect } from "../../helpers/cookies/cookiesHandler.ts";
+import { CookieTokenObject, getCookieTokens } from "../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
 import { createInfiniteQueryOptionsUtil } from "../butterySmoothScroll/scrollVirtualizationUtils.ts";
 
@@ -51,7 +51,7 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
 
     let fetchedResults: (FeedPost | ShortUserProfile)[] = [];
     for (let fetcherFunction of fetchFunctions) {
-        const response = await safeAPICallPrivate<FeedPostsResponse | ShortUserProfilesResponse>(tokens, fetcherFunction, navigate, undefined, query, page)
+        const response = await safeAPICallPublic<FeedPostsResponse | ShortUserProfilesResponse>(tokens, fetcherFunction, navigate, undefined, query, page)
         if (response.success) {
             console.log("search response", response)
             fetchedResults = fetchedResults.concat(response.data);
@@ -85,7 +85,7 @@ const getSearchResults = async (tokens: CookieTokenObject, navigate: NavigateFun
 
 const SearchPage = () => {
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(undefined);
 
     const [ filter, setFilter ] = useState<SearchFilter>("both");
 

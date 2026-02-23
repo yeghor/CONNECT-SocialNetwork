@@ -3,21 +3,21 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import PostComments from "./post/postComments/postComments.tsx"
 
-import { getCookiesOrRedirect} from "../../helpers/cookies/cookiesHandler.ts";
+import { getCookieTokens } from "../../helpers/cookies/cookiesHandler.ts";
 import { LoadPostResponseInterface, LoadPostResponse, SuccessfulResponse } from "../../fetching/DTOs.ts";
 import { fetchLikePost, fetchLoadPost, fetchUnlikePost } from "../../fetching/fetchSocial.ts";
 
-import { safeAPICallPrivate } from "../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate, safeAPICallPublic } from "../../fetching/fetchUtils.ts";
 import MakePost from "./post/makePost.tsx";
-import { maxRequestsQueueLength, specificPostURI, tooMuchActivityMessage } from "../../consts.ts";
+import { loginURI, maxRequestsQueueLength, specificPostURI, tooMuchActivityMessage } from "../../consts.ts";
 import OwnerComponent from "./post/owner.tsx";
 
 const PostPage = () => {
     const navigate = useNavigate();
+    const tokens = getCookieTokens(undefined);
+
     const location = useLocation();
     const { postId } = useParams();
-
-    const tokens = getCookiesOrRedirect(navigate);
 
     const [ liked, toggleLikes ] = useState(false);
     const [ likeTimeout, setLikeTimeout ] = useState(false);
@@ -25,6 +25,10 @@ const PostPage = () => {
     const [ postData, setPostData ] = useState<LoadPostResponseInterface | undefined>(undefined);
 
     const likeAction = async () => {
+        if (!tokens.refresh) {
+            navigate(loginURI);
+            return;
+        }
         if (postData && !likeTimeout) {
             setLikeTimeout(true);
             if (liked) {
@@ -44,10 +48,7 @@ const PostPage = () => {
 
     useEffect(() => {
         const postFetcher = async (): Promise<void> => {
-            // If statement to prevent TS errors. Cause if no tokens - getCookiesOrRedirect will redirect user to auth page
-            if(!(tokens.access && tokens.refresh && postId)) { return; }
-
-                const response = await safeAPICallPrivate<LoadPostResponse>(
+                const response = await safeAPICallPublic<LoadPostResponse>(
                     tokens,
                     fetchLoadPost,
                     navigate,

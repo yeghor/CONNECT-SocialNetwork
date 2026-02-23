@@ -31,6 +31,8 @@ const LoginForm = () => {
     const formHandler = async (event: React.FormEvent) => {
         event.preventDefault();
 
+        setErrorMessage("");
+
         try {
             const response = await fetchLogin(username, password);
 

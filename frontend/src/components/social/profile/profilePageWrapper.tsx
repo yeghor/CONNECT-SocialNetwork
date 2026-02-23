@@ -2,15 +2,16 @@ import React, { useState, useEffect } from "react"
 
 import { UserProfileResponse, UserProfile } from "../../../fetching/DTOs.ts";
 import { MyProfilePage, ProfilePage } from ".././profilePage.tsx";
-import { safeAPICallPrivate } from "../../../fetching/fetchUtils.ts";
-import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts";
+import { safeAPICallPrivate, safeAPICallPublic } from "../../../fetching/fetchUtils.ts";
+import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 import { useNavigate } from "react-router";
 import { fetchMyProfile, fetchSpecificUserProfile } from "../../../fetching/fetchSocial.ts";
 import { useParams } from "react-router-dom";
+import { loginURI } from "../../../consts.ts";
 
 const ProfilePageWrapper = () => {
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(undefined);
     const { userId } = useParams();
 
     const [ userProfileData, setUserProfileData ] = useState<UserProfile | null>(null);
@@ -18,6 +19,11 @@ const ProfilePageWrapper = () => {
 
     useEffect(() => {
         const profileFetcher = async () => {
+            if (!tokens.refresh) {
+                navigate(loginURI);
+                return;
+            }
+
             setLoading(true);
             
             let fetchFunc: CallableFunction = fetchSpecificUserProfile;
@@ -26,7 +32,7 @@ const ProfilePageWrapper = () => {
                 fetchFunc = fetchMyProfile;
             }
 
-            const profileData = await safeAPICallPrivate<UserProfileResponse>(tokens, fetchFunc, navigate, undefined, userId ? userId : null)
+            const profileData = await safeAPICallPublic<UserProfileResponse>(tokens, fetchFunc, navigate, undefined, userId ? userId : null)
             if (profileData.success) {
                 setUserProfileData(profileData.data);
             }

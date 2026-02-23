@@ -166,9 +166,14 @@ class RedisService:
         if not jwt_token or not token_type:
             raise ValueError("No jwt_token or token_type provided")
 
+        prefix = None
+
         if token_type == "access": prefix = self.__jwt_acces_prefix
         elif token_type == "refresh": prefix = self.__jwt_refresh_prefix
         elif token_type == "password-recovery": prefix = self.__jwt_password_recovery_prefix
+
+        if not prefix:
+            return False
 
         potential_token = await self.__client.get(f"{prefix}{jwt_token}")
 

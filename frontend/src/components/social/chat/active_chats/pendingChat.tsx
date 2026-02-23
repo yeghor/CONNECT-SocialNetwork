@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { Link } from "react-router";
-import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler";
+import { getCookieTokens } from "../../../../helpers/cookies/cookiesHandler";
 import { useNavigate } from "react-router";
 import { PendingChatConnect, SuccessfulResponse } from "../../../../fetching/DTOs/";
 import FlowMessage from "../chatComponents/message";
@@ -18,7 +18,7 @@ interface PendingChatProps {
 
 const PendingChat = (props: PendingChatProps) => {
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(navigate);
 
     const approveChat = async (): Promise<void> => {
         const response = await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchApproveChat, navigate, undefined, props.chatId);

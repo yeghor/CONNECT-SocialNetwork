@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
-import { CookieTokenObject, getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts";
+import { CookieTokenObject, getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
     createInfiniteQueryOptionsUtil,
@@ -28,7 +28,7 @@ const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunctio
 
 const ChatsFlow = (props: { showGroupCreationModelToggler: React.Dispatch<React.SetStateAction<boolean>> }) => {
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(navigate);
 
     const [ showApprovedChats, setShowApprovedChats ] = useState(true);
     const [ notApprovedChatsAmount, setNotApprovedChatsAmount ] = useState(0);

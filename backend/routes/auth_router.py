@@ -53,7 +53,7 @@ async def confirm_2fa_password_recovery(
 # ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
 @auth.post("/auth/new/2fa")
 @endpoint_exception_handler
-async def issue_new_second_factor(
+async def issue_new_2fa(
     email: EmailProvided,
     session: AsyncSession = Depends(get_session_depends)
 ) -> EmailProvided:

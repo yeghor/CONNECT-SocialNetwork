@@ -157,7 +157,7 @@ export const fetchUnlikePost = async (accessJWT: string, postId: string): APIRes
 
 // User Interactions
 
-export const fetchSearchUsers = async (accessJWT: string, query: string, page: number): APIResponse<ShortUserProfilesResponse> => {
+export const fetchSearchUsers = async (accessJWT: string | null, query: string, page: number): APIResponse<ShortUserProfilesResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT)
@@ -166,7 +166,7 @@ export const fetchSearchUsers = async (accessJWT: string, query: string, page: n
     return await fetchHelper<ShortUserProfilesResponse>(searchUsersURL(query, page), requestInit, shortUserProfilesMapper);
 }
 
-export const fetchSpecificUserProfile = async (accessJWT: string, userId: string): APIResponse<UserProfileResponse> => {
+export const fetchSpecificUserProfile = async (accessJWT: string | null, userId: string): APIResponse<UserProfileResponse> => {
     const requestInit: RequestInit = {
         method: "GET",
         headers: requestTokenHeaders(accessJWT)

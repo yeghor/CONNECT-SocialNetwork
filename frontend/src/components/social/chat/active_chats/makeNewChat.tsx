@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import MessageBar from "../chatComponents/messageBar";
 import { fetchCreateDialogueChat, fetchDialoqueId  } from "../../../../fetching/fetchChatWS";
 import { resolvePath, useNavigate } from "react-router";
-import { getCookiesOrRedirect } from "../../../../helpers/cookies/cookiesHandler";
+import { getCookieTokens } from "../../../../helpers/cookies/cookiesHandler";
 import { safeAPICallPrivate } from "../../../../fetching/fetchUtils";
 import { CustomSimpleResponse, SuccessfulResponse, ChatMessage } from "../../../../fetching/DTOs/";
 import { specificChatURI } from "../../../../consts";
@@ -15,7 +15,7 @@ interface MakeNewChatProps {
 
 const MakeNewChat = (props: MakeNewChatProps) => {
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(navigate);
 
     const [ loading, setLoading ] = useState(true);
     const [ chatCreated, setChatCreated ] = useState(false);

@@ -3,10 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import { safeAPICallPrivate } from "../../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate, safeAPICallPublic } from "../../../fetching/fetchUtils.ts";
 
 import {
-    getCookiesOrRedirect,
+    getCookieTokens,
     CookieTokenObject
 } from "../../../helpers/cookies/cookiesHandler.ts";
 
@@ -44,7 +44,7 @@ const createPostFlowResponse = (data: FeedPost[]): PostsFlowComponents => {
 const postFetcher = async (tokens: CookieTokenObject, feed: boolean, navigate: NavigateFunction, page: number): Promise<PostsFlowComponents> => {
     const fetchFunction = feed ? fetchFeedPosts : fetchFollowedPosts;
 
-    const fetchedPosts = await safeAPICallPrivate<FeedPostsResponse>(tokens, fetchFunction, navigate, undefined, page)
+    const fetchedPosts = await safeAPICallPublic<FeedPostsResponse>(tokens, fetchFunction, navigate, undefined, page)
 
     if (fetchedPosts.success) {
         return createPostFlowResponse(fetchedPosts.data);
@@ -56,8 +56,8 @@ const postFetcher = async (tokens: CookieTokenObject, feed: boolean, navigate: N
 
 const PostsFlow = () => {
     const navigate = useNavigate();
-
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(undefined);
+    
     const [ feed, setFeed ] = useState(true);
 
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(postFetcher, [tokens, feed, navigate], ["posts", feed]));

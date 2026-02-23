@@ -1,10 +1,10 @@
 import React, {ChangeEvent, useState} from "react";
 
 import { fetchUploadPostPictures } from "../../../fetching/fetchMedia.ts";
-import {allowedImageMimeTypes, maxPostImagesUpload, fileIsTooBigMessage, specificPostURI} from "../../../consts.ts";
+import {allowedImageMimeTypes, maxPostImagesUpload, fileIsTooBigMessage, specificPostURI, loginURI} from "../../../consts.ts";
 import {safeAPICallPrivate} from "../../../fetching/fetchUtils.ts";
 import {LoadPostResponse, PostBaseResponse, SuccessfulResponse} from "../../../fetching/DTOs.ts";
-import {getCookiesOrRedirect} from "../../../helpers/cookies/cookiesHandler.ts";
+import {getCookieTokens} from "../../../helpers/cookies/cookiesHandler.ts";
 import {useNavigate} from "react-router";
 import {fetchMakePost} from "../../../fetching/fetchSocial.ts";
 import {validateMakePost} from "../../../helpers/validatorts.ts";
@@ -20,7 +20,8 @@ const MakePost = (props: MakePostProps) => {
     }
 
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    // Passing undefined as navigate, because some components that use public endpoints depend on this component
+    const tokens = getCookieTokens(undefined);
 
     const [ title, setTitle ] = useState("");
     const [ text, setText ] = useState("");
@@ -29,7 +30,8 @@ const MakePost = (props: MakePostProps) => {
 
 
     const createPost = async () => {
-        if (!tokens.access || !tokens.refresh) {
+        if (!tokens.refresh) {
+            navigate(loginURI);
             return;
         }
 

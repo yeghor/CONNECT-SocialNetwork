@@ -1,14 +1,14 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, { useState, useEffect } from "react";
 
 import PostComment from "./postComment.tsx";
 
 import commentFetchHelper, { CommentProps } from "./commentFetchHelper.ts";
 import { PostCommentsResponse, ShortPostInterface } from "../../../../fetching/DTOs.ts";
-import {useNavigate} from "react-router";
-import {getCookiesOrRedirect} from "../../../../helpers/cookies/cookiesHandler.ts";
-import {useParams} from "react-router-dom";
-import {fetchPostComments} from "../../../../fetching/fetchSocial.ts";
-import { safeAPICallPrivate } from "../../../../fetching/fetchUtils.ts";
+import { useNavigate } from "react-router";
+import { getCookieTokens } from "../../../../helpers/cookies/cookiesHandler.ts";
+import { useParams } from "react-router-dom";
+import { fetchPostComments } from "../../../../fetching/fetchSocial.ts";
+import { safeAPICallPrivate, safeAPICallPublic } from "../../../../fetching/fetchUtils.ts";
 
 const PostComments = (props: CommentProps) => {
     let isMounted = true;
@@ -18,11 +18,8 @@ const PostComments = (props: CommentProps) => {
     //     props.originalPostData.postId = postId
     // }
 
-    console.log(props)
-
     const navigate = useNavigate();
-
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(undefined);
 
     const [ postComments, setPostComments ] = useState<ShortPostInterface[]>([]);
 
@@ -35,7 +32,7 @@ const PostComments = (props: CommentProps) => {
     useEffect(() => {
         const fetchWrapper = async () => {
             setShowLoadMore(false)
-            const response = await safeAPICallPrivate<PostCommentsResponse>(tokens, fetchPostComments, navigate, undefined, props.originalPostData.postId, page);
+            const response = await safeAPICallPublic<PostCommentsResponse>(tokens, fetchPostComments, navigate, undefined, props.originalPostData.postId, page);
             if (response.success && response.data.length > 0) {
                 setPostComments((prevState) => {
                     console.log("setting", hasMore)

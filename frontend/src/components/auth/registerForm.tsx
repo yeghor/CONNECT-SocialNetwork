@@ -30,6 +30,8 @@ const RegisterForm = () => {
     const formHandler = async (event: React.FormEvent): Promise<void> => {
         event.preventDefault();
 
+        setErrorMessage("");
+
         if(!validateFormString(username, "username")) {
             setErrorMessage(invalidUsernameMessage);
             return;

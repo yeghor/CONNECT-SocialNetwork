@@ -40,11 +40,11 @@ export const getCookies = (): CookieTokenObject => {
     };
 };
 
-
-export const getCookiesOrRedirect = (navigate: NavigateFunction): CookieTokenObject => {
+/* Skip navigate args to not get redirected to auth page when there is no tokens */
+export const getCookieTokens = (navigate: NavigateFunction | undefined): CookieTokenObject => {
     const possibleCookies = getCookies();
 
-    if(!possibleCookies.access || !possibleCookies.refresh) {
+    if(navigate && (!possibleCookies.access || !possibleCookies.refresh)) {
         navigate(loginURI);
     }
 

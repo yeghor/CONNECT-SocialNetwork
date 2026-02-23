@@ -3,7 +3,7 @@ import { Chat } from "../../../fetching/DTOs.ts";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { specificChatURI } from "../../../consts.ts";
 import { safeAPICallPrivate } from "../../../fetching/fetchUtils.ts";
-import { getCookiesOrRedirect } from "../../../helpers/cookies/cookiesHandler.ts";
+import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 import { fetchLeaveChat as fetchLeaveGroup } from "../../../fetching/fetchChatWS.ts";
 
 const FlowChatNavigationWrapper = (props: {
@@ -23,7 +23,7 @@ const FlowChatNavigationWrapper = (props: {
 
 const FlowChat = (chatData: Chat) => {
     const navigate = useNavigate();
-    const tokens = getCookiesOrRedirect(navigate);
+    const tokens = getCookieTokens(navigate);
     
     const [ isMenuOpen, setIsMenuOpen ] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
