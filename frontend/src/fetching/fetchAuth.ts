@@ -98,7 +98,8 @@ export const fetchConfirmEmail2FA = async (confirmationCode: string, email: stri
         headers: requestHeaders(),
         body: JSON.stringify(confirm2FABody(confirmationCode, email))
     };
-
+    console.log(requestInit)
+    console.log(confirmationCode, email)
     return await fetchHelper<AuthTokensResponse>(confirmEmail2FA_URL, requestInit, authTokensResponseMapper);
 };
 

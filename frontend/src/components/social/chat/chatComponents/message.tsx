@@ -6,6 +6,7 @@ export interface ChatMessageProps {
     ownerData: ChatParticipant;
     isSending: boolean;
     isGroup: boolean;
+    showChangeDelete: boolean
     changeMessageCallable: ((message: string, messageId: string) => void);
     deleteMessageCallable: ((messageId: string) => void);
 }
@@ -15,6 +16,10 @@ const FlowMessage = (props: ChatMessageProps) => {
     const [ currentMessage, setCurrentMessage ] = useState(props.messageData.text ?? "");
 
     const messageActionHandler = () => {
+        if (!props.showChangeDelete) {
+            return;
+        }
+
         switch (messageAction) {
             case "change":
                 props.changeMessageCallable(currentMessage, props.messageData.messageId)
@@ -51,7 +56,7 @@ const FlowMessage = (props: ChatMessageProps) => {
                 }`}
             >
                 <div className="text-[12px] mb-1 font-bold tracking-widest text-gray-100">
-                    {props.isGroup && !props.messageData.me ? props.messageData.owner.username : null }
+                    {props.isGroup && !props.messageData.me ? props.messageData.owner?.username : null }
                 </div>
 
                 <div className={`text-[12px] mb-1 font-bold tracking-widest ${isMe ? "text-gray-200" : "text-gray-400"}`}>
@@ -74,7 +79,7 @@ const FlowMessage = (props: ChatMessageProps) => {
                     </p>
                 )}
 
-                {!messageAction && !isSending && isMe && (
+                {!messageAction && !isSending && isMe && props.showChangeDelete && (
                     <div className="flex gap-3 mt-2 pt-2 border-t border-white/10 text-[11px] font-medium">
                         <span 
                             onClick={() => setMessageAction("change")} 

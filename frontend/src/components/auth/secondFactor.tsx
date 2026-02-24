@@ -4,7 +4,7 @@ import { fetchConfirmEmail2FA, fetchConfirmPasswordRecovery2FA, fetchIssueNewSec
 import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers";
 import { AccessTokenCookieKey, createPasswordRecoveryLocationState, homeURI as homePageURI, internalServerErrorURI, newPasswordRecoveryURI, RefreshTokenCookieKey } from "../../consts";
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler";
-import { safeAPICallPrivate, safeAPICallPublic, safeAPICallRecovery } from "../../fetching/fetchUtils";
+import { safeAPICallNoToken, safeAPICallPrivate, safeAPICallPublic, safeAPICallRecovery } from "../../fetching/fetchUtils";
 import { AuthTokensResponse, PasswordRecoveryTokenResponse } from "../../fetching/DTOs";
 
 // emailToConfirm coulb be null, in case user got redirected to this page
@@ -104,13 +104,13 @@ const SecondFactor = (props: SecondFactorProps) => {
         }
 
         const joinedConfirmationCode = confirmationCodeArr.join("");
-        console.log(props._2FACase)
+
         try {
             let response
             switch (props._2FACase) {
                 case "email-confirmation":
                     console.log("sending respesne")
-                    response = await safeAPICallPublic<AuthTokensResponse>(null, fetchConfirmEmail2FA, navigate, setErrorMesage, joinedConfirmationCode, emailToConfirm);
+                    response = await safeAPICallNoToken<AuthTokensResponse>(fetchConfirmEmail2FA, navigate, setErrorMesage, joinedConfirmationCode, emailToConfirm);
 
                     if(!validateGETResponse(response, setErrorMesage, navigate)) {
                         return;
@@ -123,7 +123,7 @@ const SecondFactor = (props: SecondFactorProps) => {
                     }
                     break
                 case "password-recovery":
-                    response = await safeAPICallPublic<PasswordRecoveryTokenResponse>(null, fetchConfirmPasswordRecovery2FA, navigate, setErrorMesage, joinedConfirmationCode, emailToConfirm);
+                    response = await safeAPICallNoToken<PasswordRecoveryTokenResponse>(fetchConfirmPasswordRecovery2FA, navigate, setErrorMesage, joinedConfirmationCode, emailToConfirm);
 
                     if(!validateGETResponse(response, setErrorMesage, navigate)) {
                         return;

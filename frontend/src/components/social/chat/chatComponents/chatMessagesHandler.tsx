@@ -231,10 +231,11 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             // Passing temporary fake user data as a fallback, in case we didn't find owner data
             // When chatId changes, participantsData updates with a delay
             // Passing undefined to ownerData to flowMessage would crush the component. 
-            ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner.userId) ?? { userId: fallbackUserID, username: "Loading", avatarURL: null, me: false }) as ChatParticipant,
+            ownerData: msg.tempId ? meAsParticipantData : (props.participantsData.find((participant) => participant.userId == msg.owner?.userId) ?? { userId: fallbackUserID, username: "Loading", avatarURL: null, me: false }) as ChatParticipant,
             // Only pending messags have tempId value
             isSending: msg.tempId !== null,
             isGroup: props.isGroup,
+            showChangeDelete: true,
             changeMessageCallable: (message, messageId) => changeMessageOptimistically(message, messageId, false),
             deleteMessageCallable: (messageId) => deleteMessageOptimistically(messageId, false)
         }

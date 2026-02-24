@@ -72,7 +72,8 @@ async def create_dialogue_chat(
     data: CreateDialogueRoomBody = Body(...),  
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends)
-) -> None:
+) -> str:
+    """Returns created chat id"""
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
         return await chat_service.create_dialogue_chat(data=data, user=user)
@@ -84,6 +85,7 @@ async def create_group_chat(
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends)
 ) -> str:
+    """Returns created group id"""
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
         return await chat_service.create_group_chat(data=data, user=user)
@@ -152,6 +154,17 @@ async def leave_from_group(
     user = await merge_model(postgres_session=session,model_obj=user_)
     async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
         return await chat_service.leave_from_group(user=user, room_id=chat_id) 
+
+@chat.get("/chat/not-approved/initiated-by-me/{chat_id}")
+@endpoint_exception_handler
+async def chat_initiated_by_me(
+    chat_id: str,
+    user_: User = Depends(authorize_private_endpoint),
+    session: AsyncSession = Depends(get_session_depends)
+) -> bool:
+    user = await merge_model(postgres_session=session,model_obj=user_)
+    async with await MainServiceContextManager[MainChatService].create(MainServiceType=MainChatService, postgres_session=session) as chat_service:
+        return await chat_service.initiated_by_me(user=user, room_id=chat_id) 
 
 async def wsconnect(token: str, websocket: WebSocket) -> ChatJWTPayload:
     connection_data = JWTService.extract_chat_jwt_payload(jwt_token=token)

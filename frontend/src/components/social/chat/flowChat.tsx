@@ -10,15 +10,15 @@ const FlowChatNavigationWrapper = (props: {
     linkURI: string | undefined;
     children: React.ReactNode;
 }) => {
-    return (
-        <div>
-            {props.linkURI ? (
-                <Link to={props.linkURI}>{props.children}</Link>
-            ) : (
-                <div>{props.children}</div>
-            )}
-        </div>
-    );
+    if (props.linkURI) {
+        return (
+            <Link to={props.linkURI}>{props.children}</Link>
+        )
+    } else {
+        return (
+        <div>{props.children}</div>
+        )
+    }
 };
 
 const FlowChat = (chatData: Chat) => {
@@ -29,9 +29,11 @@ const FlowChat = (chatData: Chat) => {
     const menuRef = useRef<HTMLDivElement>(null);
 
     let chatLink: string | undefined = specificChatURI(chatData.chatId);
+    const pathParams = useParams();
     if (chatData.chatId) {
-        chatLink = chatData.chatId === chatData.chatId ? undefined : chatLink;
+        chatLink = chatData.chatId === pathParams.chatId ? undefined : chatLink;
     }
+    console.log(chatLink)
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {

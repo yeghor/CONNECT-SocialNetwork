@@ -277,7 +277,7 @@ class MainChatService(MainServiceBase):
         return MessageSchemaShortActionIncluded(action="change", message_id=message.message_id, text=message_data.message)
 
     @web_exceptions_raiser
-    async def create_dialogue_chat(self, data: CreateDialogueRoomBody, user: User) -> None:
+    async def create_dialogue_chat(self, data: CreateDialogueRoomBody, user: User) -> str:
         other_user = await self._PostgresService.get_user_by_id(data.other_participant_id)
 
         if other_user.user_id == user.user_id:
@@ -312,7 +312,7 @@ class MainChatService(MainServiceBase):
 
         await self._PostgresService.insert_models_and_flush(chat_room, message)
 
-
+        return chat_room_id
 
     @web_exceptions_raiser
     async def create_group_chat(self, data: CreateGroupRoomBody, user: User) -> str:
@@ -380,3 +380,8 @@ class MainChatService(MainServiceBase):
             raise InvalidAction(detail=f"ChatService: User: {user.user_id} tried to leave from dialogue chat.", client_safe_detail=f"You can't leave from dialogue chat")
 
         chat_room.participants.remove(user)
+
+    @web_exceptions_raiser
+    async def initiated_by_me(self, user: User, room_id: str) -> bool:
+        chat_room = await self._get_and_authorize_chat_room(room_id=room_id, user_id=user.user_id, return_chat_room=True)
+        return chat_room.creator_id == user.user_id

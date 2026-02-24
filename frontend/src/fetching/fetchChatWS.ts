@@ -15,7 +15,8 @@ import {
     pendingChatConnectURL,
     isChatPendingURL,
     groupChatURL,
-    leaveFromChatURL as leaveFromGroupURL
+    leaveFromChatURL as leaveFromGroupURL,
+    chatInitiatedByMeURL
 } from "./urls.ts"
 
 import {
@@ -195,14 +196,14 @@ export const fetchChats = async (accessJWT: string, page: number): APIResponse<C
     return await fetchHelper<ChatsResponse>(chatsURL(page), requestInit, chatResponseMapper);
 };
 
-export const fetchCreateDialogueChat = async (accessJWT: string, participantId: string, message: string): APIResponse<SuccessfulResponse> => {
+export const fetchCreateDialogueChat = async (accessJWT: string, participantId: string, message: string): APIResponse<CustomSimpleResponse<string>> => {
     const requestInit: RequestInit = {
         method: "POST",
         headers: requestTokenHeaders(accessJWT),
         body: JSON.stringify(createDialogueBody(message, participantId))
     };
 
-    return await fetchHelper(dialogueChatURL, requestInit, successfulResponseMapper);
+    return await fetchHelper(dialogueChatURL, requestInit, customSimpleResponseMapper<string>);
 };
 
 export const fetchCreateGroupChat = async (accessJWT: string, participantsIds: string[]): APIResponse<CustomSimpleResponse<string>> => {
@@ -240,4 +241,13 @@ export const fetchLeaveChat = async (accessJWT: string, chatId: string): APIResp
     };
 
     return await fetchHelper<SuccessfulResponse>(leaveFromGroupURL(chatId), requestInit, successfulResponseMapper);
+};
+
+export const fetchChatInitiatedByMe = async (accessJWT: string, chatId: string): APIResponse<CustomSimpleResponse<boolean>> => {
+    const requestInit: RequestInit = {
+        method: "GET",
+        headers: requestTokenHeaders(accessJWT),
+    };
+
+    return await fetchHelper<CustomSimpleResponse<boolean>>(chatInitiatedByMeURL(chatId), requestInit, customSimpleResponseMapper<boolean>); 
 };

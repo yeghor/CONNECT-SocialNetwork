@@ -331,9 +331,7 @@ class MainServiceSocial(MainServiceBase):
                         likes=post.parent_post.likes_count,
                         views=post.parent_post.views_count,
                         replies=post.parent_post.replies_count,
-                        is_my_post=(
-                            user.user_id == post.parent_post.owner_id if user else None
-                        ),
+                        is_my_post=user.user_id == post.parent_post.owner_id if user else False,
                         pictures_urls=await self._ImageStorage.get_post_image_urls(
                             images_names=[
                                 post_image.image_name

@@ -4,7 +4,7 @@ import { fetchCreateDialogueChat, fetchDialoqueId  } from "../../../../fetching/
 import { resolvePath, useNavigate } from "react-router";
 import { getCookieTokens } from "../../../../helpers/cookies/cookiesHandler";
 import { safeAPICallPrivate } from "../../../../fetching/fetchUtils";
-import { CustomSimpleResponse, SuccessfulResponse, ChatMessage } from "../../../../fetching/DTOs/";
+import { CustomSimpleResponse, SuccessfulResponse, ChatMessage } from "../../../../fetching/DTOs";
 import { specificChatURI } from "../../../../consts";
 import FlowMessage from "../chatComponents/message";
 import LoadingIndicator from "../../../base/centeredLoadingIndicator";
@@ -27,8 +27,12 @@ const MakeNewChat = (props: MakeNewChatProps) => {
             return;
         }
 
-        await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchCreateDialogueChat, navigate, undefined, props.otherUserId, message);
-        setChatCreated(true);
+        const response = await safeAPICallPrivate<CustomSimpleResponse<string>>(tokens, fetchCreateDialogueChat, navigate, undefined, props.otherUserId, message);
+        if (response.success) {
+            setChatCreated(true);
+            navigate(specificChatURI(response.content));            
+        }
+
     }
     useEffect(() => {
         const asyncfetcher = async () => {
@@ -50,9 +54,9 @@ const MakeNewChat = (props: MakeNewChatProps) => {
     return (
         <div>
             <div className="h-[calc(100vh-350px)] flex justify-center items-center text-2xl text-gray-200">
-                { firstMessage ?
-                <div>
-                    { /* <FlowMessage /> */ } 
+                { chatCreated ?
+                <div className="flex flex-col text-center gap-4">
+                    <p className="">Waiting for approval.</p>
                 </div>
                 :
                 <div className="flex flex-col text-center gap-4">
@@ -61,7 +65,7 @@ const MakeNewChat = (props: MakeNewChatProps) => {
                 </div>
                 }
             </div>
-            { chatCreated ? <p className="text-gray-200 text-center bg-white/10 px-4 py-2 border-white/30">Waiting for Approval</p> : <MessageBar sendMessageLocally={sendMessageWrapper} /> }
+            { chatCreated ? <p className="text-gray-200 text-center bg-white/10 px-4 py-2 border-white/30 rounded-xl">Waiting for Approval</p> : <MessageBar sendMessageLocally={sendMessageWrapper} /> }
         </div>
     );
 };

@@ -120,8 +120,11 @@ export const chatMessages = (chatId: string, page: number | string) => {
 };
 
 export const dialogueChatURL = `${BASEURL}${chatConstructor}/dialogue`;
-
 export const groupChatURL = `${BASEURL}${chatConstructor}/group`;
+
+export const chatInitiatedByMeURL = (chatId: string) => {
+    return `${BASEURL}${chatConstructor}/not-approved/initiated-by-me/${chatId}`;
+} 
 
 export const chatsURL = (page: number | string) => {
     return `${BASEURL}${chatConstructor}/approved/${page}`;
