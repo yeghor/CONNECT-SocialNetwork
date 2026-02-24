@@ -9,14 +9,16 @@ interface MessageBarProps {
 const MessageBar = (props: MessageBarProps) => {
     const [ message, setMessage ] = useState("");
     const [ sendTimeout, setSendTimeout ] = useState(false);
-    const [ errorMessage, setErrorMessage ] = useState<string | null>(null);
+    const [ errorMessage, setWarningMessage ] = useState<string | null>(null);
 
     const sendMessage = (e: FormEvent): void => {
         e.preventDefault()
         if (sendTimeout) {
             return;
-        } else if (message.length > chatMessageMaxLength || message.length === 0) {
-            setErrorMessage(chatMessageIsTooBigMessage);
+        } else if (message.length > chatMessageMaxLength) {
+            setWarningMessage(chatMessageIsTooBigMessage);
+            return;
+        } else if (message.length === 0) {
             return;
         }
         setSendTimeout(true);
@@ -27,7 +29,7 @@ const MessageBar = (props: MessageBarProps) => {
 
     const setMessageWrapper = (message: string): void => {
         setMessage(message);
-        setErrorMessage(null);
+        setWarningMessage(null);
     } 
 
     return(
@@ -51,7 +53,7 @@ const MessageBar = (props: MessageBarProps) => {
 
                 <button 
                     type="submit"
-                    className="bg-white/10 hover:bg-white/20 text-white text-[11px] uppercase font-bold tracking-wider px-5 py-2.5 rounded-xl border border-white/10 transition-all active:scale-95"
+                    className={`${message.length > 0 ? "bg-white/10 hover:bg-white/20 text-white" : "bg-gray-300/10 text-gray-400"} text-[11px] uppercase font-bold tracking-wider px-5 py-2.5 rounded-xl border border-white/10 transition-all active:scale-95`}
                 >
                     Send
                 </button>
