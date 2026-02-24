@@ -12,7 +12,7 @@ from exceptions.exceptions_handler import (
     endpoint_exception_handler,
     ws_endpoint_exception_handler,
 )
-from services_types import EnpointAuthType
+from services_types import EndpointAuthType
 
 load_dotenv()
 
@@ -21,7 +21,7 @@ PASSWORD_MAX_L = int(getenv("PASSWORD_MAX_L"))
 
 
 async def _authorize_token(
-    token: str, token_type: EnpointAuthType, return_user: bool
+    token: str, token_type: EndpointAuthType, return_user: bool
 ) -> User | None:
     # To prevent circular import
     from services.core_services import MainServiceContextManager
@@ -52,6 +52,7 @@ async def authorize_public_endpoint(
         ..., title="Optional authorization access token", examples="Bearer {token}"
     ),
 ) -> User:
+    print(token)
     """Use with fastAPI Depends() in public endpoints"""
     return await _authorize_token(
         token=token, token_type="optional-access", return_user=True

@@ -11,6 +11,6 @@ ImageType = Literal["post", "user"]
 
 # ========
 
-EnpointAuthType = Literal["access", "optional-access", "refresh", "password-recovery"]
+EndpointAuthType = Literal["access", "optional-access", "refresh", "password-recovery"]
 
 # =======

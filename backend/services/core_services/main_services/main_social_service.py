@@ -800,13 +800,10 @@ class MainServiceSocial(MainServiceBase):
             if registered_view:
                 post.views_count += 1
 
-        liked = (
-            await self._PostgresService.get_actions(
-                user.user_id, post_id=post_id, action_type=ActionType.like
-            )
-            if user
-            else False
-        )
+        # Converting to boolean to check like action existence
+        liked = bool(await self._PostgresService.get_actions(
+            user.user_id, post_id=post_id, action_type=ActionType.like
+        )) if user else []
 
         filenames = [filename.image_name for filename in post.images]
         images_temp_urls = await self._ImageStorage.get_post_image_urls(
