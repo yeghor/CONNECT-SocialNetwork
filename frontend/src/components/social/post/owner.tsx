@@ -1,6 +1,6 @@
 import React, {} from "react"
 
-import { User } from "../../../fetching/DTOs.ts"
+import { User } from "../../../fetching/DTOs.ts";
 
 interface ownerProps {
     ownerData: User | null

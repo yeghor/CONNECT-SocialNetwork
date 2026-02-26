@@ -7,7 +7,7 @@ import FlowMessage from "../chatComponents/message";
 import { safeAPICallPrivate } from "../../../../fetching/fetchUtils";
 import { fetchApproveChat, fetchChatInitiatedByMe, fetchDisapproveChat } from "../../../../fetching/fetchChatWS";
 import { chatsURI, specificUserProfileURI } from "../../../../consts";
-import { CustomSimpleResponse } from "../../../../fetching/DTOs";
+import { CustomSimpleResponse } from "../../../../fetching/DTOs"
 
 interface PendingChatProps {
     chatId: string;

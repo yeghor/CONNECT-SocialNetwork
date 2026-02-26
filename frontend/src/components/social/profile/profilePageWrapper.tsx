@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react"
 
 import { UserProfileResponse, UserProfile } from "../../../fetching/DTOs.ts";
 import { MyProfilePage, ProfilePage } from ".././profilePage.tsx";
-import { safeAPICallPrivate, safeAPICallPublic } from "../../../fetching/fetchUtils.ts";
+import { safeAPICallPrivate, safeAPICallPublic } from "../../../fetching/fetchUtils";
 import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 import { useNavigate } from "react-router";
-import { fetchMyProfile, fetchSpecificUserProfile } from "../../../fetching/fetchSocial.ts";
+import { fetchMyProfile, fetchSpecificUserProfile } from "../../../fetching/fetchSocial";
 import { useParams } from "react-router-dom";
 import { loginURI } from "../../../consts.ts";
 
@@ -42,7 +42,10 @@ const ProfilePageWrapper = () => {
     }, [])
 
     if (loading || !userProfileData) {
-        return null
+        // Setting h to screen size just to prevent footer placed on the top of page while page is loading
+        return (
+            <div className="h-screen"></div>
+        )
     }
 
     if (!userProfileData.me) {

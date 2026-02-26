@@ -1,4 +1,4 @@
-import {OrderPostsByFlag, ProfilePostsSectionFlag} from "../components/social/profilePage.tsx";
+import { OrderPostsByFlag, ProfilePostsSectionFlag } from "../components/social/profilePage";
 
 const MAINHTTPPROTOCOL = "http://"
 const WSPROTOCOL = "ws://"

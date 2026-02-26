@@ -1,13 +1,13 @@
 import React, {ChangeEvent, useState} from "react";
 
-import { fetchUploadPostPictures } from "../../../fetching/fetchMedia.ts";
-import {allowedImageMimeTypes, maxPostImagesUpload, fileIsTooBigMessage, specificPostURI, loginURI} from "../../../consts.ts";
-import {safeAPICallPrivate} from "../../../fetching/fetchUtils.ts";
-import {LoadPostResponse, PostBaseResponse, SuccessfulResponse} from "../../../fetching/DTOs.ts";
-import {getCookieTokens} from "../../../helpers/cookies/cookiesHandler.ts";
-import {useNavigate} from "react-router";
-import {fetchMakePost} from "../../../fetching/fetchSocial.ts";
-import {validateMakePost} from "../../../helpers/validatorts.ts";
+import { fetchUploadPostPictures } from "../../../fetching/fetchMedia";
+import { allowedImageMimeTypes, maxPostImagesUpload, fileIsTooBigMessage, specificPostURI, loginURI} from "../../../consts.ts";
+import { safeAPICallPrivate } from "../../../fetching/fetchUtils";
+import { LoadPostResponse, PostBaseResponse, SuccessfulResponse } from "../../../fetching/DTOs.ts";
+import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
+import { useNavigate } from "react-router";
+import { fetchMakePost } from "../../../fetching/fetchSocial";
+import { validateMakePost } from "../../../helpers/validatorts.ts";
 
 type MakePostProps = {
     postType:  "post" | "reply"

@@ -53,6 +53,20 @@ def web_exceptions_raiser(func):
             return await func(*args, **kwargs)
 
         # TODO: Remove ValueError crutch
+        except (PostgresError, ChromaDBError, RedisError, MediaError, JWTError, BcryptError, WrongDataFound, ValidationError) as e:
+            logging_level = 40
+            if isinstance(e, MediaError):
+                logging_level = 50 # Be aware of cases when postgres database and s3 or local data NOT synced
+
+            InternalExcToRaise = InternalServerErrorExc(
+                client_safe_detail=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE,
+                dev_log_detail=str(e),
+                exc_type=e
+            )
+            InternalExcToRaise.logging_level = logging_level
+            
+            raise InternalExcToRaise
+        
         except (InvalidAction, InvalidFileMimeType, LimitReached, InvalidResourceProvided, ValidationErrorExc, ValueError) as e:
             if isinstance(e, ValidationError) or isinstance(e, ValueError):
                 raise BadRequestExc(client_safe_detail="Invalid request data received", dev_log_detail=str(e), exc_type=e)
@@ -67,20 +81,6 @@ def web_exceptions_raiser(func):
         
         except Collision as e:
             raise ConflictExc(client_safe_detail=e.client_safe_detail, dev_log_detail=str(e), exc_type=e) from e
-        
-        except (PostgresError, ChromaDBError, RedisError, MediaError, JWTError, BcryptError, WrongDataFound, ValidationError) as e:
-            logging_level = 40
-            if isinstance(e, MediaError):
-                logging_level = 50 # Be aware of cases when postgres database and s3 or local data NOT synced
-
-            InternalExcToRaise = InternalServerErrorExc(
-                client_safe_detail=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE,
-                dev_log_detail=str(e),
-                exc_type=e
-            )
-            InternalExcToRaise.logging_level = logging_level
-            
-            raise InternalExcToRaise
         
         # We must handle these exceptions becasue: in this project, decorated with `web_exception_raiser` functions call functions that also decorated with the decorator.
         # By handling exceptions that being raised in this decorator too we can keep correct exception chaining.

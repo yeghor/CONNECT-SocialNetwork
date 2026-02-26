@@ -827,7 +827,7 @@ class MainServiceSocial(MainServiceBase):
                 else None
             ),
             likes=post.likes_count,
-            is_liked=liked,
+            is_liked=True if liked else False,
             views=post.views_count,
             replies=post.replies_count,
             is_my_post=user.user_id == post.owner_id if user else False,

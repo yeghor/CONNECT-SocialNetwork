@@ -14,8 +14,8 @@ import {
 } from "../../../../fetching/DTOs.ts";
 import { CookieTokenObject, getCookieTokens } from "../../../../helpers/cookies/cookiesHandler.ts";
 import { NavigateFunction } from "react-router-dom";
-import { safeAPICallPrivate } from "../../../../fetching/fetchUtils.ts";
-import { fetchChatMessagesBatch } from "../../../../fetching/fetchChatWS.ts";
+import { safeAPICallPrivate } from "../../../../fetching/fetchUtils";
+import { fetchChatMessagesBatch } from "../../../../fetching/fetchChatWS";
 
 import VirtualizedList from "../../../butterySmoothScroll/virtualizedList.tsx";
 import {

@@ -95,7 +95,7 @@ async def change_password(
 @endpoint_exception_handler
 async def logout(
     session: AsyncSession = Depends(get_session_depends),
-    tokens:RefreshAccesTokensProvided = Body(...)
+    tokens: RefreshAccesTokensProvided = Body(...)
 ) -> None:
     async with await MainServiceContextManager[MainServiceAuth].create(MainServiceType=MainServiceAuth, postgres_session=session) as auth:
         return await auth.logout_on_this_device(tokens=tokens)

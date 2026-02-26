@@ -17,17 +17,16 @@ import { fetchRecoverPassword, fetchRequestPasswordRecovery } from "../../fetchi
 import { Link } from "react-router-dom";
 import SecondFactor from "./secondFactor.tsx";
 import { validateFormString } from "../../helpers/validatorts.ts";
-import { safeAPICallRecovery } from "../../fetching/fetchUtils.ts";
+import { safeAPICallRecovery, safeAPICallNoToken } from "../../fetching/fetchUtils.ts";
 import { AuthTokensResponse, EmailToConfirmResponse, SuccessfulResponse } from "../../fetching/DTOs.ts";
 import { EmailInput, PasswordInput } from "../base/inputs.tsx";
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts";
 
-export const PasswordRecoveryForm = () => {
+export const PasswordRecovery2FAForm = () => {
     const navigate = useNavigate();
 
     const [ warningMessage, setWarningMessage ] = useState("");
 
-    const [ errorMessage, setErrorMessage ] = useState<string | null>(null);
     const [ email, setEmail ] = useState("");
 
     const [ showSecondFactor, setShowSecondFactor ] = useState(false);
@@ -40,7 +39,7 @@ export const PasswordRecoveryForm = () => {
             return
         }
 
-        const response = await safeAPICallRecovery<EmailToConfirmResponse>(null, fetchRequestPasswordRecovery, navigate, setErrorMessage, email);
+        const response = await safeAPICallNoToken<EmailToConfirmResponse>(fetchRequestPasswordRecovery, navigate, setWarningMessage, email);
         
         if (response.success) {
             setShowSecondFactor(true);
@@ -60,9 +59,9 @@ export const PasswordRecoveryForm = () => {
                             Enter your email address and new password.
                         </p>
 
-                        {errorMessage && (
+                        {warningMessage && (
                             <div className="mb-4 px-4 py-2 rounded text-red-300 border border-red-300 text-sm">
-                                {errorMessage}
+                                {warningMessage}
                             </div>
                         )}
                         
