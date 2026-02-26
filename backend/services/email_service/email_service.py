@@ -1,9 +1,10 @@
 import os
 import aiosmtplib
 from dotenv import load_dotenv
-import random   
+import random
 
 load_dotenv()
+
 
 class EmailService:
     __instance = None
@@ -16,7 +17,9 @@ class EmailService:
 
     async def __connect_and_authorize_client(self) -> None:
         await self.__SMTP.connect()
-        await self.__SMTP.auth_login(self.__app_email_address, self.__email_app_password)
+        await self.__SMTP.auth_login(
+            self.__app_email_address, self.__email_app_password
+        )
         self.__authorized = True
 
     def __init__(self):
@@ -37,12 +40,14 @@ class EmailService:
     def generate_confirmation_code(self) -> str:
         return "".join([str(random.randint(0, 9)) for _ in range(6)])
 
-    async def send_second_factor_email(self, recipient_email: str, recipient_username: str, confirmation_code: str) -> None:
+    async def send_second_factor_email(
+        self, recipient_email: str, recipient_username: str, confirmation_code: str
+    ) -> None:
         if not self.__authorized:
             await self.__connect_and_authorize_client()
-        
+
         await self.__SMTP.sendmail(
             self.__app_email_address,
             recipient_email,
-            f"Hi {recipient_username.title()}! \n Your email confirmation code is: {confirmation_code}"
+            f"Hi {recipient_username.title()}! \n Your email confirmation code is: {confirmation_code}",
         )

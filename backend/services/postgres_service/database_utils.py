@@ -12,6 +12,7 @@ MAX_FOLLOWED_POSTS_TO_SHOW = int(getenv("MAX_FOLLOWED_POSTS_TO_SHOW"))
 
 ModelT = TypeVar("Models", bound=Base)
 
+
 async def get_session_depends():
     """
     Automatically closes session.\n
@@ -23,7 +24,8 @@ async def get_session_depends():
         async with SessionLocal() as conn:
             yield conn
     finally:
-        await conn.aclose() # await engine.dispose()
+        await conn.aclose()  # await engine.dispose()
+
 
 def postgres_exception_handler(action: str = "Unknown action with the database"):
     def decorator(func):
@@ -33,14 +35,22 @@ def postgres_exception_handler(action: str = "Unknown action with the database")
                 return await func(*args, **kwargs)
             except Exception as e:
                 if isinstance(e, MultipleResultsFound):
-                    raise MultipleDataFound(f"Postgres: Multiple results found in - {func.__name__}. Action - {action}. Exception - {e}") from e
+                    raise MultipleDataFound(
+                        f"Postgres: Multiple results found in - {func.__name__}. Action - {action}. Exception - {e}"
+                    ) from e
                 elif isinstance(e, SQLAlchemyError):
                     raise PostgresError(
-                        f"Postgres: Postgres error occured in : {func.__name__}. Action: {action}. Exception - {e}") from e
+                        f"Postgres: Postgres error occured in : {func.__name__}. Action: {action}. Exception - {e}"
+                    ) from e
                 else:
-                    raise PostgresError(f"Postgres: Uknown error occured in : {func.__name__}. Action: {action}. Exception - {e}") from e
+                    raise PostgresError(
+                        f"Postgres: Uknown error occured in : {func.__name__}. Action: {action}. Exception - {e}"
+                    ) from e
+
         return wrapper
+
     return decorator
+
 
 async def get_session() -> AsyncSession:
     try:
@@ -50,8 +60,11 @@ async def get_session() -> AsyncSession:
     finally:
         await engine.dispose()
 
+
 # TODO: Fix generics
-async def merge_model(postgres_session: AsyncSession, model_obj: ModelT | None) -> ModelT | None:
+async def merge_model(
+    postgres_session: AsyncSession, model_obj: ModelT | None
+) -> ModelT | None:
     """
     Caution! When merging old model.
     It can clear all loaded relationsghips via `options(selectinload(...))`
@@ -59,5 +72,5 @@ async def merge_model(postgres_session: AsyncSession, model_obj: ModelT | None) 
     """
     if model_obj:
         return await postgres_session.merge(model_obj)
-    else: 
+    else:
         return None

@@ -3,7 +3,12 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncEngine
 from routes import auth_router, social_router, media_router
 from services.postgres_service import Base
-from services.postgres_service import get_engine, initialize_models, drop_all, get_session
+from services.postgres_service import (
+    get_engine,
+    initialize_models,
+    drop_all,
+    get_session,
+)
 from services.core_services.main_services import MainServiceSocial
 from services.core_services import MainServiceContextManager
 from websockets_chat.chat import chat
@@ -26,7 +31,7 @@ logging.basicConfig(
     level=logging.WARN,
     filename="app_logs.log",
     filemode="a",
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
 load_dotenv()
@@ -34,30 +39,31 @@ POST_RATING_EXPIRATION = int(getenv("POST_RATING_EXPIRATION_SECONDS"))
 
 engine = None
 
+
 async def drop_redis() -> None:
-    client = async_redis.Redis(
-        host="localhost",
-        port=int(getenv("REDIS_PORT")),
-        db=0
-    )
+    client = async_redis.Redis(host="localhost", port=int(getenv("REDIS_PORT")), db=0)
     await client.flushall()
     await client.aclose()
+
 
 # To be deleted
 async def sync_chroma_postgres_data() -> None:
     session = await get_session()
     try:
-        async with await MainServiceContextManager[MainServiceSocial].create(MainServiceType=MainServiceSocial, postgres_session=session, mode="prod") as social_service:
+        async with await MainServiceContextManager[MainServiceSocial].create(
+            MainServiceType=MainServiceSocial, postgres_session=session, mode="prod"
+        ) as social_service:
             await social_service.sync_postgres_chroma_DEV_METHOD()
     except EmptyPostsError:
         pass
     finally:
         await session.aclose()
 
+
 # On app startup - https://fastapi.tiangolo.com/advanced/events/#lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # await drop_all(engine=engine, Base=Base)    
+    # await drop_all(engine=engine, Base=Base)
     global engine
     engine = await get_engine()
 
@@ -66,11 +72,7 @@ async def lifespan(app: FastAPI):
     # await drop_redis()
 
     try:
-        scheduler.add_job(
-            update_post_rates,
-            "interval",
-            seconds=POST_RATING_EXPIRATION
-        )
+        scheduler.add_job(update_post_rates, "interval", seconds=POST_RATING_EXPIRATION)
         scheduler.start()
     except Exception as e:
         scheduler.shutdown()
@@ -84,7 +86,7 @@ origins = [
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",
-    "http://0.0.0.0:3000"
+    "http://0.0.0.0:3000",
 ]
 
 app.add_middleware(

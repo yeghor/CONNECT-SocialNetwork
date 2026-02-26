@@ -5,18 +5,21 @@ from pydantic import BaseModel, Field, model_validator, field_validator
 from typing import List, Literal, Any
 from typing_extensions import Self
 from datetime import datetime
-from pydantic_schemas.pydantic_schemas_social import UserShortSchema, ChatUserShortSchemaAvatarURL
+from pydantic_schemas.pydantic_schemas_social import (
+    UserShortSchema,
+    ChatUserShortSchemaAvatarURL,
+)
 from exceptions.custom_exceptions import WSInvalidData, WSMessageIsTooBig
 from services.postgres_service import User
 from dotenv import load_dotenv
 from os import getenv
 
 
-
 ActionType = Literal["send", "change", "delete"]
 
 load_dotenv()
 MESSAGE_MAX_LEN = int(getenv("MESSAGE_MAX_LEN", "5000"))
+
 
 class ChatSchema(BaseModel):
     chat_id: str
@@ -26,19 +29,24 @@ class ChatSchema(BaseModel):
     chat_image_url: str | None = Field(default=None)
     last_message: MessageSchema | None = Field(default=None)
 
+
 class ActionIncluded(BaseModel):
     action: Literal["send", "change", "delete"]
+
 
 class MessageSchemaShort(BaseModel):
     message_id: str
     text: str | None = Field(default=None)
 
+
 class MessageSchema(MessageSchemaShort):
     """Use in main http endpoints"""
+
     text: str
     sent: datetime
     owner: UserShortSchema
     me: bool
+
 
 class MessageSchemaActionIncluded(MessageSchema, ActionIncluded):
     """Use in websockets 'send' action"""
@@ -47,12 +55,14 @@ class MessageSchemaActionIncluded(MessageSchema, ActionIncluded):
     me: None = Field(default=None)
     temp_id: str | None = Field(default=None)
 
+
 class MessageSchemaShortActionIncluded(MessageSchemaShort, ActionIncluded):
     """Use in websockets 'change' and 'delete' actions"""
 
     # Messages that circulate in Websockets can't have `me` attribute
     me: None = Field(default=None)
     temp_id: str | None = Field(default=None)
+
 
 class ChatConnect(BaseModel):
     token: str
@@ -62,19 +72,24 @@ class ChatConnect(BaseModel):
     # Include the user, the user schema with boolean field me setted to True
     participants_data: List[ChatUserShortSchemaAvatarURL]
 
+
 class NotApprovedChatData(BaseModel):
     message: MessageSchema
     initiator_user: ChatUserShortSchemaAvatarURL
     initiated_by_me: bool
 
+
 class CreateChatBodyBase(BaseModel):
     message: str
+
 
 class CreateDialogueRoomBody(CreateChatBodyBase):
     other_participant_id: str
 
+
 class CreateGroupRoomBody(BaseModel):
     other_participants_ids: List[str]
+
 
 class ExpectedWSData(BaseModel):
     action: ActionType
@@ -89,23 +104,30 @@ class ExpectedWSData(BaseModel):
     def validate_fields(self) -> Self:
         if self.action == "change":
             if not self.message or not self.message_id:
-                raise WSInvalidData(f"Pydantic ExpectedWSData: The Schema received invalid data. Action - {self.action}. Message or it's id missing.")
+                raise WSInvalidData(
+                    f"Pydantic ExpectedWSData: The Schema received invalid data. Action - {self.action}. Message or it's id missing."
+                )
         elif self.action == "delete":
             if not self.message_id:
-                raise WSInvalidData("Pydantic ExpectedWSData: The schema received invalid data.")
+                raise WSInvalidData(
+                    "Pydantic ExpectedWSData: The schema received invalid data."
+                )
         else:
             if not self.message:
-                raise WSInvalidData(f"Pydantic ExpectedWSData: The Schema received invalid data. Action - {self.action}. Message missing.")
+                raise WSInvalidData(
+                    f"Pydantic ExpectedWSData: The Schema received invalid data. Action - {self.action}. Message missing."
+                )
 
         if self.message:
             if len(self.message) > MESSAGE_MAX_LEN:
                 raise WSMessageIsTooBig(
                     detail=f"Pydantic ExpectedWSData: The schema received message that is too big. Length: {len(self.message)}.",
-                    client_safe_detail=f"Message length can't be greater than 5000 chars"
+                    client_safe_detail=f"Message length can't be greater than 5000 chars",
                 )
 
         return self
-    
+
+
 class ChatJWTPayload(BaseModel):
     room_id: str
     user_id: str

@@ -1,5 +1,15 @@
 import pytest
-from services.postgres_service import PostgresService, create_engine, create_async_engine, Base, User, Post, PostActions, create_sessionmaker, ActionType
+from services.postgres_service import (
+    PostgresService,
+    create_engine,
+    create_async_engine,
+    Base,
+    User,
+    Post,
+    PostActions,
+    create_sessionmaker,
+    ActionType,
+)
 
 from post_popularity_rate_task.popularity_rate import POST_ACTIONS
 from services.core_services import MainServiceContextManager
@@ -12,7 +22,7 @@ from pydantic_schemas.pydantic_schemas_social import PostDataSchemaID
 
 
 @pytest.mark.asyncio
-async def test_postgres_service():    
+async def test_postgres_service():
     engine = await create_engine(mode="test")
     session = create_sessionmaker(engine=engine)()
 
@@ -105,7 +115,7 @@ async def test_postgres_service():
     #     assert post3 not in all_posts
 
     #     assert await ps.get_entry_by_id(id_=uid3, ModelType=User) == user3
-        
+
     #     users = await ps.get_users_by_username(prompt="user")
     #     assert user1 in users
     #     assert user2 in users
@@ -137,7 +147,6 @@ async def test_postgres_service():
     #     assert post3 in followed_posts
     #     assert post1 not in followed_posts
 
-
     #     updated_post = await ps.update_post_fields(post_data=PostDataSchemaID(post_id=post3.post_id, title="New title", text="New wonderful text"), return_updated_post=True)
     #     assert updated_post.title == "New title"
     #     assert updated_post.text == "New wonderful text"
@@ -152,7 +161,7 @@ async def test_postgres_service():
 
     #     p2 = await ps.get_entry_by_id(id_=post2.post_id, ModelType=Post)
     #     assert p2.actions == [action1, action2]
-        
+
     #     action = await ps.get_actions(user_id=user3.user_id, post_id=post2.post_id, action_type=ActionType.like)
     #     assert action[0].action_id == action2.action_id
 

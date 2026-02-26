@@ -331,7 +331,9 @@ class MainServiceSocial(MainServiceBase):
                         likes=post.parent_post.likes_count,
                         views=post.parent_post.views_count,
                         replies=post.parent_post.replies_count,
-                        is_my_post=user.user_id == post.parent_post.owner_id if user else False,
+                        is_my_post=(
+                            user.user_id == post.parent_post.owner_id if user else False
+                        ),
                         pictures_urls=await self._ImageStorage.get_post_image_urls(
                             images_names=[
                                 post_image.image_name
@@ -714,11 +716,15 @@ class MainServiceSocial(MainServiceBase):
                 owner=UserShortSchemaAvatarURL(
                     user_id=post.owner.user_id,
                     username=post.owner.username,
-                    avatar_url=await self._ImageStorage.get_user_avatar_url(
-                        post.owner.user_id
-                    ) if post.owner else None,
+                    avatar_url=(
+                        await self._ImageStorage.get_user_avatar_url(post.owner.user_id)
+                        if post.owner
+                        else None
+                    ),
                 ),
-                is_my_post=post.owner_id == initiator_user.user_id if initiator_user else False,
+                is_my_post=(
+                    post.owner_id == initiator_user.user_id if initiator_user else False
+                ),
                 likes=post.likes_count,
                 views=post.views_count,
                 replies=post.replies_count,
@@ -734,14 +740,22 @@ class MainServiceSocial(MainServiceBase):
                         owner=UserShortSchemaAvatarURL(
                             user_id=post.parent_post.owner_id,
                             username=post.parent_post.owner.username,
-                            avatar_url=await self._ImageStorage.get_user_avatar_url(
-                                post.parent_post.owner_id
-                            ) if post.parent_post.owner else None,
+                            avatar_url=(
+                                await self._ImageStorage.get_user_avatar_url(
+                                    post.parent_post.owner_id
+                                )
+                                if post.parent_post.owner
+                                else None
+                            ),
                         ),
                         likes=post.parent_post.likes_count,
                         views=post.parent_post.views_count,
                         replies=post.parent_post.replies_count,
-                        is_my_post=post.owner_id == initiator_user.user_id if initiator_user else False,
+                        is_my_post=(
+                            post.owner_id == initiator_user.user_id
+                            if initiator_user
+                            else False
+                        ),
                         pictures_urls=await self._ImageStorage.get_post_image_urls(
                             images_names=[
                                 post_image.image_name
@@ -749,7 +763,8 @@ class MainServiceSocial(MainServiceBase):
                             ]
                         ),
                     )
-                    if post.parent_post else None
+                    if post.parent_post
+                    else None
                 ),
             )
             for post in posts
@@ -799,9 +814,15 @@ class MainServiceSocial(MainServiceBase):
                 post.views_count += 1
 
         # Converting to boolean to check like action existence
-        liked = bool(await self._PostgresService.get_actions(
-            user.user_id, post_id=post_id, action_type=ActionType.like
-        )) if user else []
+        liked = (
+            bool(
+                await self._PostgresService.get_actions(
+                    user.user_id, post_id=post_id, action_type=ActionType.like
+                )
+            )
+            if user
+            else []
+        )
 
         filenames = [filename.image_name for filename in post.images]
         images_temp_urls = await self._ImageStorage.get_post_image_urls(

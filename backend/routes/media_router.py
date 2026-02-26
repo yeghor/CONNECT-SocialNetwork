@@ -16,26 +16,31 @@ media_router = APIRouter()
 This router is only for case when the application use Local image storage.
 """
 
+
 # https://stackoverflow.com/questions/55873174/how-do-i-return-an-image-in-fastapi
 @media_router.get("/media/users/{token}", response_class=Response)
 @endpoint_exception_handler
 async def get_image_user(
-    token: str,
-    session: AsyncSession = Depends(get_session_depends)
+    token: str, session: AsyncSession = Depends(get_session_depends)
 ) -> Response:
-    async with await MainServiceContextManager[MainMediaService].create(MainServiceType=MainMediaService, postgres_session=session) as media:  
+    async with await MainServiceContextManager[MainMediaService].create(
+        MainServiceType=MainMediaService, postgres_session=session
+    ) as media:
         file_contents, mime_type = await media.get_user_avatar_by_token(token=token)
         return Response(content=file_contents, media_type=mime_type)
+
 
 @media_router.get("/media/posts/{token}", response_class=Response)
 @endpoint_exception_handler
 async def get_image_post(
-    token: str,
-    session: AsyncSession = Depends(get_session_depends)
+    token: str, session: AsyncSession = Depends(get_session_depends)
 ) -> Response:
-    async with await MainServiceContextManager[MainMediaService].create(MainServiceType=MainMediaService, postgres_session=session) as media:  
+    async with await MainServiceContextManager[MainMediaService].create(
+        MainServiceType=MainMediaService, postgres_session=session
+    ) as media:
         file_contents, mime_type = await media.get_post_image_by_token(token=token)
         return Response(content=file_contents, media_type=mime_type)
+
 
 @media_router.post("/media/posts/{post_id}")
 @endpoint_exception_handler
@@ -43,22 +48,34 @@ async def upload_post_picture(
     post_id: str,
     file: UploadFile = File(...),
     user_: User = Depends(authorize_private_endpoint),
-    session: AsyncSession = Depends(get_session_depends)
+    session: AsyncSession = Depends(get_session_depends),
 ) -> None:
     print("Received upload post picture")
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainMediaService].create(MainServiceType=MainMediaService, postgres_session=session) as media:
+    async with await MainServiceContextManager[MainMediaService].create(
+        MainServiceType=MainMediaService, postgres_session=session
+    ) as media:
         file_contents = await file.read()
-        await media.upload_post_image(post_id=post_id, user=user, image_contents=file_contents, specified_mime=file.content_type)
+        await media.upload_post_image(
+            post_id=post_id,
+            user=user,
+            image_contents=file_contents,
+            specified_mime=file.content_type,
+        )
+
 
 @media_router.post("/media/my-profile/avatar")
 @endpoint_exception_handler
 async def upload_user_avatar(
     file: UploadFile = File(...),
     user_: User = Depends(authorize_private_endpoint),
-    session: AsyncSession = Depends(get_session_depends)
+    session: AsyncSession = Depends(get_session_depends),
 ) -> None:
     user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainMediaService].create(MainServiceType=MainMediaService, postgres_session=session) as media:
+    async with await MainServiceContextManager[MainMediaService].create(
+        MainServiceType=MainMediaService, postgres_session=session
+    ) as media:
         file_contents = await file.read()
-        await media.upload_user_avatar(user=user, image_contents=file_contents, specified_mime=file.content_type)
+        await media.upload_user_avatar(
+            user=user, image_contents=file_contents, specified_mime=file.content_type
+        )

@@ -12,32 +12,49 @@ from pydantic import ValidationError
 load_dotenv()
 Debug = getenv("DEBUG").lower().capitalize().strip()
 
-INTERNAL_SERVER_ERROR_CLIENT_MESSAGE = getenv("INTERNAL_SERVER_ERROR_CLIENT_MESSAGE").strip()
+INTERNAL_SERVER_ERROR_CLIENT_MESSAGE = getenv(
+    "INTERNAL_SERVER_ERROR_CLIENT_MESSAGE"
+).strip()
 
 import logging
 
 from exceptions.custom_exceptions import *
 
+
 def endpoint_exception_handler(func):
     """Use only with asynchronomous code"""
+
     @wraps(func)
     async def wrapper(*args, **kwargs):
         if Debug == "False":
             try:
                 return await func(*args, **kwargs)
-            
-            except (BadRequestExc, NotFoundExc, ConflictExc, UnauthorizedExc, UnauthorizedInWebsocket) as e:
+
+            except (
+                BadRequestExc,
+                NotFoundExc,
+                ConflictExc,
+                UnauthorizedExc,
+                UnauthorizedInWebsocket,
+            ) as e:
                 logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
-                raise HTTPException(status_code=e.status_code, detail=e.client_safe_detail)
-            
+                raise HTTPException(
+                    status_code=e.status_code, detail=e.client_safe_detail
+                )
+
             except InternalServerErrorExc as e:
                 logging.log(level=e.logging_level, msg=str(e), exc_info=True)
-                raise HTTPException(status_code=e.status_code, detail=e.client_safe_detail)
-            
+                raise HTTPException(
+                    status_code=e.status_code, detail=e.client_safe_detail
+                )
+
             # In case endpoint returned unexpected data we're handling fastapi's `ResponseValidationError`
             except (Exception, ResponseValidationError) as e:
                 logging.critical(msg=f"Unexpected exception: {e}", exc_info=True)
-                raise HTTPException(status_code=500, detail="It's not you, it's us. Something went wrong, please, contact us or try again later")
+                raise HTTPException(
+                    status_code=500,
+                    detail="It's not you, it's us. Something went wrong, please, contact us or try again later",
+                )
         elif Debug == "True":
             return await func(*args, **kwargs)
         else:
@@ -45,49 +62,94 @@ def endpoint_exception_handler(func):
 
     return wrapper
 
+
 def web_exceptions_raiser(func):
     """Use only with asynchronomous code"""
+
     @wraps(func)
     async def wrapper(*args, **kwargs):
         try:
             return await func(*args, **kwargs)
 
         # TODO: Remove ValueError crutch
-        except (PostgresError, ChromaDBError, RedisError, MediaError, JWTError, BcryptError, WrongDataFound, ValidationError) as e:
+        except (
+            PostgresError,
+            ChromaDBError,
+            RedisError,
+            MediaError,
+            JWTError,
+            BcryptError,
+            WrongDataFound,
+            ValidationError,
+        ) as e:
             logging_level = 40
             if isinstance(e, MediaError):
-                logging_level = 50 # Be aware of cases when postgres database and s3 or local data NOT synced
+                logging_level = 50  # Be aware of cases when postgres database and s3 or local data NOT synced
 
             InternalExcToRaise = InternalServerErrorExc(
                 client_safe_detail=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE,
                 dev_log_detail=str(e),
-                exc_type=e
+                exc_type=e,
             )
             InternalExcToRaise.logging_level = logging_level
-            
+
             raise InternalExcToRaise
-        
-        except (InvalidAction, InvalidFileMimeType, LimitReached, InvalidResourceProvided, ValidationErrorExc, ValueError) as e:
+
+        except (
+            InvalidAction,
+            InvalidFileMimeType,
+            LimitReached,
+            InvalidResourceProvided,
+            ValidationErrorExc,
+            ValueError,
+        ) as e:
             if isinstance(e, ValidationError) or isinstance(e, ValueError):
-                raise BadRequestExc(client_safe_detail="Invalid request data received", dev_log_detail=str(e), exc_type=e)
-            
-            raise BadRequestExc(client_safe_detail=e.client_safe_detail, dev_log_detail=str(e), exc_type=e) from e
-        
+                raise BadRequestExc(
+                    client_safe_detail="Invalid request data received",
+                    dev_log_detail=str(e),
+                    exc_type=e,
+                )
+
+            raise BadRequestExc(
+                client_safe_detail=e.client_safe_detail,
+                dev_log_detail=str(e),
+                exc_type=e,
+            ) from e
+
         except Unauthorized as e:
-            raise UnauthorizedExc(client_safe_detail=e.client_safe_detail, dev_log_detail=str(e), exc_type=e) from e 
-        
+            raise UnauthorizedExc(
+                client_safe_detail=e.client_safe_detail,
+                dev_log_detail=str(e),
+                exc_type=e,
+            ) from e
+
         except ResourceNotFound as e:
-            raise NotFoundExc(client_safe_detail=e.client_safe_detail, dev_log_detail=str(e), exc_type=e) from e
-        
+            raise NotFoundExc(
+                client_safe_detail=e.client_safe_detail,
+                dev_log_detail=str(e),
+                exc_type=e,
+            ) from e
+
         except Collision as e:
-            raise ConflictExc(client_safe_detail=e.client_safe_detail, dev_log_detail=str(e), exc_type=e) from e
-        
+            raise ConflictExc(
+                client_safe_detail=e.client_safe_detail,
+                dev_log_detail=str(e),
+                exc_type=e,
+            ) from e
+
         # We must handle these exceptions becasue: in this project, decorated with `web_exception_raiser` functions call functions that also decorated with the decorator.
         # By handling exceptions that being raised in this decorator too we can keep correct exception chaining.
-        except (BadRequestExc, UnauthorizedExc, NotFoundExc, ConflictExc, InternalServerErrorExc) as e:
+        except (
+            BadRequestExc,
+            UnauthorizedExc,
+            NotFoundExc,
+            ConflictExc,
+            InternalServerErrorExc,
+        ) as e:
             raise e
 
     return wrapper
+
 
 def check_websocket_state(ws: WebSocket) -> bool:
     """Checks websocket state whether it's safe to close"""
@@ -96,22 +158,34 @@ def check_websocket_state(ws: WebSocket) -> bool:
 
     return False
 
+
 def ws_endpoint_exception_handler(func):
     @wraps(func)
     async def wrapper(websocket: WebSocket, *args, **kwargs):
         if Debug == "False":
             try:
                 return await func(websocket, *args, **kwargs)
-            
+
             except ValidationError as e:
-                logging.log(level=logging.WARNING, msg="WSEndpointErrorHandler: Websocket handler received invalid ExpectedWSData schema data.", exc_info=e)
+                logging.log(
+                    level=logging.WARNING,
+                    msg="WSEndpointErrorHandler: Websocket handler received invalid ExpectedWSData schema data.",
+                    exc_info=e,
+                )
                 if check_websocket_state(ws=websocket):
-                    await websocket.close(code=4001, reason="Data does not match excpected schema.")
+                    await websocket.close(
+                        code=4001, reason="Data does not match excpected schema."
+                    )
 
             except JSONDecodeError as e:
-                logging.log(level=logging.WARNING, msg="WSEndpointErrorHandler: Websocket handler received invalid JSON message format.")
+                logging.log(
+                    level=logging.WARNING,
+                    msg="WSEndpointErrorHandler: Websocket handler received invalid JSON message format.",
+                )
                 if check_websocket_state(ws=websocket):
-                    await websocket.close(code=1007, reason="Invalid JSON data received")
+                    await websocket.close(
+                        code=1007, reason="Invalid JSON data received"
+                    )
 
             except WSMessageIsTooBig as e:
                 logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
@@ -121,8 +195,10 @@ def ws_endpoint_exception_handler(func):
             except (UnauthorizedExc, UnauthorizedInWebsocket) as e:
                 logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
                 if check_websocket_state(ws=websocket):
-                    raise HTTPException(detail=e.client_safe_detail, status_code=e.status_code)
-                
+                    raise HTTPException(
+                        detail=e.client_safe_detail, status_code=e.status_code
+                    )
+
             except InvalidAction as e:
                 logging.log(level=logging.WARNING, msg=str(e), exc_info=True)
                 if check_websocket_state(ws=websocket):
@@ -133,10 +209,20 @@ def ws_endpoint_exception_handler(func):
                 if check_websocket_state(ws=websocket):
                     await websocket.close(code=1011, reason=e.client_safe_detail)
 
-            except (PostgresError, ChromaDBError, RedisError, MediaError, JWTError, BcryptError, WrongDataFound) as e:
+            except (
+                PostgresError,
+                ChromaDBError,
+                RedisError,
+                MediaError,
+                JWTError,
+                BcryptError,
+                WrongDataFound,
+            ) as e:
                 logging.log(level=logging.CRITICAL, msg=str(e), exc_info=True)
                 if check_websocket_state(ws=websocket):
-                    await websocket.close(code=1011, reason=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE)
+                    await websocket.close(
+                        code=1011, reason=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE
+                    )
 
             except WebSocketDisconnect as e:
                 # Client disconnected, no need to close websocket connection
@@ -145,9 +231,15 @@ def ws_endpoint_exception_handler(func):
                 pass
 
             except Exception as e:
-                logging.log(level=logging.CRITICAL, msg=f"WSEndpointErrorHandler: Unknown Exception occurred {str(e)}", exc_info=True)
+                logging.log(
+                    level=logging.CRITICAL,
+                    msg=f"WSEndpointErrorHandler: Unknown Exception occurred {str(e)}",
+                    exc_info=True,
+                )
                 if check_websocket_state(ws=websocket):
-                    await websocket.close(code=1011, reason=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE)
+                    await websocket.close(
+                        code=1011, reason=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE
+                    )
 
         elif Debug == "True":
             return await func(websocket, *args, **kwargs)

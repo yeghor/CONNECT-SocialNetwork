@@ -29,6 +29,7 @@ EXPIRATION_INTERVAL = timedelta(seconds=POST_RATING_EXPIRATION_SECONDS)
 
 scheduler = AsyncIOScheduler()
 
+
 async def update_post_rates() -> None:
     """Calculates new rate, shitfing out old actions."""
     print("Task started")
@@ -39,15 +40,16 @@ async def update_post_rates() -> None:
         now = datetime.utcnow()
 
         posts_raw = await session.execute(
-            select(Post)
-            .where((now - Post.last_updated) > EXPIRATION_INTERVAL)
+            select(Post).where((now - Post.last_updated) > EXPIRATION_INTERVAL)
         )
         posts = posts_raw.scalars().all()
 
         for post in posts:
             actions_raw = await session.execute(
-                select(PostActions)
-                .where(and_((now - PostActions.date) > EXPIRATION_INTERVAL), PostActions.post_id == post.post_id)
+                select(PostActions).where(
+                    and_((now - PostActions.date) > EXPIRATION_INTERVAL),
+                    PostActions.post_id == post.post_id,
+                )
             )
             actions = actions_raw.scalars().all()
             post.popularity_rate = calculate_new_rate(actions=actions)

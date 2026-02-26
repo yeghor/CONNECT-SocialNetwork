@@ -46,28 +46,39 @@ class LoginBody(BaseModel):
     username: str = Field(..., min_length=USERNAME_MIN_L, max_length=USERNAME_MAX_L)
     password: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
 
+
 class RegisterBody(LoginBody):
     email: str
-    
+
+
 class PasswordRecoveryBody(BaseModel):
     new_password: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
-    new_password_confirm: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
+    new_password_confirm: str = Field(
+        ..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L
+    )
 
     @model_validator(mode="after")
     def match_passwords(self) -> Self:
         if self.new_password_confirm != self.new_password:
-            raise ValidationErrorExc(detail="NewPassword Pydantic schema: new passwords didn't match .", client_safe_detail="Passwords didn't match")
+            raise ValidationErrorExc(
+                detail="NewPassword Pydantic schema: new passwords didn't match .",
+                client_safe_detail="Passwords didn't match",
+            )
         return self
+
 
 class ChangePasswordBody(BaseModel):
     old_password: str
     new_password: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
 
+
 class NewUsernameBody(BaseModel):
     new_username: str = Field(..., min_length=USERNAME_MIN_L, max_length=USERNAME_MAX_L)
 
+
 class EmailProvided(BaseModel):
-    email: str  
+    email: str
+
 
 class _2FAConfirmationBody(EmailProvided):
     confirmation_code: str
@@ -75,9 +86,11 @@ class _2FAConfirmationBody(EmailProvided):
 
 # JWT Token models
 
+
 class RefreshAccesTokensProvided(BaseModel):
     refresh_token: str
     access_token: str
+
 
 class PasswordRecoveryToken(BaseModel):
     recovery_token: str
@@ -92,6 +105,7 @@ class PasswordRecoveryToken(BaseModel):
             value = value.strftime(DATE_FORMAT)
         return value
 
+
 class RefreshTokenSchema(BaseModel):
     refresh_token: str
     expires_at_refresh: str
@@ -104,6 +118,7 @@ class RefreshTokenSchema(BaseModel):
         elif isinstance(value, datetime):
             value = value.strftime(DATE_FORMAT)
         return value
+
 
 class AccessTokenSchema(BaseModel):
     access_token: str
@@ -118,17 +133,18 @@ class AccessTokenSchema(BaseModel):
             value = value.strftime(DATE_FORMAT)
         return value
 
+
 class RefreshAccessTokens(RefreshTokenSchema, AccessTokenSchema):
     """
     Access and refresh tokens could be None if the account email isn't confirmed yet.\n\n
     If email isn't confirmed yet: email_confirmation_required=True \n\n
     If second factor authentication required, `email_to_confirm` contains email string while tokens data have None values
     """
+
     access_token: str | None = Field(default=None)
     expires_at_access: str | None = Field(default=None)
 
     refresh_token: str | None = Field(default=None)
     expires_at_refresh: str | None = Field(default=None)
 
-
-    email_to_confirm: str| None = Field(default=None)
+    email_to_confirm: str | None = Field(default=None)

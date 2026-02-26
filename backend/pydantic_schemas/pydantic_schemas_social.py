@@ -11,6 +11,7 @@ from os import getenv
 
 load_dotenv()
 
+
 class ActionSchemaShort(BaseModel):
     owner_id: str
     post_id: str
@@ -18,30 +19,35 @@ class ActionSchemaShort(BaseModel):
     action: ActionType
     date: datetime
 
+
 class ActionShema(ActionSchemaShort):
     owner: UserShortSchema
     post: PostBaseShort
+
 
 class PostIDValidate(BaseModel):
     post_id: str
 
     @field_validator("post_id", mode="before")
     @classmethod
-    def validate_id(cls, value: Any):       
+    def validate_id(cls, value: Any):
         return str(value)
+
 
 class UserIDValidate(BaseModel):
     user_id: str
 
     @field_validator("user_id", mode="before")
     @classmethod
-    def validate_id(cls, value: Any):        
+    def validate_id(cls, value: Any):
         return str(value)
+
 
 class PostBaseShort(PostIDValidate):
     title: str
     published: datetime
     is_reply: bool
+
 
 class PostBase(PostBaseShort):
     owner: UserShortSchemaAvatarURL | None
@@ -52,9 +58,11 @@ class PostBase(PostBaseShort):
 
     is_my_post: bool
 
+
 class PostLiteSchema(PostBase):
     parent_post: PostBase | None
     pictures_urls: List[str]
+
 
 class PostSchema(PostBase):
     text: str
@@ -65,27 +73,34 @@ class PostSchema(PostBase):
     parent_post: PostBase | None
     pictures_urls: List[str]
 
+
 class RecentActivitySchema(BaseModel):
     avatar_url: str
     type: Literal["post", "like", "reply"]
     message: str
     date: datetime
 
+
 # =====================
+
 
 class UserShortSchema(UserIDValidate):
     username: str
 
+
 class UserShortSchemaAvatarURL(UserShortSchema):
     avatar_url: str | None
+
 
 class UserLiteSchema(UserShortSchemaAvatarURL):
     followers: int
     joined: datetime
 
+
 class ChatUserShortSchemaAvatarURL(UserShortSchemaAvatarURL):
     # Boolean state to identify which messages do user own. Used in chats
     me: bool
+
 
 class UserSchema(UserLiteSchema):
     followed: int
@@ -93,14 +108,17 @@ class UserSchema(UserLiteSchema):
     is_following: bool
     me: bool
 
+
 # =================
 # Body data structure
 class PostDataSchemaBase(BaseModel):
     title: str
     text: str
-    
+
+
 class MakePostDataSchema(PostDataSchemaBase):
     parent_post_id: str | None
+
 
 class PostDataSchemaID(PostDataSchemaBase):
     post_id: str

@@ -1,6 +1,7 @@
 import bcrypt
 from exceptions.custom_exceptions import BcryptError
 
+
 def hash_password(raw_pass: str) -> str:
     try:
         salt = bcrypt.gensalt()
@@ -9,6 +10,7 @@ def hash_password(raw_pass: str) -> str:
         return hashed_password.decode()
     except Exception as e:
         raise BcryptError(f"Bcrypt: password encoding failed.")
+
 
 def check_password(entered_pass: str, hashed_pass: str) -> bool:
     try:
