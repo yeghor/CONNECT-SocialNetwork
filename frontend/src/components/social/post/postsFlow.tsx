@@ -19,6 +19,7 @@ import estimatePostSize from "../../../helpers/postSizeEstimator.ts";
 
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 import { createInfiniteQueryOptionsUtil, infiniteQieryingFetchGuard } from "../../butterySmoothScroll/scrollVirtualizationUtils.ts";
+import { loginURI } from "../../../consts.ts";
 
 interface PostsFlowFetcherInterface {
     // Depends on image existence
@@ -42,12 +43,18 @@ const createPostFlowResponse = (data: FeedPost[]): PostsFlowComponents => {
 }
 
 const postFetcher = async (tokens: CookieTokenObject, feed: boolean, navigate: NavigateFunction, page: number): Promise<PostsFlowComponents> => {
-    const fetchFunction = feed ? fetchFeedPosts : fetchFollowedPosts;
+    let fetchedPosts;
 
-    const fetchedPosts = await safeAPICallPublic<FeedPostsResponse>(tokens, fetchFunction, navigate, undefined, page)
+    if (feed) {
+        fetchedPosts = await safeAPICallPublic<FeedPostsResponse>(tokens, fetchFeedPosts, navigate, undefined, page);
+    } else {
+        fetchedPosts = await safeAPICallPrivate<FeedPostsResponse>(tokens, fetchFollowedPosts, navigate, undefined, page);
+    }
 
     if (fetchedPosts.success) {
         return createPostFlowResponse(fetchedPosts.data);
+    } else if (fetchedPosts.statusCode === 401) {
+        navigate(loginURI);
     }
 
     return [];
