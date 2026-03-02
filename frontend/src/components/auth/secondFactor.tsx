@@ -17,7 +17,7 @@ const SecondFactor = (props: SecondFactorProps) => {
     const navigate = useNavigate();
 
     const [ errorMessage, setErrorMesage ] = useState<string | null>(null);
-    const [ allowSendNewCode, setAllowSendNewCode ] = useState(false)
+    const [ allowSendNewCode, setAllowSendNewCode ] = useState(false);
 
     const location = useLocation();
     const emailToConfirm = props.emailToConfirm ? props.emailToConfirm : location.state ? location.state.emailToConfirm : null;
@@ -76,7 +76,7 @@ const SecondFactor = (props: SecondFactorProps) => {
         document.getElementById("0")?.focus();
         window.addEventListener("keydown", handleBackspace);
         window.addEventListener("paste", handlePast);
-        setTimeout(() => setAllowSendNewCode(false), 60 * 1000); // 60 * 1000 - 60 seconds in milliseconds
+        setTimeout(() => setAllowSendNewCode(true), 30 * 1000); // 30 * 1000 - 30 seconds in milliseconds
         return () => {
             window.removeEventListener("keydown", handleBackspace);
             window.removeEventListener("paste", handlePast);
@@ -94,7 +94,7 @@ const SecondFactor = (props: SecondFactorProps) => {
         for (let i = 0; i < 6; i++) {
             const inputElement = document.getElementById(String(i)) as HTMLInputElement;
             if (inputElement.value !== "") {
-                confirmationCodeArr.push(inputElement.value);
+                confirmationCodeArr.push(inputElement.value)
             }
         }
 
@@ -143,7 +143,8 @@ const SecondFactor = (props: SecondFactorProps) => {
     const sendNewCode = async () => {
         setAllowSendNewCode(false)
 
-        await safeAPICallPublic(null, fetchIssueNew2FA, navigate, setErrorMesage, emailToConfirm);
+        setErrorMesage(null);
+        await safeAPICallNoToken(fetchIssueNew2FA, navigate, setErrorMesage, emailToConfirm);
 
         setTimeout(() => setAllowSendNewCode(true), 60 * 1000); // 60 * 1000 - 60 seconds in milliseconds
     };
@@ -187,9 +188,9 @@ const SecondFactor = (props: SecondFactorProps) => {
                     Confirm
                 </button>
 
-                <p onClick={() => sendNewCode()} className={`text-sm font-light ${allowSendNewCode ? "text-gray-200 hover:underline" : "text-gray-400"}`}>
+                <button disabled={!allowSendNewCode} onClick={() => sendNewCode()} className={`text-sm font-light ${allowSendNewCode ? "text-gray-200 hover:underline" : "text-gray-400"}`}>
                     Send new code {allowSendNewCode ? null : "(available in 30 seconds)"}
-                </p>
+                </button>
     
             </div>
         </div>

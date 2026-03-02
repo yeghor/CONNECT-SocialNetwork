@@ -272,8 +272,6 @@ class RedisService:
         Returns image name (read ReadMe-dev.md). If acces not granted or token value corrupted - returns None \n
         Pass `n_image` if `image_type` set to "post"
         """
-        if not url_image_token:
-            return None
 
         if image_type == "post":
             pattern = f"{self.__post_image_acces_prefix}{url_image_token}"

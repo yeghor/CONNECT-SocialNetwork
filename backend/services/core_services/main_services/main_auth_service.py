@@ -281,13 +281,10 @@ class MainServiceAuth(MainServiceBase):
     async def issue_new_second_factor(self, email: str) -> EmailProvided:
         user = await self._PostgresService.get_user_by_username_or_email(email=email)
 
-        if not user:
-            raise InvalidResourceProvided(
-                detail=f"AuthService: User with email: {email} tried to issue new second factor authentication with email that does not exists in the database.",
-                client_safe_detail="User with this email doesn't exist",
-            )
-
-        await self.__create_2fa(email=email, username=user.username)
+        # We don't tell user that such email doesn't exist
+        # In than case we simply return succesfull response to don't let user's see which emails are already registered
+        if user:
+            await self.__create_2fa(email=email, username=user.username)
 
         return EmailProvided(email=email)
 

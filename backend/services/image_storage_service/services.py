@@ -393,14 +393,14 @@ class LocalStorage(ImageStorageABC):
     async def get_post_image_urls(self, images_names: List[str]) -> List[str]:
         urls = []
         for provided_filename in images_names:
-            urfsafe_token = self._generate_url_token()
-
             filenames = glob.glob(
                 pathname=f"{provided_filename}*", root_dir=self.__media_post_path
             )
             if not filenames:
                 continue
             filename = filenames[0]
+
+            urfsafe_token = self._generate_url_token()
 
             await self._Redis.save_url_post_token(
                 image_token=urfsafe_token, image_name=filename
@@ -410,13 +410,13 @@ class LocalStorage(ImageStorageABC):
         return urls
 
     async def get_user_avatar_url(self, image_name: str) -> str | None:
-        urlsafe_token = self._generate_url_token()
-
         # Searching for potential
         filenames = glob.glob(f"{image_name}*", root_dir=self.__media_avatar_path)
         if not filenames:
             return None
         filename = filenames[0]
+
+        urlsafe_token = self._generate_url_token()
 
         await self._Redis.save_url_user_token(
             image_token=urlsafe_token, image_name=filename
