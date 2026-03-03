@@ -202,7 +202,7 @@ interface PostBase {
     isReply: boolean;
 }
 
-export interface ShortPostInterface extends PostBase {
+export interface ShortPost extends PostBase {
     owner: User | null;
     likes: number,
     views: number,
@@ -211,8 +211,8 @@ export interface ShortPostInterface extends PostBase {
     picturesURLs: string[]
 }
 
-export interface FeedPost extends ShortPostInterface {
-    parentPost?: ShortPostInterface
+export interface FeedPost extends ShortPost {
+    parentPost?: ShortPost
 }
 
 export interface LoadPostResponseInterface extends FeedPost {
@@ -224,7 +224,7 @@ export interface LoadPostResponse extends SuccessfulResponse {
     data: LoadPostResponseInterface
 }
 export interface PostCommentsResponse extends SuccessfulResponse {
-    data: ShortPostInterface[]
+    data: ShortPost[]
 }
 export interface FeedPostsResponse extends SuccessfulResponse {
     data: FeedPost[]

@@ -1,79 +1,103 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { createInfiniteQueryOptionsUtil } from "../../../butterySmoothScroll/scrollVirtualizationUtils.ts";
+import { useNavigate, NavigateFunction } from "react-router";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
-import PostComment from "./postComment.tsx";
-
-import commentFetchHelper, { CommentProps } from "./commentFetchHelper.ts";
-import { PostCommentsResponse, ShortPostInterface } from "../../../../fetching/DTOs.ts";
-import { useNavigate } from "react-router";
+import { PostCommentsResponse, ShortPost } from "../../../../fetching/DTOs.ts";
 import { getCookieTokens } from "../../../../helpers/cookies/cookiesHandler.ts";
-import { useParams } from "react-router-dom";
 import { fetchPostComments } from "../../../../fetching/fetchSocial.ts";
-import { safeAPICallPrivate, safeAPICallPublic } from "../../../../fetching/fetchUtils.ts";
+import { safeAPICallPublic } from "../../../../fetching/fetchUtils.ts";
+import VirtualizedList from "../../../butterySmoothScroll/virtualizedList.tsx";
+import { infiniteQieryingFetchGuard } from "../../../butterySmoothScroll/scrollVirtualizationUtils.ts";
+import estimatePostSize from "../../../../helpers/postSizeEstimator.ts";
+import { CookieTokenObject } from "../../../../helpers/cookies/cookiesHandler.ts";
+import { loginURI } from "../../../../consts.ts";
+import FlowPost from "../flowPost.tsx";
+
+interface PostsCommentsFlow {
+    // Depends on image existence
+    estimatedSize: number;
+    postId: string;
+    postData: ShortPost;
+}
+
+type PostsCommentsFlowPrepared = PostsCommentsFlow[];
+
+const createPostFlowResponse = (data: ShortPost[]): PostsCommentsFlowPrepared => {
+    return data.map((post) => {
+        let estimatedSize: number = estimatePostSize(post.picturesURLs.length, post.isReply);
+
+        return {
+            estimatedSize: estimatedSize,
+            postId: post.postId,
+            postData: post
+        };
+    })
+}
+
+const commentsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, postId: string, page: number): Promise<PostsCommentsFlowPrepared> => {
+    console.log(`Fetching comments for post ${postId}, page ${page}`); // Проверьте, что page не undefined
+    const fetchedPostsResponse = await safeAPICallPublic<PostCommentsResponse>(tokens, fetchPostComments, navigate, undefined, postId, page);
+
+    console.log("Response:", fetchedPostsResponse);
+
+    if (fetchedPostsResponse.success === false) {
+        console.log("returninng empty list")
+        return [];
+    }
+
+    console.log(fetchedPostsResponse.data);
+    return createPostFlowResponse(fetchedPostsResponse.data);
+}
+
+export interface CommentProps {
+    originalPostId: string
+}
 
 const PostComments = (props: CommentProps) => {
-    let isMounted = true;
-
-    // const { postId } = useParams();
-    // if (postId && postId !== props.originalPostData.postId) {
-    //     props.originalPostData.postId = postId
-    // }
-
+    console.log("rendering post comments")
     const navigate = useNavigate();
     const tokens = getCookieTokens(undefined);
 
-    const [ postComments, setPostComments ] = useState<ShortPostInterface[]>([]);
+    const scrollRef = useRef<HTMLDivElement | null>(null);
 
-    const [ loadMoreTrigger, setLoadMoreTrigger ] = useState<boolean>(false);
-    const [ showLoadMore, setShowLoadMore ] = useState<boolean>(false);
-    const [ page, setPage ] = useState<number>(0);
+    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(commentsFetcher, [tokens, navigate, props.originalPostId], ["postComments", props.originalPostId]));
+    const [ posts, setPosts ] = useState<PostsCommentsFlowPrepared>(data?.pages ?? []);
 
-    const [ hasMore, setHasMore ] = useState<boolean>(props.originalPostData.replies > 0);
+    const virtualizer = useVirtualizer({
+        count: posts.length,
+        estimateSize: (index) => {
+            const post = posts[index];
+            return post.estimatedSize;
+        },
+        measureElement: (element) => { return element?.getBoundingClientRect().height },
+        overscan: 1,
+        getScrollElement: () => scrollRef.current,
+    });
 
-    useEffect(() => {
-        const fetchWrapper = async () => {
-            setShowLoadMore(false)
-            const response = await safeAPICallPublic<PostCommentsResponse>(tokens, fetchPostComments, navigate, undefined, props.originalPostData.postId, page);
-            if (response.success && response.data.length > 0) {
-                setPostComments((prevState) => {
-                    console.log("setting", hasMore)
-                    const updatedComments = [...prevState, ...response.data];
-                    // React updates states asynchronously, so we need to update hasMore state inside setPostComments to update it before render
-                    setHasMore(updatedComments.length < props.originalPostData.replies);
-                    return updatedComments;
-                });
-                setPage((prev) => prev + 1);
-            } else {
-                setHasMore(false);
-            }
-            setShowLoadMore(true);
-        };
-        fetchWrapper();
+    const virtualItems = virtualizer.getVirtualItems();
 
-        return () => { isMounted = false }
-    }, [loadMoreTrigger]);
+    const flatMapPosts = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((post) => post !== undefined) ?? []
 
-    useEffect(() => {
-        setPostComments([]);
-        setPage(0);
-        setHasMore(props.originalPostData.replies > 0);
-    }, [props.originalPostData.postId]);
-
-    const loadMoreClick = (): void => {
-        setLoadMoreTrigger(!loadMoreTrigger);
+    const infiniteQuerying = async () => {
+        setPosts(flatMapPosts)
+        const lastItem = virtualItems[virtualItems.length - 1]
+        if (infiniteQieryingFetchGuard(hasNextPage, isFetchingNextPage, lastItem, posts.length)) await fetchNextPage();
     }
 
+    useEffect(() => {
+        infiniteQuerying();
+    }, [virtualItems, hasNextPage, isFetchingNextPage, props.originalPostId]);
+
+    const virtualizedComponentsProps = posts.map((post) => { return { postData: post.postData, isMyPost: false} } )
+    console.log(virtualItems.length)
+
     return(
-        <div>
-            <div>
-                {
-                    postComments && postComments.map((commentData) => {
-                        return (
-                            <PostComment key={commentData.postId} commentData={commentData} />
-                        );
-                    })
-                }
-                { (showLoadMore && hasMore) &&  <button onClick={() => loadMoreClick()} className="text-blue-500 hover:underline">Load More</button>}
-            </div>
+        <div ref={scrollRef} className="h-600px overflow-auto mb-16 relative mx-auto border-gray-300">
+            { virtualItems.length !== 0 ? <p className="text-center text-white my-8">{"No comments yet :("}</p> : <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
+                <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={virtualizedComponentsProps} />
+            </div>}
         </div>
     );
 };

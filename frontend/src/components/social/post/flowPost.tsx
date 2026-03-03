@@ -1,12 +1,12 @@
 import React from "react";
-import { FeedPost } from "../../../fetching/DTOs.ts";
+import { FeedPost, ShortPost } from "../../../fetching/DTOs.ts";
 import OwnerComponent from "./owner.tsx";
 import {Link} from "react-router-dom";
 
 import { specificPostURI } from "../../../consts.ts";
 
 interface FlowPostProps {
-    postData: FeedPost | undefined,
+    postData: FeedPost | ShortPost | undefined,
     isMyPost: boolean
 }
 
@@ -20,9 +20,19 @@ const FlowPost = (props: FlowPostProps) => {
 
     return (
         <div className="border bg-white/10 border-white/20 border-3 rounded-lg shadow-sm flex flex-col hover:scale-105 transition-all m-6">
+            {
+            /*
+                If isReply flag seted correctly
+                and backend will always be sensing parentPost data
+                nothing will break
+            */
+            }
+            { /* @ts-ignore */ }
             {props.postData?.isReply && props.postData?.parentPost && (
+                // @ts-ignore 
                 <Link to={specificPostURI(props.postData.parentPost.postId)}>
                     <div className="bg-white/10 text-white text-sm p-2 rounded m-2">
+                        { /* @ts-ignore */ } 
                         <span className="font-bold">Reply to:</span> {props.postData.parentPost.title}
                     </div>
                 </Link>

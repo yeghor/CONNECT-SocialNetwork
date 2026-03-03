@@ -21,14 +21,14 @@ import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 import { createInfiniteQueryOptionsUtil, infiniteQieryingFetchGuard } from "../../butterySmoothScroll/scrollVirtualizationUtils.ts";
 import { loginURI } from "../../../consts.ts";
 
-interface PostsFlowFetcherInterface {
+interface PostsFlowPrepared {
     // Depends on image existence
     estimatedSize: number;
     postId: string;
     postData: FeedPost;
 }
 
-type PostsFlowComponents = PostsFlowFetcherInterface[];
+type PostsFlowComponents = PostsFlowPrepared[];
 
 const createPostFlowResponse = (data: FeedPost[]): PostsFlowComponents => {
     return data.map((post) => {
@@ -58,7 +58,6 @@ const postFetcher = async (tokens: CookieTokenObject, feed: boolean, navigate: N
     }
 
     return [];
-
 }
 
 const PostsFlow = () => {

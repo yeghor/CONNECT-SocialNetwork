@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import {ShortPostInterface} from "../../../../fetching/DTOs.ts";
+import {ShortPost} from "../../../../fetching/DTOs.ts";
 import {specificPostURI} from "../../../../consts.ts";
 import {Link} from "react-router-dom";
 
 interface PostCommentProps {
-    commentData: ShortPostInterface
+    commentData: ShortPost
 }
 
 const PostComment = (props: PostCommentProps) => {

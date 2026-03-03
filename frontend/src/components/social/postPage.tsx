@@ -69,8 +69,9 @@ const PostPage = () => {
         postFetcher();
     }, [postId])
 
+    // To prevent screen jumping when data loaded
     if(!postData) {
-        return null;
+        return <div className="h-screen" />;
     }
 
     return (
@@ -114,7 +115,7 @@ const PostPage = () => {
 
             <div className="w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
                 <div className="font-bold text-xl text-white">Comments {postData.replies}:</div>
-                <PostComments originalPostData={postData} />
+                <PostComments originalPostId={postData.postId} />
             </div>
         </div>
     );
