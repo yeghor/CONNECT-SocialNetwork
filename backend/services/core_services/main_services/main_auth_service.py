@@ -68,7 +68,7 @@ class MainServiceAuth(MainServiceBase):
         if token_type == "optional-access" and not token:
             return None
 
-        prepared_token = self._JWT.prepare_token(jwt_token=token)
+        prepared_token = self._JWT._prepare_token(jwt_token=token)
 
         if not await self._RedisService.check_jwt_existence(
             jwt_token=prepared_token, token_type=token_type
@@ -303,7 +303,7 @@ class MainServiceAuth(MainServiceBase):
 
     @web_exceptions_raiser
     async def refresh_token(self, refresh_token: str) -> AccessTokenSchema:
-        prepared_token = self._JWT.prepare_token(jwt_token=refresh_token)
+        prepared_token = self._JWT._prepare_token(jwt_token=refresh_token)
         if not await self._RedisService.check_jwt_existence(
             jwt_token=prepared_token, token_type="refresh"
         ):
@@ -365,4 +365,4 @@ class MainServiceAuth(MainServiceBase):
 
         await self._PostgresService.delete_models_and_flush(user)
         await self._RedisService.deactivate_tokens_by_user_id(user_id=user.user_id)
-        await self._ImageStorage.delete_avatar_user(user_id=user.user_id)
+        await self._ImageStorage.delete_avatar_user(image_name=user.user_id)

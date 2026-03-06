@@ -23,7 +23,9 @@ PASSWORD_MAX_L = int(getenv("PASSWORD_MAX_L"))
 async def _authorize_token(
     token: str, token_type: EndpointAuthType, return_user: bool
 ) -> User | None:
-    # To prevent circular import
+    """Function call must be wrapper into @endpoint_exception_handler"""
+
+    # Preventing circular import
     from services.core_services import MainServiceContextManager
     from services.core_services.main_services import MainServiceAuth
 
@@ -52,7 +54,6 @@ async def authorize_public_endpoint(
         ..., title="Optional authorization access token", examples="Bearer {token}"
     ),
 ) -> User:
-    print(token)
     """Use with fastAPI Depends() in public endpoints"""
     return await _authorize_token(
         token=token, token_type="optional-access", return_user=True
@@ -66,7 +67,6 @@ async def authorize_password_recovery_endpoint(
     ),
 ) -> User:
     """Use with fastAPI Depends() in password recovery enpoint"""
-    print(token)
     return await _authorize_token(
         token=token, token_type="password-recovery", return_user=True
     )
@@ -76,7 +76,7 @@ async def authorize_password_recovery_endpoint(
 async def authorize_chat_token(websocket: WebSocket, token: str) -> None:
     """User with fastAPI Depends()"""
 
-    # To prevent circular import
+    # Preventing circular import
     from services.core_services import MainServiceContextManager
     from services.core_services.main_services import MainServiceAuth
 

@@ -16,6 +16,8 @@ from exceptions.custom_exceptions import *
 MEDIA_AVATAR_PATH = os.getenv("MEDIA_AVATAR_PATH", "media/users/")
 MEDIA_POST_IMAGE_PATH = os.getenv("MEDIA_POST_IMAGE_PATH", "media/posts/")
 MAX_NUMBER_POST_IMAGES = int(os.getenv("MAX_NUMBER_POST_IMAGES", "3"))
+POST_IMAGE_MAX_SIZE_MB = os.getenv("POST_IMAGE_MAX_SIZE_MB")
+ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS")
 
 MEDIA_AVATAR_PATH = os.getenv("MEDIA_AVATAR_PATH", "media/users/")
 MEDIA_POST_IMAGE_PATH = os.getenv("MEDIA_POST_IMAGE_PATH", "media/posts/")
@@ -52,9 +54,83 @@ class MainMediaService(MainServiceBase):
         content_type = mimetypes.guess_type(filepath)[0]
 
         if not content_type:
-            raise MediaError(f"MediaService: Can't guess image type by it's contents.")
+            raise MediaStorageException(
+                f"MediaService: Can't guess image type by it's contents."
+            )
 
         return (contents, content_type)
+
+    @staticmethod
+    async def _get_extension(content_type: str, image_name: str) -> str:
+        # Return value is a string giving a filename extension, including the leading dot ('.') / mimetypes.guess_extension()
+        extension = mimetypes.guess_extension(type=content_type)
+        if not extension:
+            raise InvalidFileMimeType(
+                detail=f"Local Storage: User {image_name} tried to upload post image with corrupted mime type - {content_type}",
+                client_safe_detail=f"Invalid image type. Allowed only - {ALLOWED_EXTENSIONS}",
+            )
+        return extension
+
+    @staticmethod
+    def _validate_file_size(bytes_obj: bytes) -> bool:
+        return 0 < len(bytes_obj) / 1024 / 1024 < POST_IMAGE_MAX_SIZE_MB
+
+    def _validate_image_mime(self, image_bytes: bytes, specified_mime: str) -> bool:
+        """Validate specified mime_type"""
+        # TODO: Could reject valid file
+        extension_mime = self._guess_mime(file_bytes=image_bytes)
+        splitted_mime = extension_mime.split("/")
+
+        if len(splitted_mime) != 2:
+            return False
+
+        if not extension_mime.startswith("image/"):
+            return False
+
+        if not splitted_mime[1] in ALLOWED_EXTENSIONS:
+            return False
+
+        if extension_mime != specified_mime:
+            return False
+
+        return True
+
+    async def _validate_image(
+        self, contents: bytes, content_type: str, image_name: str
+    ) -> None:
+        if not self._validate_image_mime(
+            image_bytes=contents, specified_mime=content_type
+        ):
+            raise InvalidFileMimeType(
+                detail=f"Local Storage: User {image_name} tried to upload avatar with wrong mime type",
+                client_safe_detail=f"Invalid image type. Allowed only - {ALLOWED_EXTENSIONS}",
+            )
+
+        if not self._validate_file_size(bytes_obj=contents):
+            raise InvalidResourceProvided(
+                detail=f"Local Storage: User {image_name} tried to uploaded avatar bigger than {POST_IMAGE_MAX_SIZE_MB}mb",
+                client_safe_detail=f"Image is too big. Size up to {POST_IMAGE_MAX_SIZE_MB}mb",
+            )
+
+    def _validate_incoming_file(self, user_id: str | None, contents: bytes, mime_type: str):
+        """
+        Must be wrapper into @web_exception_raiser
+        user_id is optional for clarity in exception logs
+        """
+
+        if not self._validate_image_mime(
+            image_bytes=contents, specified_mime=mime_type
+        ):
+            raise InvalidResourceProvided(
+                detail=f"S3 Storage: User {user_id} tried to upload image with wrong mime type",
+                client_safe_detail=f"Invalid image type. Allowed only - {ALLOWED_EXTENSIONS}",
+            )
+
+        if not self._validate_file_size(bytes_obj=contents):
+            raise InvalidResourceProvided(
+                detail=f"S3 Storage: User {user_id} tried to upload image bigger than {POST_IMAGE_MAX_SIZE_MB}mb",
+                client_safe_detail=f"Image is too big. Size up to {POST_IMAGE_MAX_SIZE_MB}mb",
+            )
 
     async def get_name_and_check_token(self, token: str, image_type: ImageType):
         """
@@ -76,6 +152,8 @@ class MainMediaService(MainServiceBase):
         self, post_id: str, user: User, image_contents: bytes, specified_mime: str
     ) -> None:
         if image_contents and specified_mime:
+            self._validate_incoming_file(user_id=user.user_id, contents=image_contents, mime_type=specified_mime)
+
             post = await self._PostgresService.get_entry_by_id(
                 id_=post_id, ModelType=Post
             )
@@ -109,7 +187,7 @@ class MainMediaService(MainServiceBase):
             await self._ImageStorage.upload_images_post(
                 contents=image_contents,
                 content_type=specified_mime,
-                image_name=image_name,
+                full_image_name=image_name,
             )
         else:
             raise InvalidResourceProvided(
@@ -121,13 +199,15 @@ class MainMediaService(MainServiceBase):
         self, user: User, image_contents: bytes, specified_mime: str
     ):
         if image_contents and specified_mime:
+            self._validate_incoming_file(user_id=user.user_id, contents=image_contents, mime_type=specified_mime)
+
             if user.avatar_image_name:
-                await self._ImageStorage.delete_avatar_user(user_id=user.user_id)
+                await self._ImageStorage.delete_avatar_user(image_name=user.user_id)
 
             await self._ImageStorage.upload_avatar_user(
                 contents=image_contents,
                 content_type=specified_mime,
-                image_name=user.user_id,
+                full_image_name=user.user_id,
             )
 
             user.avatar_image_name = user.user_id

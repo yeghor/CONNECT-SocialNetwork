@@ -20,10 +20,11 @@ class NoActiveConnectionsOrRoomDoesNotExist(Exception):
     logging_type = 50
 
 
-E = TypeVar("E", bound=ServiceLayerBaseBound)
+EndpointLayerExc = TypeVar("EndpointLayerExc", bound=ServiceLayerBaseBound)
 
 # =======
 # Endpoint Layer Exceptions
+# =======
 
 
 class EndpointExcConstructor(Exception):
@@ -34,7 +35,7 @@ class EndpointExcConstructor(Exception):
     def __init__(
         self,
         client_safe_detail: str,
-        exc_type: Type[E] = Exception,
+        exc_type: Type[EndpointLayerExc] = Exception,
         dev_log_detail: str | None = None,
     ):
         self.client_safe_detail = client_safe_detail
@@ -82,62 +83,63 @@ class UnauthorizedExc(EndpointExcConstructor):
 # ========
 # Services layer exceptions
 # These exception that application requires right now, they're growing.
+# ========
 
-# CLIENT SAFE MESSAGE DOES NOT SPECIFY ANY SPECIFIC ERROR DATA
+# CLIENT SAFE MESSAGE MUST NOT SPECIFY ANY SPECIFIC ERROR DATA
 
 
-class ClientSafeServiceError(ServiceLayerBaseBound):
+class ClientSafeServiceException(ServiceLayerBaseBound):
     def __init__(self, detail: str, client_safe_detail: str):
         self.client_safe_detail = client_safe_detail
         super().__init__(detail)
 
 
-# 404 # PROVIDE DIFFERENT CLIENT SAFE INFO WHERE IT'S NECESSARY
-class ResourceNotFound(ClientSafeServiceError):
+# 404 PROVIDE DIFFERENT CLIENT SAFE INFO WHERE IT'S NECESSARY
+class ResourceNotFound(ClientSafeServiceException):
     """Raise in case provided ID does not exist or similar"""
 
 
 # 401 PROVIDE SPECIFIED INFO WHEN IT'S SAFE
-class Unauthorized(ClientSafeServiceError):
+class Unauthorized(ClientSafeServiceException):
     """Authorization failed? Raise this."""
 
 
-class UnauthorizedInWebsocket(ClientSafeServiceError):
+class UnauthorizedInWebsocket(ClientSafeServiceException):
     """Raise in websocket and don't re raise HttpException to this."""
 
 
 # 400 PROVIDE SPECIFIED USER ACTION IN DEV DETAIL (FIRST ARG) AND REGULAR CLIENT ERROR IN `client_safe_detail`
-class InvalidAction(ClientSafeServiceError):
-    """Raise in case when action can't be done. For example - follow user that you're already following to. Or follow self"""
+class InvalidAction(ClientSafeServiceException):
+    """Raise in case when action can't be done. For example - follow user that you're already following to. Or self follow"""
 
 
-class InvalidFileMimeType(ClientSafeServiceError):
+class InvalidFileMimeType(ClientSafeServiceException):
     """Raise when provided file mime type invalid"""
 
 
-class LimitReached(ClientSafeServiceError):
+class LimitReached(ClientSafeServiceException):
     """Raise whenever user 'action' limit reached. For example - max post images uploaded"""
 
 
-class InvalidResourceProvided(ClientSafeServiceError):
+class InvalidResourceProvided(ClientSafeServiceException):
     """Raise whenever user's content corrupted or does not fits application rules"""
 
 
-class ValidationErrorExc(ClientSafeServiceError):
+class ValidationErrorExc(ClientSafeServiceException):
     """Raise in cases provided user data does not valid, for example email validation did not get through regular expressions"""
 
 
 # Only for Websocket case. Don't catch in service layer exception handler
-class WSMessageIsTooBig(ClientSafeServiceError):
+class WSMessageIsTooBig(ClientSafeServiceException):
     pass
 
 
 # 409
-class Collision(ClientSafeServiceError):
+class Collision(ClientSafeServiceException):
     """Raise when something is already exists"""
 
 
-# 500 DANGER ZONE :)
+# 500
 class PostgresError(ServiceLayerBaseBound):
     pass
 
@@ -150,7 +152,7 @@ class RedisError(ServiceLayerBaseBound):
     pass
 
 
-class MediaError(ServiceLayerBaseBound):
+class MediaStorageException(ServiceLayerBaseBound):
     """Raise in Image storage if problem on server side"""
 
 

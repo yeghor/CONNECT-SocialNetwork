@@ -45,12 +45,13 @@ def endpoint_exception_handler(func):
             except InternalServerErrorExc as e:
                 logging.log(level=e.logging_level, msg=str(e), exc_info=True)
                 raise HTTPException(
-                    status_code=e.status_code, detail=e.client_safe_detail
+                    status_code=e.status_code,
+                    detail="It's not you, it's us. Something went wrong, please, contact us or try again later",
                 )
 
             # In case endpoint returned unexpected data we're handling fastapi's `ResponseValidationError`
-            except (Exception, ResponseValidationError) as e:
-                logging.critical(msg=f"Unexpected exception: {e}", exc_info=True)
+            except (Exception, InternalServerErrorExc, ResponseValidationError) as e:
+                logging.critical(msg=str(e), exc_info=True)
                 raise HTTPException(
                     status_code=500,
                     detail="It's not you, it's us. Something went wrong, please, contact us or try again later",
@@ -76,14 +77,14 @@ def web_exceptions_raiser(func):
             PostgresError,
             ChromaDBError,
             RedisError,
-            MediaError,
+            MediaStorageException,
             JWTError,
             BcryptError,
             WrongDataFound,
             ValidationError,
         ) as e:
             logging_level = 40
-            if isinstance(e, MediaError):
+            if isinstance(e, MediaStorageException):
                 logging_level = 50  # Be aware of cases when postgres database and s3 or local data NOT synced
 
             InternalExcToRaise = InternalServerErrorExc(
@@ -145,8 +146,9 @@ def web_exceptions_raiser(func):
             NotFoundExc,
             ConflictExc,
             InternalServerErrorExc,
+            Exception,
         ) as e:
-            raise e
+            raise e from e
 
     return wrapper
 
@@ -213,7 +215,7 @@ def ws_endpoint_exception_handler(func):
                 PostgresError,
                 ChromaDBError,
                 RedisError,
-                MediaError,
+                MediaStorageException,
                 JWTError,
                 BcryptError,
                 WrongDataFound,
