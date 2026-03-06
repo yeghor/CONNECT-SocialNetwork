@@ -40,15 +40,10 @@ MEDIA_POST_IMAGE_URI = os.getenv("MEDIA_POST_IMAGE_URI", "/media/posts/")
 USER_AVATAR_URI = os.getenv("USER_AVATAR_URI", "media/users/")
 
 
-ALLOWED_IMAGES_EXTENSIONS_MIME_RAW = os.getenv("ALLOWED_IMAGES_EXTENSIONS_MIME")
-ALLOWED_EXTENSIONS = ALLOWED_IMAGES_EXTENSIONS_MIME_RAW.split(",")
-for i, ext in enumerate(ALLOWED_EXTENSIONS):
-    ALLOWED_EXTENSIONS[i] = ext.strip()
-
 
 # https://docs.aws.amazon.com/boto3/latest/guide/error-handling.html
 def media_storage_exception_handler_s3(func: Callable):
-    @wraps
+    @wraps(func)
     async def wrapper(*args, **kwargs):
         try:
             return await func(*args, **kwargs)
@@ -68,7 +63,7 @@ def media_storage_exception_handler_s3(func: Callable):
 
 # https://docs.aws.amazon.com/boto3/latest/guide/error-handling.html
 def media_storage_exception_handler_local(func: Callable):
-    @wraps
+    @wraps(func)
     async def wrapper(*args, **kwargs):
         try:
             return await func(*args, **kwargs)
@@ -88,11 +83,6 @@ class ImageStorageABC(ABC):
     Every method call must be wrapper into @web_exception_raiser decorator
     Image contents must be already validated
     """
-
-    @staticmethod
-    def _guess_mime(file_bytes: bytes) -> str:
-        """Guesses mime type from tile bytes"""
-        return magic.from_buffer(buffer=file_bytes, mime=True)
 
     @abstractmethod
     def upload_images_post(

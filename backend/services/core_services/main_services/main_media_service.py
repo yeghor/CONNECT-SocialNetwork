@@ -9,6 +9,7 @@ import mimetypes
 import os
 import aiofiles
 from uuid import uuid4
+import magic
 
 from exceptions.exceptions_handler import web_exceptions_raiser
 from exceptions.custom_exceptions import *
@@ -16,8 +17,13 @@ from exceptions.custom_exceptions import *
 MEDIA_AVATAR_PATH = os.getenv("MEDIA_AVATAR_PATH", "media/users/")
 MEDIA_POST_IMAGE_PATH = os.getenv("MEDIA_POST_IMAGE_PATH", "media/posts/")
 MAX_NUMBER_POST_IMAGES = int(os.getenv("MAX_NUMBER_POST_IMAGES", "3"))
-POST_IMAGE_MAX_SIZE_MB = os.getenv("POST_IMAGE_MAX_SIZE_MB")
-ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS")
+POST_IMAGE_MAX_SIZE_MB = int(os.getenv("POST_IMAGE_MAX_SIZE_MB"))
+
+ALLOWED_IMAGES_EXTENSIONS_MIME_RAW = os.getenv("ALLOWED_IMAGES_EXTENSIONS_MIME")
+ALLOWED_EXTENSIONS = ALLOWED_IMAGES_EXTENSIONS_MIME_RAW.split(",")
+for i, ext in enumerate(ALLOWED_EXTENSIONS):
+    ALLOWED_EXTENSIONS[i] = ext.strip()
+
 
 MEDIA_AVATAR_PATH = os.getenv("MEDIA_AVATAR_PATH", "media/users/")
 MEDIA_POST_IMAGE_PATH = os.getenv("MEDIA_POST_IMAGE_PATH", "media/posts/")
@@ -30,6 +36,12 @@ MEDIA_POST_IMAGE_PATH_TEST = os.getenv(
 
 
 class MainMediaService(MainServiceBase):
+    @staticmethod
+    def _guess_mime(file_bytes: bytes) -> str:
+        """Guesses mime type from tile bytes"""
+        return magic.from_buffer(buffer=file_bytes, mime=True)
+
+
     @staticmethod
     def _define_image_name(id_: str, image_type: ImageType, n_image: int = None) -> str:
         """Pass `n_image` only if `image_type` set to `'post'`"""
@@ -79,8 +91,11 @@ class MainMediaService(MainServiceBase):
         """Validate specified mime_type"""
         # TODO: Could reject valid file
         extension_mime = self._guess_mime(file_bytes=image_bytes)
-        splitted_mime = extension_mime.split("/")
 
+        print(extension_mime)
+
+        splitted_mime = extension_mime.split("/")
+        print(splitted_mime)
         if len(splitted_mime) != 2:
             return False
 
@@ -179,6 +194,10 @@ class MainMediaService(MainServiceBase):
             image_name = self._define_image_name(
                 id_=post_id, image_type="post", n_image=len(post.images)
             )
+            
+            mime_type = self._guess_mime(file_bytes=image_contents)
+            extension = await self._get_extension(content_type=mime_type, image_name=image_name)
+
             image_entry = PostImage(
                 image_id=str(uuid4()), post_id=post_id, image_name=image_name
             )
@@ -187,7 +206,7 @@ class MainMediaService(MainServiceBase):
             await self._ImageStorage.upload_images_post(
                 contents=image_contents,
                 content_type=specified_mime,
-                full_image_name=image_name,
+                full_image_name=f"{image_name}{extension}",
             )
         else:
             raise InvalidResourceProvided(
@@ -204,10 +223,13 @@ class MainMediaService(MainServiceBase):
             if user.avatar_image_name:
                 await self._ImageStorage.delete_avatar_user(image_name=user.user_id)
 
+            mime_type = self._guess_mime(file_bytes=image_contents)
+            extension = await self._get_extension(content_type=mime_type, image_name=user.user_id)
+
             await self._ImageStorage.upload_avatar_user(
                 contents=image_contents,
                 content_type=specified_mime,
-                full_image_name=user.user_id,
+                full_image_name=f"{user.user_id}{extension}",
             )
 
             user.avatar_image_name = user.user_id
