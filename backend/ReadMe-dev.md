@@ -5,14 +5,11 @@ This application suport choice using between S3 and Local storage to store image
 - Post: {PostId}-{ImageNumber}.png/jpg
 - User: {UserId}.png/jpg
 
-Filenames **must** be unique
-
 ## Dependencies
 Required pips on Windows:
 ```bash
 pip install python-magic-bin==0.4.14
 ```
-
 
 On Windows: In case error: Module magic has no attribute magic.from_buffer(...) ...
 ```bash
@@ -63,17 +60,12 @@ For groups, ChatRoom model `approved` field must always be setted on `True`. To 
 
 ### Chat pagination
 
-Add note about pagination normalization... 
-
+When some user is connected to chat room, new messages aren't loaded directly from backend.
+They're provided by websocket connection. That's why, if we don't change pagination starting point, user may load duplicate message.
+So, we need to manually increment chat pagination on every incoming websocket message.
 
 ## Frontend-Backend 
 
 Backend must **never** provide successful response with `detail` field. It will break frontend DTO!
 
 Fetchers wrapper over fetching functions that you pass to createInfiniteQueryOptionsUtils must always take page as a last param to prevent automatic infiniteQueryOptions creation crushes.
-
-# Issues 
-
-Pydantic schemas designed poorly. The application often returns unused or extra data. Which is not critical, but influences project support.
-
-This is the most problematic part of the application.
