@@ -8,7 +8,7 @@ from os import getenv
 import re
 from fastapi import HTTPException
 from authorization.authorization_utils import validate_password
-from exceptions.custom_exceptions import ValidationErrorExc
+from exceptions.custom_exceptions import ValidationExc
 
 load_dotenv()
 
@@ -60,7 +60,7 @@ class PasswordRecoveryBody(BaseModel):
     @model_validator(mode="after")
     def match_passwords(self) -> Self:
         if self.new_password_confirm != self.new_password:
-            raise ValidationErrorExc(
+            raise ValidationExc(
                 detail="NewPassword Pydantic schema: new passwords didn't match .",
                 client_safe_detail="Passwords didn't match",
             )

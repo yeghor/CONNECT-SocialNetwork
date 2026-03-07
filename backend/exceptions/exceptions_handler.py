@@ -101,7 +101,7 @@ def web_exceptions_raiser(func):
             InvalidFileMimeType,
             LimitReached,
             InvalidResourceProvided,
-            ValidationErrorExc,
+            ValidationExc,
             ValueError,
         ) as e:
             if isinstance(e, ValidationError) or isinstance(e, ValueError):

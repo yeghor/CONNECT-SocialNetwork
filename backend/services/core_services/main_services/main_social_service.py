@@ -11,9 +11,12 @@ from datetime import datetime
 from os import getenv
 from typing import List, TypeVar, Type, Literal, Iterable, NamedTuple, Union, Dict
 from pydantic_schemas.pydantic_schemas_social import *
+from uuid import uuid4
 
 from exceptions.exceptions_handler import web_exceptions_raiser
 from exceptions.custom_exceptions import *
+
+from validation_utils import *
 
 load_dotenv()
 
@@ -505,6 +508,8 @@ class MainServiceSocial(MainServiceBase):
 
     @web_exceptions_raiser
     async def make_post(self, data: MakePostDataSchema, user: User) -> PostBaseShort:
+        validate_post_text_content(title=data.title, text=data.text)
+
         if data.parent_post_id:
             parent_post = await self._PostgresService.get_entry_by_id(
                 id_=data.parent_post_id, ModelType=Post

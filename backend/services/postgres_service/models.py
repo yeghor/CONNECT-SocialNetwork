@@ -1,25 +1,13 @@
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
-    validates,
     mapped_column,
     relationship,
 )
-from sqlalchemy import ForeignKey, text
-from uuid import uuid4
+from sqlalchemy import ForeignKey
 from datetime import datetime
 from typing import List
-from dotenv import load_dotenv
-from os import getenv
 import enum
-
-
-load_dotenv()
-
-
-def validate_field_range():
-    """Soon. To get rid of repetative @validates logic"""
-
 
 class Base(DeclarativeBase):
     pass
@@ -69,15 +57,15 @@ class User(Base):
         "ChatRoom", secondary="userroom", back_populates="participants", lazy="selectin"
     )
 
-    @validates("username")
-    def validate_username(self, key, username: str):
-        if (
-            not int(getenv("USERNAME_MIN_L"))
-            <= len(username)
-            <= int(getenv("USERNAME_MAX_L"))
-        ):
-            raise ValueError("Username length is out of range")
-        return username
+    # @validates("username")
+    # def validate_username(self, key, username: str):
+    #     if (
+    #         not int(getenv("USERNAME_MIN_L"))
+    #         <= len(username)
+    #         <= int(getenv("USERNAME_MAX_L"))
+    #     ):
+    #         raise ValueError("Username length is out of range")
+    #     return username
 
     def __repr__(self):
         return f"Username: {self.username}"
@@ -131,21 +119,21 @@ class Post(Base):
         "Post", back_populates="parent_post", lazy="selectin"
     )
 
-    @validates("title")
-    def validate_title(self, key, title: str):
-        if (
-            not int(getenv("POST_TITLE_MIN_L"))
-            <= len(title)
-            <= int(getenv("POST_TITLE_MAX_L"))
-        ):
-            raise ValueError("Post title length is out of range")
-        return title
+    # @validates("title")
+    # def validate_title(self, key, title: str):
+    #     if (
+    #         not int(getenv("POST_TITLE_MIN_L"))
+    #         <= len(title)
+    #         <= int(getenv("POST_TITLE_MAX_L"))
+    #     ):
+    #         raise ValueError("Post title length is out of range")
+    #     return title
 
-    @validates("text")
-    def validate_text(self, key, text: str):
-        if not len(text) <= int(getenv("POST_TEXT_MAX_L")):
-            raise ValueError("Post text length is out of range")
-        return text
+    # @validates("text")
+    # def validate_text(self, key, text: str):
+    #     if not len(text) <= int(getenv("POST_TEXT_MAX_L")):
+    #         raise ValueError("Post text length is out of range")
+    #     return text
 
     def __repr__(self):
         return f"Post name: {self.title} | Rate: {self.popularity_rate} | Post id: {self.post_id}"

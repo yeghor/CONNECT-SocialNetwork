@@ -27,12 +27,12 @@ def jwt_error_handler(func):
         except jwt_exceptions.DecodeError as e:
             raise InvalidResourceProvided(
                 detail=f"JWTService: JWT Token decoding failed. Function - {func.__name__}",
-                client_safe_detail="Authorization token is not valid"
+                client_safe_detail="Authorization token is not valid",
             ) from e
         except jwt_exceptions.PyJWTError as e:
             raise InvalidResourceProvided(
                 detail=f"JWTService: Invalid or malformed JWT token. Function - {func.__name__}",
-                client_safe_detail="Authorization token is not valid"
+                client_safe_detail="Authorization token is not valid",
             ) from e
         except JWTError as e:
             raise e from e
@@ -53,7 +53,7 @@ class JWTService:
         This method validates and removes "Bearer " prefix from token
         """
         if not jwt_token.startswith("Bearer ") or not jwt_token:
-            raise ValidationErrorExc(
+            raise ValidationExc(
                 detail=f"JWTService: provided jwt: {jwt_token} did not pass startswith('Bearer') check.",
                 client_safe_detail="Invalid token",
             )

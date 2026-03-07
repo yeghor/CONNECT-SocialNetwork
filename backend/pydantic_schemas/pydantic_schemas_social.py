@@ -3,13 +3,9 @@ from __future__ import annotations
 from services.postgres_service.models import ActionType
 
 from pydantic import BaseModel, field_validator, Field, ValidationInfo, model_validator
-from uuid import UUID
 from datetime import datetime
 from typing import List, Any, Annotated, Literal
 from dotenv import load_dotenv
-from os import getenv
-
-load_dotenv()
 
 
 class ActionSchemaShort(BaseModel):
@@ -109,8 +105,8 @@ class UserSchema(UserLiteSchema):
     me: bool
 
 
-# =================
 # Body data structure
+
 class PostDataSchemaBase(BaseModel):
     title: str
     text: str

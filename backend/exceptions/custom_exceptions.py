@@ -125,7 +125,7 @@ class InvalidResourceProvided(ClientSafeServiceException):
     """Raise whenever user's content corrupted or does not fits application rules"""
 
 
-class ValidationErrorExc(ClientSafeServiceException):
+class ValidationExc(ClientSafeServiceException):
     """Raise in cases provided user data does not valid, for example email validation did not get through regular expressions"""
 
 

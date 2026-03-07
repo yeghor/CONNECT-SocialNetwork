@@ -1,4 +1,5 @@
 import authorization as authorization_utils
+import validation_utils
 from services.core_services import MainServiceBase
 from services.postgres_service import User
 from pydantic_schemas.pydantic_schemas_auth import *
@@ -104,8 +105,9 @@ class MainServiceAuth(MainServiceBase):
 
     @web_exceptions_raiser
     async def register(self, credentials: RegisterBody) -> EmailProvided:
-        authorization_utils.validate_email(credentials.email)
-        authorization_utils.validate_password(credentials.password)
+        validation_utils.validate_email(credentials.email)
+        validation_utils.validate_password(credentials.password)
+        validation_utils.validate_username(credentials.username)
 
         if await self._PostgresService.get_user_by_username_or_email(
             username=credentials.username, email=credentials.email
@@ -355,6 +357,9 @@ class MainServiceAuth(MainServiceBase):
 
     @web_exceptions_raiser
     async def delete_user(self, password: str, user: User) -> None:
+        """Unsupported handler"""
+        pass
+
         if not authorization_utils.check_password(
             entered_pass=password, hashed_pass=user.password_hash
         ):
