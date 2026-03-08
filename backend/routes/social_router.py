@@ -271,11 +271,11 @@ async def get_recent_activity(
     user_: User | None = Depends(authorize_public_endpoint),
     session: AsyncSession = Depends(get_session_depends),
 ) -> List[RecentActivitySchema]:
-    user = await merge_model(user_, User)
+    user = await merge_model(session, user_)
     async with await MainServiceContextManager[MainServiceSocial].create(
         postgres_session=session, MainServiceType=MainServiceSocial
     ) as social:
-        return await social.get_recent_activity(user)
+        return await social.get_recent_activity(user_id=user.user_id)
 
 
 @social.get("/friends")

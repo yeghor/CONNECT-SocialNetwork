@@ -954,16 +954,18 @@ class MainServiceSocial(MainServiceBase):
                     avatar_url=await self._ImageStorage.get_user_avatar_url(
                         action.owner.username
                     ),
+                    type=action.action.value,
                     message=f"{action.owner.username} liked your post",
-                    date=action.date,
+                    date=action.date
                 )
             case "reply":
                 RecentActivitySchema(
                     avatar_url=await self._ImageStorage.get_user_avatar_url(
                         action.owner.username
                     ),
+                    type=action.action.value,
                     message=f"{action.owner.username} left a reply to your post: {action.post.title}",
-                    date=action.date,
+                    date=action.date
                 )
 
     async def _get_recent_followed_post_message(self, post: Post) -> Dict | None:
@@ -976,16 +978,20 @@ class MainServiceSocial(MainServiceBase):
                 post.owner.username
             ),
             message=f"{post.owner.username} made a new post.",
-            date=post.published,
+            type="post",
+            date=post.published
         )
 
     @web_exceptions_raiser
     async def get_recent_activity(
-        self, user: User | None
+        self, user_id: str | None
     ) -> List[RecentActivitySchema]:
-        if not user:
-
+        if not user_id:
             return []
+
+        # We don't accept User from endpoint, since after merging
+        # Instances loses all lazy loaded relationships
+        user = await self._PostgresService.get_user_by_id(user_id=user_id)
 
         followed_posts = await self._PostgresService.get_fresh_followed_posts(
             user, RECENT_ACTIVITY_ENTRIES
@@ -1004,7 +1010,9 @@ class MainServiceSocial(MainServiceBase):
         activity: List[RecentActivitySchema] = await asyncio.gather(
             *followed_coroutines, *action_coroutines
         )
-        activity = filter(lambda i: bool(i), activity)
+        activity = list(filter(lambda i: bool(i), activity))
+
+        print(activity)
 
         return sorted(activity, key=lambda message: message.date, reverse=True)[
             :RECENT_ACTIVITY_ENTRIES

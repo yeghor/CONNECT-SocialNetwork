@@ -7,7 +7,6 @@ from typing_extensions import Self
 from os import getenv
 import re
 from fastapi import HTTPException
-from authorization.authorization_utils import validate_password
 from exceptions.custom_exceptions import ValidationExc
 
 load_dotenv()

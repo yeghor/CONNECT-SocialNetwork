@@ -13,7 +13,7 @@ import {
     manualUnauthorizedMessage,
     unauthorizedRedirectURI
 } from "../consts.ts";
-import { validateGETResponse as validateResponse } from "../helpers/responseHandlers/getResponseHandlers.ts";
+import { validateAPIResponse as validateResponse } from "../helpers/responseHandlers/responseHandlers.ts";
 
 // & Types Intersection
 // If object type {success: false} intersects with BadResponse *(which has that exactly field)* - function return type will be BadResponse

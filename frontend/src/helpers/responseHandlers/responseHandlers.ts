@@ -1,23 +1,18 @@
-import { AccessTokenResponse, BadResponse, SuccessfulResponse } from "../../fetching/DTOs.ts"
+import { BadResponse, SuccessfulResponse } from "../../fetching/DTOs.ts"
 import {
-    AccessTokenCookieKey,
-    unauthorizedRedirectURI,
-    internalServerErrorURI, RefreshTokenCookieKey,
+    internalServerErrorURI,
     notFoundURI
 } from "../../consts.ts";
-import { getCookies, getCookieTokens, setUpdateCookie } from "../cookies/cookiesHandler.ts";
-import  { fetchRefresh } from "../../fetching/fetchAuth.ts";
 import { NavigateFunction } from "react-router-dom"
-import { APIResponse } from "../../fetching/fetchUtils.ts";
 
 /*
 This functions does NOT validate 401 code. Code 401 - returns true
 */
-export const validateGETResponse = (response: BadResponse | SuccessfulResponse, setErrorMessage?: CallableFunction, navigate?: NavigateFunction): boolean => {
+export const validateAPIResponse = (response: BadResponse | SuccessfulResponse, setErrorMessage?: CallableFunction, navigate?: NavigateFunction): boolean => {
     if (response.success || response.statusCode === 401) {
         return true;
     } else {
-        if (response.statusCode === 500) { 
+        if (response.statusCode === 500 || response.statusCode == 422) { 
             if (navigate) {
                 navigate(internalServerErrorURI);                
             }

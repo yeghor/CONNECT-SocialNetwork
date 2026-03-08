@@ -29,7 +29,7 @@ def validate_email(email: str) -> None:
 def validate_username(username: str) -> None:
     """Raises ValidationErrorExc on failed validation"""
 
-    if not re.match(r"^[\p{L}\p{N}._\-!'`*]{3,32}$", username):
+    if not re.match(r"^[\w._\-!'`*]{3,32}$", username):
         raise ValidationExc(
             detail="validate_username: Username validation failed.",
             client_safe_detail="Username is not valid",

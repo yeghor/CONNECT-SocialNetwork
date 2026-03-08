@@ -506,9 +506,14 @@ class PostgresService:
 
     @postgres_exception_handler(action="Get most fresh followed posts")
     async def get_fresh_followed_posts(self, user: User, n: int) -> List[Post]:
+        # Using followed_ids instead of model instances to prevent
+        # in_() not yet supported for relationships.
+        # Exception
+        followed_ids = [followed.user_id for followed in user.followed]
+
         result = await self.__session.execute(
             select(Post)
-            .where(Post.owner.in_((user.followed)))
+            .where(Post.owner_id.in_(followed_ids))
             .order_by(Post.published.desc())
             .limit(n)
         )
@@ -517,9 +522,14 @@ class PostgresService:
 
     @postgres_exception_handler(action="Get most fresh action for a user")
     async def get_fresh_actions_for_user(self, user: User, n: int) -> List[PostActions]:
+        # Using followed_ids instead of model instances to prevent
+        # in_() not yet supported for relationships.
+        # Exception
+        post_ids = [post.post_id for post in user.posts]
+
         result = await self.__session.execute(
             select(PostActions)
-            .where(PostActions.post.in_(user.posts))
+            .where(PostActions.post_id.in_(post_ids))
             .order_by(PostActions.date.desc())
             .limit(n)
         )

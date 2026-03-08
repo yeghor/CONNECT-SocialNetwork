@@ -1,7 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { fetchConfirmEmail2FA, fetchConfirmPasswordRecovery2FA, fetchIssueNewSecondFactor as fetchIssueNew2FA } from "../../fetching/fetchAuth";
-import { validateGETResponse } from "../../helpers/responseHandlers/getResponseHandlers";
+import { validateAPIResponse } from "../../helpers/responseHandlers/responseHandlers";
 import { AccessTokenCookieKey, createPasswordRecoveryLocationState, homeURI as homePageURI, internalServerErrorURI, newPasswordRecoveryURI, RefreshTokenCookieKey } from "../../consts";
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler";
 import { safeAPICallNoToken, safeAPICallPrivate, safeAPICallPublic, safeAPICallRecovery } from "../../fetching/fetchUtils";
@@ -112,7 +112,7 @@ const SecondFactor = (props: SecondFactorProps) => {
                     console.log("sending respesne")
                     response = await safeAPICallNoToken<AuthTokensResponse>(fetchConfirmEmail2FA, navigate, setErrorMesage, joinedConfirmationCode, emailToConfirm);
 
-                    if(!validateGETResponse(response, setErrorMesage, navigate)) {
+                    if(!validateAPIResponse(response, setErrorMesage, navigate)) {
                         return;
                     }
 
@@ -125,7 +125,7 @@ const SecondFactor = (props: SecondFactorProps) => {
                 case "password-recovery":
                     response = await safeAPICallNoToken<PasswordRecoveryTokenResponse>(fetchConfirmPasswordRecovery2FA, navigate, setErrorMesage, joinedConfirmationCode, emailToConfirm);
 
-                    if(!validateGETResponse(response, setErrorMesage, navigate)) {
+                    if(!validateAPIResponse(response, setErrorMesage, navigate)) {
                         return;
                     }
 

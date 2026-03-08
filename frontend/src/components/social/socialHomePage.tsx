@@ -19,7 +19,6 @@ const SocialHomePage = () => {
             <div className="w-1/3">
                 <RecentActivityComponent />
             </div>
-            <button className="bg-red-500 text-white" onClick={() => { removeCookie(AccessTokenCookieKey); removeCookie(RefreshTokenCookieKey); } }>logout type button</button>
         </div>
     )
 };

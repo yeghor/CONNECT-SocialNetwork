@@ -71,7 +71,7 @@ class PostSchema(PostBase):
 
 
 class RecentActivitySchema(BaseModel):
-    avatar_url: str
+    avatar_url: str | None
     type: Literal["post", "like", "reply"]
     message: str
     date: datetime

@@ -35,7 +35,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install deps
-        run: pip install -r requirements.txt
+        run: pip install -e .
 
     #   - name: Test Authorization
     #     run: pytest auth_tests.py
