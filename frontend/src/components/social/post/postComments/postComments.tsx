@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { createInfiniteQueryOptionsUtil } from "../../../butterySmoothScroll/scrollVirtualizationUtils.ts";
 import { useNavigate, NavigateFunction } from "react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -25,29 +25,33 @@ interface PostsCommentsFlow {
 type PostsCommentsFlowPrepared = PostsCommentsFlow[];
 
 const createPostFlowResponse = (data: ShortPost[]): PostsCommentsFlowPrepared => {
-    return data.map((post) => {
+    console.log("startiong mapping")
+    const flowData = data.map((post) => {
+        console.log(post.picturesURLs)
         let estimatedSize: number = estimatePostSize(post.picturesURLs.length, post.isReply);
-
+        console.log("computed estimatedSize")
         return {
             estimatedSize: estimatedSize,
             postId: post.postId,
             postData: post
         };
-    })
+    });
+    console.log(flowData)
+    return flowData;
 }
 
 const commentsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, postId: string, page: number): Promise<PostsCommentsFlowPrepared> => {
-    console.log(`Fetching comments for post ${postId}, page ${page}`); // Проверьте, что page не undefined
+    console.log(`Fetching comments for post ${postId}, page ${page}`);
     const fetchedPostsResponse = await safeAPICallPublic<PostCommentsResponse>(tokens, fetchPostComments, navigate, undefined, postId, page);
-
-    console.log("Response:", fetchedPostsResponse);
-
+    console.log("bamabm ")
     if (fetchedPostsResponse.success === false) {
-        console.log("returninng empty list")
+        console.log("return []");
         return [];
     }
 
-    console.log(fetchedPostsResponse.data);
+    console.log("fetchedPostsResponse.data", fetchedPostsResponse.data)
+    console.log("createPostFlowResponse(fetchedPostsResponse.data)", createPostFlowResponse(fetchedPostsResponse.data));
+    console.log("data mapped")
     return createPostFlowResponse(fetchedPostsResponse.data);
 }
 
@@ -56,14 +60,14 @@ export interface CommentProps {
 }
 
 const PostComments = (props: CommentProps) => {
-    console.log("rendering post comments")
     const navigate = useNavigate();
     const tokens = getCookieTokens(undefined);
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(commentsFetcher, [tokens, navigate, props.originalPostId], ["postComments", props.originalPostId]));
-    const [ posts, setPosts ] = useState<PostsCommentsFlowPrepared>(data?.pages ?? []);
+
+    const posts: PostsCommentsFlowPrepared = data?.pages?.flatMap((page) => page ?? []) ?? [];
 
     const virtualizer = useVirtualizer({
         count: posts.length,
@@ -78,24 +82,20 @@ const PostComments = (props: CommentProps) => {
 
     const virtualItems = virtualizer.getVirtualItems();
 
-    const flatMapPosts = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((post) => post !== undefined) ?? []
-
     const infiniteQuerying = async () => {
-        setPosts(flatMapPosts)
         const lastItem = virtualItems[virtualItems.length - 1]
         if (infiniteQieryingFetchGuard(hasNextPage, isFetchingNextPage, lastItem, posts.length)) await fetchNextPage();
     }
 
     useEffect(() => {
         infiniteQuerying();
-    }, [virtualItems, hasNextPage, isFetchingNextPage, props.originalPostId]);
+    }, [virtualItems, hasNextPage, isFetchingNextPage, posts.length, props.originalPostId]);
 
     const virtualizedComponentsProps = posts.map((post) => { return { postData: post.postData, isMyPost: false} } )
-    console.log(virtualItems.length)
 
     return(
         <div ref={scrollRef} className="h-600px overflow-auto mb-16 relative mx-auto border-gray-300">
-            { virtualItems.length !== 0 ? <p className="text-center text-white my-8">{"No comments yet :("}</p> : <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
+            { virtualItems.length === 0 ? <p className="text-center text-white my-8">{"No comments yet :("}</p> : <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
                 <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={virtualizedComponentsProps} />
             </div>}
         </div>

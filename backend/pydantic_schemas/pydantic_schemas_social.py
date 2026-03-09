@@ -53,11 +53,10 @@ class PostBase(PostBaseShort):
     replies: int = Field(default=0)
 
     is_my_post: bool
-
+    pictures_urls: List[str]
 
 class PostLiteSchema(PostBase):
     parent_post: PostBase | None
-    pictures_urls: List[str]
 
 
 class PostSchema(PostBase):

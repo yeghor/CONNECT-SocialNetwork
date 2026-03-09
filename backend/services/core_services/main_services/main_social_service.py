@@ -882,6 +882,9 @@ class MainServiceSocial(MainServiceBase):
                     is_my_post=(
                         user.user_id == post.parent_post.owner_id if user else False
                     ),
+                    pictures_urls=await self._ImageStorage.get_post_image_urls(
+                        [image.image_name for image in post.parent_post.images]
+                    )
                 )
                 if post.parent_post
                 else None
@@ -891,7 +894,7 @@ class MainServiceSocial(MainServiceBase):
             is_reply=post.is_reply,
         )
 
-    async def _create_post_lite_schema_via_gather(
+    async def _create_post_base_schema_via_gather(
         self, user_id: str, post: Post
     ) -> PostBase:
         images_coroutines = [
@@ -935,7 +938,7 @@ class MainServiceSocial(MainServiceBase):
         )
 
         replies_coroutines = [
-            self._create_post_lite_schema_via_gather(user_id=user.user_id, post=reply)
+            self._create_post_base_schema_via_gather(user_id=user.user_id, post=reply)
             for reply in replies
         ]
 
