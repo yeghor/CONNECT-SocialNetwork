@@ -8,7 +8,8 @@ interface ownerProps {
     avatarHeight: number;
 }
 
-const OwnerComponent = (props: ownerProps) => {
+/* Includes published field for post and owner data */
+const PostOwnerComponent = (props: ownerProps) => {
     return (
         <div>
             <div className="flex items-center gap-2">
@@ -25,4 +26,4 @@ const OwnerComponent = (props: ownerProps) => {
     )
 };
 
-export default OwnerComponent;
+export default PostOwnerComponent;

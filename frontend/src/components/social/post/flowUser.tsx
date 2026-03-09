@@ -2,7 +2,7 @@ import React from "react";
 import {ShortUserProfile} from "../../../fetching/DTOs.ts";
 import {Link} from "react-router-dom";
 import {specificPostURI, specificUserProfileURI} from "../../../consts.ts";
-import OwnerComponent from "./owner.tsx";
+import PostOwnerComponent from "./owner.tsx";
 
 interface UserProps {
     userData: ShortUserProfile;

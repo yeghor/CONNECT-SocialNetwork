@@ -42,14 +42,15 @@ const RecentActivityComponent = () => {
             <ul>
                 {recentActivity?.map((rc, index) => {
                     return(
-                            <li key={index} className="p-4">
+                            <li key={index} className="p-4 text-white flex items-center">
                                 <img 
                                     src={rc.avatarURL || "/uknown-user-image.jpg"} 
                                     alt="avatar" 
-                                    className="h-10 w-auto rounded-full object-cover border border-white/20 group-hover:scale-110 transition-transform"
+                                    className="h-10 mr-4 w-auto rounded-full object-cover border border-white/20 group-hover:scale-110 transition-transform"
                                 />
                                 <span className="text-white">{rc.message}</span>
-                                <span className="mx-2 text-grey-700">{calculateElapsedTime(rc.date)}</span>
+                                <span>{rc.date.toISOString().split("T")[0]}</span>
+                                <span className="mx-2 font-semibold">{`${rc.date.getHours()}:${rc.date.getMinutes()}`}</span>
                             </li>
                     )
                 }) ?? null}

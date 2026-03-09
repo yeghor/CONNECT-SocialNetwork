@@ -953,7 +953,7 @@ class MainServiceSocial(MainServiceBase):
 
         match action.action.value:
             case "like":
-                RecentActivitySchema(
+                return RecentActivitySchema(
                     avatar_url=await self._ImageStorage.get_user_avatar_url(
                         action.owner.username
                     ),
@@ -962,7 +962,7 @@ class MainServiceSocial(MainServiceBase):
                     date=action.date
                 )
             case "reply":
-                RecentActivitySchema(
+                return RecentActivitySchema(
                     avatar_url=await self._ImageStorage.get_user_avatar_url(
                         action.owner.username
                     ),

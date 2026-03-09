@@ -10,7 +10,7 @@ import { fetchLikePost, fetchLoadPost, fetchUnlikePost } from "../../fetching/fe
 import { safeAPICallPrivate, safeAPICallPublic } from "../../fetching/fetchUtils.ts";
 import MakePost from "./post/makePost.tsx";
 import { loginURI, maxRequestsQueueLength, specificPostURI, tooMuchActivityMessage } from "../../consts.ts";
-import OwnerComponent from "./post/owner.tsx";
+import PostOwnerComponent from "./post/owner.tsx";
 
 const PostPage = () => {
     const navigate = useNavigate();
@@ -84,7 +84,7 @@ const PostPage = () => {
             </Link> : null }
             <div className="w-[900px] mx-auto p-6 bg-white/10 backdrop-blur rounded-2xl shadow-sm m-12">
                 <div className="flex items-center gap-3 mb-4">
-                    <OwnerComponent ownerData={postData.owner} postPublished={postData.published} avatarHeight={10} />
+                    <PostOwnerComponent ownerData={postData.owner} postPublished={postData.published} avatarHeight={10} />
                 </div>
 
                 <div className="text-white leading-relaxed mb-4 font-bold">{postData.title}</div>

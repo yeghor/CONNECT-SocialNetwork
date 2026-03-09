@@ -1,6 +1,6 @@
 import React from "react";
 import { FeedPost, ShortPost } from "../../../fetching/DTOs.ts";
-import OwnerComponent from "./owner.tsx";
+import PostOwnerComponent from "./owner.tsx";
 import {Link} from "react-router-dom";
 
 import { specificPostURI } from "../../../consts.ts";
@@ -69,7 +69,7 @@ const FlowPost = (props: FlowPostProps) => {
                 <div className="p-4 flex flex-col gap-2">
                     <h5 className="text-2xl font-bold text-white text-ce">{props.postData?.title}</h5>
 
-                    <OwnerComponent ownerData={props.postData.owner} postPublished={props.postData.published} avatarHeight={8}/>
+                    <PostOwnerComponent ownerData={props.postData.owner} postPublished={props.postData.published} avatarHeight={8}/>
 
                     <div className="flex items-center gap-4 text-sm text-gray-300 mt-2">
                         <span>Likes: {props.postData?.likes || 0}</span>

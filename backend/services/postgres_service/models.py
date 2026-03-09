@@ -189,6 +189,8 @@ class PostActions(Base):
         "User", back_populates="actions", lazy="selectin"
     )
 
+    def __str__(self) -> str:
+        return f"Action: {self.action.value}, post_id: {self.post_id}"
 
 # CHAT MODELS
 
