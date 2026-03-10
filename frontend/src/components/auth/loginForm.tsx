@@ -16,6 +16,8 @@ import { validateAPIResponse } from "../../helpers/responseHandlers/responseHand
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
 import { Link } from "react-router-dom";
 import SecondFactor from "./secondFactor.tsx";
+import WarningMessage from "../base/warningMessage.tsx";
+import { safeAPICallNoToken } from "../../fetching/fetchUtils.ts";
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -33,39 +35,41 @@ const LoginForm = () => {
 
         setErrorMessage("");
 
-        try {
-            const response = await fetchLogin(username, password);
+        await safeAPICallNoToken(fetchLogin, navigate, setErrorMessage, username, password);
 
-            if(!validateAPIResponse(response, setErrorMessage, navigate)) {
-                return;
-            }
+        // try {
+        //     const response = await fetchLogin(username, password);
+
+        //     if(!validateAPIResponse(response, setErrorMessage, navigate)) {
+        //         return;
+        //     }
             
-            if (response.success) {
-                console.log("succesfull response, ", response)
-                if (response.emailToConfirm) {
-                    setEmailToConfirm(response.emailToConfirm);
-                    setShowSecondFactor(true);
-                } else {
-                    setUpdateCookie(AccessTokenCookieKey, response.accessToken, null);
-                    setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, null);
-                    navigate(homeURI);                    
-                }
+        //     if (response.success) {
+        //         console.log("succesfull response, ", response)
+        //         if (response.emailToConfirm) {
+        //             setEmailToConfirm(response.emailToConfirm);
+        //             setShowSecondFactor(true);
+        //         } else {
+        //             setUpdateCookie(AccessTokenCookieKey, response.accessToken, null);
+        //             setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, null);
+        //             navigate(homeURI);                    
+        //         }
 
-                return;
-            }
+        //         return;
+        //     }
 
-            if (response.statusCode === 401 || response.statusCode === 400) {
-                setErrorMessage(response.detail);
-                return;
-            }
+        //     if (response.statusCode === 401 || response.statusCode === 400) {
+        //         setErrorMessage(response.detail);
+        //         return;
+        //     }
             
-            navigate(internalServerErrorURI);
+        //     navigate(internalServerErrorURI);
 
-        } catch (err) {
-            console.error(err);
-            navigate(internalServerErrorURI);
-            return;
-        }
+        // } catch (err) {
+        //     console.error(err);
+        //     navigate(internalServerErrorURI);
+        //     return;
+        // }
     }
 
     return (
@@ -77,9 +81,7 @@ const LoginForm = () => {
                             Sign in to your account
                         </h1>
                             {errorMessage && (
-                                <div className="mb-4 px-4 py-2 rounded text-red-300 border border-red-300">
-                                    {errorMessage}
-                                </div>
+                                <WarningMessage message={errorMessage} />
                             )}
                         <form onSubmit={formHandler} className="space-y-4 md:space-y-6" action="#">
                             <div>

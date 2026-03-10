@@ -1015,8 +1015,6 @@ class MainServiceSocial(MainServiceBase):
         )
         activity = list(filter(lambda i: bool(i), activity))
 
-        print(activity)
-
         return sorted(activity, key=lambda message: message.date, reverse=True)[
             :RECENT_ACTIVITY_ENTRIES
         ]

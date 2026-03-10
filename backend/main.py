@@ -97,9 +97,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router.auth)
-app.include_router(social_router.social)
-app.include_router(media_router.media_router)
+app.include_router(auth_router.Auth)
+app.include_router(social_router.Social)
+app.include_router(media_router.Media)
 app.include_router(chat)
 
 try:

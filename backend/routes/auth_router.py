@@ -14,10 +14,10 @@ from pydantic_schemas.pydantic_schemas_auth import _2FAConfirmationBody
 
 from exceptions.exceptions_handler import endpoint_exception_handler
 
-auth = APIRouter()
+Auth = APIRouter()
 
 
-@auth.post("/login")
+@Auth.post("/login")
 @endpoint_exception_handler
 async def login(
     credentials: LoginBody = Body(...),
@@ -30,7 +30,7 @@ async def login(
 
 
 # ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
-@auth.post("/register")
+@Auth.post("/register")
 @endpoint_exception_handler
 async def register(
     credentials: RegisterBody = Body(...),
@@ -42,7 +42,7 @@ async def register(
         return await auth.register(credentials=credentials)
 
 
-@auth.post("/auth/2fa/confirm-email")
+@Auth.post("/auth/2fa/confirm-email")
 @endpoint_exception_handler
 async def confirm_2fa_email(
     confirmation_credentials: _2FAConfirmationBody,
@@ -54,7 +54,7 @@ async def confirm_2fa_email(
         return await auth.confirm_email_2fa(credentials=confirmation_credentials)
 
 
-@auth.post("/auth/2fa/password-recovery")
+@Auth.post("/auth/2fa/password-recovery")
 @endpoint_exception_handler
 async def confirm_2fa_password_recovery(
     credentials: _2FAConfirmationBody,
@@ -67,7 +67,7 @@ async def confirm_2fa_password_recovery(
 
 
 # ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
-@auth.post("/auth/new/2fa")
+@Auth.post("/auth/new/2fa")
 @endpoint_exception_handler
 async def issue_new_2fa(
     email: EmailProvided, session: AsyncSession = Depends(get_session_depends)
@@ -78,7 +78,7 @@ async def issue_new_2fa(
         return await auth.issue_new_second_factor(email=email.email)
 
 
-@auth.post("/auth/password-recovery")
+@Auth.post("/auth/password-recovery")
 @endpoint_exception_handler
 async def request_password_recovery(
     credentials: EmailProvided, session: AsyncSession = Depends(get_session_depends)
@@ -89,7 +89,7 @@ async def request_password_recovery(
         return await auth.request_password_recovery(email=credentials.email)
 
 
-@auth.patch("/auth/password-recovery")
+@Auth.patch("/auth/password-recovery")
 @endpoint_exception_handler
 async def password_recovery(
     credentials: PasswordRecoveryBody,
@@ -103,7 +103,7 @@ async def password_recovery(
         return await auth.recover_password(user=user, credentials=credentials)
 
 
-@auth.patch("/users/my-profile/password")
+@Auth.patch("/users/my-profile/password")
 @endpoint_exception_handler
 async def change_password(
     credentials: ChangePasswordBody,
@@ -117,7 +117,7 @@ async def change_password(
         return await auth.change_password(user=user, credentials=credentials)
 
 
-@auth.post("/logout")
+@Auth.post("/logout")
 @endpoint_exception_handler
 async def logout(
     session: AsyncSession = Depends(get_session_depends),
@@ -129,7 +129,7 @@ async def logout(
         return await auth.logout_on_this_device(tokens=tokens)
 
 
-@auth.post("/logout/full")
+@Auth.post("/logout/full")
 @endpoint_exception_handler
 async def fully_logout(
     user_: User = Depends(authorize_private_endpoint),
@@ -142,7 +142,7 @@ async def fully_logout(
         return await auth.logout_on_every_device(user=user)
 
 
-@auth.post("/refresh")
+@Auth.post("/refresh")
 @endpoint_exception_handler
 async def refresh_token(
     token=Header(..., examples="Bearer (refresh_token)"),
@@ -154,7 +154,7 @@ async def refresh_token(
         return await auth.refresh_token(refresh_token=token)
 
 
-@auth.patch("/users/my-profile/username")
+@Auth.patch("/users/my-profile/username")
 @endpoint_exception_handler
 async def change_username(
     credentials: NewUsernameBody = Body(...),
@@ -168,7 +168,7 @@ async def change_username(
         await auth.change_username(user=user, credentials=credentials)
 
 
-@auth.delete("/users/my-profile")
+@Auth.delete("/users/my-profile")
 @endpoint_exception_handler
 async def delete_profile(
     password: str = Header(...),

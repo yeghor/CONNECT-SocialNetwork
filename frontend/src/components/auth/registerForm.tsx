@@ -15,6 +15,8 @@ import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler"
 import { validateFormString } from "../../helpers/validatorts"
 import {Link} from "react-router-dom";
 import SecondFactor from "./secondFactor.tsx";
+import LoadingIndicator from "../base/centeredLoadingIndicator.tsx";
+import WarningMessage from "../base/warningMessage.tsx";
 
 const RegisterForm = () => {
     const navigate = useNavigate();
@@ -26,58 +28,63 @@ const RegisterForm = () => {
 
     const [ emailToConfirm, setEmailToConfirm ] = useState<string | null>(null);
     const [ showSecondFactor, setShowSecondFactor ] = useState(false);
+    const [ showLoading, setShowLoading ] = useState(false);
 
     const formHandler = async (event: React.FormEvent): Promise<void> => {
-        event.preventDefault();
+        setShowLoading(true);
 
-        setErrorMessage("");
-
-        if(!validateFormString(username, "username")) {
-            setErrorMessage(invalidUsernameMessage);
-            return;
-            
-        } else if(!validateFormString(email, "email")) {
-            setErrorMessage(invalidEmailMessage);
-            return;
-
-        } else if(!validateFormString(password, "password")) {
-            console.log("password is not secure enough: ", password);
-            setErrorMessage(passwordNotSecureEnoughMessage);
-            return;
-        }
-
-        // Manually calling fetchLogin, because safeApiCall doesn't provide interface to working without tokens object. In our case, on login we can't have it.
         try {
-            const response = await fetchRegister(username, email, password);
-            console.log(response)
-            if(!validateAPIResponse(response, setErrorMessage, navigate)) {
+            event.preventDefault();
+
+            setErrorMessage("");
+
+            if(!validateFormString(username, "username")) {
+                setErrorMessage(invalidUsernameMessage);
+                return;
+                
+            } else if(!validateFormString(email, "email")) {
+                setErrorMessage(invalidEmailMessage);
+                return;
+
+            } else if(!validateFormString(password, "password")) {
+                console.log("password is not secure enough: ", password);
+                setErrorMessage(passwordNotSecureEnoughMessage);
                 return;
             }
 
-            if(response.success) {
-                setEmailToConfirm(response.email);
-                setShowSecondFactor(true);
-                return
+            // Manually calling fetchLogin, because safeApiCall doesn't provide interface to working without tokens object. In our case, on login we can't have it.
+            try {
+                const response = await fetchRegister(username, email, password);
+                console.log(response)
+                if(!validateAPIResponse(response, setErrorMessage, navigate)) {
+                    return;
+                }
+
+                if(response.success) {
+                    setEmailToConfirm(response.email);
+                    setShowSecondFactor(true);
+                    return
+                }
+            } catch(err) {
+                console.error(err);
+                navigate(internalServerErrorURI);
+                return;
             }
-        } catch(err) {
-            console.error(err);
-            navigate(internalServerErrorURI);
-            return;
+        } finally {
+            setShowLoading(false)
         }
     }
-
+    
     return (
         <div className="flex flex-col h-screen items-center justify-top mt-16 px-6 py-8 mx-auto lg:py-0">
             { (showSecondFactor && emailToConfirm) ? <SecondFactor emailToConfirm={emailToConfirm} _2FACase="email-confirmation" /> :
-                <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
+                (showLoading ? <LoadingIndicator customMessage="Processing registration data..." centerY={false} /> : <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
                     <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-white md:text-2xl dark:text-white">
                             Sign in to your account
                         </h1>
                             {errorMessage && (
-                                <div className="mb-4 px-4 py-2 rounded text-red-300 border border-red-300 transition-all">
-                                    {errorMessage}
-                                </div>
+                                <WarningMessage message={errorMessage} />
                             )}
                         <form onSubmit={formHandler} className="space-y-4 md:space-y-6">
                             <div>
@@ -102,7 +109,7 @@ const RegisterForm = () => {
                             </p>
                         </form>
                     </div>
-                </div>
+                </div> )
             }
         </div>
     );

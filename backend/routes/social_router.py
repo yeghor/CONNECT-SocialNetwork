@@ -19,13 +19,13 @@ from .query_utils import page_validator, query_prompt_required
 from authorization import authorize_private_endpoint, authorize_public_endpoint
 from services.postgres_service import get_session_depends, merge_model
 
-social = APIRouter()
+Social = APIRouter()
 
 load_dotenv()
 QUERY_PARAM_MAX_L = int(getenv("QUERY_PARAM_MAX_L"))
 
 
-@social.get("/posts/feed/{page}")
+@Social.get("/posts/feed/{page}")
 @endpoint_exception_handler
 async def get_feed(
     page: int = Depends(page_validator),
@@ -39,7 +39,7 @@ async def get_feed(
         return await social.get_feed(user=user, page=page)
 
 
-@social.get("/posts/following/{page}")
+@Social.get("/posts/following/{page}")
 @endpoint_exception_handler
 async def get_followed_posts(
     page: int = Depends(page_validator),
@@ -53,7 +53,7 @@ async def get_followed_posts(
         return await social.get_followed_posts(user=user, page=page)
 
 
-@social.get("/search/posts/{page}")
+@Social.get("/search/posts/{page}")
 @endpoint_exception_handler
 async def search_posts(
     page: int = Depends(page_validator),
@@ -68,7 +68,7 @@ async def search_posts(
         return await social.search_posts(query=query, user=user, page=page)
 
 
-@social.get("/search/users/{page}")
+@Social.get("/search/users/{page}")
 @endpoint_exception_handler
 async def search_users(
     query: str = Depends(query_prompt_required),
@@ -82,7 +82,7 @@ async def search_users(
         return await social.search_users(query=query, page=page)
 
 
-@social.post("/posts")
+@Social.post("/posts")
 @endpoint_exception_handler
 async def make_post(
     user_: User = Depends(authorize_private_endpoint),
@@ -96,7 +96,7 @@ async def make_post(
         return await social.make_post(data=post_data, user=user)
 
 
-@social.get("/posts/{post_id}")
+@Social.get("/posts/{post_id}")
 @endpoint_exception_handler
 async def load_post(
     post_id: str,
@@ -110,7 +110,7 @@ async def load_post(
         return await social.load_post(user=user, post_id=post_id)
 
 
-@social.get("/posts/{post_id}/comments/{page}")
+@Social.get("/posts/{post_id}/comments/{page}")
 @endpoint_exception_handler
 async def load_comments(
     post_id: str,
@@ -125,7 +125,7 @@ async def load_comments(
         return await social.load_replies(user=user, post_id=post_id, page=page)
 
 
-@social.patch("/posts/{post_id}")
+@Social.patch("/posts/{post_id}")
 @endpoint_exception_handler
 async def change_post(
     post_id: str,
@@ -140,7 +140,7 @@ async def change_post(
         return await social.change_post(post_data=post_data, user=user, post_id=post_id)
 
 
-@social.delete("/posts/{post_id}")
+@Social.delete("/posts/{post_id}")
 @endpoint_exception_handler
 async def delete_post(
     post_id: str,
@@ -155,7 +155,7 @@ async def delete_post(
         await social.delete_post(post_id=post_id, user=user)
 
 
-@social.post("/posts/{post_id}/like")
+@Social.post("/posts/{post_id}/like")
 @endpoint_exception_handler
 async def like_post(
     post_id: str | None,
@@ -169,7 +169,7 @@ async def like_post(
         await social.like_post_action(post_id=post_id, user=user, like=True)
 
 
-@social.delete("/posts/{post_id}/like")
+@Social.delete("/posts/{post_id}/like")
 @endpoint_exception_handler
 async def unlike_post(
     post_id: str,
@@ -183,7 +183,7 @@ async def unlike_post(
         await social.like_post_action(post_id=post_id, user=user, like=False)
 
 
-@social.post("/users/{follow_to_id}/follow")
+@Social.post("/users/{follow_to_id}/follow")
 @endpoint_exception_handler
 async def follow(
     follow_to_id: str,
@@ -199,7 +199,7 @@ async def follow(
         )
 
 
-@social.delete("/users/{unfollow_from_id}/follow")
+@Social.delete("/users/{unfollow_from_id}/follow")
 @endpoint_exception_handler
 async def unfollow(
     unfollow_from_id: str,
@@ -215,7 +215,7 @@ async def unfollow(
         )
 
 
-@social.get("/users/my-profile")
+@Social.get("/users/my-profile")
 @endpoint_exception_handler
 async def get_my_profile(
     user_: User = Depends(authorize_private_endpoint),
@@ -228,7 +228,7 @@ async def get_my_profile(
         return await social.get_my_profile(user=user)
 
 
-@social.get("/users/{user_id}")
+@Social.get("/users/{user_id}")
 @endpoint_exception_handler
 async def get_user_profile(
     user_id: str | None,
@@ -242,7 +242,7 @@ async def get_user_profile(
         return await social.get_user_profile(user=user, other_user_id=user_id)
 
 
-@social.get("/users/{user_id}/posts/{page}")
+@Social.get("/users/{user_id}/posts/{page}")
 @endpoint_exception_handler
 async def get_users_posts(
     user_id: str,
@@ -265,7 +265,7 @@ async def get_users_posts(
         )
 
 
-@social.get("/recent-activity")
+@Social.get("/recent-activity")
 @endpoint_exception_handler
 async def get_recent_activity(
     user_: User | None = Depends(authorize_public_endpoint),
@@ -278,7 +278,7 @@ async def get_recent_activity(
         return await social.get_recent_activity(user_id=user.user_id)
 
 
-@social.get("/friends")
+@Social.get("/friends")
 async def get_my_friends(
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),

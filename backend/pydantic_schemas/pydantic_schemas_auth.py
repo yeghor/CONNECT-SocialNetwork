@@ -40,10 +40,12 @@ class PayloadJWT(BaseModel):
 
 
 # Body forms
-# ==============
+# there are no constraits. Because, we check request data inside the endpoints
+# to return client comprehensive response
+
 class LoginBody(BaseModel):
-    username: str = Field(..., min_length=USERNAME_MIN_L, max_length=USERNAME_MAX_L)
-    password: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
+    username: str
+    password: str
 
 
 class RegisterBody(LoginBody):
@@ -51,10 +53,8 @@ class RegisterBody(LoginBody):
 
 
 class PasswordRecoveryBody(BaseModel):
-    new_password: str = Field(..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L)
-    new_password_confirm: str = Field(
-        ..., min_length=PASSWORD_MIN_L, max_length=PASSWORD_MAX_L
-    )
+    new_password: str
+    new_password_confirm: str
 
     @model_validator(mode="after")
     def match_passwords(self) -> Self:
