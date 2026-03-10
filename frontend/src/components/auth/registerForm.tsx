@@ -17,6 +17,9 @@ import {Link} from "react-router-dom";
 import SecondFactor from "./secondFactor.tsx";
 import LoadingIndicator from "../base/centeredLoadingIndicator.tsx";
 import WarningMessage from "../base/warningMessage.tsx";
+import { safeAPICallNoToken } from "../../fetching/fetchUtils.ts";
+import { AuthTokensResponse, EmailToConfirmResponse } from "../../fetching/DTOs.ts";
+import { fetchLoadPost } from "../../fetching/fetchSocial.ts";
 
 const RegisterForm = () => {
     const navigate = useNavigate();
@@ -52,26 +55,15 @@ const RegisterForm = () => {
                 return;
             }
 
-            // Manually calling fetchLogin, because safeApiCall doesn't provide interface to working without tokens object. In our case, on login we can't have it.
-            try {
-                const response = await fetchRegister(username, email, password);
-                console.log(response)
-                if(!validateAPIResponse(response, setErrorMessage, navigate)) {
-                    return;
-                }
+            const response = await safeAPICallNoToken<EmailToConfirmResponse>(fetchRegister, navigate, setErrorMessage, username, email, password);
 
-                if(response.success) {
-                    setEmailToConfirm(response.email);
-                    setShowSecondFactor(true);
-                    return
-                }
-            } catch(err) {
-                console.error(err);
-                navigate(internalServerErrorURI);
-                return;
-            }
+            if(response.success) {
+                setEmailToConfirm(response.email);
+                setShowSecondFactor(true);
+                return
+            }            
         } finally {
-            setShowLoading(false)
+            setShowLoading(false);
         }
     }
     

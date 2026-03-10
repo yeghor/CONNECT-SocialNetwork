@@ -38,9 +38,9 @@ const RecentActivityComponent = () => {
 
     return (
         <div>
-            <p className="text-xl text-white font-bold text-left m-6">Recent Activity:</p>
+            <p className="text-xl text-white font-bold text-left my-6">Recent Activity:</p>
             <ul>
-                {recentActivity?.map((rc, index) => {
+                {recentActivity?.length === 0 ? <p className="text-white font-semibold">No activity yet... Check back later or find some new people to follow!</p> : recentActivity?.map((rc, index) => {
                     return(
                             <li key={index} className="p-4 text-white flex items-center">
                                 <img 

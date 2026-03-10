@@ -18,6 +18,8 @@ import { Link } from "react-router-dom";
 import SecondFactor from "./secondFactor.tsx";
 import WarningMessage from "../base/warningMessage.tsx";
 import { safeAPICallNoToken } from "../../fetching/fetchUtils.ts";
+import { AuthTokensResponse } from "../../fetching/DTOs.ts";
+import LoadingIndicator from "../base/centeredLoadingIndicator.tsx";
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -28,54 +30,38 @@ const LoginForm = () => {
 
     const [ emailToConfirm, setEmailToConfirm ] = useState<string | null>(null);
     const [ showSecondFactor, setShowSecondFactor ] = useState(false);
+    const [ showLoading, setShowLoading ] = useState(false);
 
     // Manually calling fetchLogin, because safeApiCall doesn't provide interface to working without tokens object. In our case, on login we can't have it.
     const formHandler = async (event: React.FormEvent) => {
         event.preventDefault();
-
+        
+        setShowLoading(true);
         setErrorMessage("");
 
-        await safeAPICallNoToken(fetchLogin, navigate, setErrorMessage, username, password);
+        try {
+            const response = await safeAPICallNoToken<AuthTokensResponse>(fetchLogin, navigate, setErrorMessage, username, password);
 
-        // try {
-        //     const response = await fetchLogin(username, password);
+            if (response.success) {
+                if (response.emailToConfirm) {
+                    setEmailToConfirm(response.emailToConfirm);
+                    setShowSecondFactor(true);
+                } else {
+                    setUpdateCookie(AccessTokenCookieKey, response.accessToken, null);
+                    setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, null);
+                    navigate(homeURI);                    
+                }
+            }            
+        } finally {
+            setShowLoading(false)
+        }
 
-        //     if(!validateAPIResponse(response, setErrorMessage, navigate)) {
-        //         return;
-        //     }
-            
-        //     if (response.success) {
-        //         console.log("succesfull response, ", response)
-        //         if (response.emailToConfirm) {
-        //             setEmailToConfirm(response.emailToConfirm);
-        //             setShowSecondFactor(true);
-        //         } else {
-        //             setUpdateCookie(AccessTokenCookieKey, response.accessToken, null);
-        //             setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, null);
-        //             navigate(homeURI);                    
-        //         }
-
-        //         return;
-        //     }
-
-        //     if (response.statusCode === 401 || response.statusCode === 400) {
-        //         setErrorMessage(response.detail);
-        //         return;
-        //     }
-            
-        //     navigate(internalServerErrorURI);
-
-        // } catch (err) {
-        //     console.error(err);
-        //     navigate(internalServerErrorURI);
-        //     return;
-        // }
     }
 
     return (
         <div className="flex flex-col h-screen items-center justify-top mt-16 px-6 py-8 mx-auto lg:py-0">
             { showSecondFactor && emailToConfirm ? <SecondFactor emailToConfirm={emailToConfirm} _2FACase="email-confirmation" /> :
-                    <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
+                    ( showLoading ? <LoadingIndicator centerY={false} customMessage="Processing login data..." /> : <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
                     <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-white md:text-2xl">
                             Sign in to your account
@@ -105,7 +91,7 @@ const LoginForm = () => {
                             </p>
                         </form>
                     </div>
-                </div> }
+                </div>) }
         </div>
     );
 }

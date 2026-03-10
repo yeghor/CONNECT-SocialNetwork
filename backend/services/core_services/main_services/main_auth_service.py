@@ -108,7 +108,7 @@ class MainServiceAuth(MainServiceBase):
         validation_utils.validate_email(credentials.email)
         validation_utils.validate_password(credentials.password)
         validation_utils.validate_username(credentials.username)
-
+        print(credentials.username)
         if await self._PostgresService.get_user_by_username_or_email(
             username=credentials.username, email=credentials.email
         ):
