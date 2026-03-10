@@ -94,7 +94,7 @@ const PostComments = (props: CommentProps) => {
     const virtualizedComponentsProps = posts.map((post) => { return { postData: post.postData, isMyPost: false} } )
 
     return(
-        <div ref={scrollRef} className="h-600px overflow-auto mb-16 relative mx-auto border-gray-300">
+        <div ref={scrollRef} className="h-[800px] overflow-auto mb-16 relative mx-auto border-gray-300">
             { virtualItems.length === 0 ? <p className="text-center text-white my-8">{"No comments yet :("}</p> : <div className="relative" style={{ height: `${virtualizer.getTotalSize()}px` }}>
                 <VirtualizedList DisplayedComponent={FlowPost} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={virtualizedComponentsProps} />
             </div>}
