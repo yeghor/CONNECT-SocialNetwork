@@ -40,7 +40,6 @@ MEDIA_POST_IMAGE_URI = os.getenv("MEDIA_POST_IMAGE_URI", "/media/posts/")
 USER_AVATAR_URI = os.getenv("USER_AVATAR_URI", "media/users/")
 
 
-
 # https://docs.aws.amazon.com/boto3/latest/guide/error-handling.html
 def media_storage_exception_handler_s3(func: Callable):
     @wraps(func)
@@ -120,6 +119,7 @@ class ImageStorageABC(ABC):
 
 
 # S3 Implementation
+
 
 class S3Storage(ImageStorageABC):
     # redis argument for compatibility with other implementations

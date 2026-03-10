@@ -126,8 +126,7 @@ class EmailService:
         email_message.attach(
             MIMEText(
                 generate_confirmation_email_html(
-                    confirmation_code=confirmation_code,
-                    username=recipient_username
+                    confirmation_code=confirmation_code, username=recipient_username
                 ),
                 "html",
             )

@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import List
 import enum
 
+
 class Base(DeclarativeBase):
     pass
 
@@ -191,6 +192,7 @@ class PostActions(Base):
 
     def __str__(self) -> str:
         return f"Action: {self.action.value}, post_id: {self.post_id}"
+
 
 # CHAT MODELS
 

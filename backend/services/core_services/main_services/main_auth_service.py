@@ -108,7 +108,7 @@ class MainServiceAuth(MainServiceBase):
         validation_utils.validate_email(credentials.email)
         validation_utils.validate_password(credentials.password)
         validation_utils.validate_username(credentials.username)
-        print(credentials.username)
+
         if await self._PostgresService.get_user_by_username_or_email(
             username=credentials.username, email=credentials.email
         ):
@@ -230,7 +230,7 @@ class MainServiceAuth(MainServiceBase):
     ) -> RefreshAccessTokens:
         """Actually changes password via token"""
 
-        authorization_utils.validate_password(credentials.new_password)
+        validation_utils.validate_password(credentials.new_password)
 
         new_password_hash = authorization_utils.hash_password(credentials.new_password)
         user.password_hash = new_password_hash

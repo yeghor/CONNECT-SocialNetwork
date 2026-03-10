@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import RecentActivityComponent from "./post/recentActivityComponent.tsx";
+import RecentActivityComponent from "./post/recentActivity.tsx";
 import PostsFlow from "./post/postsFlow.tsx";
 import MakePost from "./post/makePost.tsx";
 import { removeCookie } from "../../helpers/cookies/cookiesHandler.ts";

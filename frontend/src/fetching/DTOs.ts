@@ -413,17 +413,18 @@ export type RecentActivityType = "post" | "like" | "reply"
 interface RecentActivityBase {
     type: RecentActivityType,
     message: string,
-    postId: string
     date: Date
 }
 
 interface RecentActivityBaseDTO extends RecentActivityBase {
+    post_id: string
     avatar_url: string | undefined
 }
 
 type RecentActivityDTO = RecentActivityBaseDTO[];
 
 export interface RecentActivity extends RecentActivityBase {
+    postId: string
     avatarURL: string | undefined
 }
 
@@ -439,7 +440,7 @@ export const recentActivityMapper = (data: RecentActivityDTO): RecentActivityRes
             type: DTO.type,
             message: DTO.message,
             date: new Date(DTO.date),
-            postId: DTO.postId,
+            postId: DTO.post_id,
             avatarURL: DTO.avatar_url
         };
     });

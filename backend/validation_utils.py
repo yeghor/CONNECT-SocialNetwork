@@ -40,11 +40,10 @@ def validate_post_text_content(title: str, text: str) -> None:
     if not re.match(r"^[^\n]{3,256}$", title):
         raise ValidationExc(
             detail="validate_post_text_content: Post title validation failed",
-            client_safe_detail="Post title length must be in range from 3 to 256"
+            client_safe_detail="Post title length must be in range from 3 to 256",
         )
     elif not re.match(r"^[\s\S]{0,4000}$", text):
         raise ValidationExc(
             detail="validate_post_text_content: Post text validation failed",
-            client_safe_detail="Post text length mustn't be larger than 4000 characters"
+            client_safe_detail="Post text length mustn't be larger than 4000 characters",
         )
-    

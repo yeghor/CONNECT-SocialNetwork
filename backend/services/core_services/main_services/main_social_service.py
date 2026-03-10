@@ -514,12 +514,18 @@ class MainServiceSocial(MainServiceBase):
             parent_post = await self._PostgresService.get_entry_by_id(
                 id_=data.parent_post_id, ModelType=Post
             )
-            parent_post.replies_count += 1
+
             if not parent_post:
                 raise InvalidAction(
                     detail=f"SocialService: User: {user.user_id} tried to reply to post: {data.parent_post_id} that does not exists.",
                     client_safe_detail="Post that you are replying does not exist.",
                 )
+
+            parent_post.replies_count += 1
+
+            await self._construct_and_flush_action(
+                action_type=ActionType.reply, user=user, post=parent_post
+            )
 
         post = Post(
             post_id=str(uuid4()),
@@ -884,7 +890,7 @@ class MainServiceSocial(MainServiceBase):
                     ),
                     pictures_urls=await self._ImageStorage.get_post_image_urls(
                         [image.image_name for image in post.parent_post.images]
-                    )
+                    ),
                 )
                 if post.parent_post
                 else None
@@ -958,17 +964,19 @@ class MainServiceSocial(MainServiceBase):
                         action.owner.username
                     ),
                     type=action.action.value,
+                    post_id=action.post_id,
                     message=f"{action.owner.username} liked your post",
-                    date=action.date
+                    date=action.date,
                 )
             case "reply":
                 return RecentActivitySchema(
                     avatar_url=await self._ImageStorage.get_user_avatar_url(
-                        action.owner.username
+                        action.owner_id
                     ),
                     type=action.action.value,
+                    post_id=action.post_id,
                     message=f"{action.owner.username} left a reply to your post: {action.post.title}",
-                    date=action.date
+                    date=action.date,
                 )
 
     async def _get_recent_followed_post_message(self, post: Post) -> Dict | None:
@@ -978,11 +986,12 @@ class MainServiceSocial(MainServiceBase):
 
         return RecentActivitySchema(
             avatar_url=await self._ImageStorage.get_user_avatar_url(
-                post.owner.username
+                post.owner_id
             ),
             message=f"{post.owner.username} made a new post.",
             type="post",
-            date=post.published
+            post_id=post.post_id,
+            date=post.published,
         )
 
     @web_exceptions_raiser
@@ -1003,16 +1012,23 @@ class MainServiceSocial(MainServiceBase):
             user, RECENT_ACTIVITY_ENTRIES
         )
 
-        followed_coroutines = [
-            self._get_recent_followed_post_message(post) for post in followed_posts
-        ]
+        action_post_ids = set(action.post_id for action in actions)
+
         action_coroutines = [
             self._get_recent_action_message(action) for action in actions
+        ]
+
+        followed_coroutines = [
+            self._get_recent_followed_post_message(post)
+            for post in filter(
+                lambda post: not post.post_id in action_post_ids, followed_posts
+            )
         ]
 
         activity: List[RecentActivitySchema] = await asyncio.gather(
             *followed_coroutines, *action_coroutines
         )
+
         activity = list(filter(lambda i: bool(i), activity))
 
         return sorted(activity, key=lambda message: message.date, reverse=True)[

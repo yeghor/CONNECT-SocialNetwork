@@ -9,7 +9,7 @@ import {
 import { safeAPICallPublic } from "../../../fetching/fetchUtils.ts";
 import { specificPostURI } from "../../../consts.ts";
 import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 
 const RecentActivityComponent = () => {
     const navigate = useNavigate();
@@ -22,6 +22,7 @@ const RecentActivityComponent = () => {
             let response = await  safeAPICallPublic<RecentActivityResponse>(tokens, fetchRecentActivity, navigate, undefined );
 
             if (response.success) {
+                console.log(response.data)
                 setRecentActivity(response.data);
             }
         }
@@ -29,12 +30,10 @@ const RecentActivityComponent = () => {
     }, []);
 
     const defineActionURI = (rc: RecentActivity): string => {
-        return specificPostURI(rc.postId)
+        console.log("postid", rc.postId)
+        return specificPostURI(rc.postId);
     };
 
-    const calculateElapsedTime = (date: Date): string => {
-        return new Date().toString()
-    };
 
     return (
         <div>
@@ -42,16 +41,20 @@ const RecentActivityComponent = () => {
             <ul>
                 {recentActivity?.length === 0 ? <p className="text-white font-semibold">No activity yet... Check back later or find some new people to follow!</p> : recentActivity?.map((rc, index) => {
                     return(
-                            <li key={index} className="p-4 text-white flex items-center">
+                        <Link to={defineActionURI(rc)}>
+                            <li key={index} className="p-4 text-white flex items-center hover:underline">
                                 <img 
                                     src={rc.avatarURL || "/uknown-user-image.jpg"} 
                                     alt="avatar" 
                                     className="h-10 mr-4 w-auto rounded-full object-cover border border-white/20 group-hover:scale-110 transition-transform"
                                 />
-                                <span className="text-white">{rc.message}</span>
-                                <span>{rc.date.toISOString().split("T")[0]}</span>
-                                <span className="mx-2 font-semibold">{`${rc.date.getHours()}:${rc.date.getMinutes()}`}</span>
-                            </li>
+                                <div className="flex justify-between">
+                                    <p className="text-white">{rc.message}</p>
+                                    <p><span>{rc.date.toISOString().split("T")[0]}</span><span className="mx-2 font-semibold">{`${rc.date.getHours()}:${rc.date.getMinutes()}`}</span></p>                                    
+                                </div>
+                            </li>                        
+                        </Link>
+
                     )
                 }) ?? null}
             </ul>

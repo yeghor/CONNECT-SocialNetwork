@@ -43,6 +43,7 @@ class PayloadJWT(BaseModel):
 # there are no constraits. Because, we check request data inside the endpoints
 # to return client comprehensive response
 
+
 class LoginBody(BaseModel):
     username: str
     password: str

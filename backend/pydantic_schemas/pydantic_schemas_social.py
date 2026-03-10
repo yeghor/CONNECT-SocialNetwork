@@ -55,6 +55,7 @@ class PostBase(PostBaseShort):
     is_my_post: bool
     pictures_urls: List[str]
 
+
 class PostLiteSchema(PostBase):
     parent_post: PostBase | None
 
@@ -72,6 +73,7 @@ class PostSchema(PostBase):
 class RecentActivitySchema(BaseModel):
     avatar_url: str | None
     type: Literal["post", "like", "reply"]
+    post_id: str
     message: str
     date: datetime
 
@@ -105,6 +107,7 @@ class UserSchema(UserLiteSchema):
 
 
 # Body data structure
+
 
 class PostDataSchemaBase(BaseModel):
     title: str

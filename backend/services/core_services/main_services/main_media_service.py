@@ -41,7 +41,6 @@ class MainMediaService(MainServiceBase):
         """Guesses mime type from tile bytes"""
         return magic.from_buffer(buffer=file_bytes, mime=True)
 
-
     @staticmethod
     def _define_image_name(id_: str, image_type: ImageType, n_image: int = None) -> str:
         """Pass `n_image` only if `image_type` set to `'post'`"""
@@ -127,7 +126,9 @@ class MainMediaService(MainServiceBase):
                 client_safe_detail=f"Image is too big. Size up to {POST_IMAGE_MAX_SIZE_MB}mb",
             )
 
-    def _validate_incoming_file(self, user_id: str | None, contents: bytes, mime_type: str):
+    def _validate_incoming_file(
+        self, user_id: str | None, contents: bytes, mime_type: str
+    ):
         """
         Must be wrapper into @web_exception_raiser
         user_id is optional for clarity in exception logs
@@ -167,7 +168,9 @@ class MainMediaService(MainServiceBase):
         self, post_id: str, user: User, image_contents: bytes, specified_mime: str
     ) -> None:
         if image_contents and specified_mime:
-            self._validate_incoming_file(user_id=user.user_id, contents=image_contents, mime_type=specified_mime)
+            self._validate_incoming_file(
+                user_id=user.user_id, contents=image_contents, mime_type=specified_mime
+            )
 
             post = await self._PostgresService.get_entry_by_id(
                 id_=post_id, ModelType=Post
@@ -194,9 +197,11 @@ class MainMediaService(MainServiceBase):
             image_name = self._define_image_name(
                 id_=post_id, image_type="post", n_image=len(post.images)
             )
-            
+
             mime_type = self._guess_mime(file_bytes=image_contents)
-            extension = await self._get_extension(content_type=mime_type, image_name=image_name)
+            extension = await self._get_extension(
+                content_type=mime_type, image_name=image_name
+            )
 
             image_entry = PostImage(
                 image_id=str(uuid4()), post_id=post_id, image_name=image_name
@@ -218,13 +223,17 @@ class MainMediaService(MainServiceBase):
         self, user: User, image_contents: bytes, specified_mime: str
     ):
         if image_contents and specified_mime:
-            self._validate_incoming_file(user_id=user.user_id, contents=image_contents, mime_type=specified_mime)
+            self._validate_incoming_file(
+                user_id=user.user_id, contents=image_contents, mime_type=specified_mime
+            )
 
             if user.avatar_image_name:
                 await self._ImageStorage.delete_avatar_user(image_name=user.user_id)
 
             mime_type = self._guess_mime(file_bytes=image_contents)
-            extension = await self._get_extension(content_type=mime_type, image_name=user.user_id)
+            extension = await self._get_extension(
+                content_type=mime_type, image_name=user.user_id
+            )
 
             await self._ImageStorage.upload_avatar_user(
                 contents=image_contents,
