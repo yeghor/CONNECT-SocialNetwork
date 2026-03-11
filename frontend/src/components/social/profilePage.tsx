@@ -125,7 +125,7 @@ export const ProfilePage = (props: ProfilePageProps) => {
     return(
         <div>
             { showManageProfileModal ? <ManageProfileModal avatarURL={props.userData.avatarURL} setShowManageProfileModal={setshowManageProfileModal} /> : null }
-            <div className="w-2/3 mx-auto m-8 bg-white/10 rounded-xl p-6 backdrop-blur">
+            <div className="w-2/3 mx-auto m-8 bg-gray-200/10 border-2 border-gray-200/20 rounded-xl p-6 backdrop-blur">
                 <div className="flex justify-center items-center gap-4 text-white">
                     <div>
                         { props.userData.avatarURL ? <img

@@ -901,7 +901,7 @@ class MainServiceSocial(MainServiceBase):
         )
 
     async def _create_post_base_schema_via_gather(
-        self, user_id: str, post: Post
+        self, user_id: str | None, post: Post
     ) -> PostBase:
         images_coroutines = [
             self._ImageStorage.get_post_image_urls(images_names=image.image_name)
@@ -919,7 +919,7 @@ class MainServiceSocial(MainServiceBase):
             post_id=post.post_id,
             title=post.title,
             published=post.published,
-            is_my_post=post.owner_id == user_id,
+            is_my_post=post.owner_id == user_id if user_id else False,
             is_reply=post.is_reply,
             pictures_urls=images_urls,
             owner=(
@@ -944,7 +944,7 @@ class MainServiceSocial(MainServiceBase):
         )
 
         replies_coroutines = [
-            self._create_post_base_schema_via_gather(user_id=user.user_id, post=reply)
+            self._create_post_base_schema_via_gather(user_id=user.user_id if user else None, post=reply)
             for reply in replies
         ]
 
@@ -985,9 +985,7 @@ class MainServiceSocial(MainServiceBase):
         """
 
         return RecentActivitySchema(
-            avatar_url=await self._ImageStorage.get_user_avatar_url(
-                post.owner_id
-            ),
+            avatar_url=await self._ImageStorage.get_user_avatar_url(post.owner_id),
             message=f"{post.owner.username} made a new post.",
             type="post",
             post_id=post.post_id,

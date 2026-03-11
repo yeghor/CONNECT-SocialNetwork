@@ -4,7 +4,7 @@ const ActivePicture = (props: {
     closeModal: () => void,
     imageURL: string
 }) => {
-    const activePictureRef = useRef(null);
+    const activePictureRef = useRef<HTMLImageElement | null>(null);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -17,7 +17,7 @@ const ActivePicture = (props: {
     }, []);
 
     return(
-<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-8">
             <img 
                 ref={activePictureRef}
                 src={props.imageURL} 

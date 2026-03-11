@@ -46,7 +46,7 @@ const RecentActivityComponent = () => {
                                 <img 
                                     src={rc.avatarURL || "/uknown-user-image.jpg"} 
                                     alt="avatar" 
-                                    className="h-10 mr-4 w-auto rounded-full object-cover border border-white/20 group-hover:scale-110 transition-transform"
+                                    className="h-10 w-10 mr-4 w-auto rounded-full object-cover border border-white/20 group-hover:scale-110 transition-transform"
                                 />
                                 <div className="flex justify-between">
                                     <p className="text-white">{rc.message}</p>

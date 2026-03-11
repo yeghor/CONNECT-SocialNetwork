@@ -529,7 +529,9 @@ class PostgresService:
 
         result = await self.__session.execute(
             select(PostActions)
-            .where(PostActions.post_id.in_(post_ids), PostActions.owner_id != user.user_id)
+            .where(
+                PostActions.post_id.in_(post_ids), PostActions.owner_id != user.user_id
+            )
             .order_by(PostActions.date.desc())
             .limit(n)
         )

@@ -1,5 +1,6 @@
 import { BadResponse, SuccessfulResponse } from "../../fetching/DTOs.ts"
 import {
+    cooldownURI,
     internalServerErrorURI,
     notFoundURI
 } from "../../consts.ts";
@@ -22,6 +23,10 @@ export const validateAPIResponse = (response: BadResponse | SuccessfulResponse, 
             }
         
             return false;
+        } else if (response.statusCode === 429) {
+            if (navigate) {
+                navigate(cooldownURI);
+            }
         }
         if (setErrorMessage) {
             setErrorMessage(response.detail);

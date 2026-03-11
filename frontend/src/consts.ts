@@ -28,7 +28,8 @@ export const maxRequestsQueueLength = 30;
 export const maxGroupParticipants = 9;
 
 export const internalServerErrorURI = "/internal-server-error";
-export const notFoundURI = "/not-found"
+export const notFoundURI = "/not-found";
+export const cooldownURI = "/cooldown";
 export const homeURI = "/";
 export const loginURI = "/auth/login";
 export const registerURI = "/auth/register";

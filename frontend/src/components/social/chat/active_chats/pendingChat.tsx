@@ -55,7 +55,7 @@ const PendingChat = (props: PendingChatProps) => {
     }
 
     return (
-        <div className="h-[calc(100vh-300px)] mx-4 flex flex-col">
+        <div className="h-[calc(100vh-300px)] m-4 flex flex-col">
             <div className="flex-grow flex flex-col justify-center">
                 { initiatedByMe ?
                     <div>

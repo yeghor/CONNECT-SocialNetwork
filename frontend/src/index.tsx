@@ -15,6 +15,10 @@ import Footer from "./components/base/footer.tsx";
 import SearchPage from "./components/social/searchPage.tsx";
 import SecondFactor from './components/auth/secondFactor.tsx';
 import { PasswordRecovery2FAForm, NewPasswordCreationRecovery } from './components/auth/passwordRecovery.tsx';
+import NotFoundPage from './components/base/errorPages/nofFound.tsx';
+import { cooldownURI, internalServerErrorURI } from './consts.ts';
+import InternalServerError from './components/base/errorPages/internalServerError.tsx';
+import Cooldown from './components/base/errorPages/cooldown.tsx';
 
 const container = document.getElementById('root')
 
@@ -75,6 +79,14 @@ if(container) {
                                         <Route path='/search' element={
                                             <SearchPage />
                                         } />
+                                        <Route path={internalServerErrorURI} element={
+                                            <InternalServerError />                                            
+                                        } />
+                                        <Route path={cooldownURI} element={
+                                            <Cooldown />                                            
+                                        } />
+
+                                        <Route path='*' element={<NotFoundPage />} />
                                     </Routes>
                                 </div>
                             <Footer />
