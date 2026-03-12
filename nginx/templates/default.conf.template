@@ -1,0 +1,8 @@
+server {
+    listen ${NGINX_PORT};
+    server_name  ${NGINX_HOST};
+
+    location / {
+        proxy_pass http://${CONNECT_SERVER_HOST}:{CONNECT_SERVER_PORT}
+    }
+}

@@ -84,7 +84,6 @@ app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost:3000",
-    "http://localhost:3001",
     "http://127.0.0.1:3000",
     "http://0.0.0.0:3000",
 ]
@@ -101,11 +100,6 @@ app.include_router(auth_router.Auth)
 app.include_router(social_router.Social)
 app.include_router(media_router.Media)
 app.include_router(chat)
-
-try:
-    mkdir("images")
-except FileExistsError:
-    pass
 
 
 # for debugging

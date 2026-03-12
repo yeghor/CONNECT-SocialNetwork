@@ -1,22 +1,43 @@
 services:
-  backend:
+  connect-backend:
     build: ./backend
+    container_name: connect_backend
     depends_on:
-      - redis_db
-      - postgres_db
-      - chromadb_db
+      - redis_docker
+      - postgres_docker
+      - chromadb_docker
     ports:
       - "8800:8800"
 
+  connect-frontend:
+    build: ./frontend
+    container_name: connect_frontend
+    depends_on:
+      - connect-backend
+    ports:
+     - "3000:3000"
+
+  nginx_docker:
+    image: nginx
+    build: ./nginx
+    container_name: ${NGINX_HOST}
+    depends_on:
+      - connect-backend
+      - connect-frontend
+    env_file:
+      - .env
+    ports:
+      - ${NGINX_PORT}:${NGINX_PORT}
+
   redis_docker:
     image: redis
-    container_name: social_network_redis_main
+    container_name: connect_redis
     ports:
       - "6379:6379"
 
   chromadb_docker:
     image: chromadb/chroma
-    container_name: social_network_chromadb_main
+    container_name: connect_chromadb
     volumes:
       - ./backend/chroma-data:/chroma/chroma
     ports:
@@ -24,7 +45,7 @@ services:
 
   postgres_docker:
     image: postgres
-    container_name: social_network_postgres_main
+    container_name: connect_postgres
     ports:
       - "5432:5432"
     environment:

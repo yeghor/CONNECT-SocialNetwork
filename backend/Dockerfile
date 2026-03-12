@@ -8,6 +8,6 @@ EXPOSE 8800
 
 RUN apt-get update && apt-get install -y libmagic1
 
-RUN pip install -r requirements.txt
+RUN pip install -e .
 
 CMD [ "uvicorn", "--host", "0.0.0.0", "--port", "8800", "main:app" ]
