@@ -31,6 +31,7 @@ This project has a `docker-compose.yml` file, so it allows you to start the appl
 Also the project has basic **CI** _(Implemented with GitHub actions)_ that runs tests on every **push**.
 
 **Next steps**:
+
 - Implement frontend chat
 - Registration email confirmation
 - Backend optimization *(mostly with ImageStorage service and asyncio gather)*
