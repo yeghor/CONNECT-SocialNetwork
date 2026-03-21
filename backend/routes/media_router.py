@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, Request
 from fastapi.responses import Response
 
 from authorization.authorization_utils import authorize_private_endpoint
@@ -10,7 +10,9 @@ from services.core_services.main_services.main_media_service import MainMediaSer
 
 from exceptions.exceptions_handler import endpoint_exception_handler
 
-Media = APIRouter()
+from main import limiter
+
+media = APIRouter()
 
 """
 This router is only for case when the application use Local image storage.
@@ -18,9 +20,11 @@ This router is only for case when the application use Local image storage.
 
 
 # https://stackoverflow.com/questions/55873174/how-do-i-return-an-image-in-fastapi
-@Media.get("/media/users/{token}", response_class=Response)
+@media.get("/media/users/{token}", response_class=Response)
+@limiter.limit("500/minute")
 @endpoint_exception_handler
 async def get_image_user(
+    request: Request,
     token: str, session: AsyncSession = Depends(get_session_depends)
 ) -> Response:
     async with await MainServiceContextManager[MainMediaService].create(
@@ -30,9 +34,11 @@ async def get_image_user(
         return Response(content=file_contents, media_type=mime_type)
 
 
-@Media.get("/media/posts/{token}", response_class=Response)
+@media.get("/media/posts/{token}", response_class=Response)
+@limiter.limit("500/minute")
 @endpoint_exception_handler
 async def get_image_post(
+    request: Request,
     token: str, session: AsyncSession = Depends(get_session_depends)
 ) -> Response:
     async with await MainServiceContextManager[MainMediaService].create(
@@ -42,9 +48,11 @@ async def get_image_post(
         return Response(content=file_contents, media_type=mime_type)
 
 
-@Media.post("/media/posts/{post_id}")
+@media.post("/media/posts/{post_id}")
+@limiter.limit("300/minute") # rate must be [max post pictures] * [make_post rate]
 @endpoint_exception_handler
 async def upload_post_picture(
+    request: Request,
     post_id: str,
     file: UploadFile = File(...),
     user_: User = Depends(authorize_private_endpoint),
@@ -64,9 +72,11 @@ async def upload_post_picture(
         )
 
 
-@Media.post("/media/my-profile/avatar")
+@media.post("/media/my-profile/avatar")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def upload_user_avatar(
+    request: Request,
     file: UploadFile = File(...),
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),

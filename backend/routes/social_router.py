@@ -1,5 +1,5 @@
 import re
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, Request
 from services.postgres_service.database_utils import *
 from services.postgres_service.models import User
 from services.core_services import MainServiceContextManager
@@ -19,15 +19,19 @@ from .query_utils import page_validator, query_prompt_required
 from authorization import authorize_private_endpoint, authorize_public_endpoint
 from services.postgres_service import get_session_depends, merge_model
 
-Social = APIRouter()
+from main import limiter
+
+social = APIRouter()
 
 load_dotenv()
 QUERY_PARAM_MAX_L = int(getenv("QUERY_PARAM_MAX_L"))
 
 
-@Social.get("/posts/feed/{page}")
+@social.get("/posts/feed/{page}")
+@limiter.limit("300/minute")
 @endpoint_exception_handler
 async def get_feed(
+    request: Request,
     page: int = Depends(page_validator),
     user_: User | None = Depends(authorize_public_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -39,9 +43,11 @@ async def get_feed(
         return await social.get_feed(user=user, page=page)
 
 
-@Social.get("/posts/following/{page}")
+@social.get("/posts/following/{page}")
+@limiter.limit("300/minute")
 @endpoint_exception_handler
 async def get_followed_posts(
+    request: Request,
     page: int = Depends(page_validator),
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -53,9 +59,11 @@ async def get_followed_posts(
         return await social.get_followed_posts(user=user, page=page)
 
 
-@Social.get("/search/posts/{page}")
+@social.get("/search/posts/{page}")
+@limiter.limit("300/minute")
 @endpoint_exception_handler
 async def search_posts(
+    request: Request,
     page: int = Depends(page_validator),
     query: str = Depends(query_prompt_required),
     user_: User | None = Depends(authorize_public_endpoint),
@@ -68,9 +76,11 @@ async def search_posts(
         return await social.search_posts(query=query, user=user, page=page)
 
 
-@Social.get("/search/users/{page}")
+@social.get("/search/users/{page}")
+@limiter.limit("300/minute")
 @endpoint_exception_handler
 async def search_users(
+    request: Request,
     query: str = Depends(query_prompt_required),
     page: str = Depends(page_validator),
     user_: User | None = Depends(authorize_public_endpoint),
@@ -82,9 +92,11 @@ async def search_users(
         return await social.search_users(query=query, page=page)
 
 
-@Social.post("/posts")
+@social.post("/posts")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def make_post(
+    request: Request,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
     post_data: MakePostDataSchema = Body(...),
@@ -96,9 +108,11 @@ async def make_post(
         return await social.make_post(data=post_data, user=user)
 
 
-@Social.get("/posts/{post_id}")
+@social.get("/posts/{post_id}")
+@limiter.limit("300/minute")
 @endpoint_exception_handler
 async def load_post(
+    request: Request,
     post_id: str,
     user_: User | None = Depends(authorize_public_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -110,9 +124,11 @@ async def load_post(
         return await social.load_post(user=user, post_id=post_id)
 
 
-@Social.get("/posts/{post_id}/comments/{page}")
+@social.get("/posts/{post_id}/comments/{page}")
+@limiter.limit("300/minute")
 @endpoint_exception_handler
 async def load_comments(
+    request: Request,
     post_id: str,
     page: int = Depends(page_validator),
     user_: User | None = Depends(authorize_public_endpoint),
@@ -125,9 +141,11 @@ async def load_comments(
         return await social.load_replies(user=user, post_id=post_id, page=page)
 
 
-@Social.patch("/posts/{post_id}")
+@social.patch("/posts/{post_id}")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def change_post(
+    request: Request,
     post_id: str,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -140,9 +158,11 @@ async def change_post(
         return await social.change_post(post_data=post_data, user=user, post_id=post_id)
 
 
-@Social.delete("/posts/{post_id}")
+@social.delete("/posts/{post_id}")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def delete_post(
+    request: Request,
     post_id: str,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -155,9 +175,11 @@ async def delete_post(
         await social.delete_post(post_id=post_id, user=user)
 
 
-@Social.post("/posts/{post_id}/like")
+@social.post("/posts/{post_id}/like")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def like_post(
+    request: Request,
     post_id: str | None,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -169,9 +191,11 @@ async def like_post(
         await social.like_post_action(post_id=post_id, user=user, like=True)
 
 
-@Social.delete("/posts/{post_id}/like")
+@social.delete("/posts/{post_id}/like")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def unlike_post(
+    request: Request,
     post_id: str,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -183,9 +207,11 @@ async def unlike_post(
         await social.like_post_action(post_id=post_id, user=user, like=False)
 
 
-@Social.post("/users/{follow_to_id}/follow")
+@social.post("/users/{follow_to_id}/follow")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def follow(
+    request: Request,
     follow_to_id: str,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -199,9 +225,11 @@ async def follow(
         )
 
 
-@Social.delete("/users/{unfollow_from_id}/follow")
+@social.delete("/users/{unfollow_from_id}/follow")
+@limiter.limit("30/minute")
 @endpoint_exception_handler
 async def unfollow(
+    request: Request,
     unfollow_from_id: str,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -215,9 +243,11 @@ async def unfollow(
         )
 
 
-@Social.get("/users/my-profile")
+@social.get("/users/my-profile")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def get_my_profile(
+    request: Request,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
 ) -> UserSchema:
@@ -228,9 +258,11 @@ async def get_my_profile(
         return await social.get_my_profile(user=user)
 
 
-@Social.get("/users/{user_id}")
+@social.get("/users/{user_id}")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def get_user_profile(
+    request: Request,
     user_id: str | None,
     user_: User = Depends(authorize_public_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -242,9 +274,11 @@ async def get_user_profile(
         return await social.get_user_profile(user=user, other_user_id=user_id)
 
 
-@Social.get("/users/{user_id}/posts/{page}")
+@social.get("/users/{user_id}/posts/{page}")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def get_users_posts(
+    request: Request,
     user_id: str,
     page: int = Depends(page_validator),
     user_: User | None = Depends(authorize_public_endpoint),
@@ -265,9 +299,11 @@ async def get_users_posts(
         )
 
 
-@Social.get("/recent-activity")
+@social.get("/recent-activity")
+@limiter.limit("100/minute")
 @endpoint_exception_handler
 async def get_recent_activity(
+    request: Request,
     user_: User | None = Depends(authorize_public_endpoint),
     session: AsyncSession = Depends(get_session_depends),
 ) -> List[RecentActivitySchema]:
@@ -278,8 +314,10 @@ async def get_recent_activity(
         return await social.get_recent_activity(user_id=user.user_id)
 
 
-@Social.get("/friends")
+@social.get("/friends")
+@limiter.limit("300/minute")
 async def get_my_friends(
+    request: Request,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
 ) -> List[UserLiteSchema]:

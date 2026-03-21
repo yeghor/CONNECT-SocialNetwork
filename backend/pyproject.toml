@@ -17,6 +17,7 @@ dependencies = [
     "pydantic==2.11.5",
     "SQLAlchemy==2.0.41",
     "python-dotenv==1.2.2",
+    "slowapi==0.1.9"
     "uvicorn==0.34.0",
     "pyjwt==2.9.0",
     "redis==5.3.0",
