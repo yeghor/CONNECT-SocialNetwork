@@ -13,7 +13,7 @@ from pydantic_schemas.pydantic_schemas_auth import *
 from pydantic_schemas.pydantic_schemas_auth import _2FAConfirmationBody
 from exceptions.exceptions_handler import endpoint_exception_handler
 
-from main import limiter
+from rate_limiter import limiter
 
 auth = APIRouter()
 

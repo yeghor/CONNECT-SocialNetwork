@@ -10,7 +10,7 @@ from services.core_services.main_services.main_media_service import MainMediaSer
 
 from exceptions.exceptions_handler import endpoint_exception_handler
 
-from main import limiter
+from rate_limiter import limiter
 
 media = APIRouter()
 

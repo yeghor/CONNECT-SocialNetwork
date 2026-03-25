@@ -19,7 +19,7 @@ from .query_utils import page_validator, query_prompt_required
 from authorization import authorize_private_endpoint, authorize_public_endpoint
 from services.postgres_service import get_session_depends, merge_model
 
-from main import limiter
+from rate_limiter import limiter
 
 social = APIRouter()
 

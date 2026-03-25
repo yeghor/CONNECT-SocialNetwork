@@ -47,8 +47,8 @@ const LoginForm = () => {
                     setEmailToConfirm(response.emailToConfirm);
                     setShowSecondFactor(true);
                 } else {
-                    setUpdateCookie(AccessTokenCookieKey, response.accessToken, null);
-                    setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, null);
+                    setUpdateCookie(AccessTokenCookieKey, response.accessToken, response.expiresAtAccessToken);
+                    setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, response.expiresAtRefreshToken);
                     navigate(homeURI);                    
                 }
             }            

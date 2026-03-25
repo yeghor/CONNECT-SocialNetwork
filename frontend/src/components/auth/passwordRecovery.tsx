@@ -107,8 +107,8 @@ export const NewPasswordCreationRecovery = () => {
         const response = await safeAPICallRecovery<AuthTokensResponse>(locationState.passwordRecoveryToken, fetchRecoverPassword, navigate, setErrorMessage, newPassword, newPasswordConfirm);
 
         if (response.success) {
-            setUpdateCookie(AccessTokenCookieKey, response.accessToken, null);
-            setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, null);
+            setUpdateCookie(AccessTokenCookieKey, response.accessToken, response.expiresAtAccessToken);
+            setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, response.expiresAtRefreshToken);
             navigate(homeURI);
         }
     };
