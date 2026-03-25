@@ -85,22 +85,25 @@ class JWTService:
             expires_at = await redis.save_acces_jwt(
                 jwt_token=encoded_jwt, user_id=user_id
             )
-            return AccessTokenSchema.model_validate(
-                {"access_token": encoded_jwt, "expires_at_access": expires_at}
+            return AccessTokenSchema(
+                access_token=encoded_jwt,
+                expires_at_access=expires_at
             )
         elif token_type == "refresh":
             expires_at = await redis.save_refresh_jwt(
                 jwt_token=encoded_jwt, user_id=user_id
             )
-            return RefreshTokenSchema.model_validate(
-                {"refresh_token": encoded_jwt, "expires_at_refresh": expires_at}
+            return RefreshTokenSchema(
+                refresh_token=encoded_jwt,
+                expires_at_refresh=expires_at
             )
         elif token_type == "password-recovery":
             expires_at = await redis.save_password_recovery_jwt(
                 jwt_token=encoded_jwt, user_id=user_id
             )
             return PasswordRecoveryToken(
-                recovery_token=encoded_jwt, expires_at_recovery=expires_at
+                recovery_token=encoded_jwt,
+                expires_at_recovery=expires_at
             )
         else:
             raise ValueError("Unsuported token type")
@@ -120,14 +123,12 @@ class JWTService:
             user_id=user_id, redis=redis, token_type="refresh"
         )
 
-        return RefreshAccessTokens.model_validate(
-            {
-                "access_token": access_token.access_token,
-                "expires_at_access": access_token.expires_at_access,
-                "refresh_token": refresh_token.refresh_token,
-                "expires_at_refresh": refresh_token.expires_at_refresh,
-                "email_confirmation_required": email_confirmation_required,
-            }
+        return RefreshAccessTokens(
+            access_token=access_token.access_token,
+            expires_at_access=access_token.expires_at_access,
+            refresh_token=refresh_token.refresh_token,
+            expires_at_refresh=refresh_token.expires_at_refresh,
+            email_confirmation_required=email_confirmation_required,
         )
 
     @classmethod
