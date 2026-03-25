@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Body, Header
+from fastapi import APIRouter, Depends, Body, Header, Request
 from services.postgres_service import *
 from services.core_services import MainServiceContextManager, MainServiceAuth
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,15 +11,18 @@ from pydantic_schemas.pydantic_schemas_auth import *
 
 # Somehow, * import doesn't work if object name begins with underscore
 from pydantic_schemas.pydantic_schemas_auth import _2FAConfirmationBody
-
 from exceptions.exceptions_handler import endpoint_exception_handler
 
-Auth = APIRouter()
+from main import limiter
+
+auth = APIRouter()
 
 
-@Auth.post("/login")
+@auth.post("/login")
+@limiter.limit("5/minute")
 @endpoint_exception_handler
 async def login(
+    request: Request,
     credentials: LoginBody = Body(...),
     session: AsyncSession = Depends(get_session_depends),
 ) -> RefreshAccessTokens:
@@ -29,10 +32,11 @@ async def login(
         return await auth.login(credentials=credentials)
 
 
-# ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
-@Auth.post("/register")
+@auth.post("/register")
+@limiter.limit("3/minute")
 @endpoint_exception_handler
 async def register(
+    request: Request,
     credentials: RegisterBody = Body(...),
     session: AsyncSession = Depends(get_session_depends),
 ) -> EmailProvided:
@@ -42,9 +46,11 @@ async def register(
         return await auth.register(credentials=credentials)
 
 
-@Auth.post("/auth/2fa/confirm-email")
+@auth.post("/auth/2fa/confirm-email")
+@limiter.limit("10/minute")
 @endpoint_exception_handler
 async def confirm_2fa_email(
+    request: Request,
     confirmation_credentials: _2FAConfirmationBody,
     session: AsyncSession = Depends(get_session_depends),
 ) -> RefreshAccessTokens:
@@ -54,9 +60,11 @@ async def confirm_2fa_email(
         return await auth.confirm_email_2fa(credentials=confirmation_credentials)
 
 
-@Auth.post("/auth/2fa/password-recovery")
+@auth.post("/auth/2fa/password-recovery")
+@limiter.limit("10/minute")
 @endpoint_exception_handler
 async def confirm_2fa_password_recovery(
+    request: Request,
     credentials: _2FAConfirmationBody,
     session: AsyncSession = Depends(get_session_depends),
 ) -> PasswordRecoveryToken:
@@ -66,10 +74,11 @@ async def confirm_2fa_password_recovery(
         return await auth.recover_password_2fa(credentials=credentials)
 
 
-# ADD RATE LIMITING DUE TO EMAIL SERVICE!!!!!!!
-@Auth.post("/auth/new/2fa")
+@auth.post("/auth/new/2fa")
+@limiter.limit("3/minute")
 @endpoint_exception_handler
 async def issue_new_2fa(
+    request: Request,
     email: EmailProvided, session: AsyncSession = Depends(get_session_depends)
 ) -> EmailProvided:
     async with await MainServiceContextManager[MainServiceAuth].create(
@@ -78,9 +87,11 @@ async def issue_new_2fa(
         return await auth.issue_new_second_factor(email=email.email)
 
 
-@Auth.post("/auth/password-recovery")
+@auth.post("/auth/password-recovery")
+@limiter.limit("3/minute")
 @endpoint_exception_handler
 async def request_password_recovery(
+    request: Request,
     credentials: EmailProvided, session: AsyncSession = Depends(get_session_depends)
 ) -> EmailProvided:
     async with await MainServiceContextManager[MainServiceAuth].create(
@@ -89,9 +100,11 @@ async def request_password_recovery(
         return await auth.request_password_recovery(email=credentials.email)
 
 
-@Auth.patch("/auth/password-recovery")
+@auth.patch("/auth/password-recovery")
+@limiter.limit("10/minute")
 @endpoint_exception_handler
 async def password_recovery(
+    request: Request,
     credentials: PasswordRecoveryBody,
     user_: User = Depends(authorize_password_recovery_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -103,9 +116,11 @@ async def password_recovery(
         return await auth.recover_password(user=user, credentials=credentials)
 
 
-@Auth.patch("/users/my-profile/password")
+@auth.patch("/users/my-profile/password")
+@limiter.limit("3/minute")
 @endpoint_exception_handler
 async def change_password(
+    request: Request,
     credentials: ChangePasswordBody,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -117,9 +132,11 @@ async def change_password(
         return await auth.change_password(user=user, credentials=credentials)
 
 
-@Auth.post("/logout")
+@auth.post("/logout")
+@limiter.limit("10/minute")
 @endpoint_exception_handler
 async def logout(
+    request: Request,
     session: AsyncSession = Depends(get_session_depends),
     tokens: RefreshAccesTokensProvided = Body(...),
 ) -> None:
@@ -129,9 +146,11 @@ async def logout(
         return await auth.logout_on_this_device(tokens=tokens)
 
 
-@Auth.post("/logout/full")
+@auth.post("/logout/full")
+@limiter.limit("3/minute")
 @endpoint_exception_handler
 async def fully_logout(
+    request: Request,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
 ) -> None:
@@ -142,9 +161,11 @@ async def fully_logout(
         return await auth.logout_on_every_device(user=user)
 
 
-@Auth.post("/refresh")
+@auth.post("/refresh")
+@limiter.limit("10/minute")
 @endpoint_exception_handler
 async def refresh_token(
+    request: Request,
     token=Header(..., examples="Bearer (refresh_token)"),
     session: AsyncSession = Depends(get_session_depends),
 ) -> AccessTokenSchema:
@@ -154,9 +175,11 @@ async def refresh_token(
         return await auth.refresh_token(refresh_token=token)
 
 
-@Auth.patch("/users/my-profile/username")
+@auth.patch("/users/my-profile/username")
+@limiter.limit("5/minute")
 @endpoint_exception_handler
 async def change_username(
+    request: Request,
     credentials: NewUsernameBody = Body(...),
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
@@ -168,15 +191,15 @@ async def change_username(
         await auth.change_username(user=user, credentials=credentials)
 
 
-@Auth.delete("/users/my-profile")
-@endpoint_exception_handler
-async def delete_profile(
-    password: str = Header(...),
-    user_: User = Depends(authorize_private_endpoint),
-    session: AsyncSession = Depends(get_session_depends),
-) -> None:
-    user = await merge_model(postgres_session=session, model_obj=user_)
-    async with await MainServiceContextManager[MainServiceAuth].create(
-        postgres_session=session, MainServiceType=MainServiceAuth
-    ) as auth:
-        await auth.delete_user(password=password, user=user)
+# @auth.delete("/users/my-profile")
+# @endpoint_exception_handler
+# async def delete_profile(
+#     password: str = Header(...),
+#     user_: User = Depends(authorize_private_endpoint),
+#     session: AsyncSession = Depends(get_session_depends),
+# ) -> None:
+#     user = await merge_model(postgres_session=session, model_obj=user_)
+#     async with await MainServiceContextManager[MainServiceAuth].create(
+#         postgres_session=session, MainServiceType=MainServiceAuth
+#     ) as auth:
+#         await auth.delete_user(password=password, user=user)
