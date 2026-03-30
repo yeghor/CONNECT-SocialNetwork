@@ -1,4 +1,4 @@
-import { changeDateTz as mapDatestringToLocalTz } from "../helpers/dateUtils";
+import { displayDayWithTZ as mapDatestringToLocalTz } from "../helpers/dateUtils";
 
 export interface SuccessfulResponse {
     success: true
@@ -138,9 +138,9 @@ export const passwordRecoveryTokenResponseMapper = (data: PasswordRecoveryTokenR
 export const authTokensResponseMapper = (data: AuthTokensResponseDTO): AuthTokensResponse => {
     return {
         accessToken: data.access_token,
-        expiresAtAccessToken: mapDatestringToLocalTz(data.expires_at_access ?? null),
+        expiresAtAccessToken: data.expires_at_access && new Date(data.expires_at_access) || null,
         refreshToken: data.refresh_token,
-        expiresAtRefreshToken: mapDatestringToLocalTz(data.expires_at_refresh),
+        expiresAtRefreshToken: data.expires_at_refresh && new Date(data.expires_at_refresh) || null,
         emailToConfirm: data.email_to_confirm,
 
         success: true
@@ -254,7 +254,7 @@ export const loadPostResponseMapper = (postDTO: LoadPostResponseDTO): LoadPostRe
         {
             postId: postDTO.post_id,
             title: postDTO.title,
-            published: mapDatestringToLocalTz(postDTO.published) as Date,
+            published: new Date(postDTO.published),
             isReply: postDTO.is_reply,
             owner: userMapper(postDTO.owner),
             likes: postDTO.likes,
@@ -262,13 +262,13 @@ export const loadPostResponseMapper = (postDTO: LoadPostResponseDTO): LoadPostRe
             isLiked: postDTO.is_liked,
             replies: postDTO.replies,
             text: postDTO.text,
-            lastUpdated: mapDatestringToLocalTz(postDTO.last_updated) as Date,
+            lastUpdated: new Date(postDTO.last_updated),
             picturesURLs: postDTO.pictures_urls,
             parentPost: postDTO.parent_post
                 ? {
                     postId: postDTO.parent_post.post_id,
                     title: postDTO.parent_post.title,
-                    published: mapDatestringToLocalTz(postDTO.parent_post.published) as Date,
+                    published: new Date(postDTO.parent_post.published),
                     isReply: postDTO.parent_post.is_reply,
                     owner: userMapper(postDTO.parent_post.owner),
                     likes: postDTO.parent_post.likes,
@@ -290,7 +290,7 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
     const mapped = data.map(postDTO => ({
     postId: postDTO.post_id,
     title: postDTO.title,
-    published: mapDatestringToLocalTz(postDTO.published) as Date,
+    published: new Date(postDTO.published),
     isReply: postDTO.is_reply,
     owner: userMapper(postDTO.owner),
     likes: postDTO.likes,
@@ -302,7 +302,7 @@ export const feedPostResponseMapper = (data: FeedPostsResponseDTO): FeedPostsRes
         ? {
             postId: postDTO.parent_post.post_id,
             title: postDTO.parent_post.title,
-            published: mapDatestringToLocalTz(postDTO.parent_post.published) as Date,
+            published: new Date(postDTO.parent_post.published),
             isReply: postDTO.parent_post.is_reply,
             owner: userMapper(postDTO.parent_post.owner),
             likes: postDTO.parent_post.likes,
@@ -326,7 +326,7 @@ export const postCommentsResponseMapper = (data: ShortPostsDTO): PostCommentsRes
         {
             postId: commentDTO.post_id,
             title: commentDTO.title,
-            published: mapDatestringToLocalTz(commentDTO.published) as Date,
+            published: new Date(commentDTO.published),
             isReply: commentDTO.is_reply,
             likes: commentDTO.likes,
             views: commentDTO.views,
@@ -385,7 +385,7 @@ export const shortUserProfilesMapper = (data: ShortUsersDTOResponse): ShortUserP
             username: shortUserDTO.username,
             avatarURL: shortUserDTO.avatar_url,
             followers: shortUserDTO.followers,
-            joined: mapDatestringToLocalTz(shortUserDTO.joined) as Date
+            joined: new Date(shortUserDTO.joined)
         })
     );
     return {
@@ -402,7 +402,7 @@ export const userProfileMapper = (data: UserProfileDTO): UserProfileResponse => 
             followers: data.followers,
             followed: data.followed,
             avatarURL: data.avatar_url,
-            joined: mapDatestringToLocalTz(data.joined) as Date,
+            joined: new Date(data.joined),
             me: data.me,
             isFollowing: data.is_following,
         },
@@ -442,7 +442,7 @@ export const recentActivityMapper = (data: RecentActivityDTO): RecentActivityRes
         return {
             type: rcDTO.type,
             message: rcDTO.message,
-            date: mapDatestringToLocalTz(rcDTO.date) as Date,
+            date: new Date(rcDTO.date),
             postId: rcDTO.post_id,
             avatarURL: rcDTO.avatar_url
         };
@@ -490,7 +490,7 @@ export const chatResponseMapper = (data: ChatsDTO): ChatsResponse => {
             lastMessage: chatDTO.last_message ? mapSingleMessage(
                 chatDTO.last_message.message_id,
                 chatDTO.last_message.text,
-                mapDatestringToLocalTz(chatDTO.last_message.sent) as Date,
+                new Date(chatDTO.last_message.sent),
                 userMapper(chatDTO.last_message.owner),
                 chatDTO.last_message.me,
                 chatDTO.last_message.temp_id
@@ -572,7 +572,7 @@ export const mapWebsocketReceivedMessage = (data: SendWebsocketReceivedMessageSc
     };
     if (data.action === "send") {
         const sendResponsePart = {
-            sent: mapDatestringToLocalTz(data.sent) as Date,
+            sent: new Date(data.sent),
             owner: userMapper(data.owner),
             tempId: data.temp_id ?? null
         }
@@ -591,7 +591,7 @@ export const messagesResponseMapper = (data: ChatMessagesDTO): MessagesResponse 
     const mapped = data.map((messageDTO) => ({
         messageId: messageDTO.message_id,
         text: messageDTO.text,
-        sent: mapDatestringToLocalTz(messageDTO.sent) as Date,
+        sent: new Date(messageDTO.sent),
         owner: userMapper(messageDTO.owner),
         me: messageDTO.me,
         tempId: messageDTO.temp_id ?? null
@@ -608,7 +608,7 @@ export const singleMessageResponseMapper = (data: ChatMessageDTO): ChatMessage =
     return {
         messageId: data.message_id,
         text: data.text,
-        sent: mapDatestringToLocalTz(data.sent) as Date,
+        sent: new Date(data.sent),
         owner: userMapper(data.owner),
         me: data.me,
         tempId: data.temp_id ?? null

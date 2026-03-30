@@ -88,26 +88,28 @@ class JWTService:
         encoded_jwt = cls._generate_token(user_id, issued_at_unix=int(now.timestamp()))
 
         if token_type == "acces":
-            expires_at_seconds = await redis.save_acces_jwt(
+            expires_within_seconds = await redis.save_acces_jwt(
                 jwt_token=encoded_jwt, user_id=user_id
             )
-            expires_at = cls._increment_date_with_seconds(now, expires_at_seconds)
+            print(expires_within_seconds)
+            expires_at = cls._increment_date_with_seconds(now, int(expires_within_seconds))
             return AccessTokenSchema(
                 access_token=encoded_jwt, expires_at_access=expires_at
             )
         elif token_type == "refresh":
-            expires_at_seconds = await redis.save_refresh_jwt(
+            expires_within_seconds = await redis.save_refresh_jwt(
                 jwt_token=encoded_jwt, user_id=user_id
             )
-            expires_at = cls._increment_date_with_seconds(now, expires_at_seconds)
+            print(expires_within_seconds)
+            expires_at = cls._increment_date_with_seconds(now, int(expires_within_seconds))
             return RefreshTokenSchema(
                 refresh_token=encoded_jwt, expires_at_refresh=expires_at
             )
         elif token_type == "password-recovery":
-            expires_at_seconds = await redis.save_password_recovery_jwt(
+            expires_within_seconds = await redis.save_password_recovery_jwt(
                 jwt_token=encoded_jwt, user_id=user_id
             )
-            expires_at = cls._increment_date_with_seconds(now, expires_at_seconds)
+            expires_at = cls._increment_date_with_seconds(now, int(expires_within_seconds))
             return PasswordRecoveryToken(
                 recovery_token=encoded_jwt, expires_at_recovery=expires_at
             )
@@ -128,7 +130,8 @@ class JWTService:
         refresh_token = await cls.generate_save_token(
             user_id=user_id, redis=redis, token_type="refresh"
         )
-
+        print(type(refresh_token.expires_at_refresh))
+        print(refresh_token.expires_at_refresh)
         return RefreshAccessTokens(
             access_token=access_token.access_token,
             expires_at_access=access_token.expires_at_access,

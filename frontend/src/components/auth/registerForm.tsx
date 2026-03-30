@@ -60,8 +60,10 @@ const RegisterForm = () => {
             if(response.success) {
                 setEmailToConfirm(response.email);
                 setShowSecondFactor(true);
-                return
-            }            
+                return;
+            } else {
+                setErrorMessage(response.detail);
+            }    
         } finally {
             setShowLoading(false);
         }

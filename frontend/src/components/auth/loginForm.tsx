@@ -4,14 +4,11 @@ import { useNavigate } from "react-router";
 import {
     homeURI,
     AccessTokenCookieKey, RefreshTokenCookieKey,
-    internalServerErrorURI,
     registerURI,
     passwordRecoveryURI
 } from "../../consts.ts"
 
 import { fetchLogin } from "../../fetching/fetchAuth.ts"
-
-import { validateAPIResponse } from "../../helpers/responseHandlers/responseHandlers.ts"
 
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler.ts"
 import { Link } from "react-router-dom";
@@ -32,7 +29,6 @@ const LoginForm = () => {
     const [ showSecondFactor, setShowSecondFactor ] = useState(false);
     const [ showLoading, setShowLoading ] = useState(false);
 
-    // Manually calling fetchLogin, because safeApiCall doesn't provide interface to working without tokens object. In our case, on login we can't have it.
     const formHandler = async (event: React.FormEvent) => {
         event.preventDefault();
         
@@ -41,8 +37,9 @@ const LoginForm = () => {
 
         try {
             const response = await safeAPICallNoToken<AuthTokensResponse>(fetchLogin, navigate, setErrorMessage, username, password);
-
+    
             if (response.success) {
+                console.log("SHISH", response.expiresAtRefreshToken)
                 if (response.emailToConfirm) {
                     setEmailToConfirm(response.emailToConfirm);
                     setShowSecondFactor(true);
@@ -51,9 +48,11 @@ const LoginForm = () => {
                     setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, response.expiresAtRefreshToken);
                     navigate(homeURI);                    
                 }
-            }            
+            } else {
+                setErrorMessage(response.detail);
+            }        
         } finally {
-            setShowLoading(false)
+            setShowLoading(false);
         }
 
     }

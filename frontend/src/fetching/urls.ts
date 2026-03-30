@@ -2,7 +2,7 @@ import { OrderPostsByFlag, ProfilePostsSectionFlag } from "../components/social/
 
 const MAINHTTPPROTOCOL = "http://"
 const WSPROTOCOL = "ws://"
-const HOST = "localhost:80"
+const HOST = "localhost:8000"
 
 const BASEURL = `${MAINHTTPPROTOCOL}${HOST}`
 

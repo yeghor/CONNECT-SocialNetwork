@@ -120,7 +120,7 @@ class RedisService:
             time=ACCESS_JWT_EXPIRY_SECONDS,
             value=user_id,
         )
-        return self._get_expiry(ACCESS_JWT_EXPIRY_SECONDS)
+        return SECOND_FACTOR_EXPIRY_SECONDS
 
     @redis_error_handler
     async def save_refresh_jwt(self, jwt_token: str, user_id: str) -> str:
@@ -129,16 +129,16 @@ class RedisService:
             time=REFRESH_JWT_EXPIRY_SECONDS,
             value=user_id,
         )
-        return self._get_expiry(REFRESH_JWT_EXPIRY_SECONDS)
+        return SECOND_FACTOR_EXPIRY_SECONDS
 
     @redis_error_handler
-    async def save_password_recovery_jwt(self, jwt_token: str, user_id: str) -> None:
+    async def save_password_recovery_jwt(self, jwt_token: str, user_id: str) -> str:
         await self.__client.setex(
             name=f"{(self.__jwt_password_recovery_prefix)}{jwt_token}",
             time=SECOND_FACTOR_EXPIRY_SECONDS,
             value=user_id,
         )
-        return self._get_expiry(SECOND_FACTOR_EXPIRY_SECONDS)
+        return SECOND_FACTOR_EXPIRY_SECONDS
 
     @redis_error_handler
     async def refresh_access_token(

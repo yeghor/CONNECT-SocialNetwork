@@ -94,7 +94,7 @@ class RefreshAccesTokensProvided(BaseModel):
 
 class PasswordRecoveryToken(BaseModel):
     recovery_token: str
-    expires_at_recovery: str
+    expires_at_recovery: datetime
 
     @field_validator("expires_at_recovery", mode="before")
     @classmethod
@@ -108,7 +108,7 @@ class PasswordRecoveryToken(BaseModel):
 
 class RefreshTokenSchema(BaseModel):
     refresh_token: str
-    expires_at_refresh: str
+    expires_at_refresh: datetime
 
     @field_validator("expires_at_refresh", mode="before")
     @classmethod
@@ -122,7 +122,7 @@ class RefreshTokenSchema(BaseModel):
 
 class AccessTokenSchema(BaseModel):
     access_token: str
-    expires_at_access: str
+    expires_at_access: datetime
 
     @field_validator("expires_at_access", mode="before")
     @classmethod
@@ -142,9 +142,9 @@ class RefreshAccessTokens(RefreshTokenSchema, AccessTokenSchema):
     """
 
     access_token: str | None = Field(default=None)
-    expires_at_access: str | None = Field(default=None)
+    expires_at_access: datetime | None = Field(default=None)
 
     refresh_token: str | None = Field(default=None)
-    expires_at_refresh: str | None = Field(default=None)
+    expires_at_refresh: datetime | None = Field(default=None)
 
     email_to_confirm: str | None = Field(default=None)
