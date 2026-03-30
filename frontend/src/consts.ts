@@ -3,6 +3,7 @@ export const AccessTokenCookieKey = "CONNECT-access-token";
 export const RefreshTokenCookieKey = "CONNECT-a-refresh-token";
 
 export const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+export const dateLocales = Intl.DateTimeFormat().resolvedOptions().locale;
 
 export const UsernameMinLength = 3;
 export const UsernameMaxLength = 32;

@@ -1,7 +1,7 @@
 import jwt
 from dotenv import load_dotenv
 from os import getenv
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from services.redis_service import RedisService
 from typing import Dict, TypeVar, Type
 from services_types import EndpointAuthType
@@ -61,16 +61,20 @@ class JWTService:
 
     @classmethod
     @jwt_error_handler
-    def _generate_token(cls, user_id: str) -> str:
+    def _generate_token(cls, user_id: str, issued_at_unix: int) -> str:
         encoded_jwt = jwt.encode(
             payload={
                 "user_id": str(user_id),
-                "issued_at": int(datetime.now().timestamp()),
+                "issued_at": issued_at_unix,
             },
             key=getenv("SECRET_KEY"),
             algorithm="HS256",
         )
         return encoded_jwt
+
+    @staticmethod
+    def _increment_date_with_seconds(date: datetime, seconds: int) -> datetime:
+        return date + timedelta(seconds=seconds)
 
     @classmethod
     @jwt_error_handler
@@ -79,31 +83,33 @@ class JWTService:
     ) -> RefreshTokenSchema | AccessTokenSchema | PasswordRecoveryToken:
         """Choose token type you want to generate - acces/refresh"""
 
-        encoded_jwt = cls._generate_token(user_id)
+        now = datetime.now(timezone.utc)
+
+        encoded_jwt = cls._generate_token(user_id, issued_at_unix=int(now.timestamp()))
 
         if token_type == "acces":
-            expires_at = await redis.save_acces_jwt(
+            expires_at_seconds = await redis.save_acces_jwt(
                 jwt_token=encoded_jwt, user_id=user_id
             )
+            expires_at = cls._increment_date_with_seconds(now, expires_at_seconds)
             return AccessTokenSchema(
-                access_token=encoded_jwt,
-                expires_at_access=expires_at
+                access_token=encoded_jwt, expires_at_access=expires_at
             )
         elif token_type == "refresh":
-            expires_at = await redis.save_refresh_jwt(
+            expires_at_seconds = await redis.save_refresh_jwt(
                 jwt_token=encoded_jwt, user_id=user_id
             )
+            expires_at = cls._increment_date_with_seconds(now, expires_at_seconds)
             return RefreshTokenSchema(
-                refresh_token=encoded_jwt,
-                expires_at_refresh=expires_at
+                refresh_token=encoded_jwt, expires_at_refresh=expires_at
             )
         elif token_type == "password-recovery":
-            expires_at = await redis.save_password_recovery_jwt(
+            expires_at_seconds = await redis.save_password_recovery_jwt(
                 jwt_token=encoded_jwt, user_id=user_id
             )
+            expires_at = cls._increment_date_with_seconds(now, expires_at_seconds)
             return PasswordRecoveryToken(
-                recovery_token=encoded_jwt,
-                expires_at_recovery=expires_at
+                recovery_token=encoded_jwt, expires_at_recovery=expires_at
             )
         else:
             raise ValueError("Unsuported token type")

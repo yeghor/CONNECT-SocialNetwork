@@ -944,7 +944,9 @@ class MainServiceSocial(MainServiceBase):
         )
 
         replies_coroutines = [
-            self._create_post_base_schema_via_gather(user_id=user.user_id if user else None, post=reply)
+            self._create_post_base_schema_via_gather(
+                user_id=user.user_id if user else None, post=reply
+            )
             for reply in replies
         ]
 

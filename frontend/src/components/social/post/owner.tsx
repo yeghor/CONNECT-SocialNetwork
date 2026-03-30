@@ -1,6 +1,7 @@
 import React, {} from "react"
 
 import { User } from "../../../fetching/DTOs.ts";
+import { tz } from "../../../consts.ts";
 
 interface ownerProps {
     ownerData: User | null
@@ -18,8 +19,7 @@ const PostOwnerComponent = (props: ownerProps) => {
             </div>
             <div className="text-white flex gap-2 items-center">
                 <div className="text-xs text-gray-200 pt-4">
-                    <span>{props.postPublished.toISOString().split("T")[0]}</span>
-                    <span className="mx-2">{`${props.postPublished.getHours()}:${props.postPublished.getMinutes()}`}</span>
+                    {props.postPublished.toLocaleString(undefined, {"timeZone": tz})}
                 </div>
             </div>
         </div>

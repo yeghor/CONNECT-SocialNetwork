@@ -79,7 +79,8 @@ async def confirm_2fa_password_recovery(
 @endpoint_exception_handler
 async def issue_new_2fa(
     request: Request,
-    email: EmailProvided, session: AsyncSession = Depends(get_session_depends)
+    email: EmailProvided,
+    session: AsyncSession = Depends(get_session_depends),
 ) -> EmailProvided:
     async with await MainServiceContextManager[MainServiceAuth].create(
         MainServiceType=MainServiceAuth, include_email=True, postgres_session=session
@@ -92,7 +93,8 @@ async def issue_new_2fa(
 @endpoint_exception_handler
 async def request_password_recovery(
     request: Request,
-    credentials: EmailProvided, session: AsyncSession = Depends(get_session_depends)
+    credentials: EmailProvided,
+    session: AsyncSession = Depends(get_session_depends),
 ) -> EmailProvided:
     async with await MainServiceContextManager[MainServiceAuth].create(
         postgres_session=session, include_email=True, MainServiceType=MainServiceAuth

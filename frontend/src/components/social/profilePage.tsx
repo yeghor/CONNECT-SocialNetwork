@@ -18,7 +18,7 @@ import estimatePostSize from "../../helpers/postSizeEstimator.ts";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { createInfiniteQueryOptionsUtil, infiniteQieryingFetchGuard } from "../butterySmoothScroll/scrollVirtualizationUtils.ts";
 import ManageProfileModal from "./profile/manageProfileModal.tsx";
-import { loginURI } from "../../consts.ts";
+import { loginURI, tz } from "../../consts.ts";
 
 interface ProfilePageProps {
     userData: UserProfile;
@@ -136,7 +136,7 @@ export const ProfilePage = (props: ProfilePageProps) => {
                     </div>
                     <div>
                         <h2 className="text-xl font-semibold ">{props.userData.username}</h2>
-                        <p className="text-gray-300">Joined {props.userData.joined.toLocaleDateString()}</p>
+                        <p className="text-gray-300">Joined {props.userData.joined.toLocaleDateString(undefined, {"timeZone": tz})}</p>
                     </div>
                     <div className="text-center">
                         <p className="font-bold">{props.userData.followers}</p>

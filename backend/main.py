@@ -39,6 +39,7 @@ POST_RATING_EXPIRATION = int(getenv("POST_RATING_EXPIRATION_SECONDS"))
 
 engine = None
 
+
 async def drop_redis() -> None:
     client = async_redis.Redis(host="localhost", port=int(getenv("REDIS_PORT")), db=0)
     await client.flushall()
@@ -81,10 +82,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-origins = [
-    "http://localhost:3000",
-    "http://localhost:80"
-]
+origins = ["http://localhost:3000", "http://localhost:80"]
 
 app.add_middleware(
     CORSMiddleware,

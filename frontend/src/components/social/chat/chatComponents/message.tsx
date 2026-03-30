@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChatMessage, ChatParticipant } from "../../../../fetching/DTOs.ts";
+import { tz } from "../../../../consts.ts";
 
 export interface ChatMessageProps {
     messageData: ChatMessage;
@@ -60,7 +61,7 @@ const FlowMessage = (props: ChatMessageProps) => {
                 </div>
 
                 <div className={`text-[12px] mb-1 font-bold tracking-widest ${isMe ? "text-gray-200" : "text-gray-400"}`}>
-                    {isSending ? "Sending..." : props.messageData.sent.toLocaleString("en-GB", {   weekday: "long", year: "numeric", month: "long", day: "numeric", hour12: true, hour: "2-digit", minute: "2-digit" })}
+                    {isSending ? "Sending..." : props.messageData.sent.toLocaleString("en-GB", {   weekday: "long", year: "numeric", month: "long", day: "numeric", hour12: true, hour: "2-digit", minute: "2-digit", timeZone: tz })}
                 </div>
 
                 {messageAction === "change" ? (

@@ -24,8 +24,7 @@ This router is only for case when the application use Local image storage.
 @limiter.limit("500/minute")
 @endpoint_exception_handler
 async def get_image_user(
-    request: Request,
-    token: str, session: AsyncSession = Depends(get_session_depends)
+    request: Request, token: str, session: AsyncSession = Depends(get_session_depends)
 ) -> Response:
     async with await MainServiceContextManager[MainMediaService].create(
         MainServiceType=MainMediaService, postgres_session=session
@@ -38,8 +37,7 @@ async def get_image_user(
 @limiter.limit("500/minute")
 @endpoint_exception_handler
 async def get_image_post(
-    request: Request,
-    token: str, session: AsyncSession = Depends(get_session_depends)
+    request: Request, token: str, session: AsyncSession = Depends(get_session_depends)
 ) -> Response:
     async with await MainServiceContextManager[MainMediaService].create(
         MainServiceType=MainMediaService, postgres_session=session
@@ -49,7 +47,7 @@ async def get_image_post(
 
 
 @media.post("/media/posts/{post_id}")
-@limiter.limit("300/minute") # rate must be [max post pictures] * [make_post rate]
+@limiter.limit("300/minute")  # rate must be [max post pictures] * [make_post rate]
 @endpoint_exception_handler
 async def upload_post_picture(
     request: Request,
