@@ -10,6 +10,7 @@ import { safeAPICallPublic } from "../../../fetching/fetchUtils.ts";
 import { specificPostURI } from "../../../consts.ts";
 import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 import { useNavigate, Link } from "react-router";
+import { displayDayWithTZ } from "../../../helpers/dateUtils.ts";
 
 const RecentActivityComponent = () => {
     const navigate = useNavigate();
@@ -46,11 +47,11 @@ const RecentActivityComponent = () => {
                                 <img 
                                     src={rc.avatarURL || "/uknown-user-image.jpg"} 
                                     alt="avatar" 
-                                    className="h-10 w-10 mr-4 w-auto rounded-full object-cover border border-white/20 group-hover:scale-110 transition-transform"
+                                    className="h-10 w-10 mr-4 rounded-full object-cover border border-white/20 group-hover:scale-110 transition-transform"
                                 />
                                 <div className="flex justify-between">
                                     <p className="text-white">{rc.message}</p>
-                                    <p><span>{rc.date.toISOString().split("T")[0]}</span><span className="mx-2 font-semibold">{`${rc.date.getHours()}:${rc.date.getMinutes()}`}</span></p>                                    
+                                    <p>{displayDayWithTZ(rc.date)}</p>                                    
                                 </div>
                             </li>                        
                         </Link>

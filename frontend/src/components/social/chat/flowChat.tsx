@@ -5,6 +5,7 @@ import { specificChatURI } from "../../../consts.ts";
 import { safeAPICallPrivate } from "../../../fetching/fetchUtils.ts";
 import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 import { fetchLeaveChat as fetchLeaveGroup } from "../../../fetching/fetchChatWS.ts";
+import { displayDayWithTZ } from "../../../helpers/dateUtils.ts";
 
 const FlowChatNavigationWrapper = (props: {
     linkURI: string | undefined;
@@ -83,7 +84,7 @@ const FlowChat = (chatData: Chat) => {
                             { chatData.lastMessage && (
                                 <p className="text-sm text-gray-400 flex gap-2">
                                     <span>{chatData.lastMessage.text.slice(0, 20)}...</span>
-                                    <span className="opacity-60">{chatData.lastMessage.sent.toLocaleDateString()}</span>
+                                    <span className="opacity-60">{displayDayWithTZ(chatData.lastMessage.sent)}</span>
                                 </p>
                             )}
                         </div>

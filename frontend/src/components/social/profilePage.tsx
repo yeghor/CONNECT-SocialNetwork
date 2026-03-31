@@ -19,6 +19,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { createInfiniteQueryOptionsUtil, infiniteQieryingFetchGuard } from "../butterySmoothScroll/scrollVirtualizationUtils.ts";
 import ManageProfileModal from "./profile/manageProfileModal.tsx";
 import { loginURI, tz } from "../../consts.ts";
+import { displayDayWithTZ } from "../../helpers/dateUtils.ts";
 
 interface ProfilePageProps {
     userData: UserProfile;
@@ -136,7 +137,7 @@ export const ProfilePage = (props: ProfilePageProps) => {
                     </div>
                     <div>
                         <h2 className="text-xl font-semibold ">{props.userData.username}</h2>
-                        <p className="text-gray-300">Joined {props.userData.joined.toLocaleDateString(undefined, {"timeZone": tz})}</p>
+                        <p className="text-gray-300">Joined {displayDayWithTZ(props.userData.joined)}</p>
                     </div>
                     <div className="text-center">
                         <p className="font-bold">{props.userData.followers}</p>

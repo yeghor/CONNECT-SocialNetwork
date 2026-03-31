@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ChatMessage, ChatParticipant } from "../../../../fetching/DTOs.ts";
 import { tz } from "../../../../consts.ts";
+import { displayDayWithTZ } from "../../../../helpers/dateUtils.ts";
 
 export interface ChatMessageProps {
     messageData: ChatMessage;
@@ -61,7 +62,7 @@ const FlowMessage = (props: ChatMessageProps) => {
                 </div>
 
                 <div className={`text-[12px] mb-1 font-bold tracking-widest ${isMe ? "text-gray-200" : "text-gray-400"}`}>
-                    {isSending ? "Sending..." : props.messageData.sent.toLocaleString("en-GB", {   weekday: "long", year: "numeric", month: "long", day: "numeric", hour12: true, hour: "2-digit", minute: "2-digit", timeZone: tz })}
+                    {isSending ? "Sending..." : displayDayWithTZ(props.messageData.sent)}
                 </div>
 
                 {messageAction === "change" ? (

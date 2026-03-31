@@ -39,7 +39,6 @@ const LoginForm = () => {
             const response = await safeAPICallNoToken<AuthTokensResponse>(fetchLogin, navigate, setErrorMessage, username, password);
     
             if (response.success) {
-                console.log("SHISH", response.expiresAtRefreshToken)
                 if (response.emailToConfirm) {
                     setEmailToConfirm(response.emailToConfirm);
                     setShowSecondFactor(true);

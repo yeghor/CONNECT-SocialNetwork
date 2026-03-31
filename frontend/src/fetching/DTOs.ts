@@ -129,7 +129,7 @@ export const passwordRecoveryTokenResponseMapper = (data: PasswordRecoveryTokenR
     return {
         success: true,
         recoveryToken: data.recovery_token,
-        expiresAtRecovery: mapDatestringToLocalTz(data.expires_at_recovery) as Date
+        expiresAtRecovery: new Date(data.expires_at_recovery)
     };
 };
 
@@ -241,7 +241,7 @@ export const postBaseMapper = (postBaseDTO: PostBaseDTO): PostBaseResponse => {
         data: {
             postId: postBaseDTO.post_id,
             title: postBaseDTO.title,
-            published: mapDatestringToLocalTz(postBaseDTO.published) as Date,
+            published: new Date(postBaseDTO.published),
             isReply: postBaseDTO.is_reply
         },
         success: true
