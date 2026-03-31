@@ -230,8 +230,10 @@ def ws_endpoint_exception_handler(func):
                 # Client disconnected, no need to close websocket connection
                 print("client disconnected")
                 print(check_websocket_state(ws=websocket))
-                pass
-
+                if check_websocket_state(ws=websocket):
+                    await websocket.close(
+                        code=1011, reason=INTERNAL_SERVER_ERROR_CLIENT_MESSAGE
+                    )
             except Exception as e:
                 logging.log(
                     level=logging.CRITICAL,
