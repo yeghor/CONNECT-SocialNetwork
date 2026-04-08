@@ -507,7 +507,7 @@ class MainServiceSocial(MainServiceBase):
         ]
 
     @web_exceptions_raiser
-    async def make_post(self, data: MakePostDataSchema, user: User) -> PostBaseShort:
+    async def make_post(self, data: MakePostSchema, user: User) -> PostBaseShort:
         validate_post_text_content(title=data.title, text=data.text)
 
         if data.parent_post_id:

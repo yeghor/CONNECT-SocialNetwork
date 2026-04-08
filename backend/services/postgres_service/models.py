@@ -4,8 +4,8 @@ from sqlalchemy.orm import (
     mapped_column,
     relationship,
 )
-from sqlalchemy import ForeignKey
-from datetime import datetime
+from sqlalchemy import ForeignKey, DateTime, Column
+from datetime import datetime, timezone
 from typing import List
 import enum
 
@@ -22,7 +22,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(unique=True)
     email: Mapped[str] = mapped_column(unique=True)
     password_hash: Mapped[str]
-    joined: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    joined: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     email_confirmed: Mapped[bool] = mapped_column(default=False)
 
@@ -58,16 +58,6 @@ class User(Base):
         "ChatRoom", secondary="userroom", back_populates="participants", lazy="selectin"
     )
 
-    # @validates("username")
-    # def validate_username(self, key, username: str):
-    #     if (
-    #         not int(getenv("USERNAME_MIN_L"))
-    #         <= len(username)
-    #         <= int(getenv("USERNAME_MAX_L"))
-    #     ):
-    #         raise ValueError("Username length is out of range")
-    #     return username
-
     def __repr__(self):
         return f"Username: {self.username}"
 
@@ -87,10 +77,10 @@ class Post(Base):
 
     title: Mapped[str] = mapped_column()
     text: Mapped[str]
-    published: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    last_updated: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+
+    published: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    last_updated: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
 
     likes_count: Mapped[int] = mapped_column(default=0)
     views_count: Mapped[int] = mapped_column(default=0)
@@ -103,7 +93,8 @@ class Post(Base):
     )
 
     popularity_rate: Mapped[int] = mapped_column(default=0)
-    last_rate_calculated: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    last_rate_calculated: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
     actions: Mapped[List["PostActions"]] = relationship(
         "PostActions", back_populates="post", lazy="selectin"
     )
@@ -182,7 +173,8 @@ class PostActions(Base):
         ForeignKey("posts.post_id", ondelete="CASCADE")
     )
     action: Mapped[ActionType]
-    date: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    date: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
 
     post: Mapped[Post] = relationship("Post", back_populates="actions", lazy="selectin")
 
@@ -203,7 +195,8 @@ class ChatRoom(Base):
     __tablename__ = "chatroom"
 
     room_id: Mapped[str] = mapped_column(primary_key=True)
-    approval_sent: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    approval_sent: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
 
     # Change manualy on approval
     created: Mapped[datetime | None] = mapped_column(default=None, nullable=True)
@@ -215,9 +208,8 @@ class ChatRoom(Base):
     )
 
     # Putting onupdate cause when user approving chat we need to notify user about that on chat orders
-    last_message_time: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    last_message_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
 
     # Only for dialogues, for groups must always be setted on `True``
     approved: Mapped[bool]
@@ -247,11 +239,11 @@ class Message(Base):
         ForeignKey("chatroom.room_id", ondelete="CASCADE")
     )
     owner_id: Mapped[str | None] = mapped_column(
-        ForeignKey("users.user_id", ondelete="SET NULL"), nullable=True
+        ForeignKey("users.user_id", ondelete="SET NULL"), nullable=True,
     )
 
     text: Mapped[str]
-    sent: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    sent: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     owner: Mapped[User | None] = relationship("User", lazy="selectin")
 

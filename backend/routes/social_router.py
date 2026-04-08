@@ -93,13 +93,13 @@ async def search_users(
 
 
 @social.post("/posts")
-@limiter.limit("100/minute")
+@limiter.limit("30/minute")
 @endpoint_exception_handler
 async def make_post(
     request: Request,
     user_: User = Depends(authorize_private_endpoint),
     session: AsyncSession = Depends(get_session_depends),
-    post_data: MakePostDataSchema = Body(...),
+    post_data: MakePostSchema = Body(...),
 ) -> PostBaseShort:
     user = await merge_model(postgres_session=session, model_obj=user_)
     async with await MainServiceContextManager[MainServiceSocial].create(

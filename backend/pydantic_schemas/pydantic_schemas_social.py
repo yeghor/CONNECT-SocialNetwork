@@ -2,11 +2,15 @@ from __future__ import annotations
 
 from services.postgres_service.models import ActionType
 
-from pydantic import BaseModel, field_validator, Field, ValidationInfo, model_validator
+from pydantic import BaseModel, field_validator, Field, field_serializer
 from datetime import datetime
 from typing import List, Any, Annotated, Literal
 from dotenv import load_dotenv
+from os import getenv
 
+load_dotenv()
+
+DATETIME_BASE_FORMAT = getenv("DATETIME_BASE_FORMAT")
 
 class ActionSchemaShort(BaseModel):
     owner_id: str
@@ -30,13 +34,7 @@ class PostIDValidate(BaseModel):
         return str(value)
 
 
-class UserIDValidate(BaseModel):
-    user_id: str
 
-    @field_validator("user_id", mode="before")
-    @classmethod
-    def validate_id(cls, value: Any):
-        return str(value)
 
 
 class PostBaseShort(PostIDValidate):
@@ -81,7 +79,8 @@ class RecentActivitySchema(BaseModel):
 # =====================
 
 
-class UserShortSchema(UserIDValidate):
+class UserShortSchema(BaseModel):
+    user_id: str
     username: str
 
 
@@ -114,7 +113,7 @@ class PostDataSchemaBase(BaseModel):
     text: str
 
 
-class MakePostDataSchema(PostDataSchemaBase):
+class MakePostSchema(PostDataSchemaBase):
     parent_post_id: str | None
 
 
