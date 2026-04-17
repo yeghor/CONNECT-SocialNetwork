@@ -1,4 +1,7 @@
 # Social Network project
+
+https://github.com/user-attachments/assets/6cb0d4ae-0de2-4414-ad49-d2f9c0221061
+
 This is my most **serious** project.
 
 It is a prototype of a social network similar to Twitter _(now X)_. 
