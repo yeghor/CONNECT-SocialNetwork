@@ -331,11 +331,9 @@ class MainChatService(MainServiceBase):
         await self._PostgresService.delete_models_and_flush(chat_room)
 
     @web_exceptions_raiser
-    async def disconnect(self, user: User) -> None:
-        """Necessarily call this methods when error occurred or user disconnected from websocket to clear all excluding."""
-        await self._RedisService.clear_exclude_chat_ids(
-            user_id=user.user_id, exclude_type="message"
-        )
+    async def disconnect(self, user_id: str) -> None:
+        """Necessarily call this methods when error occurred or user disconnected from websocket"""
+        await self._RedisService.reset_user_chat_pagination(user_id=user_id)
 
     @web_exceptions_raiser
     async def send_message(

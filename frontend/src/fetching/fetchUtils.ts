@@ -99,16 +99,17 @@ export const safeAPICallPrivate = async <ResponseType>(
     setErrorMessage?: CallableFunction,
     ...fetchArgs: any[]
 ): Promise<ResponseType | BadResponse> => {
-    if(!(tokens.access && tokens.refresh)) {
-        return createBadResponseManually(manualUnauthorizedMessage, 401);
-    }
-    console.log("calling private endpoint")
+    // console.log("TOKENS", token)
+    // if(!(tokens.access && tokens.refresh)) {
+    //     return createBadResponseManually(manualUnauthorizedMessage, 401);
+    // }
+
     try {
         let response = await fetchFunc(tokens.access, ...fetchArgs);        
 
         if (validateResponse(response, setErrorMessage, navigate)) {
             if(checkUnauthorizedResponse(response)) {
-                response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, tokens.refresh, navigate, setErrorMessage, ...fetchArgs);
+                response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, tokens.refresh ?? "", navigate, setErrorMessage, ...fetchArgs);
             }
         }
 

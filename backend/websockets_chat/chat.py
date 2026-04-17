@@ -236,19 +236,22 @@ async def connect_to_websocket_chat_room(
 ):
     connection_data = await wsconnect(token=token, websocket=websocket)
 
-    while True:
-        json_dict = await websocket.receive_json()
+    try:
+        while True:
+            json_dict = await websocket.receive_json()
 
-        # If in json_dict enough data - it passes not related fields
-        request_data = ExpectedWSData.model_validate(json_dict, strict=True)
+            # If in json_dict enough data - it passes not related fields
+            request_data = ExpectedWSData.model_validate(json_dict, strict=True)
 
-        async with await MainServiceContextManager[MainChatService].create(
-            MainServiceType=MainChatService, postgres_session=session
-        ) as chat:
-            db_message_data = await chat.execute_action(
-                request_data=request_data, connection_data=connection_data
+            async with await MainServiceContextManager[MainChatService].create(
+                MainServiceType=MainChatService, postgres_session=session
+            ) as chat:
+                db_message_data = await chat.execute_action(
+                    request_data=request_data, connection_data=connection_data
+                )
+
+            await connection.execute_real_time_action(
+                connection_data=connection_data, db_message_data=db_message_data
             )
-
-        await connection.execute_real_time_action(
-            connection_data=connection_data, db_message_data=db_message_data
-        )
+    finally:
+        await chat.disconnect(user_id=connection_data.user_id)

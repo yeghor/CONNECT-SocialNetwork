@@ -23,7 +23,7 @@ const PendingChat = (props: PendingChatProps) => {
     const [ initiatedByMe, setInitiatedByMe ] = useState(true);
     const [ showComponent, setShowComponent ] = useState(false)
 
-    const approveChat = async (): Promise<void> => {
+    const approveChat = async () => {
         const response = await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchApproveChat, navigate, undefined, props.chatId);
 
         if (response.success) {
@@ -31,7 +31,8 @@ const PendingChat = (props: PendingChatProps) => {
         }
     };
 
-    const disapproveChat = async (): Promise<void> => {
+    const disapproveChat = async ()=> {
+        console.log("disapprove")
         const response = await safeAPICallPrivate<SuccessfulResponse>(tokens, fetchDisapproveChat, navigate, undefined, props.chatId);
         
         if (response.success) {
@@ -106,14 +107,14 @@ const PendingChat = (props: PendingChatProps) => {
                 { initiatedByMe ? <p className="text-gray-200 text-center bg-white/10 px-4 py-2 border-white/30 rounded-xl">Waiting for Approval</p> : <div className="flex gap-3 w-full">
                     <button 
                         className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-200 text-[11px] uppercase font-bold tracking-wider px-5 py-2.5 rounded-xl border border-red-500/30 transition-all active:scale-95" 
-                        onClick={ async () => await disapproveChat()}
+                        onClick={() => disapproveChat()}
                     >
                         Disapprove
                     </button>
                     
                     <button 
                         className="flex-1 bg-white/10 hover:bg-white/20 text-white text-[11px] uppercase font-bold tracking-wider px-5 py-2.5 rounded-xl border border-white/20 transition-all" 
-                        onClick={ async () => await approveChat()}
+                        onClick={() => approveChat()}
                     >
                         Approve
                     </button>

@@ -47,6 +47,7 @@ const ChatsFlow = (props: { showGroupCreationModelToggler: React.Dispatch<React.
 
     const virtualItems = virtualizer.getVirtualItems();
 
+    //@ts-ignore
     const flatMapPChats = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((chat) => chat !== undefined) ?? []
 
     const infiniteQuerying = async () => {
@@ -70,7 +71,7 @@ const ChatsFlow = (props: { showGroupCreationModelToggler: React.Dispatch<React.
     }, []);
 
     return(
-        <div className="w-full rounded-xl border-white/20 border-2 px-4 mx-8">
+        <div className="w-full rounded-xl border-white/20 border-2 px-4 m-8">
             <div className="flex justify-start gap-2 text-white m-4">
                 <button
                     className={`px-4 py-1 w-48 rounded-3xl ${

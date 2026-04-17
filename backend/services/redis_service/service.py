@@ -379,13 +379,3 @@ class RedisService:
         issued_code = await self.__client.get(pattern)
 
         return issued_code == str(code)
-
-    # @redis_error_handler
-    # async def save_password_recovery_token(self, token: str) -> None:
-    #     pattern = f"{self.__2fa_change_password_hash_prefix}{email}"
-    #     await self.__client.setex(pattern, SECOND_FACTOR_EXPIRY_SECONDS, password_hash)
-
-    # @redis_error_handler
-    # async def get_password_recovery_token(self, token: str) -> str | bytes | None:
-    #     pattern = f"{self.__2fa_change_password_hash_prefix}{email}"
-    #     return await self.__client.get(pattern)

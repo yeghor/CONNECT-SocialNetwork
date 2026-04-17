@@ -82,7 +82,7 @@ export const ChatPage = (props: ChatPageProps) => {
                 <ChatsFlow showGroupCreationModelToggler={setCreateGroupModal} />
             </div>
             <div className="w-2/3">
-                {ActiveChatComponent ??  (chatId ? <LoadingIndicator customMessage={undefined} /> : null)  }
+                {ActiveChatComponent ??  (chatId ? <LoadingIndicator customMessage={undefined} centerY={true} /> : null)  }
             </div>
         </div>
     );
