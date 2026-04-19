@@ -1,4 +1,7 @@
 # Social Network project
+
+https://github.com/user-attachments/assets/6cb0d4ae-0de2-4414-ad49-d2f9c0221061
+
 This is my most **serious** project.
 
 It is a prototype of a social network similar to Twitter _(now X)_. 
@@ -26,16 +29,13 @@ It is a prototype of a social network similar to Twitter _(now X)_.
     - **Following posts** from users you follow to _(If no follows - returns **Unrelated**)_
 - **Real-time Chat** using fastAPI (starlete's) websockets.
 
-This project has a `docker-compose.yml` file, so it allows you to start the application by executing only one line.
+This project has a `docker-compose.yml`, so it allows you to start the application by executing only one line.
 
 Also the project has basic **CI** _(Implemented with GitHub actions)_ that runs tests on every **push**.
 
 **Next steps**:
 
-- Implement frontend chat
-- Registration email confirmation
 - Backend optimization *(mostly with ImageStorage service and asyncio gather)*
-- Frontend polishing
 - Tests Covering & CI/CD Pipeline
 - Deploy
 
