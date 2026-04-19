@@ -25,33 +25,25 @@ interface PostsCommentsFlow {
 type PostsCommentsFlowPrepared = PostsCommentsFlow[];
 
 const createPostFlowResponse = (data: ShortPost[]): PostsCommentsFlowPrepared => {
-    console.log("startiong mapping")
     const flowData = data.map((post) => {
         console.log(post.picturesURLs)
         let estimatedSize: number = estimatePostSize(post.picturesURLs.length, post.isReply);
-        console.log("computed estimatedSize")
         return {
             estimatedSize: estimatedSize,
             postId: post.postId,
             postData: post
         };
     });
-    console.log(flowData)
     return flowData;
 }
 
 const commentsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, postId: string, page: number): Promise<PostsCommentsFlowPrepared> => {
-    console.log(`Fetching comments for post ${postId}, page ${page}`);
     const fetchedPostsResponse = await safeAPICallPublic<PostCommentsResponse>(tokens, fetchPostComments, navigate, undefined, postId, page);
-    console.log("bamabm ")
     if (fetchedPostsResponse.success === false) {
         console.log("return []");
         return [];
     }
 
-    console.log("fetchedPostsResponse.data", fetchedPostsResponse.data)
-    console.log("createPostFlowResponse(fetchedPostsResponse.data)", createPostFlowResponse(fetchedPostsResponse.data));
-    console.log("data mapped")
     return createPostFlowResponse(fetchedPostsResponse.data);
 }
 
@@ -67,6 +59,7 @@ const PostComments = (props: CommentProps) => {
 
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(createInfiniteQueryOptionsUtil(commentsFetcher, [tokens, navigate, props.originalPostId], ["postComments", props.originalPostId]));
 
+    // @ts-ignore
     const posts: PostsCommentsFlowPrepared = data?.pages?.flatMap((page) => page ?? []) ?? [];
 
     const virtualizer = useVirtualizer({

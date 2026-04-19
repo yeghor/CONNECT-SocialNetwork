@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useMemo } from "react";
+import React, { useState, useEffect, memo, useMemo, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 
@@ -10,8 +10,9 @@ import { safeAPICallPrivate } from "../../../fetching/fetchUtils.ts";
 import { fetchChatConnect, fetchIsChatPending, fetchPendingChatConnect } from "../../../fetching/fetchChatWS.ts";
 import MakeNewChat from "./active_chats/makeNewChat.tsx";
 import PendingChat from "./active_chats/pendingChat.tsx";
-import CreateGroupChatModal from "./createGroupModal.tsx";
+import CreateGroupChatModal from "./chatComponents/createGroupModal.tsx";
 import LoadingIndicator from "../../base/centeredLoadingIndicator.tsx";
+import { TokensContext } from "../../../index.tsx";
 
 interface ChatPageProps {
     createNew: boolean,
@@ -19,7 +20,7 @@ interface ChatPageProps {
 
 export const ChatPage = (props: ChatPageProps) => {
     const navigate = useNavigate();
-    const tokens = getCookieTokens(navigate);
+    const tokens = useContext(TokensContext).tokens;
 
     const [ activeChatData, setActiveChatData ] = useState<ChatConnectData | null>(null);
     const [ pendingChatData, setpendingChatData ] = useState<PendingChatConnect | null>(null);

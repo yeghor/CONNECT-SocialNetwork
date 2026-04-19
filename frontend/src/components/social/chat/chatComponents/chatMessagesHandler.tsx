@@ -1,9 +1,9 @@
-import React, {RefObject, useEffect, useRef, useState, useMemo} from "react";
+import React, {RefObject, useEffect, useRef, useState, useMemo, useContext} from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useNavigate } from "react-router";
 
-import { queryClient } from "../../../../index.tsx";
+import { queryClient, TokensContext } from "../../../../index.tsx";
 
 import {
     ChatMessage,
@@ -60,7 +60,7 @@ interface ChatMessageListProps {
 
 const ChatMessagesHandler = (props: ChatMessageListProps) => {
     const navigate = useNavigate();
-    const tokens = getCookieTokens(navigate);
+    const tokens = useContext(TokensContext).tokens;
 
     // There is no change, that user isn't on participants data, so passing as ChatParticipantData type
     const meAsParticipantData: ChatParticipant = props.participantsData.find((participant) => participant.me) as ChatParticipant
@@ -78,6 +78,7 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
             )
         )
 
+    // @ts-ignore
     const messages: ChatMessage[] = data?.pages.flatMap(page => page ?? []) ?? [];
 
     const virtualizer = useVirtualizer({

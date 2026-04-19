@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router";
 
 import {
@@ -20,6 +20,7 @@ import WarningMessage from "../base/warningMessage.tsx";
 import { safeAPICallNoToken } from "../../fetching/fetchUtils.ts";
 import { AuthTokensResponse, EmailToConfirmResponse } from "../../fetching/DTOs.ts";
 import { fetchLoadPost } from "../../fetching/fetchSocial.ts";
+import { TokensContext } from "../../index.tsx";
 
 const RegisterForm = () => {
     const navigate = useNavigate();

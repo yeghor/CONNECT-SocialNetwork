@@ -52,3 +52,9 @@ export const getCookieTokens = (navigate: NavigateFunction | undefined): CookieT
     // Because after redirecting app won't be able to use invalid tokens.
     return possibleCookies;
 };
+
+export const CookieTokensNavigateProcessing = (possibleCookies: CookieTokenObject, navigate: NavigateFunction): void => {
+    if((!possibleCookies.access || !possibleCookies.refresh)) {
+        navigate(loginURI);
+    }
+}

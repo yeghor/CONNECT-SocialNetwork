@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, RefObject } from "react";
+import React, { useEffect, useState, useRef, RefObject, useContext } from "react";
 import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -8,21 +8,20 @@ import { getCookieTokens, removeCookie } from "../../helpers/cookies/cookiesHand
 import { fetchLogout } from "../../fetching/fetchAuth";
 import { safeAPICallNoToken, safeAPICallPrivate } from "../../fetching/fetchUtils";
 import { SuccessfulResponse } from "../../fetching/DTOs";
+import { TokensContext } from "../../index.tsx";
 
 const NavigationBar = (): ReactNode => {
     const navigate = useNavigate();
-    const tokens = getCookieTokens(undefined);
+    const tokensContexted = useContext(TokensContext);
+    const tokens = tokensContexted.tokens;
 
-    const [ showLogoutConfirmModal, setShowLogoutConfirmModal ] = useState(false);
+    const [ showLogoutConfirmModal, setShowLogoutConfirmModal ] = useState(tokens.access !== undefined && tokens.refresh !== undefined ? true : false);
         
     const handleLogout = () => {
-        if (tokens.access && tokens.refresh) {
-            setShowLogoutConfirmModal(false);
-            removeCookie(AccessTokenCookieKey);
-            removeCookie(RefreshTokenCookieKey);
-            navigate(loginURI);
-            safeAPICallNoToken<SuccessfulResponse>(fetchLogout, navigate, undefined, tokens.access, tokens.refresh);
-        }
+        setShowLogoutConfirmModal(false);
+        tokensContexted.removeTokens();
+        navigate(loginURI);
+        safeAPICallNoToken<SuccessfulResponse>(fetchLogout, navigate, undefined, tokens.access, tokens.refresh);
     };
 
 
@@ -64,7 +63,7 @@ const NavigationBar = (): ReactNode => {
                             </Link>
                         </li>
                         <li>
-                            {tokens.refresh ?
+                            {tokensContexted.refresh ?
                                 <button onClick={() => setShowLogoutConfirmModal(true)} className="py-2 px-3">
                                     <img src="/logout-title.png" alt="Me" className="h-10 w-auto hover:scale-110 transition-all" />
                                 </button>

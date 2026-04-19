@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import { Link } from "react-router";
 import { getCookieTokens } from "../../../../helpers/cookies/cookiesHandler";
 import { useNavigate } from "react-router";
@@ -8,6 +8,7 @@ import { safeAPICallPrivate } from "../../../../fetching/fetchUtils";
 import { fetchApproveChat, fetchChatInitiatedByMe, fetchDisapproveChat } from "../../../../fetching/fetchChatWS";
 import { chatsURI, specificUserProfileURI } from "../../../../consts";
 import { CustomSimpleResponse } from "../../../../fetching/DTOs"
+import { TokensContext } from "../../../..";
 
 interface PendingChatProps {
     chatId: string;
@@ -19,7 +20,8 @@ interface PendingChatProps {
 
 const PendingChat = (props: PendingChatProps) => {
     const navigate = useNavigate();
-    const tokens = getCookieTokens(navigate);
+    const tokens = useContext(TokensContext).tokens;
+    
     const [ initiatedByMe, setInitiatedByMe ] = useState(true);
     const [ showComponent, setShowComponent ] = useState(false)
 

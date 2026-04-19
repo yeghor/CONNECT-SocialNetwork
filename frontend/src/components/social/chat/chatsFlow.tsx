@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import { CookieTokenObject, getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -13,6 +13,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 
 import FlowChat from "./flowChat.tsx";
+import { TokensContext } from "../../../index.tsx";
 
 const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunction, approved: boolean, page: number): Promise<Chat[]> => {
     const fetcher = approved ? fetchChats : fetchNotApprovedChats
@@ -28,7 +29,7 @@ const chatsFetcher = async (tokens: CookieTokenObject, navigate: NavigateFunctio
 
 const ChatsFlow = (props: { showGroupCreationModelToggler: React.Dispatch<React.SetStateAction<boolean>> }) => {
     const navigate = useNavigate();
-    const tokens = getCookieTokens(navigate);
+    const tokens = useContext(TokensContext).tokens;
 
     const [ showApprovedChats, setShowApprovedChats ] = useState(true);
     const [ notApprovedChatsAmount, setNotApprovedChatsAmount ] = useState(0);

@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useState} from "react";
+import React, {ChangeEvent, useContext, useState} from "react";
 
 import { fetchUploadPostPictures } from "../../../fetching/fetchMedia";
 import { allowedImageMimeTypes, maxPostImagesUpload, fileIsTooBigMessage, specificPostURI, loginURI} from "../../../consts.ts";
@@ -8,6 +8,7 @@ import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 import { useNavigate } from "react-router";
 import { fetchMakePost } from "../../../fetching/fetchSocial";
 import { validateMakePost } from "../../../helpers/validatorts.ts";
+import { TokensContext } from "../../../index.tsx";
 
 type MakePostProps = {
     postType:  "post" | "reply"
@@ -21,7 +22,7 @@ const MakePost = (props: MakePostProps) => {
 
     const navigate = useNavigate();
     // Passing undefined as navigate, because some components that use public endpoints depend on this component
-    const tokens = getCookieTokens(undefined);
+    const tokens = useContext(TokensContext).tokens;
 
     const [ title, setTitle ] = useState("");
     const [ text, setText ] = useState("");

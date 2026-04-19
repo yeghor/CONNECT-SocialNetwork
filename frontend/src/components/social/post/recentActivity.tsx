@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import { fetchRecentActivity } from "../../../fetching/fetchSocial.ts";
 import {
@@ -11,10 +11,11 @@ import { specificPostURI } from "../../../consts.ts";
 import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 import { useNavigate, Link } from "react-router";
 import { displayDayWithTZ } from "../../../helpers/dateUtils.ts";
+import { TokensContext } from "../../../index.tsx";
 
 const RecentActivityComponent = () => {
     const navigate = useNavigate();
-    const tokens = getCookieTokens(undefined);
+    const tokens = useContext(TokensContext).tokens;
 
     const [ recentActivity, setRecentActivity ] = useState<RecentActivityArray>();
 

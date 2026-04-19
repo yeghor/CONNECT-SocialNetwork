@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { Chat } from "../../../fetching/DTOs.ts";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { specificChatURI } from "../../../consts.ts";
@@ -6,6 +6,7 @@ import { safeAPICallPrivate } from "../../../fetching/fetchUtils.ts";
 import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler.ts";
 import { fetchLeaveChat as fetchLeaveGroup } from "../../../fetching/fetchChatWS.ts";
 import { displayDayWithTZ } from "../../../helpers/dateUtils.ts";
+import { TokensContext } from "../../../index.tsx";
 
 const FlowChatNavigationWrapper = (props: {
     linkURI: string | undefined;
@@ -24,7 +25,7 @@ const FlowChatNavigationWrapper = (props: {
 
 const FlowChat = (chatData: Chat) => {
     const navigate = useNavigate();
-    const tokens = getCookieTokens(navigate);
+    const tokens = useContext(TokensContext).tokens;
     
     const [ isMenuOpen, setIsMenuOpen ] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);

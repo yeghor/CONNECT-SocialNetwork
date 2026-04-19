@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -20,6 +20,7 @@ import estimatePostSize from "../../../helpers/postSizeEstimator.ts";
 import VirtualizedList from "../../butterySmoothScroll/virtualizedList.tsx";
 import { createInfiniteQueryOptionsUtil, infiniteQieryingFetchGuard } from "../../butterySmoothScroll/scrollVirtualizationUtils.ts";
 import { loginURI } from "../../../consts.ts";
+import { TokensContext } from "../../../index.tsx";
 
 interface PostsFlowPrepared {
     // Depends on image existence
@@ -62,7 +63,7 @@ const postFetcher = async (tokens: CookieTokenObject, feed: boolean, navigate: N
 
 const PostsFlow = () => {
     const navigate = useNavigate();
-    const tokens = getCookieTokens(undefined);
+    const tokens = useContext(TokensContext).tokens;
     
     const [ feed, setFeed ] = useState(true);
 
@@ -83,6 +84,7 @@ const PostsFlow = () => {
 
     const virtualItems = virtualizer.getVirtualItems();
 
+    // @ts-ignore
     const flatMapPosts = data?.pages.flatMap((page) => {if(page) { return page; }}).filter((post) => post !== undefined) ?? []
 
     const infiniteQuerying = async () => {

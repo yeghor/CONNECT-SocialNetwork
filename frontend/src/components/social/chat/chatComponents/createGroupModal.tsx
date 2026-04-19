@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
-import { fetchMyFriends } from "../../../fetching/fetchSocial";
-import { safeAPICallPrivate } from "../../../fetching/fetchUtils";
-import { CustomSimpleResponse, ShortUserProfile, ShortUserProfilesResponse, SuccessfulResponse } from "../../../fetching/DTOs";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { fetchMyFriends } from "../../../../fetching/fetchSocial";
+import { safeAPICallPrivate } from "../../../../fetching/fetchUtils";
+import { ShortUserProfile, CustomSimpleResponse, ShortUserProfilesResponse } from "../../../../fetching/DTOs";
 import { useNavigate } from "react-router";
-import { getCookieTokens } from "../../../helpers/cookies/cookiesHandler";
-import FlowUser from "../post/flowUser";
-import { fetchCreateGroupChat } from "../../../fetching/fetchChatWS";
-import { specificChatURI } from "../../../consts";
 
+import FlowUser from "../../post/flowUser";
+import { fetchCreateGroupChat } from "../../../../fetching/fetchChatWS";
+import { specificChatURI } from "../../../../consts";
+import { TokensContext } from "../../../..";
 
 const CreateGroupChatModal = (props: { showGroupCreationModelToggler: React.Dispatch<React.SetStateAction<boolean>> }) => {
     const navigate = useNavigate();
-    const tokens = getCookieTokens(navigate);
+    const tokens = useContext(TokensContext).tokens;
 
     const modalRef = useRef<HTMLDivElement>(null);
 

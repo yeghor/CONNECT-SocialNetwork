@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import {ShortPost} from "../../../../fetching/DTOs.ts";
-import {specificPostURI} from "../../../../consts.ts";
-import {Link} from "react-router-dom";
+import React from "react";
+import { ShortPost } from "../../../../fetching/DTOs.ts";
+import { specificPostURI } from "../../../../consts.ts";
+import { Link } from "react-router-dom";
 
 interface PostCommentProps {
     commentData: ShortPost

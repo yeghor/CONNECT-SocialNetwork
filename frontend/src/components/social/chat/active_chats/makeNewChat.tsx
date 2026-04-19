@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import MessageBar from "../chatComponents/messageBar";
 import { fetchCreateDialogueChat, fetchDialoqueId  } from "../../../../fetching/fetchChatWS";
 import { resolvePath, useNavigate } from "react-router";
@@ -8,6 +8,7 @@ import { CustomSimpleResponse, SuccessfulResponse, ChatMessage } from "../../../
 import { specificChatURI } from "../../../../consts";
 import FlowMessage from "../chatComponents/message";
 import LoadingIndicator from "../../../base/centeredLoadingIndicator";
+import { TokensContext } from "../../../..";
 
 interface MakeNewChatProps {
     otherUserId: string
@@ -15,7 +16,7 @@ interface MakeNewChatProps {
 
 const MakeNewChat = (props: MakeNewChatProps) => {
     const navigate = useNavigate();
-    const tokens = getCookieTokens(navigate);
+    const tokens = useContext(TokensContext).tokens;
 
     const [ loading, setLoading ] = useState(true);
     const [ chatCreated, setChatCreated ] = useState(false);
@@ -48,7 +49,7 @@ const MakeNewChat = (props: MakeNewChatProps) => {
     }, []);
 
     if (loading) {
-        return ( <LoadingIndicator customMessage={undefined} /> );
+        return ( <LoadingIndicator customMessage={undefined} centerY={true} /> );
     }
 
     return (

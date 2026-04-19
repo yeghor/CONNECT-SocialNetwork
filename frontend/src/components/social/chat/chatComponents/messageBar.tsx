@@ -1,6 +1,5 @@
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { FormEvent, useState } from "react";
 import { chatMessageIsTooBigMessage, chatMessageMaxLength } from "../../../../consts";
-import { measureElement } from "@tanstack/react-virtual";
 
 interface MessageBarProps {
     sendMessageLocally: (message: string) => void;

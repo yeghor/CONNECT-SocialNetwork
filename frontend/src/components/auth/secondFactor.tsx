@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, useCallback } from "react";
+import React, { useState, useEffect, ChangeEvent, useCallback, useContext } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { fetchConfirmEmail2FA, fetchConfirmPasswordRecovery2FA, fetchIssueNewSecondFactor as fetchIssueNew2FA } from "../../fetching/fetchAuth";
 import { validateAPIResponse } from "../../helpers/responseHandlers/responseHandlers";
@@ -6,15 +6,17 @@ import { AccessTokenCookieKey, createPasswordRecoveryLocationState, homeURI as h
 import { setUpdateCookie } from "../../helpers/cookies/cookiesHandler";
 import { safeAPICallNoToken, safeAPICallPrivate, safeAPICallPublic, safeAPICallRecovery } from "../../fetching/fetchUtils";
 import { AuthTokensResponse, PasswordRecoveryTokenResponse } from "../../fetching/DTOs";
+import { TokensContext } from "../..";
 
-// emailToConfirm coulb be null, in case user got redirected to this page
-interface SecondFactorProps {
+// emailToConfirm could be null, in case user got redirected to this page
+interface SecondFactorProps {   
     emailToConfirm: string | null
     _2FACase: "email-confirmation" | "password-recovery"
 }
 
 const SecondFactor = (props: SecondFactorProps) => {
     const navigate = useNavigate();
+    const setTokens = useContext(TokensContext).setTokens;
 
     const [ errorMessage, setErrorMesage ] = useState<string | null>(null);
     const [ allowSendNewCode, setAllowSendNewCode ] = useState(false);
@@ -117,8 +119,12 @@ const SecondFactor = (props: SecondFactorProps) => {
                     }
 
                     if(response.success) {
-                        setUpdateCookie(AccessTokenCookieKey, response.accessToken, response.expiresAtAccessToken);
-                        setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, response.expiresAtRefreshToken);
+                        setTokens(
+                            response.accessToken,
+                            response.refreshToken,
+                            response.expiresAtAccessToken,
+                            response.expiresAtRefreshToken
+                        )                        
                         navigate(homePageURI);
                     }
                     break

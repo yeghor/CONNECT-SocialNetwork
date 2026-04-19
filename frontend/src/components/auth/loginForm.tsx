@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router";
 
 import {
@@ -17,9 +17,11 @@ import WarningMessage from "../base/warningMessage.tsx";
 import { safeAPICallNoToken } from "../../fetching/fetchUtils.ts";
 import { AuthTokensResponse } from "../../fetching/DTOs.ts";
 import LoadingIndicator from "../base/centeredLoadingIndicator.tsx";
+import { TokensContext } from "../../index.tsx";
 
 const LoginForm = () => {
     const navigate = useNavigate();
+    const setTokens = useContext(TokensContext).setTokens;
 
     const [ errorMessage, setErrorMessage ] = useState("");
     const [ username, setUsername ] = useState("");
@@ -43,8 +45,12 @@ const LoginForm = () => {
                     setEmailToConfirm(response.emailToConfirm);
                     setShowSecondFactor(true);
                 } else {
-                    setUpdateCookie(AccessTokenCookieKey, response.accessToken, response.expiresAtAccessToken);
-                    setUpdateCookie(RefreshTokenCookieKey, response.refreshToken, response.expiresAtRefreshToken);
+                    setTokens(
+                        response.accessToken,
+                        response.refreshToken,
+                        response.expiresAtAccessToken,
+                        response.expiresAtRefreshToken
+                    )
                     navigate(homeURI);                    
                 }
             } else {
