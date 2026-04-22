@@ -273,14 +273,14 @@ const ChatMessagesHandler = (props: ChatMessageListProps) => {
     }, [scrollRef.current]);
 
     return (
-        <div className="pb-6">
-            <div>
-                <button className="bg-white/10 hover:bg-white/20 text-white text-[11px] uppercase font-bold tracking-wider px-5 py-2.5 rounded-xl border border-white/10 transition-all active:scale-95" onClick={() => virtualizer.scrollToIndex(0, { align: "start" })}>Scroll bottom</button>
+        <div>
+            <div className="flex justify-center mb-4">
+                <button className="bg-white/10 hover:bg-white/20 text-white text-xs uppercase font-bold tracking-wider px-4 py-2 rounded-lg border border-white/10 transition-all active:scale-95 flex justify-center items-center" onClick={() => virtualizer.scrollToIndex(0, { align: "start" })}>Scroll bottom</button>
             </div>
 
             <div
                 ref={scrollRef}
-                className="h-[calc(100vh-580px)] overflow-auto scroll-smooth my-16 mx-4"
+                className="h-[calc(100vh-450px)] overflow-auto scroll-smooth my-4 mx-4 rounded-lg bg-white/5 border border-white/10 p-4"
                 style={{
                     // https://github.com/TanStack/virtual/discussions/195 Thank You
                     transform: "scaleY(-1)"

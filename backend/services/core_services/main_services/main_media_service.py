@@ -158,7 +158,7 @@ class MainMediaService(MainServiceBase):
 
         if image_name:
             return image_name
-        raise Unauthorized(
+        raise InvalidResourceProvided(
             detail=f"MediaService: User with media token: {token} (image type: {image_type}) that does not exist tried to get image.",
             client_safe_detail="Invalid or expired token",
         )

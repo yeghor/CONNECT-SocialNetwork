@@ -6,11 +6,12 @@ import {
 } from "./DTOs.ts"
 import { NavigateFunction}  from "react-router-dom";
 import { fetchRefresh } from "./fetchAuth.ts";
-import { CookieTokenObject, setUpdateCookie } from "../helpers/cookies/cookiesHandler.ts";
+import { CookieTokenObject, removeCookie, setUpdateCookie } from "../helpers/cookies/cookiesHandler.ts";
 import {
     AccessTokenCookieKey, internalServerErrorDefaultMessage,
     internalServerErrorURI,
     manualUnauthorizedMessage,
+    RefreshTokenCookieKey,
     unauthorizedRedirectURI
 } from "../consts.ts";
 import { validateAPIResponse as validateResponse } from "../helpers/responseHandlers/responseHandlers.ts";
@@ -99,10 +100,10 @@ export const safeAPICallPrivate = async <ResponseType>(
     setErrorMessage?: CallableFunction,
     ...fetchArgs: any[]
 ): Promise<ResponseType | BadResponse> => {
-    // console.log("TOKENS", token)
-    // if(!(tokens.access && tokens.refresh)) {
-    //     return createBadResponseManually(manualUnauthorizedMessage, 401);
-    // }
+
+    if(!(tokens.access && tokens.refresh)) {
+        return createBadResponseManually(manualUnauthorizedMessage, 401);
+    }
 
     try {
         let response = await fetchFunc(tokens.access, ...fetchArgs);        
@@ -111,6 +112,11 @@ export const safeAPICallPrivate = async <ResponseType>(
             if(checkUnauthorizedResponse(response)) {
                 response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, tokens.refresh ?? "", navigate, setErrorMessage, ...fetchArgs);
             }
+        }
+
+        if (response.statusCode == 401) {
+            removeCookie(AccessTokenCookieKey);
+            removeCookie(RefreshTokenCookieKey);
         }
 
         return response;
@@ -163,6 +169,11 @@ export const safeAPICallPublic = async <ResponseType>(
             if(tokens && tokens.refresh && checkUnauthorizedResponse(response)) {
                 response = await retryUnauthorizedResponse<ResponseType>(fetchFunc, tokens.refresh, navigate, setErrorMessage, ...fetchArgs);
             }
+        }
+
+        if (response.statusCode == 401) {
+            removeCookie(AccessTokenCookieKey);
+            removeCookie(RefreshTokenCookieKey);
         }
 
         return response;

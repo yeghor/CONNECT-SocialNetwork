@@ -87,6 +87,7 @@ const ManageProfileModal = (props: { avatarURL: string | null, setShowManageProf
         } else if (e.target.files.length > 1) {
             setWarningMessage(tooManyAvatarFilesMessage);
             return;
+        // @ts-ignore
         } else if (!(allowedImageMimeTypes.includes(e.target.files[0].type))) {
             setWarningMessage(fileMimeTypeNotAllowed);
             const element = document.getElementById("avatarInput") as HTMLInputElement;

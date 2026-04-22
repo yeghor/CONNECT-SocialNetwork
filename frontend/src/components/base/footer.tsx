@@ -5,7 +5,7 @@ import { chatsURI, homeURI, myProfileURI } from "../../consts";
 
 const Footer = (): ReactNode => {
     return (
-        <footer className="w-full bg-white/5 backdrop-blur-xl border-t border-white/10 text-white mt-auto">
+        <footer className="w-full bg-white/5 backdrop-blur-xl border-t border-white/10 text-white mt-auto mt-8">
             <div className="max-w-7xl mx-auto px-6 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
                     

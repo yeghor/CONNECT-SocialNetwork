@@ -72,11 +72,11 @@ const ChatsFlow = (props: { showGroupCreationModelToggler: React.Dispatch<React.
     }, []);
 
     return(
-        <div className="w-full rounded-xl border-white/20 border-2 px-4 m-8">
-            <div className="flex justify-start gap-2 text-white m-4">
+        <div className="w-full rounded-2xl border border-white/10 px-6 mx-8 bg-white/5 backdrop-blur-xl shadow-xl">
+            <div className="flex justify-start gap-3 text-white py-4 border-b border-white/10">
                 <button
-                    className={`px-4 py-1 w-48 rounded-3xl ${
-                        !showApprovedChats ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30"
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex justify-center items-center ${
+                        !showApprovedChats ? "bg-white/20" : "bg-white/10 hover:bg-white/15"
                     }`}
                     onClick={() => {
                         if(!showApprovedChats) {
@@ -87,8 +87,8 @@ const ChatsFlow = (props: { showGroupCreationModelToggler: React.Dispatch<React.
                     Your Chats
                 </button>
                 <button
-                    className={`px-4 py-1 w-48 rounded-3xl ${
-                        notApprovedChatsAmount > 0 ? (showApprovedChats  ? "bg-white/10 hover:bg-white/20 hover:scale-105 transition-all" : "bg-white/30") : "bg-white/10 text-gray-300"
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex justify-center items-center ${
+                        notApprovedChatsAmount > 0 ? (showApprovedChats  ? "bg-white/10 hover:bg-white/15" : "bg-white/20") : "bg-white/10 text-white/40"
                     }`}
                     onClick={() => {
                         if(showApprovedChats && notApprovedChatsAmount > 0) {
@@ -99,13 +99,13 @@ const ChatsFlow = (props: { showGroupCreationModelToggler: React.Dispatch<React.
                     Pending: {notApprovedChatsAmount}
                 </button>
                 <div className="w-full flex justify-end">
-                    <button onClick={() => props.showGroupCreationModelToggler(true)} className="px-4 py-2 rounded-3xl bg-white/10 hover:bg-white/20 hover:scale-105 transition-all flex gap-2">
+                    <button onClick={() => props.showGroupCreationModelToggler(true)} className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold text-sm transition-all flex justify-center items-center gap-2">
                         <span className="font-bold">+</span><span>Create Group</span>
                     </button>
                 </div>
             </div>
 
-            <div ref={scrollRef} className="h-[calc(100vh-400px)] overflow-auto relative mx-auto border-gray-300 rounded-xl">
+            <div ref={scrollRef} className="h-[calc(100vh-400px)] overflow-auto relative mx-auto rounded-lg bg-white/5 border border-white/10 mt-4 p-3">
                 <VirtualizedList DisplayedComponent={FlowChat} virtualizer={virtualizer} virtualItems={virtualItems} componentsProps={chats} interactive={true} />
             </div>
         </div>
