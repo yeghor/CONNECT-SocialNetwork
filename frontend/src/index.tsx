@@ -22,7 +22,6 @@ import { AccessTokenCookieKey, cooldownURI, internalServerErrorURI, RefreshToken
 import InternalServerError from './components/base/errorPages/internalServerError.tsx';
 import Cooldown from './components/base/errorPages/cooldown.tsx';
 
-import { useNavigate } from 'react-router-dom';
 import { CookieTokenObject, getCookieTokens, removeCookie, setUpdateCookie } from './helpers/cookies/cookiesHandler.ts';
 
 const container = document.getElementById('root')
@@ -31,12 +30,18 @@ export const queryClient = new QueryClient();
 
 interface CookieTokensContext {
     "tokens": CookieTokenObject,
-    "setTokens": (access: string | null, refresh: string | null, accessExpiry: Date | null, refreshExpiry: Date | null) => void
-    "removeTokens": () => void
+    "setTokens": (
+        access: string | null,
+        refresh: string | null,
+        accessExpiry: Date | null,
+        refreshExpiry: Date | null,
+    ) => void
+    "removeTokens": () => void,
+    "booleanLoggedInIndicatorState": boolean
 }
 
 // Dummy data
-export const TokensContext = createContext<CookieTokensContext>({"tokens": { "access": undefined, "refresh": undefined }, "setTokens": () => {}, "removeTokens": () => {}});
+export const TokensContext = createContext<CookieTokensContext>({"tokens": { "access": undefined, "refresh": undefined }, "setTokens": () => {}, "removeTokens": () => {}, "booleanLoggedInIndicatorState": false});
 
 interface TokenContextWrapperProps {
     "children": React.ReactNode
@@ -44,8 +49,14 @@ interface TokenContextWrapperProps {
 
 const TokensContextWrapper = (props: TokenContextWrapperProps) => {
     const [ tokens, setTokensState ] = useState<CookieTokenObject>(getCookieTokens(undefined));
-
-    const setTokens = (access: string | null, refresh: string | null, accessExpiry: Date | null, refreshExpiry: Date | null,) => {
+    const [ loggedIn, setLoggedIn ] = useState((tokens.access !== undefined || tokens.refresh !== undefined) ? true : false); 
+    console.log("warpper", (tokens.access !== undefined || tokens.refresh !== undefined))
+    const setTokens = (
+        access: string | null,
+        refresh: string | null,
+        accessExpiry: Date | null,
+        refreshExpiry: Date | null,    
+    ) => {
         if (access && accessExpiry) {
             setUpdateCookie(AccessTokenCookieKey, access, accessExpiry);            
         }
@@ -56,20 +67,23 @@ const TokensContextWrapper = (props: TokenContextWrapperProps) => {
             setTokensState({
                 "access": access,
                 "refresh": refresh
-            });            
+            });    
         }
+        setLoggedIn(true);   
     }
 
     const removeTokens = () => {
         removeCookie(AccessTokenCookieKey);
         removeCookie(RefreshTokenCookieKey);
+        setLoggedIn(false);
     }
 
     return (
         <TokensContext value={{
             "tokens": tokens,
             "setTokens": setTokens,
-            "removeTokens": removeTokens
+            "removeTokens": removeTokens,
+            "booleanLoggedInIndicatorState": loggedIn
         }}>
             {props.children}
         </TokensContext>
@@ -83,15 +97,15 @@ if(container) {
         <StrictMode>
             <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
-                    <div
-                        className="min-h-screen w-full bg-cover bg-center"
-                        style={{
-                            backgroundImage: "url('/background.png')"
-                        }}>
-                        <div className='flex-1 flex flex-col'>
-                            <NavigationBar />
-                                <div className="overflow-auto">
-                                    <TokensContextWrapper>
+                    <TokensContextWrapper>
+                        <div
+                            className="min-h-screen w-full bg-cover bg-center"
+                            style={{
+                                backgroundImage: "url('/background.png')"
+                            }}>
+                            <div className='flex-1 flex flex-col'>
+                                <NavigationBar />
+                                    <div className="overflow-auto">
                                         <Routes>
                                             <Route path='/' element={
                                                 <SocialHomePage />
@@ -141,11 +155,11 @@ if(container) {
 
                                             <Route path='*' element={<NotFoundPage />} />
                                         </Routes>
-                                    </TokensContextWrapper>
-                                </div>
-                            <Footer />
+                                    </div>
+                                <Footer />
+                            </div>
                         </div>
-                    </div>
+                    </TokensContextWrapper>
                 </BrowserRouter>
             </QueryClientProvider>
         </StrictMode>

@@ -4,9 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 
 import  { AccessTokenCookieKey, homeURI, loginURI, myProfileURI, RefreshTokenCookieKey, registerURI } from "../../consts.ts";
 import SearchBar from "./searchBar.tsx";
-import { getCookieTokens, removeCookie } from "../../helpers/cookies/cookiesHandler.ts";
 import { fetchLogout } from "../../fetching/fetchAuth";
-import { safeAPICallNoToken, safeAPICallPrivate } from "../../fetching/fetchUtils";
+import { safeAPICallNoToken } from "../../fetching/fetchUtils";
 import { SuccessfulResponse } from "../../fetching/DTOs";
 import { TokensContext } from "../../index.tsx";
 
@@ -14,8 +13,8 @@ const NavigationBar = (): ReactNode => {
     const navigate = useNavigate();
     const tokensContexted = useContext(TokensContext);
     const tokens = tokensContexted.tokens;
-
-    const [ showLogoutConfirmModal, setShowLogoutConfirmModal ] = useState(tokens.access !== undefined && tokens.refresh !== undefined ? true : false);
+    const loggedIn = tokensContexted.booleanLoggedInIndicatorState;
+    const [ showLogoutConfirmModal, setShowLogoutConfirmModal ] = useState(false);
         
     const handleLogout = () => {
         setShowLogoutConfirmModal(false);
@@ -23,7 +22,6 @@ const NavigationBar = (): ReactNode => {
         navigate(loginURI);
         safeAPICallNoToken<SuccessfulResponse>(fetchLogout, navigate, undefined, tokens.access, tokens.refresh);
     };
-
 
     return (
         <div>
@@ -63,7 +61,7 @@ const NavigationBar = (): ReactNode => {
                             </Link>
                         </li>
                         <li>
-                            {tokensContexted.refresh ?
+                            {loggedIn ?
                                 <button onClick={() => setShowLogoutConfirmModal(true)} className="py-2 px-3">
                                     <img src="/logout-title.png" alt="Me" className="h-10 w-auto hover:scale-110 transition-all" />
                                 </button>
